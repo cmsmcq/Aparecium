@@ -129,12 +129,13 @@ there are no error diagnostics to speak of; what you get is a
 dump of Aparecium's data structures.  Looking at the 'Closure`
 element in the result, you will see something like this:
 
+```
     <Closure>
         <item from="3" to="4" rulemark="-" rulename="s" ri="_t_11"/>
         <item from="0" to="4" rulemark="" rulename="rule" ri="s_2"/>
         ...
     </Closure>
-
+```
 The highest value seen for the `item\@to` attribute tells you where in
 the input the parser stopped thinking it understood what was going on.
 Here, the two items say that the parser has managed to recognize the
