@@ -1,0 +1,46 @@
+/* local */
+
+/* suppressing en via display: none seems to work fine */
+/*
+div.para.en { display: none; }
+del { text-decoration: none; }
+ins { text-decoration: none; }
+*/
+
+del { color: gray; }
+ins { color: #8D8; }
+
+/* paragraphs */
+div.p {
+    margin-bottom: 1em;
+    text-indent: 2.5em; 
+    text-indent: 0em; 
+}
+
+div.p.first-p {
+    text-indent: 0;
+}
+
+li > p {
+    text-indent: 0;
+}
+
+div.figure > div.p {
+    text-align: left;
+    font-size: smaller;
+    text-indent: 0em;
+}
+
+pre {
+    margin-left: 2em;
+}
+
+/* figures */
+div.figure {
+    text-align: center;
+    margin: 1em;
+}
+
+/* references */
+div.bibitem { margin: 1em 0 1em 3em; text-indent: -3em; }
+

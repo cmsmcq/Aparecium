@@ -1,0 +1,49 @@
+<nt name="Goal" _from="0" _to="8" mark="^">
+  <nt name="ixml" _from="0" _to="8" mark="^">
+    <nt name="S" _from="0" _to="0" mark="-"/>
+    <nt name="rule" _from="0" _to="8" mark="^">
+      <nt name="name" _from="0" _to="1" mark="@">
+	<nt name="namestart" _from="0" _to="1" mark="-">
+          <inclusion xml:id="_t_22" regex="dummy" string="S" cps="83"/>
+	</nt>
+      </nt>
+      <nt name="S" _from="1" _to="2" mark="-">
+	<nt name="whitespace" _from="1" _to="2" mark="-">
+          <inclusion xml:id="_t_1" tmark="-" regex="dummy" string=" " cps="32"/>
+	</nt>
+      </nt>
+      <inclusion xml:id="_t_9" regex="dummy" string=":" cps="58"/>
+      <nt name="S" _from="3" _to="4" mark="-">
+	<nt name="whitespace" _from="3" _to="4" mark="-">
+          <inclusion xml:id="_t_1" tmark="-" regex="dummy" string=" " cps="32"/>
+	</nt>
+      </nt>
+      <nt name="alts" _from="4" _to="7" mark="^">
+	<nt name="alt" _from="4" _to="7" mark="^">
+          <nt name="term" _from="4" _to="7" mark="-">
+            <nt name="factor" _from="4" _to="7" mark="-">
+              <nt name="terminal" _from="4" _to="7" mark="-">
+		<nt name="literal" _from="4" _to="7" mark="^">
+                  <nt name="quoted" _from="4" _to="7" mark="-">
+                    <nt name="string" _from="4" _to="7" mark="^">
+                      <literal xml:id="_t_30" tmark="-" regex="dummy" string="'" cps="39"/>
+                      <nt name="sstring" _from="5" _to="6" mark="@">
+			<nt name="schar" _from="5" _to="6" mark="^">
+                          <exclusion xml:id="_t_36" regex="dummy" string="a" cps="97"/>
+			</nt>
+                      </nt>
+                      <literal xml:id="_t_31" tmark="-" regex="dummy" string="'" cps="39"/>
+                      <nt name="S" _from="7" _to="7" mark="-"/>
+                    </nt>
+                  </nt>
+		</nt>
+              </nt>
+            </nt>
+          </nt>
+	</nt>
+      </nt>
+      <literal xml:id="_t_11" regex="dummy" string="." cps="46"/>
+    </nt>
+    <nt name="S" _from="8" _to="8" mark="-"/>
+  </nt>
+</nt>

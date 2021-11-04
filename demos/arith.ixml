@@ -1,0 +1,12 @@
+{ simple arithmetic }
+
+expr: s?, sum, s?.
+sum: product; sum, addop, product.
+product: factor; product, mulop, factor.
+factor: number; var; '(', expr, ')'.
+
+number: ['0'-'9']+.
+var: ['a'-'z'; 'A'-'Z']+.
+@addop: s?, ['+-'], s?.
+@mulop: s?, ['*/'], s?.
+-s: -[Zs]+.

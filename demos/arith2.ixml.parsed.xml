@@ -1,0 +1,53 @@
+<ixml>
+  <comment> simpler AST for arithmetic </comment>
+  <rule name="expr">:<alt>
+      <option>
+        <nonterminal name="s"/>?</option>,<nonterminal name="SUM"/>,<option>
+        <nonterminal name="s"/>?</option>
+    </alt>.</rule>
+  <rule mark="-" name="SUM">:<alt>
+      <nonterminal name="PRODUCT"/>
+    </alt>;<alt>
+      <nonterminal name="sum"/>
+    </alt>.</rule>
+  <rule name="sum">:<alt>
+      <nonterminal name="SUM"/>,<nonterminal name="addop"/>,<nonterminal name="PRODUCT"/>
+    </alt>.</rule>
+  <rule mark="-" name="PRODUCT">:<alt>
+      <nonterminal name="FACTOR"/>
+    </alt>;<alt>
+      <nonterminal name="product"/>
+    </alt>.</rule>
+  <rule name="product">:<alt>
+      <nonterminal name="PRODUCT"/>,<nonterminal name="mulop"/>,<nonterminal name="FACTOR"/>
+    </alt>.</rule>
+  <rule mark="-" name="FACTOR">:<alt>
+      <nonterminal name="number"/>
+    </alt>;<alt>
+      <nonterminal name="var"/>
+    </alt>;<alt>
+      <literal tmark="-" sstring="("/>,<nonterminal mark="-" name="expr"/>,<literal tmark="-" sstring=")"/>
+    </alt>.</rule>
+  <rule name="number">:<alt>
+      <repeat1>
+        <inclusion>[<range from="0" to="9">-</range>]</inclusion>+</repeat1>
+    </alt>.</rule>
+  <rule name="var">:<alt>
+      <repeat1>
+        <inclusion>[<range from="a" to="z">-</range>;<range from="A" to="Z">-</range>]</inclusion>+</repeat1>
+    </alt>.</rule>
+  <rule mark="@" name="addop">:<alt>
+      <option>
+        <nonterminal name="s"/>?</option>,<inclusion>[<literal sstring="+-"/>]</inclusion>,<option>
+        <nonterminal name="s"/>?</option>
+    </alt>.</rule>
+  <rule mark="@" name="mulop">:<alt>
+      <option>
+        <nonterminal name="s"/>?</option>,<inclusion>[<literal sstring="*/"/>]</inclusion>,<option>
+        <nonterminal name="s"/>?</option>
+    </alt>.</rule>
+  <rule mark="-" name="s">:<alt>
+      <repeat1>
+        <inclusion tmark="-">[<class code="Zs"/>]</inclusion>+</repeat1>
+    </alt>.</rule>
+</ixml>

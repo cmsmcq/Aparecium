@@ -1,0 +1,39 @@
+svg_path = s*, moveto?, (moveto, -drawto_command*)?.
+
+drawto_command = moveto | closepath
+               | lineto | horizontal_lineto | vertical_lineto
+	       | curveto | smooth_curveto
+	       | quadratic_bezier_curveto
+	       | smooth_quadratic_bezier_curveto
+	       | elliptical_arc.
+
+           moveto = ["Mm"], s*, pairs.
+        closepath = ["Zz"].
+           lineto = ["Ll"], s*, pairs.
+horizontal_lineto = ["Hh"], s*, x+cs.
+  vertical_lineto = ["Vv"], s*, y+cs.
+          curveto = ["Cc"], s*, triplet+cs.
+   smooth_curveto = ["Ss"], s*, double+cs.
+
+       quadratic_bezier_curveto = ["Qq"], s*, double+cs.
+smooth_quadratic_bezier_curveto = ["Tt"], s*, pairs.
+                 elliptical_arc = ["Aa"], s*, elliptical_arc_argument+cs.
+
+elliptical_arc_argument =
+    @x, cs, @y, cs, @rotn,
+    cs, @large, cs, @sweep, cs, pair.
+
+      rotn = number.
+
+    double = pair, cs, pair.
+   triplet = pair, cs, pair, cs, pair.
+     pairs = pair+cs.
+      pair = x, cs, y.
+        @x = -coordinate.
+	@y = -coordinate.
+coordinate = sign?, number.
+     -sign = ["+-"].
+   -number = ['0'-'9']+.
+      flag = ["01"].
+       -cs = (s+, -","?, s*) | (-",", s*).
+        -s = -[#x9 | #x20 | #xA | #xC | #xD].

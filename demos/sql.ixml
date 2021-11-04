@@ -1,0 +1,43 @@
+{ put aside for now; too complicated. }
+SQL: select-stmt.
+select-stmt: SELECT, s, selection, (INTO, s, target+comma), s, table-exp.
+selection: scalar-exp+comma | '*'.
+
+scalar-exp: term+add-op.
+
+term: factor+mul-op.
+
+factor: atom; column-ref; '(', scalar-exp, ')'.
+add-op: s?, ["+-"], s?.
+mul-op: s?, ["*/"], s?.
+
+column-ref: 
+
+atom: parameter; literal; 'USER'.
+literal: [N]+.
+
+target: parameter.
+parameter: identifier.
+
+table-exp: from-clause, where-clause?, having-clause?.
+from-clause: FROM, s, table-ref+comma.
+where-clause: WHERE, s, search-condition.
+having-clause: HAVING, s, search-condition.
+
+table:
+
+assignment:
+
+where-clause:
+
+
+
+
+-SELECT: s, (-'SELECT' | -'select').
+INTO: s, (-'INTO' | -'into').
+
+identifier: [L; '_'], [L; N; '_']*.
+
+comma: s?, ',', s?.
+
+s: [Zs]+.

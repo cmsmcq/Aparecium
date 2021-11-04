@@ -1,0 +1,6 @@
+expr: term; expr, -s?, "+", -s?, term; expr, -s?, "-", -s?, term.
+term: factor; term, -s?, "*", -s?, factor; term, -s?, "/", -s?, factor.
+factor: num; var; "(", -s?, expr, -s?, ")".
+num: ["0"-"9"]+.
+var: ["a"-"z"]+.
+-s: -[Zs]+.

@@ -1,0 +1,9 @@
+{ Grammar from https://homepages.cwi.nl/~steven/ixml/tutorial/tutorial.xhtml }
+
+date: day, month, year.
+day: s?, digit, digit?.
+month: s?, ("January"; "February"; "March"; "April"; "May"; "June";
+       "July"; "August"; "September"; "October"; "November"; "December").
+year: s?, digit, digit, digit, digit; {nil}.
+-digit: "0"; "1"; "2"; "3"; "4"; "5"; "6"; "7"; "8"; "9".
+-s: -" "+.

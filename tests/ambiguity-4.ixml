@@ -1,0 +1,4 @@
+A = B|C.
+B = 'a'; C.
+C: 'a' | B.
+{ infinite trees, unbounded depth, multiple original trees }

@@ -1,0 +1,6 @@
+expr: term+(s?, ["+-"], s?).
+term: factor+(s?, ["*/"], s?).
+factor: num; var; "(", s?, expr, s?, ")".
+num: ["0"-"9"]+.
+var: ["a"-"z"]+.
+-s: -[Zs]+.

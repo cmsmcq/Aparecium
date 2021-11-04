@@ -1,0 +1,45 @@
+<ixml>
+  <rule xmlns:follow="http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset" name="expr" xml:id="expr" nullable="false" first="term_1 expr_1 expr_2" last="term_1 term_2 term_3" follow:term_1="" follow:expr_1=" s_1 _t_1" follow:s_1=" _t_1" follow:_t_1=" s_2 term_2" follow:s_2=" term_2" follow:term_2="" follow:expr_2=" s_3 _t_2" follow:s_3=" _t_2" follow:_t_2=" s_4 term_3" follow:s_4=" term_3" follow:term_3="">:<alt xml:id="exp_alt_1" nullable="false" first="term_1" last="term_1" follow:term_1="">
+      <nonterminal name="term" xml:id="term_1" nullable="false" first="term_1" last="term_1" follow:term_1=""/>
+    </alt>;<alt xml:id="exp_alt_2" nullable="false" first="expr_1" last="term_2" follow:expr_1=" s_1 _t_1" follow:s_1=" _t_1" follow:_t_1=" s_2 term_2" follow:s_2=" term_2" follow:term_2="">
+      <nonterminal name="expr" xml:id="expr_1" nullable="false" first="expr_1" last="expr_1" follow:expr_1=""/>,<option xml:id="exp_option_1" nullable="true" first="s_1" last="s_1" follow:s_1="">
+        <nonterminal mark="-" name="s" xml:id="s_1" nullable="false" first="s_1" last="s_1" follow:s_1=""/>?</option>,<literal dstring="+" xml:id="_t_1" nullable="false" first="_t_1" last="_t_1" follow:_t_1="" regex="dummy"/>,<option xml:id="exp_option_2" nullable="true" first="s_2" last="s_2" follow:s_2="">
+        <nonterminal mark="-" name="s" xml:id="s_2" nullable="false" first="s_2" last="s_2" follow:s_2=""/>?</option>,<nonterminal name="term" xml:id="term_2" nullable="false" first="term_2" last="term_2" follow:term_2=""/>
+    </alt>;<alt xml:id="exp_alt_3" nullable="false" first="expr_2" last="term_3" follow:expr_2=" s_3 _t_2" follow:s_3=" _t_2" follow:_t_2=" s_4 term_3" follow:s_4=" term_3" follow:term_3="">
+      <nonterminal name="expr" xml:id="expr_2" nullable="false" first="expr_2" last="expr_2" follow:expr_2=""/>,<option xml:id="exp_option_3" nullable="true" first="s_3" last="s_3" follow:s_3="">
+        <nonterminal mark="-" name="s" xml:id="s_3" nullable="false" first="s_3" last="s_3" follow:s_3=""/>?</option>,<literal dstring="-" xml:id="_t_2" nullable="false" first="_t_2" last="_t_2" follow:_t_2="" regex="dummy"/>,<option xml:id="exp_option_4" nullable="true" first="s_4" last="s_4" follow:s_4="">
+        <nonterminal mark="-" name="s" xml:id="s_4" nullable="false" first="s_4" last="s_4" follow:s_4=""/>?</option>,<nonterminal name="term" xml:id="term_3" nullable="false" first="term_3" last="term_3" follow:term_3=""/>
+    </alt>.</rule>
+  <rule xmlns:follow="http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset" name="term" xml:id="term" nullable="false" first="factor_1 term_4 term_5" last="factor_1 factor_2 factor_3" follow:factor_1="" follow:term_4=" s_5 _t_3" follow:s_5=" _t_3" follow:_t_3=" s_6 factor_2" follow:s_6=" factor_2" follow:factor_2="" follow:term_5=" s_7 _t_4" follow:s_7=" _t_4" follow:_t_4=" s_8 factor_3" follow:s_8=" factor_3" follow:factor_3="">:<alt xml:id="exp_alt_4" nullable="false" first="factor_1" last="factor_1" follow:factor_1="">
+      <nonterminal name="factor" xml:id="factor_1" nullable="false" first="factor_1" last="factor_1" follow:factor_1=""/>
+    </alt>;<alt xml:id="exp_alt_5" nullable="false" first="term_4" last="factor_2" follow:term_4=" s_5 _t_3" follow:s_5=" _t_3" follow:_t_3=" s_6 factor_2" follow:s_6=" factor_2" follow:factor_2="">
+      <nonterminal name="term" xml:id="term_4" nullable="false" first="term_4" last="term_4" follow:term_4=""/>,<option xml:id="exp_option_5" nullable="true" first="s_5" last="s_5" follow:s_5="">
+        <nonterminal mark="-" name="s" xml:id="s_5" nullable="false" first="s_5" last="s_5" follow:s_5=""/>?</option>,<literal dstring="*" xml:id="_t_3" nullable="false" first="_t_3" last="_t_3" follow:_t_3="" regex="dummy"/>,<option xml:id="exp_option_6" nullable="true" first="s_6" last="s_6" follow:s_6="">
+        <nonterminal mark="-" name="s" xml:id="s_6" nullable="false" first="s_6" last="s_6" follow:s_6=""/>?</option>,<nonterminal name="factor" xml:id="factor_2" nullable="false" first="factor_2" last="factor_2" follow:factor_2=""/>
+    </alt>;<alt xml:id="exp_alt_6" nullable="false" first="term_5" last="factor_3" follow:term_5=" s_7 _t_4" follow:s_7=" _t_4" follow:_t_4=" s_8 factor_3" follow:s_8=" factor_3" follow:factor_3="">
+      <nonterminal name="term" xml:id="term_5" nullable="false" first="term_5" last="term_5" follow:term_5=""/>,<option xml:id="exp_option_7" nullable="true" first="s_7" last="s_7" follow:s_7="">
+        <nonterminal mark="-" name="s" xml:id="s_7" nullable="false" first="s_7" last="s_7" follow:s_7=""/>?</option>,<literal dstring="/" xml:id="_t_4" nullable="false" first="_t_4" last="_t_4" follow:_t_4="" regex="dummy"/>,<option xml:id="exp_option_8" nullable="true" first="s_8" last="s_8" follow:s_8="">
+        <nonterminal mark="-" name="s" xml:id="s_8" nullable="false" first="s_8" last="s_8" follow:s_8=""/>?</option>,<nonterminal name="factor" xml:id="factor_3" nullable="false" first="factor_3" last="factor_3" follow:factor_3=""/>
+    </alt>.</rule>
+  <rule xmlns:follow="http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset" name="factor" xml:id="factor" nullable="false" first="num_1 var_1 _t_5" last="num_1 var_1 _t_6" follow:num_1="" follow:var_1="" follow:_t_5=" s_9 expr_3" follow:s_9=" expr_3" follow:expr_3=" s_10 _t_6" follow:s_10=" _t_6" follow:_t_6="">:<alt xml:id="exp_alt_7" nullable="false" first="num_1" last="num_1" follow:num_1="">
+      <nonterminal name="num" xml:id="num_1" nullable="false" first="num_1" last="num_1" follow:num_1=""/>
+    </alt>;<alt xml:id="exp_alt_8" nullable="false" first="var_1" last="var_1" follow:var_1="">
+      <nonterminal name="var" xml:id="var_1" nullable="false" first="var_1" last="var_1" follow:var_1=""/>
+    </alt>;<alt xml:id="exp_alt_9" nullable="false" first="_t_5" last="_t_6" follow:_t_5=" s_9 expr_3" follow:s_9=" expr_3" follow:expr_3=" s_10 _t_6" follow:s_10=" _t_6" follow:_t_6="">
+      <literal dstring="(" xml:id="_t_5" nullable="false" first="_t_5" last="_t_5" follow:_t_5="" regex="dummy"/>,<option xml:id="exp_option_9" nullable="true" first="s_9" last="s_9" follow:s_9="">
+        <nonterminal mark="-" name="s" xml:id="s_9" nullable="false" first="s_9" last="s_9" follow:s_9=""/>?</option>,<nonterminal name="expr" xml:id="expr_3" nullable="false" first="expr_3" last="expr_3" follow:expr_3=""/>,<option xml:id="exp_option_10" nullable="true" first="s_10" last="s_10" follow:s_10="">
+        <nonterminal mark="-" name="s" xml:id="s_10" nullable="false" first="s_10" last="s_10" follow:s_10=""/>?</option>,<literal dstring=")" xml:id="_t_6" nullable="false" first="_t_6" last="_t_6" follow:_t_6="" regex="dummy"/>
+    </alt>.</rule>
+  <rule xmlns:follow="http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset" name="num" xml:id="num" nullable="false" first="_t_7" last="_t_7" follow:_t_7="_t_7">:<alt xml:id="exp_alt_10" nullable="false" first="_t_7" last="_t_7" follow:_t_7="_t_7">
+      <repeat1 xml:id="exp_repeat1_1" nullable="false" first="_t_7" last="_t_7" follow:_t_7="_t_7">
+        <inclusion xml:id="_t_7" nullable="false" first="_t_7" last="_t_7" follow:_t_7="" regex="dummy">[<range from="0" to="9" regex="[0-9]">-</range>]</inclusion>+</repeat1>
+    </alt>.</rule>
+  <rule xmlns:follow="http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset" name="var" xml:id="var" nullable="false" first="_t_8" last="_t_8" follow:_t_8="_t_8">:<alt xml:id="exp_alt_11" nullable="false" first="_t_8" last="_t_8" follow:_t_8="_t_8">
+      <repeat1 xml:id="exp_repeat1_2" nullable="false" first="_t_8" last="_t_8" follow:_t_8="_t_8">
+        <inclusion xml:id="_t_8" nullable="false" first="_t_8" last="_t_8" follow:_t_8="" regex="dummy">[<range from="a" to="z" regex="[a-z]">-</range>]</inclusion>+</repeat1>
+    </alt>.</rule>
+  <rule xmlns:follow="http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset" mark="-" name="s" xml:id="s" nullable="false" first="_t_9" last="_t_9" follow:_t_9="_t_9">:<alt xml:id="exp_alt_12" nullable="false" first="_t_9" last="_t_9" follow:_t_9="_t_9">
+      <repeat1 xml:id="exp_repeat1_3" nullable="false" first="_t_9" last="_t_9" follow:_t_9="_t_9">
+        <inclusion tmark="-" xml:id="_t_9" nullable="false" first="_t_9" last="_t_9" follow:_t_9="" regex="dummy">[<class code="Zs" regex="\p{Zs}"/>]</inclusion>+</repeat1>
+    </alt>.</rule>
+</ixml>

@@ -1,0 +1,1106 @@
+<ixml xmlns:follow="http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset">
+  <rule name="ixml" xml:id="ixml"
+	nullable="false" first="S_1" last="S_3"
+	follow:S_1=" rule_1" follow:rule_1="S_2 S_3" follow:S_2="rule_1" follow:S_3=""
+	>
+    <alt xml:id="exp_alt_1"
+	 nullable="false" first="S_1" last="S_3"
+	 follow:S_1=" rule_1" follow:rule_1="S_2 S_3" follow:S_2="rule_1" follow:S_3="">
+      <nonterminal name="S" xml:id="S_1"
+		   nullable="false" first="S_1" last="S_1"
+		   follow:S_1=""/>
+      <repeat1 xml:id="exp_repeat1_1"
+	       nullable="false" first="rule_1" last="rule_1"
+	       follow:rule_1="S_2" follow:S_2="rule_1" >
+	<nonterminal name="rule" xml:id="rule_1"
+		     nullable="false" first="rule_1" last="rule_1"
+		     follow:rule_1=""/>
+	<sep xml:id="exp_sep_1"
+	     nullable="false" first="S_2" last="S_2"
+	     follow:S_2="">
+	  <nonterminal name="S" xml:id="S_2"
+		       nullable="false" first="S_2" last="S_2"
+		       follow:S_2=""/>
+        </sep>
+      </repeat1>
+      <nonterminal name="S" xml:id="S_3"
+		   nullable="false" first="S_3" last="S_3"
+		   follow:S_3=""/>
+    </alt>
+  </rule>
+  <rule mark="-" name="S" xml:id="S"
+	nullable="true" first="whitespace_1 comment_1" last="whitespace_1 comment_1"
+	follow:whitespace_1="whitespace_1 comment_1" follow:comment_1="whitespace_1 comment_1">
+    <alt xml:id="exp_alt_2"
+	 nullable="true" first="whitespace_1 comment_1" last="whitespace_1 comment_1"
+	 follow:whitespace_1="whitespace_1 comment_1" follow:comment_1="whitespace_1 comment_1">
+      <repeat0 xml:id="exp_repeat0_1"
+	       nullable="true" first="whitespace_1 comment_1" last="whitespace_1 comment_1"
+	       follow:whitespace_1="whitespace_1 comment_1" follow:comment_1="whitespace_1 comment_1">
+	<alts xml:id="exp_alts_1"
+	      nullable="false" first="whitespace_1 comment_1" last="whitespace_1 comment_1"
+	      follow:whitespace_1="" follow:comment_1="">
+	  <alt xml:id="exp_alt_2"
+	       nullable="false" first="whitespace_1" last="whitespace_1"
+	       follow:whitespace_1="">
+	    <nonterminal name="whitespace" xml:id="whitespace_1"
+			 nullable="false" first="whitespace_1" last="whitespace_1"
+			 follow:whitespace_1=""/>
+	  </alt>
+	  <alt xml:id="exp_alt_3"
+	       nullable="false" first="comment_1" last="comment_1"
+	       follow:comment_1="">
+	    <nonterminal name="comment" xml:id="comment_1"
+			 nullable="false" first="comment_1" last="comment_1"
+			 follow:comment_1=""/>
+	  </alt>
+	</alts>
+      </repeat0>
+    </alt>
+  </rule>
+  <rule mark="-" name="whitespace" xml:id="whitespace"
+	nullable="false" first="_t_1 tab_1 lf_1 cr_1" last="_t_1 tab_1 lf_1 cr_1"
+	follow:_t_1="" follow:tab_1="" follow:lf_1="" follow:cr_1="">
+    <alt xml:id="exp_alt_5"
+	 nullable="false" first="_t_1" last="_t_1"
+	 follow:_t_1="">
+      <inclusion tmark="-" xml:id="_t_1"
+		 nullable="false" first="_t_1" last="_t_1"
+		 follow:_t_1="" regex="dummy">
+	<class code="Zs" regex="\p{Zs}"/>
+      </inclusion>
+    </alt>
+    <alt xml:id="exp_alt_6"
+	 nullable="false" first="tab_1" last="tab_1"
+	 follow:tab_1="">
+      <nonterminal name="tab" xml:id="tab_1"
+		   nullable="false" first="tab_1" last="tab_1"
+		   follow:tab_1=""/>
+    </alt>
+    <alt xml:id="exp_alt_7"
+	 nullable="false" first="lf_1" last="lf_1"
+	 follow:lf_1="">
+      <nonterminal name="lf" xml:id="lf_1"
+		   nullable="false" first="lf_1" last="lf_1"
+		   follow:lf_1=""/>
+    </alt>
+    <alt xml:id="exp_alt_8"
+	 nullable="false" first="cr_1" last="cr_1"
+	 follow:cr_1="">
+      <nonterminal name="cr" xml:id="cr_1"
+		   nullable="false" first="cr_1" last="cr_1"
+		   follow:cr_1=""/>
+    </alt>
+  </rule>
+  <rule mark="-" name="tab" xml:id="tab"
+	nullable="false" first="_t_2" last="_t_2"
+	follow:_t_2="">
+    <alt xml:id="exp_alt_9"
+	 nullable="false" first="_t_2" last="_t_2"
+	 follow:_t_2="">
+      <literal tmark="-" hex="9" xml:id="_t_2"
+	       nullable="false" first="_t_2" last="_t_2"
+	       follow:_t_2="" regex="dummy"/>
+    </alt>
+  </rule>
+  <rule mark="-" name="lf" xml:id="lf"
+	nullable="false" first="_t_3" last="_t_3"
+	follow:_t_3="">
+    <alt xml:id="exp_alt_10"
+	 nullable="false" first="_t_3" last="_t_3"
+	 follow:_t_3="">
+      <literal tmark="-" hex="a" xml:id="_t_3"
+	       nullable="false" first="_t_3" last="_t_3"
+	       follow:_t_3="" regex="dummy"/>
+    </alt>
+  </rule>
+  <rule mark="-" name="cr" xml:id="cr"
+	nullable="false" first="_t_4" last="_t_4"
+	follow:_t_4="">
+    <alt xml:id="exp_alt_11"
+	 nullable="false" first="_t_4" last="_t_4"
+	 follow:_t_4="">
+      <literal tmark="-" hex="d" xml:id="_t_4"
+	       nullable="false" first="_t_4" last="_t_4"
+	       follow:_t_4="" regex="dummy"/>
+    </alt>
+  </rule>
+  <rule name="comment" xml:id="comment"
+	nullable="false" first="_t_5" last="_t_6"
+	follow:_t_5=" cchar_1 comment_2 _t_6" follow:cchar_1="cchar_1 comment_2 _t_6" follow:comment_2="cchar_1 comment_2 _t_6" follow:_t_6="">
+    <alt xml:id="exp_alt_12"
+	 nullable="false" first="_t_5" last="_t_6"
+	 follow:_t_5=" cchar_1 comment_2 _t_6" follow:cchar_1="cchar_1 comment_2 _t_6" follow:comment_2="cchar_1 comment_2 _t_6" follow:_t_6="">
+      <literal tmark="-" dstring="{" xml:id="_t_5"
+	       nullable="false" first="_t_5" last="_t_5"
+	       follow:_t_5="" regex="dummy"/>
+      <repeat0 xml:id="exp_repeat0_2"
+	       nullable="true" first="cchar_1 comment_2" last="cchar_1 comment_2"
+	       follow:cchar_1="cchar_1 comment_2" follow:comment_2="cchar_1 comment_2">
+	<alts xml:id="exp_alts_2"
+	      nullable="false" first="cchar_1 comment_2" last="cchar_1 comment_2"
+	      follow:cchar_1="" follow:comment_2="">
+	  <alt xml:id="exp_alt_12"
+	       nullable="false" first="cchar_1" last="cchar_1"
+	       follow:cchar_1="">
+	    <nonterminal name="cchar" xml:id="cchar_1"
+			 nullable="false" first="cchar_1" last="cchar_1"
+			 follow:cchar_1=""/>
+	  </alt>
+	  <alt xml:id="exp_alt_13"
+	       nullable="false" first="comment_2" last="comment_2"
+	       follow:comment_2="">
+	    <nonterminal name="comment" xml:id="comment_2"
+			 nullable="false" first="comment_2" last="comment_2"
+			 follow:comment_2=""/>
+	  </alt>
+	</alts>
+      </repeat0>
+      <literal tmark="-" dstring="}" xml:id="_t_6"
+	       nullable="false" first="_t_6" last="_t_6"
+	       follow:_t_6="" regex="dummy"/>
+    </alt>
+  </rule>
+  <rule mark="-" name="cchar" xml:id="cchar"
+	nullable="false" first="_t_7" last="_t_7"
+	follow:_t_7="">
+    <alt xml:id="exp_alt_15"
+	 nullable="false" first="_t_7" last="_t_7"
+	 follow:_t_7="">
+      <exclusion xml:id="_t_7"
+		 nullable="false" first="_t_7" last="_t_7"
+		 follow:_t_7="" regex="dummy">
+	<literal dstring="{}" xml:id="_t_8"
+		 nullable="false" first="_t_8" last="_t_8"
+		 follow:_t_8="" regex="dummy"/>
+      </exclusion>
+    </alt>
+  </rule>
+  <rule name="rule" xml:id="rule"
+	nullable="false" first="mark_1 name_1" last="_t_11"
+	follow:mark_1=" S_4" follow:S_4=" name_1" follow:name_1=" S_5"
+	follow:S_5=" _t_9" follow:_t_9=" S_6" follow:S_6=" alts_1"
+	follow:alts_1=" _t_11" follow:_t_11="">
+    <alt xml:id="exp_alt_16"
+	 nullable="false" first="mark_1 name_1" last="_t_11"
+	 follow:mark_1=" S_4" follow:S_4=" name_1" follow:name_1=" S_5"
+	 follow:S_5=" _t_9" follow:_t_9=" S_6" follow:S_6=" alts_1"
+	 follow:alts_1=" _t_11" follow:_t_11="">
+      <option xml:id="exp_option_1"
+	      nullable="true" first="mark_1" last="S_4"
+	      follow:mark_1=" S_4" follow:S_4="">
+	<alts xml:id="exp_alts_3"
+	      nullable="false" first="mark_1" last="S_4"
+	      follow:mark_1=" S_4" follow:S_4="">
+	  <alt xml:id="exp_alt_16"
+	       nullable="false" first="mark_1" last="S_4"
+	       follow:mark_1=" S_4" follow:S_4="">
+	    <nonterminal name="mark" xml:id="mark_1"
+			 nullable="false" first="mark_1" last="mark_1"
+			 follow:mark_1=""/>
+	    <nonterminal name="S" xml:id="S_4"
+			 nullable="false" first="S_4" last="S_4"
+			 follow:S_4=""/>
+	  </alt>
+	</alts>
+      </option>
+      <nonterminal name="name" xml:id="name_1"
+		   nullable="false" first="name_1" last="name_1"
+		   follow:name_1=""/>
+      <nonterminal name="S" xml:id="S_5"
+		   nullable="false" first="S_5" last="S_5"
+		   follow:S_5=""/>
+      <inclusion xml:id="_t_9"
+		 nullable="false" first="_t_9" last="_t_9"
+		 follow:_t_9="" regex="dummy">
+	<literal dstring="=:" xml:id="_t_10"
+		 nullable="false" first="_t_10" last="_t_10"
+		 follow:_t_10="" regex="dummy"/>
+      </inclusion>
+      <nonterminal name="S" xml:id="S_6"
+		   nullable="false" first="S_6" last="S_6"
+		   follow:S_6=""/>
+      <nonterminal mark="-" name="alts" xml:id="alts_1"
+		   nullable="false" first="alts_1" last="alts_1"
+		   follow:alts_1=""/>
+      <literal dstring="." xml:id="_t_11"
+	       nullable="false" first="_t_11" last="_t_11"
+	       follow:_t_11="" regex="dummy"/>
+    </alt>
+  </rule>
+  <rule mark="@" name="mark" xml:id="mark"
+	nullable="false" first="_t_12" last="_t_12"
+	follow:_t_12="">
+    <alt xml:id="exp_alt_18"
+	 nullable="false" first="_t_12" last="_t_12"
+	 follow:_t_12="">
+      <inclusion xml:id="_t_12"
+		 nullable="false" first="_t_12" last="_t_12"
+		 follow:_t_12="" regex="dummy">
+	<literal dstring="@^-" xml:id="_t_13"
+		 nullable="false" first="_t_13" last="_t_13"
+		 follow:_t_13="" regex="dummy"/>
+      </inclusion>
+    </alt>
+  </rule>
+  <rule name="alts" xml:id="alts"
+	nullable="false" first="alt_1" last="alt_1"
+	follow:alt_1="_t_14" follow:_t_14=" S_7" follow:S_7="alt_1">
+    <alt xml:id="exp_alt_19"
+	 nullable="false" first="alt_1" last="alt_1"
+	 follow:alt_1="_t_14" follow:_t_14=" S_7" follow:S_7="alt_1">
+      <repeat1 xml:id="exp_repeat1_2"
+	       nullable="false" first="alt_1" last="alt_1"
+	       follow:alt_1="_t_14" follow:_t_14=" S_7" follow:S_7="alt_1">
+	<nonterminal name="alt" xml:id="alt_1"
+		     nullable="false" first="alt_1" last="alt_1"
+		     follow:alt_1=""/>
+	<sep xml:id="exp_sep_2"
+	     nullable="false" first="_t_14" last="S_7"
+	     follow:_t_14=" S_7" follow:S_7="">
+	  <alts xml:id="exp_alts_4"
+		nullable="false" first="_t_14" last="S_7"
+		follow:_t_14=" S_7" follow:S_7="">
+	    <alt xml:id="exp_alt_19"
+		 nullable="false" first="_t_14" last="S_7"
+		 follow:_t_14=" S_7" follow:S_7="">
+              <inclusion xml:id="_t_14"
+			 nullable="false" first="_t_14" last="_t_14"
+			 follow:_t_14="" regex="dummy">
+		<literal dstring=";|" xml:id="_t_15"
+			 nullable="false" first="_t_15" last="_t_15"
+			 follow:_t_15="" regex="dummy"/>
+	      </inclusion>
+	      <nonterminal name="S" xml:id="S_7"
+			   nullable="false" first="S_7" last="S_7"
+			   follow:S_7=""/>
+            </alt>
+          </alts>
+	</sep>
+      </repeat1>
+    </alt>
+  </rule>
+  <rule name="alt" xml:id="alt"
+	nullable="true" first="term_1" last="term_1"
+	follow:term_1="_t_16" follow:_t_16=" S_8" follow:S_8="term_1">
+    <alt xml:id="exp_alt_21"
+	 nullable="true" first="term_1" last="term_1"
+	 follow:term_1="_t_16" follow:_t_16=" S_8" follow:S_8="term_1">
+      <repeat0 xml:id="exp_repeat0_3"
+	       nullable="true" first="term_1" last="term_1"
+	       follow:term_1="_t_16" follow:_t_16=" S_8" follow:S_8="term_1">
+	<nonterminal name="term" xml:id="term_1"
+		     nullable="false" first="term_1" last="term_1"
+		     follow:term_1=""/>*<sep xml:id="exp_sep_3"
+		     nullable="false" first="_t_16" last="S_8"
+		     follow:_t_16=" S_8" follow:S_8="">
+	<alts xml:id="exp_alts_5"
+	      nullable="false" first="_t_16" last="S_8"
+	      follow:_t_16=" S_8" follow:S_8="">
+	  <alt xml:id="exp_alt_21"
+	       nullable="false" first="_t_16" last="S_8"
+	       follow:_t_16=" S_8" follow:S_8="">
+            <literal dstring="," xml:id="_t_16"
+		     nullable="false" first="_t_16" last="_t_16"
+		     follow:_t_16="" regex="dummy"/>
+	    <nonterminal name="S" xml:id="S_8"
+			 nullable="false" first="S_8" last="S_8"
+			 follow:S_8=""/>
+          </alt>
+        </alts>
+      </sep>
+      </repeat0>
+    </alt>
+  </rule>
+  <rule mark="-" name="term" xml:id="term"
+	nullable="false" first="factor_1 option_1 repeat0_1 repeat1_1" last="factor_1 option_1 repeat0_1 repeat1_1"
+	follow:factor_1="" follow:option_1="" follow:repeat0_1="" follow:repeat1_1="">
+    <alt xml:id="exp_alt_23"
+	 nullable="false" first="factor_1" last="factor_1"
+	 follow:factor_1="">
+      <nonterminal name="factor" xml:id="factor_1"
+		   nullable="false" first="factor_1" last="factor_1"
+		   follow:factor_1=""/>
+    </alt>
+    <alt xml:id="exp_alt_24"
+	 nullable="false" first="option_1" last="option_1"
+	 follow:option_1="">
+      <nonterminal name="option" xml:id="option_1"
+		   nullable="false" first="option_1" last="option_1"
+		   follow:option_1=""/>
+    </alt>
+    <alt xml:id="exp_alt_25"
+	 nullable="false" first="repeat0_1" last="repeat0_1"
+	 follow:repeat0_1="">
+      <nonterminal name="repeat0" xml:id="repeat0_1"
+		   nullable="false" first="repeat0_1" last="repeat0_1"
+		   follow:repeat0_1=""/>
+    </alt>
+    <alt xml:id="exp_alt_26"
+	 nullable="false" first="repeat1_1" last="repeat1_1"
+	 follow:repeat1_1="">
+      <nonterminal name="repeat1" xml:id="repeat1_1"
+		   nullable="false" first="repeat1_1" last="repeat1_1"
+		   follow:repeat1_1=""/>
+    </alt>
+  </rule>
+  <rule mark="-" name="factor" xml:id="factor"
+	nullable="false" first="terminal_1 nonterminal_1 _t_17" last="terminal_1 nonterminal_1 S_10"
+	follow:terminal_1="" follow:nonterminal_1="" follow:_t_17=" S_9" follow:S_9=" alts_2" follow:alts_2=" _t_18" follow:_t_18=" S_10" follow:S_10="">
+    <alt xml:id="exp_alt_27"
+	 nullable="false" first="terminal_1" last="terminal_1"
+	 follow:terminal_1="">
+      <nonterminal name="terminal" xml:id="terminal_1"
+		   nullable="false" first="terminal_1" last="terminal_1"
+		   follow:terminal_1=""/>
+    </alt>
+    <alt xml:id="exp_alt_28"
+	 nullable="false" first="nonterminal_1" last="nonterminal_1"
+	 follow:nonterminal_1="">
+      <nonterminal name="nonterminal" xml:id="nonterminal_1"
+		   nullable="false" first="nonterminal_1" last="nonterminal_1"
+		   follow:nonterminal_1=""/>
+    </alt>
+    <alt xml:id="exp_alt_29"
+	 nullable="false" first="_t_17" last="S_10"
+	 follow:_t_17=" S_9" follow:S_9=" alts_2" follow:alts_2=" _t_18" follow:_t_18=" S_10" follow:S_10="">
+      <literal dstring="(" xml:id="_t_17"
+	       nullable="false" first="_t_17" last="_t_17"
+	       follow:_t_17="" regex="dummy"/>
+      <nonterminal name="S" xml:id="S_9"
+		   nullable="false" first="S_9" last="S_9"
+		   follow:S_9=""/>
+      <nonterminal name="alts" xml:id="alts_2"
+		   nullable="false" first="alts_2" last="alts_2"
+		   follow:alts_2=""/>
+      <literal dstring=")" xml:id="_t_18"
+	       nullable="false" first="_t_18" last="_t_18"
+	       follow:_t_18="" regex="dummy"/>
+      <nonterminal name="S" xml:id="S_10"
+		   nullable="false" first="S_10" last="S_10"
+		   follow:S_10=""/>
+    </alt>
+  </rule>
+  <rule name="repeat0" xml:id="repeat0"
+	nullable="false" first="factor_2" last="S_11 sep_1"
+	follow:factor_2=" _t_19" follow:_t_19=" S_11" follow:S_11=" sep_1" follow:sep_1="">
+    <alt xml:id="exp_alt_30"
+	 nullable="false" first="factor_2" last="S_11 sep_1"
+	 follow:factor_2=" _t_19" follow:_t_19=" S_11" follow:S_11=" sep_1" follow:sep_1="">
+      <nonterminal name="factor" xml:id="factor_2"
+		   nullable="false" first="factor_2" last="factor_2"
+		   follow:factor_2=""/>
+      <literal dstring="*" xml:id="_t_19"
+	       nullable="false" first="_t_19" last="_t_19"
+	       follow:_t_19="" regex="dummy"/>
+      <nonterminal name="S" xml:id="S_11"
+		   nullable="false" first="S_11" last="S_11"
+		   follow:S_11=""/>
+      <option xml:id="exp_option_2"
+	      nullable="true" first="sep_1" last="sep_1"
+	      follow:sep_1="">
+	<nonterminal name="sep" xml:id="sep_1"
+		     nullable="false" first="sep_1" last="sep_1"
+		     follow:sep_1=""/>?</option>
+    </alt>
+  </rule>
+  <rule name="repeat1" xml:id="repeat1"
+	nullable="false" first="factor_3" last="S_12 sep_2"
+	follow:factor_3=" _t_20" follow:_t_20=" S_12" follow:S_12=" sep_2" follow:sep_2="">
+    <alt xml:id="exp_alt_31"
+	 nullable="false" first="factor_3" last="S_12 sep_2"
+	 follow:factor_3=" _t_20" follow:_t_20=" S_12" follow:S_12=" sep_2" follow:sep_2="">
+      <nonterminal name="factor" xml:id="factor_3"
+		   nullable="false" first="factor_3" last="factor_3"
+		   follow:factor_3=""/>
+      <literal dstring="+" xml:id="_t_20"
+	       nullable="false" first="_t_20" last="_t_20"
+	       follow:_t_20="" regex="dummy"/>
+      <nonterminal name="S" xml:id="S_12"
+		   nullable="false" first="S_12" last="S_12"
+		   follow:S_12=""/>
+      <option xml:id="exp_option_3"
+	      nullable="true" first="sep_2" last="sep_2"
+	      follow:sep_2="">
+	<nonterminal name="sep" xml:id="sep_2"
+		     nullable="false" first="sep_2" last="sep_2"
+		     follow:sep_2=""/>?</option>
+    </alt>
+  </rule>
+  <rule name="option" xml:id="option"
+	nullable="false" first="factor_4" last="S_13"
+	follow:factor_4=" _t_21" follow:_t_21=" S_13" follow:S_13="">
+    <alt xml:id="exp_alt_32"
+	 nullable="false" first="factor_4" last="S_13"
+	 follow:factor_4=" _t_21" follow:_t_21=" S_13" follow:S_13="">
+      <nonterminal name="factor" xml:id="factor_4"
+		   nullable="false" first="factor_4" last="factor_4"
+		   follow:factor_4=""/>
+      <literal dstring="?" xml:id="_t_21"
+	       nullable="false" first="_t_21" last="_t_21"
+	       follow:_t_21="" regex="dummy"/>
+      <nonterminal name="S" xml:id="S_13"
+		   nullable="false" first="S_13" last="S_13"
+		   follow:S_13=""/>
+    </alt>
+  </rule>
+  <rule name="sep" xml:id="sep"
+	nullable="false" first="factor_5" last="factor_5"
+	follow:factor_5="">
+    <alt xml:id="exp_alt_33"
+	 nullable="false" first="factor_5" last="factor_5"
+	 follow:factor_5="">
+      <nonterminal name="factor" xml:id="factor_5"
+		   nullable="false" first="factor_5" last="factor_5"
+		   follow:factor_5=""/>
+    </alt>
+  </rule>
+  <rule name="nonterminal" xml:id="nonterminal"
+	nullable="false" first="mark_2 name_2" last="S_15"
+	follow:mark_2=" S_14" follow:S_14=" name_2" follow:name_2=" S_15" follow:S_15="">
+    <alt xml:id="exp_alt_34"
+	 nullable="false" first="mark_2 name_2" last="S_15"
+	 follow:mark_2=" S_14" follow:S_14=" name_2" follow:name_2=" S_15" follow:S_15="">
+      <option xml:id="exp_option_4"
+	      nullable="true" first="mark_2" last="S_14"
+	      follow:mark_2=" S_14" follow:S_14="">
+	<alts xml:id="exp_alts_6"
+	      nullable="false" first="mark_2" last="S_14"
+	      follow:mark_2=" S_14" follow:S_14="">
+	  <alt xml:id="exp_alt_34"
+	       nullable="false" first="mark_2" last="S_14"
+	       follow:mark_2=" S_14" follow:S_14="">
+	    <nonterminal name="mark" xml:id="mark_2"
+			 nullable="false" first="mark_2" last="mark_2"
+			 follow:mark_2=""/>
+	    <nonterminal name="S" xml:id="S_14"
+			 nullable="false" first="S_14" last="S_14"
+			 follow:S_14=""/>
+	  </alt>
+	</alts>
+      </option>
+      <nonterminal name="name" xml:id="name_2"
+		   nullable="false" first="name_2" last="name_2"
+		   follow:name_2=""/>
+      <nonterminal name="S" xml:id="S_15"
+		   nullable="false" first="S_15" last="S_15"
+		   follow:S_15=""/>
+    </alt>
+  </rule>
+  <rule mark="-" name="terminal" xml:id="terminal"
+	nullable="false" first="literal_1 charset_1" last="literal_1 charset_1"
+	follow:literal_1="" follow:charset_1="">
+    <alt xml:id="exp_alt_36"
+	 nullable="false" first="literal_1" last="literal_1"
+	 follow:literal_1="">
+      <nonterminal name="literal" xml:id="literal_1"
+		   nullable="false" first="literal_1" last="literal_1"
+		   follow:literal_1=""/>
+    </alt>
+    <alt xml:id="exp_alt_37"
+	 nullable="false" first="charset_1" last="charset_1"
+	 follow:charset_1="">
+      <nonterminal name="charset" xml:id="charset_1"
+		   nullable="false" first="charset_1" last="charset_1"
+		   follow:charset_1=""/>
+    </alt>
+  </rule>
+  <rule name="literal" xml:id="literal"
+	nullable="false" first="quoted_1 encoded_1" last="quoted_1 encoded_1"
+	follow:quoted_1="" follow:encoded_1="">
+    <alt xml:id="exp_alt_38"
+	 nullable="false" first="quoted_1" last="quoted_1"
+	 follow:quoted_1="">
+      <nonterminal name="quoted" xml:id="quoted_1"
+		   nullable="false" first="quoted_1" last="quoted_1"
+		   follow:quoted_1=""/>
+    </alt>
+    <alt xml:id="exp_alt_39"
+	 nullable="false" first="encoded_1" last="encoded_1"
+	 follow:encoded_1="">
+      <nonterminal name="encoded" xml:id="encoded_1"
+		   nullable="false" first="encoded_1" last="encoded_1"
+		   follow:encoded_1=""/>
+    </alt>
+  </rule>
+  <rule mark="-" name="quoted" xml:id="quoted"
+	nullable="false" first="tmark_1 string_1" last="string_1"
+	follow:tmark_1=" S_16" follow:S_16=" string_1" follow:string_1="">
+    <alt xml:id="exp_alt_40"
+	 nullable="false" first="tmark_1 string_1" last="string_1"
+	 follow:tmark_1=" S_16" follow:S_16=" string_1" follow:string_1="">
+      <option xml:id="exp_option_5"
+	      nullable="true" first="tmark_1" last="S_16"
+	      follow:tmark_1=" S_16" follow:S_16="">
+	<alts xml:id="exp_alts_7"
+	      nullable="false" first="tmark_1" last="S_16"
+	      follow:tmark_1=" S_16" follow:S_16="">
+	  <alt xml:id="exp_alt_40"
+	       nullable="false" first="tmark_1" last="S_16"
+	       follow:tmark_1=" S_16" follow:S_16="">
+	    <nonterminal name="tmark" xml:id="tmark_1"
+			 nullable="false" first="tmark_1" last="tmark_1"
+			 follow:tmark_1=""/>
+	    <nonterminal name="S" xml:id="S_16"
+			 nullable="false" first="S_16" last="S_16"
+			 follow:S_16=""/>
+	  </alt>
+	</alts>
+      </option>
+      <nonterminal mark="-" name="string" xml:id="string_1"
+		   nullable="false" first="string_1" last="string_1"
+		   follow:string_1=""/>
+    </alt>
+  </rule>
+  <rule mark="@" name="name" xml:id="name"
+	nullable="false" first="namestart_1" last="namestart_1 namefollower_1"
+	follow:namestart_1=" namefollower_1" follow:namefollower_1="namefollower_1">
+    <alt xml:id="exp_alt_42"
+	 nullable="false" first="namestart_1" last="namestart_1 namefollower_1"
+	 follow:namestart_1=" namefollower_1" follow:namefollower_1="namefollower_1">
+      <nonterminal name="namestart" xml:id="namestart_1"
+		   nullable="false" first="namestart_1" last="namestart_1"
+		   follow:namestart_1=""/>
+      <repeat0 xml:id="exp_repeat0_4"
+	       nullable="true" first="namefollower_1" last="namefollower_1"
+	       follow:namefollower_1="namefollower_1">
+	<nonterminal name="namefollower" xml:id="namefollower_1"
+		     nullable="false" first="namefollower_1" last="namefollower_1"
+		     follow:namefollower_1=""/>*</repeat0>
+    </alt>
+  </rule>
+  <rule mark="-" name="namestart" xml:id="namestart"
+	nullable="false" first="_t_22" last="_t_22"
+	follow:_t_22="">
+    <alt xml:id="exp_alt_43"
+	 nullable="false" first="_t_22" last="_t_22"
+	 follow:_t_22="">
+      <inclusion xml:id="_t_22"
+		 nullable="false" first="_t_22" last="_t_22"
+		 follow:_t_22="" regex="dummy">
+	<literal dstring="_" xml:id="_t_23"
+		 nullable="false" first="_t_23" last="_t_23"
+		 follow:_t_23="" regex="dummy"/>
+	<class code="Ll" regex="\p{Ll}"/>
+	<class code="Lu" regex="\p{Lu}"/>
+	<class code="Lm" regex="\p{Lm}"/>
+	<class code="Lt" regex="\p{Lt}"/>
+	<class code="Lo" regex="\p{Lo}"/>
+      </inclusion>
+    </alt>
+  </rule>
+  <rule mark="-" name="namefollower" xml:id="namefollower"
+	nullable="false" first="namestart_2 _t_24" last="namestart_2 _t_24"
+	follow:namestart_2="" follow:_t_24="">
+    <alt xml:id="exp_alt_44"
+	 nullable="false" first="namestart_2" last="namestart_2"
+	 follow:namestart_2="">
+      <nonterminal name="namestart" xml:id="namestart_2"
+		   nullable="false" first="namestart_2" last="namestart_2"
+		   follow:namestart_2=""/>
+    </alt>
+    <alt xml:id="exp_alt_45"
+	 nullable="false" first="_t_24" last="_t_24"
+	 follow:_t_24="">
+      <inclusion xml:id="_t_24"
+		 nullable="false" first="_t_24" last="_t_24"
+		 follow:_t_24="" regex="dummy">
+	<literal dstring="-.·‿⁀" xml:id="_t_25"
+		 nullable="false" first="_t_25" last="_t_25"
+		 follow:_t_25="" regex="dummy"/>
+	<class code="Nd" regex="\p{Nd}"/>
+	<class code="Mn" regex="\p{Mn}"/>
+      </inclusion>
+    </alt>
+  </rule>
+  <rule mark="@" name="tmark" xml:id="tmark"
+	nullable="false" first="_t_26" last="_t_26"
+	follow:_t_26="">
+    <alt xml:id="exp_alt_46"
+	 nullable="false" first="_t_26" last="_t_26"
+	 follow:_t_26="">
+      <inclusion xml:id="_t_26"
+		 nullable="false" first="_t_26" last="_t_26"
+		 follow:_t_26="" regex="dummy">
+	<literal dstring="^-" xml:id="_t_27"
+		 nullable="false" first="_t_27" last="_t_27"
+		 follow:_t_27="" regex="dummy"/>
+      </inclusion>
+    </alt>
+  </rule>
+  <rule name="string" xml:id="string"
+	nullable="false" first="_t_28 _t_30" last="S_17 S_18"
+	follow:_t_28=" dstring_1" follow:dstring_1=" _t_29" follow:_t_29=" S_17" follow:S_17="" follow:_t_30=" sstring_1" follow:sstring_1=" _t_31" follow:_t_31=" S_18" follow:S_18="">
+    <alt xml:id="exp_alt_47"
+	 nullable="false" first="_t_28" last="S_17"
+	 follow:_t_28=" dstring_1" follow:dstring_1=" _t_29" follow:_t_29=" S_17" follow:S_17="">
+      <literal tmark="-" sstring="&quot;" xml:id="_t_28"
+	       nullable="false" first="_t_28" last="_t_28"
+	       follow:_t_28="" regex="dummy"/>
+      <nonterminal name="dstring" xml:id="dstring_1"
+		   nullable="false" first="dstring_1" last="dstring_1"
+		   follow:dstring_1=""/>
+      <literal tmark="-" sstring="&quot;" xml:id="_t_29"
+	       nullable="false" first="_t_29" last="_t_29"
+	       follow:_t_29="" regex="dummy"/>
+      <nonterminal name="S" xml:id="S_17"
+		   nullable="false" first="S_17" last="S_17"
+		   follow:S_17=""/>
+    </alt>
+    <alt xml:id="exp_alt_48"
+	 nullable="false" first="_t_30" last="S_18"
+	 follow:_t_30=" sstring_1" follow:sstring_1=" _t_31" follow:_t_31=" S_18" follow:S_18="">
+      <literal tmark="-" dstring="'" xml:id="_t_30"
+	       nullable="false" first="_t_30" last="_t_30"
+	       follow:_t_30="" regex="dummy"/>
+      <nonterminal name="sstring" xml:id="sstring_1"
+		   nullable="false" first="sstring_1" last="sstring_1"
+		   follow:sstring_1=""/>
+      <literal tmark="-" dstring="'" xml:id="_t_31"
+	       nullable="false" first="_t_31" last="_t_31"
+	       follow:_t_31="" regex="dummy"/>
+      <nonterminal name="S" xml:id="S_18"
+		   nullable="false" first="S_18" last="S_18"
+		   follow:S_18=""/>
+    </alt>
+  </rule>
+  <rule mark="@" name="dstring" xml:id="dstring"
+	nullable="false" first="dchar_1" last="dchar_1"
+	follow:dchar_1="dchar_1">
+    <alt xml:id="exp_alt_49"
+	 nullable="false" first="dchar_1" last="dchar_1"
+	 follow:dchar_1="dchar_1">
+      <repeat1 xml:id="exp_repeat1_3"
+	       nullable="false" first="dchar_1" last="dchar_1"
+	       follow:dchar_1="dchar_1">
+	<nonterminal name="dchar" xml:id="dchar_1"
+		     nullable="false" first="dchar_1" last="dchar_1"
+		     follow:dchar_1=""/>
+      </repeat1>
+    </alt>
+  </rule>
+  <rule mark="@" name="sstring" xml:id="sstring"
+	nullable="false" first="schar_1" last="schar_1"
+	follow:schar_1="schar_1">
+    <alt xml:id="exp_alt_50"
+	 nullable="false" first="schar_1" last="schar_1"
+	 follow:schar_1="schar_1">
+      <repeat1 xml:id="exp_repeat1_4"
+	       nullable="false" first="schar_1" last="schar_1"
+	       follow:schar_1="schar_1">
+	<nonterminal name="schar" xml:id="schar_1"
+		     nullable="false" first="schar_1" last="schar_1"
+		     follow:schar_1=""/>
+      </repeat1>
+    </alt>
+  </rule>
+  <rule name="dchar" xml:id="dchar"
+	nullable="false" first="_t_32 _t_34" last="_t_32 _t_35"
+	follow:_t_32="" follow:_t_34=" _t_35" follow:_t_35="">
+    <alt xml:id="exp_alt_51"
+	 nullable="false" first="_t_32" last="_t_32"
+	 follow:_t_32="">
+      <exclusion xml:id="_t_32"
+		 nullable="false" first="_t_32" last="_t_32"
+		 follow:_t_32="" regex="dummy">
+	<literal sstring="&quot;" xml:id="_t_33"
+		 nullable="false" first="_t_33" last="_t_33"
+		 follow:_t_33="" regex="dummy"/>
+      </exclusion>
+    </alt>
+    <alt xml:id="exp_alt_52"
+	 nullable="false" first="_t_34" last="_t_35"
+	 follow:_t_34=" _t_35" follow:_t_35="">
+      <literal sstring="&quot;" xml:id="_t_34"
+	       nullable="false" first="_t_34" last="_t_34"
+	       follow:_t_34="" regex="dummy"/>
+      <literal tmark="-" sstring="&quot;" xml:id="_t_35"
+	       nullable="false" first="_t_35" last="_t_35"
+	       follow:_t_35="" regex="dummy"/>
+    </alt>
+  </rule>
+  <comment>all characters, quotes must be doubled</comment>
+  <rule name="schar" xml:id="schar"
+	nullable="false" first="_t_36 _t_38" last="_t_36 _t_39"
+	follow:_t_36="" follow:_t_38=" _t_39" follow:_t_39="">
+    <alt xml:id="exp_alt_53"
+	 nullable="false" first="_t_36" last="_t_36"
+	 follow:_t_36="">
+      <exclusion xml:id="_t_36"
+		 nullable="false" first="_t_36" last="_t_36"
+		 follow:_t_36="" regex="dummy">
+	<literal dstring="'" xml:id="_t_37"
+		 nullable="false" first="_t_37" last="_t_37"
+		 follow:_t_37="" regex="dummy"/>
+      </exclusion>
+    </alt>
+    <alt xml:id="exp_alt_54"
+	 nullable="false" first="_t_38" last="_t_39"
+	 follow:_t_38=" _t_39" follow:_t_39="">
+      <literal dstring="'" xml:id="_t_38"
+	       nullable="false" first="_t_38" last="_t_38"
+	       follow:_t_38="" regex="dummy"/>
+      <literal tmark="-" dstring="'" xml:id="_t_39"
+	       nullable="false" first="_t_39" last="_t_39"
+	       follow:_t_39="" regex="dummy"/>
+    </alt>
+  </rule>
+  <comment>all characters, quotes must be doubled</comment>
+  <rule mark="-" name="encoded" xml:id="encoded"
+	nullable="false" first="tmark_2 _t_40" last="S_20"
+	follow:tmark_2=" S_19" follow:S_19=" _t_40" follow:_t_40=" hex_1" follow:hex_1=" S_20" follow:S_20="">
+    <alt xml:id="exp_alt_55"
+	 nullable="false" first="tmark_2 _t_40" last="S_20"
+	 follow:tmark_2=" S_19" follow:S_19=" _t_40" follow:_t_40=" hex_1" follow:hex_1=" S_20" follow:S_20="">
+      <option xml:id="exp_option_6"
+	      nullable="true" first="tmark_2" last="S_19"
+	      follow:tmark_2=" S_19" follow:S_19="">
+	<alts xml:id="exp_alts_8"
+	      nullable="false" first="tmark_2" last="S_19"
+	      follow:tmark_2=" S_19" follow:S_19="">
+	  <alt xml:id="exp_alt_55"
+	       nullable="false" first="tmark_2" last="S_19"
+	       follow:tmark_2=" S_19" follow:S_19="">
+	    <nonterminal name="tmark" xml:id="tmark_2"
+			 nullable="false" first="tmark_2" last="tmark_2"
+			 follow:tmark_2=""/>
+	    <nonterminal name="S" xml:id="S_19"
+			 nullable="false" first="S_19" last="S_19"
+			 follow:S_19=""/>
+	  </alt>
+	</alts>
+      </option>
+      <literal tmark="-" dstring="#" xml:id="_t_40"
+	       nullable="false" first="_t_40" last="_t_40"
+	       follow:_t_40="" regex="dummy"/>
+      <nonterminal mark="@" name="hex" xml:id="hex_1"
+		   nullable="false" first="hex_1" last="hex_1"
+		   follow:hex_1=""/>
+      <nonterminal name="S" xml:id="S_20"
+		   nullable="false" first="S_20" last="S_20"
+		   follow:S_20=""/>
+    </alt>
+  </rule>
+  <rule name="hex" xml:id="hex"
+	nullable="false" first="_t_41" last="_t_41"
+	follow:_t_41="_t_41">
+    <alt xml:id="exp_alt_57"
+	 nullable="false" first="_t_41" last="_t_41"
+	 follow:_t_41="_t_41">
+      <repeat1 xml:id="exp_repeat1_5"
+	       nullable="false" first="_t_41" last="_t_41"
+	       follow:_t_41="_t_41">
+	<inclusion xml:id="_t_41"
+		   nullable="false" first="_t_41" last="_t_41"
+		   follow:_t_41="" regex="dummy">
+	  <range from="0" to="9" regex="[0-9]">-</range>
+	  <range from="a" to="f" regex="[a-f]">-</range>
+	  <range from="A" to="F" regex="[A-F]">-</range>
+	</inclusion>
+      </repeat1>
+    </alt>
+  </rule>
+  <rule mark="-" name="charset" xml:id="charset"
+	nullable="false" first="inclusion_1 exclusion_1" last="inclusion_1 exclusion_1"
+	follow:inclusion_1="" follow:exclusion_1="">
+    <alt xml:id="exp_alt_58"
+	 nullable="false" first="inclusion_1" last="inclusion_1"
+	 follow:inclusion_1="">
+      <nonterminal name="inclusion" xml:id="inclusion_1"
+		   nullable="false" first="inclusion_1" last="inclusion_1"
+		   follow:inclusion_1=""/>
+    </alt>
+    <alt xml:id="exp_alt_59"
+	 nullable="false" first="exclusion_1" last="exclusion_1"
+	 follow:exclusion_1="">
+      <nonterminal name="exclusion" xml:id="exclusion_1"
+		   nullable="false" first="exclusion_1" last="exclusion_1"
+		   follow:exclusion_1=""/>
+    </alt>
+  </rule>
+  <rule name="inclusion" xml:id="inclusion"
+	nullable="false" first="tmark_3 set_1" last="set_1"
+	follow:tmark_3=" S_21" follow:S_21=" set_1" follow:set_1="">
+    <alt xml:id="exp_alt_60"
+	 nullable="false" first="tmark_3 set_1" last="set_1"
+	 follow:tmark_3=" S_21" follow:S_21=" set_1" follow:set_1="">
+      <option xml:id="exp_option_7"
+	      nullable="true" first="tmark_3" last="S_21"
+	      follow:tmark_3=" S_21" follow:S_21="">
+	<alts xml:id="exp_alts_9"
+	      nullable="false" first="tmark_3" last="S_21"
+	      follow:tmark_3=" S_21" follow:S_21="">
+	  <alt xml:id="exp_alt_60"
+	       nullable="false" first="tmark_3" last="S_21"
+	       follow:tmark_3=" S_21" follow:S_21="">
+	    <nonterminal name="tmark" xml:id="tmark_3"
+			 nullable="false" first="tmark_3" last="tmark_3"
+			 follow:tmark_3=""/>
+	    <nonterminal name="S" xml:id="S_21"
+			 nullable="false" first="S_21" last="S_21"
+			 follow:S_21=""/>
+	  </alt>
+	</alts>
+      </option>
+      <nonterminal name="set" xml:id="set_1"
+		   nullable="false" first="set_1" last="set_1"
+		   follow:set_1=""/>
+    </alt>
+  </rule>
+  <rule name="exclusion" xml:id="exclusion"
+	nullable="false" first="tmark_4 _t_42" last="set_2"
+	follow:tmark_4=" S_22" follow:S_22=" _t_42" follow:_t_42=" S_23" follow:S_23=" set_2" follow:set_2="">
+    <alt xml:id="exp_alt_62"
+	 nullable="false" first="tmark_4 _t_42" last="set_2"
+	 follow:tmark_4=" S_22" follow:S_22=" _t_42" follow:_t_42=" S_23" follow:S_23=" set_2" follow:set_2="">
+      <option xml:id="exp_option_8"
+	      nullable="true" first="tmark_4" last="S_22"
+	      follow:tmark_4=" S_22" follow:S_22="">
+	<alts xml:id="exp_alts_10"
+	      nullable="false" first="tmark_4" last="S_22"
+	      follow:tmark_4=" S_22" follow:S_22="">
+	  <alt xml:id="exp_alt_62"
+	       nullable="false" first="tmark_4" last="S_22"
+	       follow:tmark_4=" S_22" follow:S_22="">
+	    <nonterminal name="tmark" xml:id="tmark_4"
+			 nullable="false" first="tmark_4" last="tmark_4"
+			 follow:tmark_4=""/>
+	    <nonterminal name="S" xml:id="S_22"
+			 nullable="false" first="S_22" last="S_22"
+			 follow:S_22=""/>
+	  </alt>
+	</alts>
+      </option>
+      <literal dstring="~" xml:id="_t_42"
+	       nullable="false" first="_t_42" last="_t_42"
+	       follow:_t_42="" regex="dummy"/>
+      <nonterminal name="S" xml:id="S_23"
+		   nullable="false" first="S_23" last="S_23"
+		   follow:S_23=""/>
+      <nonterminal name="set" xml:id="set_2"
+		   nullable="false" first="set_2" last="set_2"
+		   follow:set_2=""/>
+    </alt>
+  </rule>
+  <rule mark="-" name="set" xml:id="set"
+	nullable="false" first="_t_43" last="S_26"
+	follow:_t_43=" S_24" follow:S_24=" member_1 _t_46" follow:member_1="_t_44 _t_46" follow:_t_44=" S_25" follow:S_25="member_1" follow:_t_46=" S_26" follow:S_26="">
+    <alt xml:id="exp_alt_64"
+	 nullable="false" first="_t_43" last="S_26"
+	 follow:_t_43=" S_24" follow:S_24=" member_1 _t_46" follow:member_1="_t_44 _t_46" follow:_t_44=" S_25" follow:S_25="member_1" follow:_t_46=" S_26" follow:S_26="">
+      <literal dstring="[" xml:id="_t_43"
+	       nullable="false" first="_t_43" last="_t_43"
+	       follow:_t_43="" regex="dummy"/>
+      <nonterminal name="S" xml:id="S_24"
+		   nullable="false" first="S_24" last="S_24"
+		   follow:S_24=""/>
+      <repeat0 xml:id="exp_repeat0_5"
+	       nullable="true" first="member_1" last="member_1"
+	       follow:member_1="_t_44" follow:_t_44=" S_25" follow:S_25="member_1">
+	<nonterminal name="member" xml:id="member_1"
+		     nullable="false" first="member_1" last="member_1"
+		     follow:member_1=""/>*<sep xml:id="exp_sep_4"
+		     nullable="false" first="_t_44" last="S_25"
+		     follow:_t_44=" S_25" follow:S_25="">
+	<alts xml:id="exp_alts_11"
+	      nullable="false" first="_t_44" last="S_25"
+	      follow:_t_44=" S_25" follow:S_25="">
+	  <alt xml:id="exp_alt_64"
+	       nullable="false" first="_t_44" last="S_25"
+	       follow:_t_44=" S_25" follow:S_25="">
+	    <inclusion xml:id="_t_44"
+		       nullable="false" first="_t_44" last="_t_44"
+		       follow:_t_44="" regex="dummy">
+	      <literal dstring=";|" xml:id="_t_45"
+		       nullable="false" first="_t_45" last="_t_45"
+		       follow:_t_45="" regex="dummy"/>
+	    </inclusion>
+	    <nonterminal name="S" xml:id="S_25"
+			 nullable="false" first="S_25" last="S_25"
+			 follow:S_25=""/>
+          </alt>
+        </alts>
+      </sep>
+      </repeat0>
+      <literal dstring="]" xml:id="_t_46"
+	       nullable="false" first="_t_46" last="_t_46"
+	       follow:_t_46="" regex="dummy"/>
+      <nonterminal name="S" xml:id="S_26"
+		   nullable="false" first="S_26" last="S_26"
+		   follow:S_26=""/>
+    </alt>
+  </rule>
+  <rule mark="-" name="member" xml:id="member"
+	nullable="false" first="literal_2 range_1 class_1" last="literal_2 range_1 class_1"
+	follow:literal_2="" follow:range_1="" follow:class_1="">
+    <alt xml:id="exp_alt_66"
+	 nullable="false" first="literal_2" last="literal_2"
+	 follow:literal_2="">
+      <nonterminal name="literal" xml:id="literal_2"
+		   nullable="false" first="literal_2" last="literal_2"
+		   follow:literal_2=""/>
+    </alt>
+    <alt xml:id="exp_alt_67"
+	 nullable="false" first="range_1" last="range_1"
+	 follow:range_1="">
+      <nonterminal name="range" xml:id="range_1"
+		   nullable="false" first="range_1" last="range_1"
+		   follow:range_1=""/>
+    </alt>
+    <alt xml:id="exp_alt_68"
+	 nullable="false" first="class_1" last="class_1"
+	 follow:class_1="">
+      <nonterminal name="class" xml:id="class_1"
+		   nullable="false" first="class_1" last="class_1"
+		   follow:class_1=""/>
+    </alt>
+  </rule>
+  <rule name="range" xml:id="range"
+	nullable="false" first="from_1" last="to_1"
+	follow:from_1=" _t_47" follow:_t_47=" S_27" follow:S_27=" to_1" follow:to_1="">
+    <alt xml:id="exp_alt_69"
+	 nullable="false" first="from_1" last="to_1"
+	 follow:from_1=" _t_47" follow:_t_47=" S_27" follow:S_27=" to_1" follow:to_1="">
+      <nonterminal name="from" xml:id="from_1"
+		   nullable="false" first="from_1" last="from_1"
+		   follow:from_1=""/>
+      <literal dstring="-" xml:id="_t_47"
+	       nullable="false" first="_t_47" last="_t_47"
+	       follow:_t_47="" regex="dummy"/>
+      <nonterminal name="S" xml:id="S_27"
+		   nullable="false" first="S_27" last="S_27"
+		   follow:S_27=""/>
+      <nonterminal name="to" xml:id="to_1"
+		   nullable="false" first="to_1" last="to_1"
+		   follow:to_1=""/>
+    </alt>
+  </rule>
+  <rule mark="@" name="from" xml:id="from"
+	nullable="false" first="character_1" last="character_1"
+	follow:character_1="">
+    <alt xml:id="exp_alt_70"
+	 nullable="false" first="character_1" last="character_1"
+	 follow:character_1="">
+      <nonterminal name="character" xml:id="character_1"
+		   nullable="false" first="character_1" last="character_1"
+		   follow:character_1=""/>
+    </alt>
+  </rule>
+  <rule mark="@" name="to" xml:id="to"
+	nullable="false" first="character_2" last="character_2"
+	follow:character_2="">
+    <alt xml:id="exp_alt_71"
+	 nullable="false" first="character_2" last="character_2"
+	 follow:character_2="">
+      <nonterminal name="character" xml:id="character_2"
+		   nullable="false" first="character_2" last="character_2"
+		   follow:character_2=""/>
+    </alt>
+  </rule>
+  <rule mark="-" name="character" xml:id="character"
+	nullable="false" first="_t_48 _t_50 _t_52" last="S_28 S_29 S_30"
+	follow:_t_48=" dchar_2" follow:dchar_2=" _t_49" follow:_t_49=" S_28" follow:S_28="" follow:_t_50=" schar_2" follow:schar_2=" _t_51" follow:_t_51=" S_29" follow:S_29="" follow:_t_52=" hex_2" follow:hex_2=" S_30" follow:S_30="">
+    <alt xml:id="exp_alt_72"
+	 nullable="false" first="_t_48" last="S_28"
+	 follow:_t_48=" dchar_2" follow:dchar_2=" _t_49" follow:_t_49=" S_28" follow:S_28="">
+      <literal tmark="-" sstring="&quot;" xml:id="_t_48"
+	       nullable="false" first="_t_48" last="_t_48"
+	       follow:_t_48="" regex="dummy"/>
+      <nonterminal name="dchar" xml:id="dchar_2"
+		   nullable="false" first="dchar_2" last="dchar_2"
+		   follow:dchar_2=""/>
+      <literal tmark="-" sstring="&quot;" xml:id="_t_49"
+	       nullable="false" first="_t_49" last="_t_49"
+	       follow:_t_49="" regex="dummy"/>
+      <nonterminal name="S" xml:id="S_28"
+		   nullable="false" first="S_28" last="S_28"
+		   follow:S_28=""/>
+    </alt>
+    <alt xml:id="exp_alt_73"
+	 nullable="false" first="_t_50" last="S_29"
+	 follow:_t_50=" schar_2" follow:schar_2=" _t_51" follow:_t_51=" S_29" follow:S_29="">
+      <literal tmark="-" dstring="'" xml:id="_t_50"
+	       nullable="false" first="_t_50" last="_t_50"
+	       follow:_t_50="" regex="dummy"/>
+      <nonterminal name="schar" xml:id="schar_2"
+		   nullable="false" first="schar_2" last="schar_2"
+		   follow:schar_2=""/>
+      <literal tmark="-" dstring="'" xml:id="_t_51"
+	       nullable="false" first="_t_51" last="_t_51"
+	       follow:_t_51="" regex="dummy"/>
+      <nonterminal name="S" xml:id="S_29"
+		   nullable="false" first="S_29" last="S_29"
+		   follow:S_29=""/>
+    </alt>
+    <alt xml:id="exp_alt_74"
+	 nullable="false" first="_t_52" last="S_30"
+	 follow:_t_52=" hex_2" follow:hex_2=" S_30" follow:S_30="">
+      <literal dstring="#" xml:id="_t_52"
+	       nullable="false" first="_t_52" last="_t_52"
+	       follow:_t_52="" regex="dummy"/>
+      <nonterminal name="hex" xml:id="hex_2"
+		   nullable="false" first="hex_2" last="hex_2"
+		   follow:hex_2=""/>
+      <nonterminal name="S" xml:id="S_30"
+		   nullable="false" first="S_30" last="S_30"
+		   follow:S_30=""/>
+    </alt>
+  </rule>
+  <rule name="class" xml:id="class"
+	nullable="false" first="code_1" last="S_31"
+	follow:code_1=" S_31" follow:S_31="">
+    <alt xml:id="exp_alt_75"
+	 nullable="false" first="code_1" last="S_31"
+	 follow:code_1=" S_31" follow:S_31="">
+      <nonterminal name="code" xml:id="code_1"
+		   nullable="false" first="code_1" last="code_1"
+		   follow:code_1=""/>
+      <nonterminal name="S" xml:id="S_31"
+		   nullable="false" first="S_31" last="S_31"
+		   follow:S_31=""/>
+    </alt>
+  </rule>
+  <rule mark="@" name="code" xml:id="code"
+	nullable="false" first="capital_1" last="capital_1 letter_1"
+	follow:capital_1=" letter_1" follow:letter_1="">
+    <alt xml:id="exp_alt_76"
+	 nullable="false" first="capital_1" last="capital_1 letter_1"
+	 follow:capital_1=" letter_1" follow:letter_1="">
+      <nonterminal name="capital" xml:id="capital_1"
+		   nullable="false" first="capital_1" last="capital_1"
+		   follow:capital_1=""/>
+      <option xml:id="exp_option_9"
+	      nullable="true" first="letter_1" last="letter_1"
+	      follow:letter_1="">
+	<nonterminal name="letter" xml:id="letter_1"
+		     nullable="false" first="letter_1" last="letter_1"
+		     follow:letter_1=""/>?</option>
+    </alt>
+  </rule>
+  <rule mark="-" name="capital" xml:id="capital"
+	nullable="false" first="_t_53" last="_t_53"
+	follow:_t_53="">
+    <alt xml:id="exp_alt_77"
+	 nullable="false" first="_t_53" last="_t_53"
+	 follow:_t_53="">
+      <inclusion xml:id="_t_53"
+		 nullable="false" first="_t_53" last="_t_53"
+		 follow:_t_53="" regex="dummy">
+	<range from="A" to="Z" regex="[A-Z]">-</range>
+      </inclusion>
+    </alt>
+  </rule>
+  <rule mark="-" name="letter" xml:id="letter"
+	nullable="false" first="_t_54" last="_t_54"
+	follow:_t_54="">
+    <alt xml:id="exp_alt_78"
+	 nullable="false" first="_t_54" last="_t_54"
+	 follow:_t_54="">
+      <inclusion xml:id="_t_54"
+		 nullable="false" first="_t_54" last="_t_54"
+		 follow:_t_54="" regex="dummy">
+	<range from="a" to="z" regex="[a-z]">-</range>
+      </inclusion>
+    </alt>
+  </rule>
+</ixml>

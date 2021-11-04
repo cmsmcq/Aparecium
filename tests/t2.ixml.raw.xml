@@ -1,0 +1,189 @@
+<nt name="Goal" _from="0" _to="38" mark="^">
+  <nt name="ixml" _from="0" _to="38" mark="^">
+    <nt name="S" _from="0" _to="0" mark="-"/>
+    <nt name="rule" _from="0" _to="38" mark="^">
+      <nt name="name" _from="0" _to="1" mark="@">
+	<nt name="namestart" _from="0" _to="1" mark="-">
+          <inclusion xml:id="_t_22" regex="dummy" string="S" cps="83"/>
+	</nt>
+      </nt>
+      <nt name="S" _from="1" _to="2" mark="-">
+	<nt name="whitespace" _from="1" _to="2" mark="-">
+          <inclusion xml:id="_t_1" tmark="-" regex="dummy" string=" " cps="32"/>
+	</nt>
+      </nt>
+      <inclusion xml:id="_t_9" regex="dummy" string=":" cps="58"/>
+      <nt name="S" _from="3" _to="4" mark="-">
+	<nt name="whitespace" _from="3" _to="4" mark="-">
+          <inclusion xml:id="_t_1" tmark="-" regex="dummy" string=" " cps="32"/>
+	</nt>
+      </nt>
+      <nt name="alts" _from="4" _to="37" mark="^">
+	<nt name="alt" _from="4" _to="11" mark="^">
+          <nt name="term" _from="4" _to="11" mark="-">
+            <nt name="factor" _from="4" _to="11" mark="-">
+              <nt name="terminal" _from="4" _to="11" mark="-">
+		<nt name="literal" _from="4" _to="11" mark="^">
+                  <nt name="quoted" _from="4" _to="11" mark="-">
+                    <nt name="string" _from="4" _to="11" mark="^">
+                      <literal xml:id="_t_30" tmark="-" regex="dummy" string="'" cps="39"/>
+                      <nt name="sstring" _from="5" _to="10" mark="@">
+			<nt name="schar" _from="5" _to="6" mark="^">
+                          <exclusion xml:id="_t_36" regex="dummy" string="m" cps="109"/>
+			</nt>
+			<nt name="schar" _from="6" _to="7" mark="^">
+                          <exclusion xml:id="_t_36" regex="dummy" string="a" cps="97"/>
+			</nt>
+			<nt name="schar" _from="7" _to="8" mark="^">
+                          <exclusion xml:id="_t_36" regex="dummy" string="g" cps="103"/>
+			</nt>
+			<nt name="schar" _from="8" _to="9" mark="^">
+                          <exclusion xml:id="_t_36" regex="dummy" string="i" cps="105"/>
+			</nt>
+			<nt name="schar" _from="9" _to="10" mark="^">
+                          <exclusion xml:id="_t_36" regex="dummy" string="c" cps="99"/>
+			</nt>
+                      </nt>
+                      <literal xml:id="_t_31" tmark="-" regex="dummy" string="'" cps="39"/>
+                      <nt name="S" _from="11" _to="11" mark="-"/>
+                    </nt>
+                  </nt>
+		</nt>
+              </nt>
+            </nt>
+          </nt>
+	</nt>
+	<inclusion xml:id="_t_14" regex="dummy" string=";" cps="59"/>
+	<nt name="S" _from="12" _to="13" mark="-">
+          <nt name="whitespace" _from="12" _to="13" mark="-">
+            <inclusion xml:id="_t_1" tmark="-" regex="dummy" string=" " cps="32"/>
+          </nt>
+	</nt>
+	<nt name="alt" _from="13" _to="21" mark="^">
+          <nt name="term" _from="13" _to="16" mark="-">
+            <nt name="factor" _from="13" _to="16" mark="-">
+              <nt name="terminal" _from="13" _to="16" mark="-">
+		<nt name="literal" _from="13" _to="16" mark="^">
+                  <nt name="quoted" _from="13" _to="16" mark="-">
+                    <nt name="string" _from="13" _to="16" mark="^">
+                      <literal xml:id="_t_30" tmark="-" regex="dummy" string="'" cps="39"/>
+                      <nt name="sstring" _from="14" _to="15" mark="@">
+			<nt name="schar" _from="14" _to="15" mark="^">
+                          <exclusion xml:id="_t_36" regex="dummy" string="b" cps="98"/>
+			</nt>
+                      </nt>
+                      <literal xml:id="_t_31" tmark="-" regex="dummy" string="'" cps="39"/>
+                      <nt name="S" _from="16" _to="16" mark="-"/>
+                    </nt>
+                  </nt>
+		</nt>
+              </nt>
+            </nt>
+          </nt>
+          <literal xml:id="_t_16" regex="dummy" string="," cps="44"/>
+          <nt name="S" _from="17" _to="18" mark="-">
+            <nt name="whitespace" _from="17" _to="18" mark="-">
+              <inclusion xml:id="_t_1" tmark="-" regex="dummy" string=" " cps="32"/>
+            </nt>
+          </nt>
+          <nt name="term" _from="18" _to="21" mark="-">
+            <nt name="factor" _from="18" _to="21" mark="-">
+              <nt name="terminal" _from="18" _to="21" mark="-">
+		<nt name="literal" _from="18" _to="21" mark="^">
+                  <nt name="quoted" _from="18" _to="21" mark="-">
+                    <nt name="string" _from="18" _to="21" mark="^">
+                      <literal xml:id="_t_28" tmark="-" regex="dummy" string="&quot;" cps="34"/>
+                      <nt name="dstring" _from="19" _to="20" mark="@">
+			<nt name="dchar" _from="19" _to="20" mark="^">
+                          <exclusion xml:id="_t_32" regex="dummy" string="c" cps="99"/>
+			</nt>
+                      </nt>
+                      <literal xml:id="_t_29" tmark="-" regex="dummy" string="&quot;" cps="34"/>
+                      <nt name="S" _from="21" _to="21" mark="-"/>
+                    </nt>
+                  </nt>
+		</nt>
+              </nt>
+            </nt>
+          </nt>
+	</nt>
+	<inclusion xml:id="_t_14" regex="dummy" string=";" cps="59"/>
+	<nt name="S" _from="22" _to="23" mark="-">
+          <nt name="whitespace" _from="22" _to="23" mark="-">
+            <inclusion xml:id="_t_1" tmark="-" regex="dummy" string=" " cps="32"/>
+          </nt>
+	</nt>
+	<nt name="alt" _from="23" _to="37" mark="^">
+          <nt name="term" _from="23" _to="37" mark="-">
+            <nt name="factor" _from="23" _to="37" mark="-">
+              <nt name="terminal" _from="23" _to="37" mark="-">
+		<nt name="charset" _from="23" _to="37" mark="-">
+                  <nt name="inclusion" _from="23" _to="37" mark="^">
+                    <nt name="set" _from="23" _to="37" mark="-">
+                      <literal xml:id="_t_43" regex="dummy" string="[" cps="91"/>
+                      <nt name="S" _from="24" _to="24" mark="-"/>
+                      <nt name="member" _from="24" _to="27" mark="-">
+			<nt name="literal" _from="24" _to="27" mark="^">
+                          <nt name="quoted" _from="24" _to="27" mark="-">
+                            <nt name="string" _from="24" _to="27" mark="^">
+                              <literal xml:id="_t_28" tmark="-" regex="dummy" string="&quot;" cps="34"/>
+                              <nt name="dstring" _from="25" _to="26" mark="@">
+				<nt name="dchar" _from="25" _to="26" mark="^">
+                                  <exclusion xml:id="_t_32" regex="dummy" string="v" cps="118"/>
+				</nt>
+                              </nt>
+                              <literal xml:id="_t_29" tmark="-" regex="dummy" string="&quot;" cps="34"/>
+                              <nt name="S" _from="27" _to="27" mark="-"/>
+                            </nt>
+                          </nt>
+			</nt>
+                      </nt>
+                      <inclusion xml:id="_t_44" regex="dummy" string=";" cps="59"/>
+                      <nt name="S" _from="28" _to="29" mark="-">
+			<nt name="whitespace" _from="28" _to="29" mark="-">
+                          <inclusion xml:id="_t_1" tmark="-" regex="dummy" string=" " cps="32"/>
+			</nt>
+                      </nt>
+                      <nt name="member" _from="29" _to="36" mark="-">
+			<nt name="literal" _from="29" _to="36" mark="^">
+                          <nt name="quoted" _from="29" _to="36" mark="-">
+                            <nt name="string" _from="29" _to="36" mark="^">
+                              <literal xml:id="_t_30" tmark="-" regex="dummy" string="'" cps="39"/>
+                              <nt name="sstring" _from="30" _to="35" mark="@">
+				<nt name="schar" _from="30" _to="31" mark="^">
+                                  <exclusion xml:id="_t_36" regex="dummy" string="a" cps="97"/>
+				</nt>
+				<nt name="schar" _from="31" _to="32" mark="^">
+                                  <exclusion xml:id="_t_36" regex="dummy" string="e" cps="101"/>
+				</nt>
+				<nt name="schar" _from="32" _to="33" mark="^">
+                                  <exclusion xml:id="_t_36" regex="dummy" string="i" cps="105"/>
+				</nt>
+				<nt name="schar" _from="33" _to="34" mark="^">
+                                  <exclusion xml:id="_t_36" regex="dummy" string="o" cps="111"/>
+				</nt>
+				<nt name="schar" _from="34" _to="35" mark="^">
+                                  <exclusion xml:id="_t_36" regex="dummy" string="u" cps="117"/>
+				</nt>
+                              </nt>
+                              <literal xml:id="_t_31" tmark="-" regex="dummy" string="'" cps="39"/>
+                              <nt name="S" _from="36" _to="36" mark="-"/>
+                            </nt>
+                          </nt>
+			</nt>
+                      </nt>
+                      <literal xml:id="_t_46" regex="dummy" string="]" cps="93"/>
+                      <nt name="S" _from="37" _to="37" mark="-"/>
+                    </nt>
+                  </nt>
+		</nt>
+              </nt>
+            </nt>
+          </nt>
+	</nt>
+      </nt>
+      <literal xml:id="_t_11" regex="dummy" string="." cps="46"/>
+    </nt>
+    <nt name="S" _from="38" _to="38" mark="-"/>
+  </nt>
+</nt>

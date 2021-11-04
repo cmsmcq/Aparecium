@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ixml>
+   <rule name="S">:  <comment/>
+      <alt/>
+      <alt>
+         <nonterminal name="S"/>
+         <nonterminal name="S"/>
+      </alt>.  <comment> infinite number of parse trees, arbitrary width and depth. </comment>
+   </rule>
+</ixml>

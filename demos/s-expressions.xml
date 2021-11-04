@@ -1,0 +1,13 @@
+<demo>
+  <grammar>
+  list = -'(', item*s, -')'.
+  item = list; ['0'-'9']+.
+  -s = (-',', -[Zs]*); -[Zs]+.
+  </grammar>
+  <test-input>34</test-input>
+  <test-input>(24 12 (34 56 79))</test-input>
+  <!-- can't do that so easily with regexes -->
+  <!-- making -',' optional causes a type error during evaluation
+       (multiple results from advance(), I think).
+       Worth debugging. -->
+</demo>

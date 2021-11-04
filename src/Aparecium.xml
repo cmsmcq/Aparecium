@@ -1,0 +1,5107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="local.xsl"?>
+<!DOCTYPE TEI.2 [
+<!ENTITY date.last.touched '3 October 2021' >
+<!ATTLIST bibl id ID #REQUIRED>
+<!ATTLIST div  id ID #REQUIRED>
+<!ATTLIST scrap id ID #IMPLIED>
+
+<!ENTITY c '<ident>c</ident>' >
+<!ENTITY e '<ident>e</ident>' >
+<!ENTITY E '<ident>E</ident>' >
+<!ENTITY E.. '<ident>$E</ident>' >
+<!ENTITY F '<ident>F</ident>' >
+<!ENTITY G '<ident>G</ident>' >
+<!ENTITY I '<ident>I</ident>' >
+<!ENTITY L.E '<ident>L(E)</ident>' >
+<!ENTITY L..E '<ident>L($E)</ident>' >
+<!ENTITY L.G '<ident>L(G)</ident>' >
+<!ENTITY L.q '<ident>L(q)</ident>' >
+<!ENTITY M '<ident>M</ident>' >
+<!ENTITY M_E '&M; <hi rend="subscript">&E;</hi>' >
+<!ENTITY ME '&M_E;' >
+<!ENTITY p '<ident>p</ident>' >
+<!ENTITY q '<ident>q</ident>' >
+<!ENTITY q0 '<ident>q</ident><hi rend="subscript">0</hi>' >
+
+<!ENTITY mdash  "&#x2014;" ><!--=em dash-->
+
+<!--* Reminder:
+      (progn
+        (make-variable-buffer-local 'nxml-child-indent)
+        (setq 'nxml-child-indent 0))
+
+      For now, do this manually.  I don't know how to
+      make Aquamacs do it using eval-last-sexp or eval-expression.
+    *-->
+]>
+<TEI.2>
+<teiHeader>
+<fileDesc>
+<titleStmt>
+<title>Aparecium:  an ixml parser for XSLT and XQuery</title>
+<author>C. M. Sperberg-McQueen</author>
+</titleStmt>
+<publicationStmt>
+<!--* This will be true rsn *-->
+<authority>Black Mesa Technologies LLC</authority>
+<authority>Github</authority>
+<date>2021</date>
+</publicationStmt>
+<sourceDesc>
+<p>Created in electronic form.</p>
+</sourceDesc>
+</fileDesc>
+<revisionDesc>
+<list>
+<item>2021-10-18 : CMSMcQ : take git snapshot of current state; then
+insert the changes I needed to make to make it work in Oxygen with
+Saxon.</item>
+<item>2021-10-14 : CMSMcQ : works for demos.</item>
+<item>2021-10-05/-10-12 : CMSMcQ : update to use current syntax.
+Current status:  producing plausible raw parse trees.</item>
+<item>2021-10-05 : CMSMcQ : change module import for Gluschkov to use
+correct ns name</item>
+<item>2021-10-03 : CMSMcQ : dump existing code into this document</item>
+<item>2021-08-16 : CMSMcQ : made first version of this file</item>
+</list>
+</revisionDesc>
+</teiHeader>
+
+<text>
+
+<front>
+<titlePage>
+<docTitle>
+<titlePart>Aparecium</titlePart>
+<titlePart>An ixml parser for XSLT and XQuery</titlePart>
+</docTitle>
+<docAuthor>C. M. Sperberg-McQueen</docAuthor>
+<docDate>Begun 16 August 2021
+<lb/>Last rev. &date.last.touched;</docDate>
+</titlePage>
+<divGen type="toc"/>
+</front>
+<body>
+<epigraph>
+<q type="block">
+<p>... Hermione was pulling her wand out of her bag.</p>
+<p><q>It might be invisible ink!</q> she whispered.</p>
+<p>She tapped the diary three times and said,
+<q>Aparecium!</q></p>
+</q>
+<bibl>
+J. K. Rowling, <title>Harry Potter 
+and the Chamber of Secrets</title>
+</bibl>
+</epigraph>
+
+<p>This document is the source code for Aparecium, an
+invisible-XML processor written in XSLT and XQuery, as a library
+for use in those languages.  Aparecium is a <soCalled>literate
+program</soCalled>, in the sense defined by Donald Knuth: this
+document contains descriptions of the program in English prose
+and in XQuery and XSLT source code.  Processed in one way, the
+document produces XQuery and XSLT programs; processed another
+way, it produces a (rather dry) technical exposition of their
+structure and coding.  Readers in search of user-level
+introductions to invisible XML or the use of Aparecium to build
+applications will not find here what they seek.</p>
+
+<p>The specific literate programming system used here is SWeb; a
+description of its notation is given 
+in <ptr target="msm-1996"/>.
+<!-- <ref target="notation">in an appendix</ref>. -->
+</p>
+
+<p>In its current form, the program is incomplete.  A running
+version of Aparecium exists, implemented in XQuery; this
+document is my attempt to update and upgrade it.  The work plan
+is:
+<list>
+<item><p>Draft overview of program, top-level structure, in
+XQuery.</p></item>
+
+<item><p>Create three simple cases to use in initial
+development, showing input and output for each stage of
+processing.</p></item>
+
+<item><p>Write XSLT stylesheet to translate from test suite
+catalog (as in ixml-texts repo) to XSpec.</p></item>
+
+<item><p>Implement grammar normalization (EBNF to
+BNF).</p></item>
+<item><p>Implement generation of Earley set.</p></item>
+<item><p>Implement creation of parse forest grammar from
+Earley set.</p></item>
+<item><p>Implement extraction of parse tree(s) from parse
+forest grammar.</p></item>
+
+<item><p>When XQuery version is running on the three toy
+cases, run on larger ixml test suite.</p></item>
+
+<item><p>Upgrade the SWeb infrastructure to support
+XSLT.</p></item>
+<item><p>Create XSLT version of Aparecium.</p></item>
+
+</list>
+</p>
+
+<div id="intro">
+<head>Introduction</head>
+<p>Aparecium is an XQuery implementation of Invisible XML (or:
+ixml).  In the usual case, it accepts a context-free grammar
+and input, and it returns an XML representation of the parse
+tree.  Any grammar in the grammar notation defined by the
+specification for Invisible XML (<ptr
+target="pemberton-2021"/>) is accepted, and the XML
+representation returned will be not the raw parse tree but the
+tree as modified by annotations in the grammar.
+</p>
+<!-- further description of ixml desirable -->
+<p>This paper assumes that the reader is familiar with the
+ideas of Invisible XML and those of Earley parsing.  Several
+accessible introductions to Invisible XML can be found at
+<xref>http://invisiblexml.org</xref>, as can the formal
+specification itself (<ptr target="pemberton-2021"/>).
+A 
+discussion of the particular challenges of implementing
+an Earley parser in a declarative functional language,
+and a re-formulation of the Earley algorithm in declarative
+terms to simplify that task, may be found in
+<ptr target="msm-2017"/>.</p>
+</div>
+
+<div id="overall">
+<head>Overall structure</head>
+<p>Aparecium divides its task into several steps:
+<list>
+<item>
+<p>Depending on the top-level function called, we may
+start work with a string containing the input to be
+parsed, or with a URI which should be dereferenced in
+order to obtain the string to be parsed.  The grammar may
+be provided as a string, as a URI, as an XML document
+containing the standard XML representation of the ixml
+grammar, or as a <soCalled>compiled</soCalled> or prepared
+grammar.</p>	    
+<p>The first step is thus to collect what is needed and
+put it into the form required for further processing: a
+prepared grammar &G; and a string &I; (for
+<gloss>input</gloss>) to be parsed.</p>
+</item>
+<item>
+<p>The second step is to calculate the Earley set, a set
+of Earley items sufficient to indicate whether &I; is a
+sentence in &L.G; (the language defined by &G;).</p>
+<p>This suffices for an Earley recognizer, which
+recognizes &L.G;, but not for a parser, which identifies
+the parse trees of sentences in &L.G;.
+</p>
+</item>
+<item>
+<p>The next step is to use the Earley set to construct a
+parse tree for the sentence.</p>
+<p>When the sentence has only one parse tree, this is
+relatively straightforward, but there are some cases of
+interest in which we can expect sentences to be ambiguous,
+and in which the user may wish to inspect more than one
+possible parse tree.  For example, in a programming
+language, keywords might have the same lexical form as
+variable or function names, and this can easily give rise
+to ambiguity.  Or the grammar writer may be trying to
+detect possible ambiguities in a language specification
+and need to examine in detail the possible parses for
+ambiguous sentences.</p>
+<p>In some cases, the number of possible parse trees
+may be unbounded.<note place="foot">
+<p>A simple example is the grammar <code>S:  'a';
+S.</code>,
+for which the single sentence (<q><code>a</code></q>)
+has an infinite number of parses (one <ident>S</ident>
+node, two <ident>S</ident> nodes, three, ...).</p>
+<p>Another is the grammar <code>S: S*; {nil}.</code>,
+which provides an infinite number of parses for the
+empty string, which vary both in depth and in width.</p>
+</note></p>
+<p>For this reason, Aparecium divides this step further.	   
+<list>
+<item>
+<p>Instead of extracting a single parse tree from the
+Earley set, Aparecium extracts a parse-forest grammar
+representing all parse trees for the sentence. [Or rather,
+it will do so real soon now.  The current version
+does extract a tree.]</p>
+<p>Parse-forest grammars have the convenient property
+that they can concisely describe more than one parse
+tree over the given input, even infinite trees.  It is
+relatively straightforward to tell by examing the
+parse-forest grammar whether it describes a single
+parse tree or multiple parse trees, and whether the
+number of parse trees is finite or infinite.</p>
+</item>
+<item>
+<p>A separate function extracts [er, will extract] a single parse tree
+from the parse-forest grammar and returns a pair
+consisting of (a) the tree extracted and (b) a
+function which can be called to extract another parse
+tree, if there is another.</p>
+</item>
+</list>
+</p>
+</item>
+<item>
+<p>The final step is to simplify the raw parse tree as
+specified in the annotation of the ixml grammar.</p>
+</item>
+</list>
+</p>
+<p>Functions performing these high-level tasks are described
+below in section <ptr target="highlevel" type="secnum"/>.</p>
+<p>Lower-level functions called upon by the higher-level
+routines are described in section <ptr target="lowlevel"
+type="secnum"/>.</p>
+</div>
+
+<div id="highlevel">
+<head>High-level functions</head>
+<p>The following sections describe the high-level
+functionality described above.</p>
+
+<div id="hi-code-org">
+<head>Organization of the code</head>
+<p>The code is organized into different modules
+(and files) in an attempt to keep things organized.
+<list>
+<item><ident>Aparecium.xqm</ident> declares the top-level user-facing
+functions for parsing (and also some cruft most users can and should
+ignore).</item>
+<item><ident>Earley-recognizer.xqm</ident> declares the high-level
+functions of an Earley recognizer.  These functions prepare the
+grammar, build the initial Earley item, and construct the Earley set.
+The functions here are relatively abstract and are intended to be
+independent of many of the lower-level implementation details, which
+are factored out into an internals module.  As a recognizer, all the
+main function here does is to decide whether the input given is or is
+not a sentence in the language defined by the grammar.</item>
+<item><ident>Earley-rec-internals.xqm</ident> declares low-level
+functions called by the Earley recognizer.  These routines reflect
+specific implementation choices from which the recognizer itself
+should ideally be insulated.</item>
+<item><ident>Earley-parser.xqm</ident> declares the high-level
+functions of the Earley parser.  The main function calls the
+recognizer and constructs a parse tree from the Earley set generated
+by the recognizer.</item>
+<item><ident>Earley-parser-internals.xqm</ident> contains low-level
+routines for the Earley parser.</item>
+<item><ident>Gluschkov.xqm</ident> decorates the right-hand sides of
+rules in a grammar with attributes allowing the rule to be interpreted
+as a finite state automaton instead of as a regular expression.</item>
+</list>
+These files are described in the following paragraphs.
+</p>
+<div id="files-ap">
+<head>Aparecium module:  <ident>Aparecium.xqm</ident></head>
+<p>The file <ident>Aparecium.xqm</ident>
+contains the module the typical user will
+want to import and use.
+<scrap file="Aparecium.xqm">
+module namespace aparecium =
+"http://blackmesatech.com/2019/iXML/Aparecium";
+
+(: Aparecium:  a library to make invisible XML visible.
+
+    ... Hermione was pulling her wand out of her bag.
+    "It might be invisible ink!" she whispered.
+    She tapped the diary three times and said, "Aparecium!"
+      
+                           - J. K. Rowling, Harry Potter 
+                           and the Chamber of Secrets
+
+:)
+
+<ptr target="aparecium-imports"/>
+<ptr target="aparecium-main"/>
+<ptr target="aparecium-secondary"/>
+<ptr target="aparecium-tertiary"/>
+<ptr target="aparecium-variables"/>
+</scrap></p>
+
+<p>The file needs to import the Earley parser and the constructor
+for Gluschkov automata.
+<scrap id="aparecium-imports"
+       name="Module imports for Aparecium top-level">
+import module namespace earley
+   = "http://blackmesatech.com/2019/iXML/Earley-parser"
+  at "Earley-parser.xqm";
+import module namespace gluschkov
+   = "http://blackmesatech.com/2019/iXML/Gluschkov"
+  at "Gluschkov.xqm";
+  
+(: Quick hack for testing ... :)
+import module namespace ws
+   = "http://blackmesatech.com/2019/iXML/wstrimtree"
+   at "wstrimtree.xqm";
+</scrap>
+</p>
+</div>
+
+<div id="files-parser">
+<head>Parser:  <ident>Earley-parser.xqm</ident></head>
+<p><ident>Earley-parser.xqm</ident> has the functions called
+by the Aparecium module to parse the input and construct the
+parse tree.</p>
+<p>As far as I have been able, the functions defined here are ignorant
+of details of how the data are represented; they call functions
+defined in other modules to take care of the details.
+<scrap file="Earley-parser.xqm">
+module namespace ep =
+"http://blackmesatech.com/2019/iXML/Earley-parser";
+
+(: The top-level definition of an Earley parser. :)
+
+import module namespace epi =
+"http://blackmesatech.com/2019/iXML/Earley-parser-internals"
+at "Earley-parser-internals.xqm";
+  
+</scrap></p>
+</div>
+
+<div id="files-epi">
+<head>Parser internals:  <ident>Earley-parser-internals.xqm</ident></head>
+<p>Some lower-level functions are separated out into
+<ident>Earley-parser-internals.xqm</ident>.  These functions are not
+intended to be used by users of the Earley parsers; if I knew how to
+hide their names, I would.  The functions defined here are intended to
+be called by the parser proper; the internal details (in particular
+the representation of data structures) are subject to change.
+<scrap file="Earley-parser-internals.xqm">
+module namespace epi =
+"http://blackmesatech.com/2019/iXML/Earley-parser-internals";
+
+(: Internals of Earley parser. :)
+(: Not intended for user exposure. :) 
+
+import module namespace er =
+"http://blackmesatech.com/2019/iXML/Earley-recognizer"
+at "Earley-recognizer.xqm";
+
+import module namespace eri =
+"http://blackmesatech.com/2019/iXML/Earley-rec-internals"
+at "Earley-rec-internals.xqm";
+  
+declare namespace follow = 
+"http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset"; 
+
+declare namespace ixml = 
+"http://invisiblexml.org/NS";
+
+(: We rely on the EXPath file module, and we use maps. :)
+declare namespace file =
+"http://expath.org/ns/file";
+
+declare namespace map =
+"http://www.w3.org/2005/xpath-functions/map";
+
+
+
+<ptr target="epi-earley-parse"/>
+<ptr target="epi-all-trees"/>
+<ptr target="epi-any-tree"/>
+<ptr target="epi-tree-cursor"/>
+<ptr target="epi-parse-forest-map"/>
+<ptr target="epi-parse-forest-grammar"/>
+<ptr target="epi-all-node-sequences"/><!--
+<ptr target="epi-lnDepXCLeC"/> -->
+<ptr target="epi-astXparsetree"/>
+</scrap></p>
+</div>
+
+<div id="files-rec">
+<head>Recognizer: <ident>Earley-recognizer.xqm</ident></head>
+
+<p>Most of the actual work done is performed by the code in
+<ident>Earley-recognizer.xqm</ident>: 
+
+<scrap file="Earley-recognizer.xqm" id="Earley-rec">
+module namespace ix =
+"http://blackmesatech.com/2019/iXML/Earley-recognizer";
+
+(: Earley parser, v0 :)
+
+import module namespace ixi =
+"http://blackmesatech.com/2019/iXML/Earley-rec-internals"
+at "Earley-rec-internals.xqm";
+
+<ptr target="er-scan"/>
+<ptr target="er-pred"/>
+<ptr target="er-comp"/>
+<ptr target="er-recognize"/>
+</scrap></p>
+</div>
+<div id="files-eri">
+<head>Recognizer internals: <ident>Earley-rec-internals.xqm</ident></head>
+<p>The low-level functions of the recognizer are in
+<ident>Earley-rec-internals.xqm</ident>.  The
+<soCalled>public</soCalled> interface (the functions intended for use
+by consumers) is in Earley-recognizer.xqm; this module contains
+details that are subject to change and intended to be
+<soCalled>private</soCalled>.</p>
+<p>It is in this module that I first experienced a
+pressing need to clarify some naming conventions.
+Naming is sort of Hungarian, at least some of the time.
+<list>
+<item><term>ei</term>: Earley item (aka ITEM, map(xs:string, item())</item>
+<item><term>e</term>:  Earley item</item>
+<item><term>f</term>:  Boolean (flag)</item>
+<item><term>G</term>:  the grammar</item>
+<item><term>I</term>:  the input</item>
+<item><term>mei</term>:  map of Earley items (= map(xs:integer, map(xs:string, ITEM*))
+       = map(xs:integer, map(xs:string, map(xs:string, item())*))</item>
+<item><term>n</term>:  non-terminal symbol (may sometimes be nt)</item>
+<item><term>p</term>:  position in input (to, from)</item>
+<item><term>pt</term>:  raw parse tree (or subtree)</item>
+<item><term>r</term>:  rule in grammar</item>
+<item><term>ri</term>:  rule index (position in rule)  </item>
+<item><term>s</term>:  string</item>
+<item><term>sym</term>:  symbol from grammar</item>
+<item><term>t</term>:  terminal symbol   </item>
+</list>
+</p>
+<p>Functions:
+<list>
+<item><term>aXb</term>: return thing A from thing B</item>
+</list>
+<scrap file="Earley-rec-internals.xqm">
+module namespace ixi =
+"http://blackmesatech.com/2019/iXML/Earley-rec-internals";
+
+(: Earley recognizer internals :)
+
+declare namespace map =
+"http://www.w3.org/2005/xpath-functions/map";
+
+<ptr target="eri-imports"/>   
+<ptr target="eri-items"/>   
+<ptr target="eri-grammars"/>   
+<ptr target="eri-rules"/>   
+<ptr target="eri-symbols"/>   
+<ptr target="eri-input"/>   
+<ptr target="eri-utils-and-misc"/>   
+</scrap></p>
+<p>This module has a complicated enough to-do list of its own that
+I'll give it here for the moment instead of inserting these into the
+general to-do list at the bottom of this document.</p>
+<list>
+<item><p>establish coherent Hungarian type policy to distinguish 
+     element and string representations of symbols.  We need
+     shorthands for both.</p></item>
+<item><p>fix symbol/position issue in leiAdvanceEiSymP()</p></item>
+<item><p>finish minimal version</p></item>
+<item><p>add support for #xxxx characters</p></item>
+<item><p>clarify XML representation of terminals and other questions
+with SP:
+<list>
+<item>grammar says -quoted, I say quoted </item>
+<item>grammar says quoted/@dstring, quoted/@sstring, 
+       I think I prefer quoted with PCDATA (code
+       currently handles all three)</item>
+<item>grammar defines -character, I want character element
+       as child of terminal (-character is fine for 
+       @dstring and @sstring)</item>
+<item>grammar and papers don't say what ^ means</item>
+<item>how is start symbol determined?  For now I
+       take LHS of first rule, like yacc.</item>
+<item>if a rule reads "-foo: @bar, baz.", what happens?
+       does @bar percolate up to parent element? (Do you
+       know how to do this?)</item>
+<item>Is a grammar specifying an @ mark on a repeatable 
+       non-terminal ill-formed?  Or is the @ just ignored
+       in that case?  (Tentative answer: both.)</item>
+<item>True or false? 
+       On a nonterminal, the mark "-" means "do not tag as element",
+       but do promote the children.  On a terminal, it means
+       "omit the entire thing".
+</item>
+</list></p>
+</item>
+<item><p>do some sanity checking in reXTerminal to avoid having
+     matches() blow up.</p></item>
+<item><p>fix confusion over two senses of nullable:
+<list>
+<item>locally nullable = nullable within the RHS (decorated 
+       with ? or *, inside optional group, etc.)</item>
+       <item>generates null string in sentence</item>
+</list>
+</p>
+<p>N.B. a required non-terminal, not nullable in first
+sense, can generate empty string and thus make its
+parent nullable in the second sense.</p>
+<p>Use fNullable for the first sense (already establisted)
+and fGES (to be renamed for the second.</p>
+</item>
+<item><p>For testing purposes, provide a recognize function that
+specifies a start symbol (analogous to phrase/2 in Prolog).</p></item>
+</list>
+
+<p>The Earley-rec-internals module has a (cyclic) import
+for the recognizer itself (why?), and also some low-level
+things.
+<scrap id="eri-imports"
+       name="Imports for recognizer internals">
+(: **************************************************************** 
+   * Imports and setup
+   **************************************************************** :)
+
+import module namespace ix =
+"http://blackmesatech.com/2019/iXML/Earley-recognizer"
+at "Earley-recognizer.xqm";
+  
+import module namespace d2x =
+'http://blackmesatech.com/2019/iXML/d2x'
+at "d2x.xqm";
+  
+declare namespace follow = 
+"http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
+
+(: $ixi:combinedups:  convenience variable for calls to map:merge. :)
+declare variable $ixi:combinedups as map(*)
+   := map:entry('duplicates','combine');
+</scrap>
+</p>
+</div>
+</div>
+<div id="hi-calling">
+<head>Calling the parser</head>
+<p>In the simple case, Aparecium is designed to be callable
+in much the same way as the <code>doc()</code> function.
+If the file at <ident>http://example.com/local.css</ident>
+were in XML, the expression
+<code>doc("http://example.com/local.css")</code>
+would have a document node as its value.  But a file
+named <ident>local.css</ident> is probably not in XML.
+With Aparecium, the idea is to open it with a call like
+<code>aparecium:parse-resource( "http://example.com/local.css",
+"http://example.com/grammars/css.ixml")</code>, which will
+fetch the CSS file and a grammar for CSS, use the grammar
+to parse the CSS, and return the document node of an XML
+document representing the resulting parse tree.</p>
+
+<p>
+<scrap prev="aparecium-main"
+       name="Define parse-resource()">
+(: ................................................................
+   parse-resource($Input, $Grammar)
+   ................................................................
+   Given URIs for the input and an ixml grammar describing it,
+   returns the XML representation of the resource.
+:)
+
+declare function aparecium:parse-resource(
+  $uriI as xs:string,
+  $uriG as xs:string
+) as element() {
+  let $sI := unparsed-text($uriI),
+      $sG := unparsed-text($uriG)
+  return aparecium:parse-string($sI, $sG)
+};
+   
+</scrap>
+</p>
+<p><hi>Move other primary functions here.</hi></p>
+</div>
+
+<div id="hi-prep-input">
+<head>Preparing the input</head>
+<p>Watch this space.</p>
+</div>
+
+<div id="hi-prep-grammar">
+<head>Preparing the grammar</head>
+<p>Watch this space.</p>
+</div>
+
+<div id="hi-earley-set">
+<head>Generating the Earley set</head>
+<p>Watch this space.</p>
+<div id="hies-scan">
+<head>The scanner</head>
+<p>
+<scrap id="er-scan"
+       name="Define scan()">
+(: **************************************************************** 
+   * ix:scan($E, $I)
+   **************************************************************** :)
+(: If $E expects any terminals which occur as expected, return
+   the advance of E over that terminal. :)
+   
+declare function ix:scan(
+  $E as item() (: ITEM :),
+  $I as item() (: INPUT :)
+) as item()? (: ITEM? :) {
+  let $p := ixi:pToXEi($E),
+      $lt := ixi:lsymExpectedXEi($E)[ixi:fTerminal(.)],
+      $dummy := ixi:notrace(ixi:sXei($E), 'ix:scan() on item:') 
+  for $t in $lt
+  let $dummy := ixi:notrace($t, 'ix:scan() expects terminal:'),
+      $dummy := ixi:notrace(ixi:fMatchesIPT($I, $p, $t), 
+                          'ix:scan() matches? ') 
+  return
+    if (ixi:fMatchesIPT($I, $p, $t))
+    then ixi:leiAdvanceEiSymP($E,$t,$p + ixi:match-length($I,$p,$t))
+    else ()
+};
+
+</scrap>
+</p>
+</div>
+<div id="hies-pred">
+<head>The predictor</head>
+
+<p>
+<scrap id="er-pred"
+       name="Define pred()">
+(: **************************************************************** 
+   * ix:pred($E, $G)
+   **************************************************************** :)
+(: If $E predicts any non-terminals, return items which expect
+   those non-terminals at the appropriate location. :)
+   
+declare function ix:pred(
+  $E as item() (: ITEM :),
+  $G as item() (: GRAMMAR :)
+) as item()* (: ITEM :) {
+  (: iterate over
+       $ln nonterminals expected by $E,
+       $lr rules in $G for $n,
+       $lri initial positions in $r
+     also return advance of $E for nullable $n
+   :)
+   let $p := ixi:pToXEi($E),
+       $ln := ixi:lsymExpectedXEi($E)[ixi:fNonterminal(.)]
+   for $n in $ln
+   let $fNullable := ixi:fNullableNG($n/@name, $G),
+       $lr := ixi:lrulesXNG($n,$G)
+   return (
+     (: first, return advance of $E if $n nullable :)
+     if ($fNullable)
+     then ixi:leiAdvanceEiSymP($E,$n,$p)
+     else (),
+       
+     (: then iterate over rules and initial locations for $n :)
+     for $r in $lr
+     let $lri := ixi:lriStartstatesXR($r)
+     for $ri in $lri
+     return ixi:eiMakePPRRi($p, $p, $r, $ri)
+   )
+};
+</scrap></p>
+</div>
+
+<div id="hies-comp">
+<head>The completer</head>
+
+<p>
+<scrap id="er-comp"
+       name="Define comp()">
+(: **************************************************************** 
+   * ix:comp($Ec, $Ep)
+   **************************************************************** :)
+(: If $Ec and $Ep are a prediction/completion pair, return the
+   advance of $Ep over the non-terminal predicted by $Ec. :)
+   
+(: comp($Ec, $Ep): if $Ec is a completion item, 
+   and $Ep a prediction item,
+   and $Ep predicts a nonterminal $n at position $pPTo,
+   and $Ec completes nonterminal $n starting at $pCFrom=$pPTo,
+   then advance $Ep over $n and place the new to-position
+   at the to-position of $Ec.
+   
+   The test for whether $Ep expects $n is handled
+   by leiAdvanceEiSymP, so we need not make it here.
+:)
+declare function ix:comp(
+  $Ec as item() (: ITEM :),
+  $Ep as item() (: ITEM :)
+) as item()* (: ITEM :) {
+  let $pCFrom := ixi:pFromXEi($Ec),
+      $pCTo   := ixi:pToXEi($Ec),
+      (: $pPFrom := ixi:pFromXEi($Ep), :)
+      $pPTo   := ixi:pToXEi($Ep),
+      $n      := ixi:nLhsXEi($Ec),
+      $RESULT := if (ixi:fFinalEi($Ec)
+                    and $pPTo eq $pCFrom)
+                 then ixi:leiAdvanceEiSymP($Ep, $n, $pCTo)
+                 else (),
+      $trace1 := ixi:notrace($RESULT,
+      concat('&amp;#xA;****** comp(',
+             '&amp;#xA;            ',
+             '$Ec=',ixi:sXei($Ec),
+             '&amp;#xA;            ',
+             '$Ep=',ixi:sXei($Ep),
+             ') ==> '
+            )
+      ),
+      $r      := ixi:rXEi($Ep),	    
+      $trace2 := ixi:notrace('sanity check',
+      concat('&amp;#xA;****** comp(',
+             '&amp;#xA;            ',
+             '$Ec=(',$pCFrom,' ',$pCTo, ' ',
+                     $n/@name, '/', $Ec/@ri,'),',
+             '&amp;#xA;            ',
+             '$Ep=(', ixi:pFromXEi($Ep),' ',$pPTo, ' ',
+                     $r/@name, '/', $Ep/@ri, ')',
+             ')&amp;#xA;'
+            )
+      )
+  return $RESULT
+};
+
+</scrap>
+</p>
+</div>
+
+<div id="hies-recognizer">
+<head>The recognizer</head>
+<p>The <ident>ix:recognize()</ident> function accepts an input string
+and a grammar, and returns a boolean: true if the input is a sentence
+in the language defined by the grammar, false otherwise.  On the way
+to reaching that result, of course, a lot of intermediate results will
+be calculated, some of them of interest for other purposes (e.g. for
+the parser as a whole).  So there are two recognition functions: one
+to calculate and expose all the intermediate results, and one to
+expose only the boolean result, which calls the other function to do
+the preliminary work.  The <ident>ix:recognize()</ident> function
+works as a kind of wrapper around the other function:
+<scrap id="er-recognize"
+       name="Define recognize()">
+declare function ix:recognize(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as xs:boolean {
+  let $m := ix:recognizeX($I, $G)
+  return $m('Result')
+};
+
+</scrap>
+</p>
+<p>The <ident>ix:recognizeX()</ident> function (an extended
+recognizer, if you will)
+<scrap prev="er-recognize"
+       name="Define recognizeX()">
+declare function ix:recognizeX(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as map(*) {
+  let $G2 := ixi:augment-grammar($G),
+      $symStart0 := ixi:symStartG($G),
+      $symStart2 := ixi:symStartG($G2),
+      $rInitial := ixi:lrulesXNG(
+        &lt;nonterminal name="{$symStart2}"/>, 
+        $G2)[1],
+      $riInitial := ixi:lriStartstatesXR($rInitial)[1],
+      $eiInitial := ixi:eiMakePPRRi(0, 0, $rInitial, $riInitial),
+      $len := ixi:inputlength($I),
+      
+      $meiClosure := ixi:earley-closure($eiInitial, $I, $G2),
+      (: $leiCompletions := $meiClosure
+         [ixi:fFinalEiPPN(.,0,$len,$symStart2)], :)
+      $leiCompletions := $meiClosure('from')(0)
+                         [ixi:fFinalEiPPN(.,0,$len,$symStart2)],
+      $result := exists($leiCompletions)
+      (:
+      ,
+      $dummy := for $eiTmp in $meiClosure
+                return ixi:notrace($eiTmp,
+              '&amp;#xA;&amp;#xA; (*** closure ***) &amp;#xA;')
+      :)
+  return map {
+    'Grammar' : $G2,
+    'Initial-Item' : $eiInitial,
+    'Input' : $I,
+    'Input-Length' : $len,
+    'Closure' : $meiClosure,
+    'Completions' : $leiCompletions,
+    'Result' : $result
+  }
+};
+</scrap>
+</p>
+</div>
+</div>
+
+<div id="hi-ptc">
+<head>Direct generation of parse tree</head>
+<p>In version 0.2 of Aparecium, we generate one
+or more parse trees directly from the Earley set.
+(In future versions, it is expected that we will
+generate a parse-forest grammar from the Earley
+set, and generate trees from that grammar, or
+return the grammar to the user.  But at the moment
+that's just pie in the sky.)</p>
+<p>We generate the parse trees in two steps.
+From the Earley set, we generate a raw parse tree
+which records every nonterminal used (we may
+regret this, eventually).  From the raw parse tree,
+we create the abstract syntax tree by attending to
+the marks on the nonterminals.
+</p>
+<div id="hi-ptc-raw">
+<head>Raw parse trees</head>
+<p>For raw parse trees, we use a generic XML
+representation with two element types:
+<list>
+<item><gi>nt</gi> elements record that a given nonterminal was parsed
+at a given location, with attributes providing details:
+<list>
+<item><att>name</att> gives the nonterminal symbol.</item>
+<item><att>_from</att> and <att>_to</att> give the
+range in the input.</item>
+<item><att>mark</att> records the mark effective for this instance of
+the nonterminal.  If a nonterminal in a right-hand side carries a
+mark, we record it here; if not, we fetch the default value; if no
+default value is specified, we supply the value
+<q><code>^</code></q>.</item>
+</list>
+</item>
+<item><gi>lit</gi>, <gi>inc</gi>, and <gi>exc</gi> elements record
+that a given terminal was found at a given location, with attributes
+providing details:
+<list>
+<item><att>name</att> gives the nonterminal symbol.</item>
+<item><att>_from</att> and <att>_to</att> give the
+range in the input.  For <gi>inc</gi> and <gi>exc</gi>
+the two values will be the same, but not necessarily so
+for literals.</item>
+<item><att>tmark</att> records the terminal mark effective for this
+the nonterminal.  This is what makes it possible to suppress
+terminals marked <q><code>-</code></q> (or inject
+terminals marked <q><code>+</code></q>, which doesn't seem
+to have made it into the spec yet).</item>
+</list>
+</item>
+</list>
+Representing nonterminal nodes as <gi>nt</gi> elements
+instead of elements with the nonterminal itself as a name
+allows terminals marked for suppression to be distinguished
+reliably from nonterminals marked <q><code>-</code></q>.
+(It also allows the raw parse tree to be produced even if
+the nonterminal is not a legal XML name.)
+</p>
+<p>N.B. The initial implementation of raw parse trees
+used nonterminals as element names; there may be traces
+of that state of affairs in this document.</p>
+<p><hi>all-node-sequences() should be described here.</hi>
+For the moment, see <ptr target="epi-all-nodes"/>.</p>
+</div>
+<div id="hi-ptc-ast">
+<head>Abstract syntax trees</head>
+<p><hi>The epi:astXparsetree() function should
+go here.  For now, see <ptr target="epi-ast-from-raw"/>.</hi></p>
+</div>
+
+</div>
+<div id="hi-pfg">
+<head>Generating the parse-forest grammar</head>
+<p>Watch this space.</p>
+<p>Note that each non-terminal in the parse-forest grammar
+carries an explicit annotation, to simplify later construction
+of the abstract syntax tree.</p>
+</div>
+
+<div id="hi-rpt-ex-pfg">
+<head>Extracting a raw parse tree from the parse-forest grammar</head>
+<p>Watch this space.</p>
+</div>
+
+<div id="hi-ast-ex-rpt">
+<head>Extracting an abstract syntax tree from the raw parse tree</head>
+<p>Watch this space.</p>
+</div>
+</div>
+
+<div id="lowlevel">
+<head>Low-level utility routines</head>
+
+<div id="ll-items">
+<head>Working with Earley items</head>
+<div id="ll-items-con">
+<head>Earley items - constructors</head>
+<p>
+<scrap id="eri-items"
+       name="Earley items (constructors, extractors, etc.)">
+(: **************************************************************** 
+   * Earley items
+   **************************************************************** :)
+(: We represent an Earley item as a map with keys 'from', 'to',
+   'rule', and 'ri' (rule index).  For any item $ei, $ei('from') 
+   and $ei('to') are integers, $ei('rule') is element(rule), and
+   $ei('ri') is a string (an NCName, in fact, but typed only as 
+   a string).
+:)
+
+(: ****************************************************************
+   * Earley items:  constructors
+  :)
+
+<ptr target="eri-make-p-p-r-ri"/>
+<ptr target="eri-lei-advance-ei-sym-p"/>
+</scrap>
+</p>
+<p>To construct an Earley function from known values, we call
+<ident>eiMakePPRRi</ident>:
+<scrap id="eri-make-p-p-r-ri"
+       name="Define eiMakePPRRi()">
+(: ................................................................
+   ei Make P P R Ri: make an Earley item from two positions, a rule,
+   and a rule index
+  :)
+declare function ixi:eiMakePPRRi(
+  $From as xs:integer,
+  $To as xs:integer,
+  $r as element(rule),
+  $ri as xs:string
+) as map(xs:string, item()) {  
+  map {
+    'from' : $From,
+    'to' : $To,
+    'rule' : $r,
+    'ri' : $ri
+  }
+};
+</scrap>
+</p>
+<p>The function <ident>leiAdvanceEiSymP()</ident>
+takes (as its name signals) an Earley item, a symbol,
+and a position, and returns the list of Earley items
+which are advances from that position on that symbol.
+<scrap id="eri-lei-advance-ei-sym-p"
+       name="Define leiAdvanceEiSymP()">
+(: ................................................................
+   ixi:lei Advance Ei Sym P($E, $sym, $p): return the set of Earley
+   items (lei) that arise if you advance $E over $sym, or over any
+   equivalent symbol, to reach position $p.
+:)
+declare function ixi:leiAdvanceEiSymP(
+  $E as map(xs:string, item()),
+  $sym as element(),
+  $pNew as xs:integer
+) as map(xs:string, item())* {
+  let $pFr := $E('from'),
+      $pTo := $E('to')
+  return if ($pNew lt xs:integer($pTo))
+      then () (: $E cannot advance backwards :)
+      else 
+  let $r := $E('rule'),
+      $ri0 := $E('ri'),
+      $lriFollow := if ($ri0 eq 'q0')
+                    then $r/@first
+                    else $r/@follow:*[local-name() = $ri0],
+      $lri := tokenize($lriFollow,'\s+')[normalize-space()]
+  for $ri in $lri
+  where ixi:fSymbolmatchRRiSym($r,$ri,$sym)
+    (: and $pNew ge xs:integer($pTo) :)
+  return ixi:eiMakePPRRi($pFr, $pNew, $r, $ri) 
+};
+</scrap>
+</p>
+</div>
+<div id="ll-items-extr">
+<head>Earley items - extractors</head>
+<p>For the <term>to</term> and <term>from</term> pointers,
+the rule, and the rule's nonterminal, the extractor
+functions are very straightforward.
+<scrap prev="eri-items"
+       name="Extractors for Earley items">
+(: ****************************************************************
+   * Earley items:  extractors
+   :)
+
+(: See also sXei() below under Utilities :)
+
+(: ................................................................
+   pTo X Ei($E): extract 'to' position from item
+   :)
+declare function ixi:pToXEi(
+  $E as map(xs:string, item())
+) as xs:integer {
+  $E('to')
+};
+
+(: ................................................................
+   pFrom X Ei($E): extract 'from' position from item
+   :)
+declare function ixi:pFromXEi(
+  $E as map(xs:string, item())
+) as xs:integer {
+  $E('from')
+};
+
+(: ................................................................
+   r X Ei($E): extract rule from item
+   :)
+declare function ixi:rXEi(
+  $E as map(xs:string, item())
+) as element(rule) {
+  $E('rule')
+};
+
+(: ................................................................
+   nLhs X Ei($E): extract nonterminal on lhs of rule from item
+   :)
+declare function ixi:nLhsXEi(
+  $E as map(xs:string, item())
+) as element(nonterminal) {
+  element nonterminal {
+    attribute name { $E('rule')/@name }
+  }
+};
+</scrap>
+</p>
+<p>To get the list of expected symbols, more work is needed.
+<scrap prev="eri-items"
+       name="Extractors for Earley items">
+ (: ................................................................
+   lsymExpected X Ei($E): extract list of expected symbols from item
+   :)
+declare function ixi:lsymExpectedXEi(
+  $E as map(xs:string, item())
+) as element()* {
+  (: results will be element() or element(nonterminal). :)
+  let $symCur := $E('ri'),
+      $r := $E('rule'),
+      $sFollowset := if ($symCur = 'q0') 
+                     then $r/@first
+                     else $r/@follow:*[local-name()=$symCur],
+      $lsymFollow := tokenize($sFollowset,'\s+')[normalize-space(.)]
+  for $sym in $lsymFollow
+  let $e := $r//*[@xml:id = $sym]
+  return $e
+};
+</scrap>
+</p>
+<p>Q. would this be faster with the <kw>for</kw> loop replaced by
+<code>return $r/descendant::*[@xml:id =
+tokenize($sFollowset,'\s+')]</code> or <code>return
+$r/descendant::*[@xml:id = $lsymFollow]</code>, maybe?
+</p>
+<p>A. Let's see.
+<list>
+<item><label>Loop:</label>  1:13.6 user time (two runs, same time),
+            1:09.8 / 1:10.8 real time (?)</item>
+<item><label>XPath:</label>  <code>$r/descendant::*
+            [@xml:id = tokenize($sFollowset,'\s+')]</code>:
+            1:19.9, 1:21.8 user</item>
+<item><label>XPath:</label>  <code>$r/descendant::*
+            [@xml:id = $lsymFollow]</code>:
+1:12.5, 1:12.4</item>
+</list>
+So:  not, it would not be noticeably faster,
+and might be slower.
+</p>
+</div>
+<div id="ll-items-predicates">
+<head>Earley items - predicates</head>
+<p>We use predicate functions to ask several questions
+about Earley items:
+<list>
+<item>Is it final?  Does it mark the completion of the rule?
+Sometimes we specify the left-hand side of the rule,
+sometimes also the position.</item>
+<item>Does it expect any nonterminals?</item>
+<item>Does the scan relation hold between two given Earley items?</item>
+<item>Does the advance-over-symbol-S relation hold between two given
+Earley items?</item>
+</list>
+</p>
+<p>There are several functions for asking whether an item is
+a completion.
+<scrap prev="eri-items"
+       name="Predicates for Earley items">
+(: ****************************************************************
+   * Earley items:  predicates
+   :)
+(: ................................................................
+   fFinal Ei P P N($E, $pFr, $pTo, $N): is $E a completion item
+   for symbol N, running between the two positions?
+   (Used just once, in recognizeX, to check for completions of
+   the start symbol that cover the entire input string.)
+   :)
+declare function ixi:fFinalEiPPN(
+  $E as map(xs:string, item()),
+  $pFrom as xs:integer,
+  $pTo as xs:integer,
+  $sym as xs:string
+) as xs:boolean {
+  (xs:integer($E('from')) eq $pFrom)
+  and (xs:integer($E('to')) eq $pTo)
+  and ($E('rule')/@name eq $sym)
+  and ($E('ri') = ixi:lriFinalstatesXR($E('rule')))
+};
+
+(: ................................................................
+   ixi:fFinalEiPN($E, $pTo, $sym):  true iff $E is a completion 
+   item ending at position $P for nonterminal $N 
+   :)
+declare function ixi:fFinalEiPN(
+  $E as map(xs:string, item()),
+  $pTo as xs:integer,
+  $n as element(nonterminal)
+) as xs:boolean {
+  let $f := xs:integer($E('to')) eq $pTo
+            and $E('rule')/@name eq $n/@name
+            and $E('ri') = ixi:lriFinalstatesXR($E('rule'))
+  (:
+  let $trace := ixi:notrace($E,
+        'Call to fFinalEiPN('
+        || ixi:sXei($E) || ','
+        || $pTo || ','
+        || $n/@name || ') ==> ' 
+        || $f
+      )
+  :)    
+  (:
+  let $trace := if ($f) then ()
+        else ixi:notrace($E,
+             'fFinalEiPN returns false: &amp;#xA;'
+                || ' to-values ' 
+                  || (if (xs:integer($E('to')) eq $pTo)
+		      then ''
+		      else 'do not ' )
+                  || 'match, &amp;#xA;' 
+                || ' symbol names '
+                  || (if ($E('rule')/@name eq $n/@name)
+                      then ''
+		      else 'do not ' )
+                  || 'match, &amp;#xA;'
+                || ' state ' || $E('ri')/string() || ' is ' 
+                  || (if ($E('ri') = ixi:lriFinalstatesXR($E('rule'))) 
+                        then '' else 'not ' )
+                  || 'final. &amp;#xA;' 
+               )
+  :)    
+  return $f
+};
+
+(: ................................................................
+   fFinal Ei($E): is $E a completion item?  I.e. is its rule index
+   in a final location?
+   :)
+declare function ixi:fFinalEi(
+  $E as map(xs:string, item())
+) as xs:boolean {
+  $E('ri') = ixi:lriFinalstatesXR($E('rule'))
+};
+</scrap>
+</p>
+<p><scrap prev="eri-items"
+       name="Define fExpectsN-Ei()">
+(: ................................................................
+   fExpectsN - Ei($E):  does $E expect any nonterminals?
+   :)
+declare function ixi:fExpectsN-Ei(
+  $E as map(xs:string, item())
+) as xs:boolean {
+  exists(ixi:lsymExpectedXEi($E)[ixi:fNonterminal(.)])
+};
+</scrap>
+</p>
+<p>Abstractly, the scan relation scan(E1,E2) holds iff
+<list>
+<item>E1 expects terminal T</item>
+<item>and E1 wins</item>
+<item>and E2 = advance(E1, T)</item>
+</list>
+And E2 = advance(E1, T) iff
+<list>
+<item>from(E1) = from(E2)</item>
+<item>and rule(E1) = rule(E2)</item>
+<item>and seen-so-far(E1) || T = seen-so-far(E2)</item>
+<item>and E1 wins on T [redundant, why?]</item>
+<item>else advance(E1, T) = empty set.</item>
+</list>
+So:
+<scrap prev="eri-items"
+       name="Define fScanrelEE()">
+(: ................................................................
+   fScanrel E E($E1, $E2):  does the scan relation hold for E1, E2?
+   (Used once, in Earley parser internals, to find related items.)
+   :)
+   (: N.B. does not test that the symbol in question is a terminal.
+      Does it matter?
+   :)   
+declare function ixi:fScanrelEE(
+  $E1 as map(xs:string, item()),
+  $E2 as map(xs:string, item())
+) as xs:boolean {
+  let $fFrom := ($E1('from') eq $E2('from')),
+        (: test 1 of advance() :)
+      $lsymFollow := ixi:lsymExpectedXEi($E1), 
+      $lSsymFollow := for $e in $lsymFollow return $e/@xml:id,
+      $fStates1 := ($E2('ri') = $lSsymFollow),
+        (: test 3, 4 of advance(), 1,2 of scan() :)
+      $fRules := deep-equal($E1('rule'), $E2('rule')),
+	(: test 2 of advance() :)
+      $f := ($fFrom and $fStates1 and $fRules), 
+      $trace := ($f,
+                'fScanrelEE(' 
+                || ixi:sXei($E1) || ',' 
+                || ixi:sXei($E2) || ') ==> '
+                )
+  return $f
+      (: 
+               .('from') = $Ecur('from')
+               and .('to') = $pMedial
+               and .('ri') = $lsPrevstates
+               and deep-equal(./rule, $Ecur/rule)
+      :)
+};
+
+</scrap>
+</p>
+<p>
+<scrap prev="eri-items"
+       name="Define fAdvanceNrelEE()">
+(: ................................................................
+   fAdvanceNrel E E ($E1, $E2):  does the advance-over-symbol-N
+   relation hold for E1, E2?
+   (Used once, in Earley parser internals, to find related items.)
+
+   By definition (see paper) E2 = advance(E1, T) iff
+      * from(E1) = from(E2)
+      * and rule(E1) = rule(E2)
+      * and seen-so-far(E1) || T = seen-so-far(E2)
+      * and E1 wins on T
+      * else advance(E1, T) = empty set.
+
+   Note that for the "E1 wins" clause we rely on the truth of
+   all items in the closure.  E1 must be winning, because otherwise
+   an E2 that satisfies the other tests would not be in the closure.
+   :)
+declare function ixi:fAdvanceNrelEE(
+  $E1 as map(xs:string, item()),
+  $E2 as map(xs:string, item())
+) as xs:boolean {
+  let $fFrom := ($E1('from') eq $E2('from')),
+      $lsymFollow := ixi:lsymExpectedXEi($E1),
+      $lSsymFollow := for $e in $lsymFollow return $e/@xml:id,
+      $fStates1 := ($E2('ri') = $lSsymFollow),
+      $fRules := deep-equal($E1('rule'), $E2('rule')),
+      $f := ($fFrom and $fStates1 and $fRules),
+      $trace := ($f,
+                'fScanrelEE(' 
+                || ixi:sXei($E1) || ',' 
+                || ixi:sXei($E2) || ') ==> '
+                )
+  return $f
+      (: 
+               .('from') = $Ecur('from')
+               and .('to') = $eiCC('from')
+               and .('ri') = $lsPrevstates 
+               and deep-equal(./rule, $Ecur/rule)
+      :)
+};
+</scrap>
+</p>
+</div>
+<div id="ll-items-closure">
+<head>Earley set closure</head>
+<p>The heart of the Earley algorithm is the calculating the
+closure of the Earley set.
+<scrap prev="eri-items"
+       id="eri-items-closure"
+       name="Calculating the closure of an Earley set">
+(: ****************************************************************
+   * Earley items:  closure (the big kahuna)
+   :)
+</scrap>
+</p>
+<p>We will want an accumulator to hold the set, so the
+user's call to <ident>earley-closure</ident> merely
+initializes an accumulator and calls another function to
+do the work.
+<scrap prev="eri-items-closure"
+       name="Define earley-closure($lei, $I, $G)">
+ (: ................................................................
+   ixi:earley-closure($lei, $I, $G2): 
+   Calculate closure of $lei over the relations scan(), pred(),
+   and comp().
+:)
+declare function ixi:earley-closure(
+  $leiPending as map(xs:string, item())* (: ITEM* :), 
+  $I as xs:string,
+  $G as element(ixml)
+) as map(xs:string,
+         map(xs:integer,
+             map(xs:string,
+                 item())*)) (:MEI:) {
+  let $meiAcc := map { 'from' : map:merge(
+                         for $ei in $leiPending
+			 return map:entry($ei('from'), $ei),
+                         $ixi:combinedups
+                       ),
+                       'to' : map:merge(
+                         for $ei in $leiPending
+			 return map:entry($ei('to'), $ei),
+                         $ixi:combinedups
+		       ) }
+		       
+  return ixi:earley-closure($leiPending, $meiAcc, $I, $G)
+};
+</scrap>
+</p>
+<p>The larger function is this one.</p>
+<p>We calculate the closure of the set of Earley items in $accumulator
+over the relations scan(), pred(), and comp().
+</p>
+<p>Every item in $pending is also in $accumulator.  The items in
+$pending have not yet been examined; the other items in $accumulator
+have been dealt with and need not be dealt with again.
+</p>
+<p>N.B. To keep the control flow simple, this function does not
+attempt to handle all of the items at position $p before moving to $p
++ 1, and it does not assume that all predictions of a nonterminal $n
+beginning at position $p are present when a completion for $n at $p is
+found.
+</p>
+<p>One immediate consequence of this is that every item making a
+prediction must also check for completions of its predicted
+non-terminals, which increases the number of times we must scan
+through the accumulator and offers a low-hanging target for improving
+speed.
+<scrap prev="eri-items-closure"
+       name="Define earley-closure($pending, $accumulator, $I, $G)">
+
+(: ................................................................
+   ixi:earley-closure($pending, $accumulator, $I, $G2):
+:)
+declare function ixi:earley-closure(
+  $leiPending as map(xs:string, item())* (: pending items :),
+  $meiAccum as map(xs:string, map(xs:integer, map(xs:string, item())*))
+            (: accumulator of type MEI :),
+  $I as xs:string,
+  $G as element(ixml)
+) as map(xs:string, map(xs:integer, map(xs:string, item())*)) (:MEI:) {
+  (: if pending list is done, so are we; return the accumulator :)
+  if (empty($leiPending))
+  then $meiAccum
+  else 
+  (: normal case:  we have items to process :)
+  (: Take head of pending list, run PCS function on it, dedup it, 
+     remove items already in the accumulator, and recur,
+     adding new items to the accumulator :)
+  let $E := head($leiPending), 
+      $dummy := ixi:notrace(count($leiPending), 'e-c() has pending items: '), 
+      $dummy := ixi:notrace(
+                    ixi:sXei($E),
+                    'ixi:earley-closure running on pending item: '), 
+      (: get everything from leiPCSrel :)
+      $leiCs0 := ixi:leiPCSrel($E,$meiAccum,$I,$G),
+      $dummy := ixi:notrace(count($leiCs0), 'e-c() initial closure has items: '), 
+      (: dedup results from leiPCSrel :) 
+      $leiCs := $leiCs0[
+                   not(some $i in 1 to (position() - 1)
+                       satisfies deep-equal(., $leiCs0[$i])
+                   )],
+      $dummy := ixi:notrace(count($leiCs), 'e-c() deduped closure has items: '), 
+        	
+      (: remove non-new results from leiPCSrel :)
+      $leiNew := for $ei in $leiCs
+	         let $from := $ei('from')
+		 where not(some $e in $meiAccum('from')($from)
+		           satisfies deep-equal($e, $ei))
+		 return $ei,
+      $dummy := ixi:notrace(count($leiNew), 'e-c() New items: '), 
+
+		 
+      $meiNewaccum := map {
+	'from' : map:merge(
+	  ( $meiAccum('from'),
+	  for $ei in $leiNew return map:entry($ei('from'), $ei) ),
+	  $ixi:combinedups),
+        'to' : map:merge(
+	  ( $meiAccum('to'),
+	  for $ei in $leiNew return map:entry($ei('to'), $ei) ),
+	  $ixi:combinedups) }
+      
+  return ixi:earley-closure(
+    (tail($leiPending), $leiNew),
+    $meiNewaccum,
+    $I,
+    $G)
+};
+</scrap>
+</p>
+<p>The function <ident>leiPCSrel()</ident> takes an Earley
+item (and an accumulator, the input, and the grammar) and
+returns all the items that stand in the scan, pred, or
+comp relations to the given item.
+<scrap prev="eri-items-closure"
+       name="Define earley-closure($pending, $accumulator, $I, $G)">
+
+(: ................................................................
+   leiPCSrel($E, $leiA, $I, $G): return all items $E2 such 
+   that $E2 = scan($E, $I)
+   or $E2 = pred($E, $G)
+   or comp($E1, $E3) for some $E3 in $leiA
+   or comp($E3, $E1) for some $E3 in $leiA
+:)
+declare function ixi:leiPCSrel(
+  $E as map(xs:string, item()),
+  $meiAccum as map(xs:string, item())*,
+  $I as xs:string,
+  $G as element(ixml)
+) as map(xs:string, item())* {
+  (: If $E expects terminals, perform scan :)
+  ix:scan($E,$I),
+  
+  (: If $E expects nonterminals, perform prediction :)
+  ix:pred($E,$G), 
+  
+  (: If $E expects a nonterminal, look for a completion $Ec and 
+     perform comp($Ec,$E) :)
+  if (ixi:fExpectsN-Ei($E))
+  then for $Ec in $meiAccum('from')($E('to'))
+       where ixi:fFinalEi($Ec)
+       return ix:comp($Ec,$E)
+  else (), 
+    
+  (: If $E is a completion, look for a prediction $Ep and 
+     perform comp($E,$Ep) :)
+  if (ixi:fFinalEi($E)) 
+  then for $Ep in $meiAccum('to')($E('from'))
+       where ixi:fExpectsN-Ei($Ep)
+       return ix:comp($E,$Ep)
+  else ()
+    
+  (: N.B. In BNF, $E can only expect one symbol, so either scan
+     or pred applies, but not both.  But we are expecting EBNF
+     and $E can predict several things at the same time as being
+     a completion. :)
+};
+</scrap>
+</p>
+</div>
+</div>
+
+<div id="ll-grammars">
+<head>Working with grammars</head>
+
+<p>
+<scrap id="eri-grammars"
+       name="Grammars (constructors, extractors, etc.)">
+(: **************************************************************** 
+   * Grammars
+   **************************************************************** :)
+(: A grammar is an ixml element with no namespace. :)
+
+<ptr target="eri-grammars-constructors"/>
+<ptr target="eri-grammars-extractors"/>
+<ptr target="eri-grammars-predicates"/>
+</scrap>
+</p>
+<p>We have just one routine that constructs grammars; it takes an
+existing grammar and gives it a new start-symbol with a single rule.
+This allows us to know without any further analysis that the start
+symbol of the augmented grammar is non-recursive and has just one
+rule. [<hi>To do:</hi> write a version of this that accepts a
+start-symbol as a parameter.]</p>
+<p>This is the same in v0.1 and v0.2 except that we use a different
+element name to wrap the right-hand side of the rule.
+<scrap id="eri-grammars-constructors"
+       name="Functions that construct or return grammars">
+ (: ****************************************************************
+   * Grammars: constructors
+   :)
+   
+(: ................................................................
+   augment-grammar($G):  given grammar, augment it as Earley
+   prescribes.
+   :)
+declare function ixi:augment-grammar(
+  $G as element(ixml)
+) as element(ixml) {
+  let $symStart := ixi:symStartG($G),
+      $symGoal := ixi:makeGoalsymbolG($G),
+      $fNullable := ixi:fNullableNG($symStart, $G)
+  return element ixml {
+    element rule {
+      attribute name {$symGoal}, 
+      attribute xml:id {$symGoal || '_rule'},
+      attribute nullable { false() },
+      attribute first {$symStart || '_0'},
+      attribute last {$symStart || '_0'},
+      attribute { xs:QName('follow:'||$symStart||'_0') } {()},        
+      element <ptr target="gl-alts-gi"/> {
+        attribute xml:id {$symGoal || '_def_0'},
+        attribute nullable { false() },
+        attribute first {$symStart || '_0'},
+        attribute last {$symStart || '_0'},
+        attribute { xs:QName('follow:'||$symStart||'_0') } {()},        
+        element alt {
+          attribute xml:id {$symGoal || '_alt_0'},
+          attribute nullable { false() },
+          attribute first {$symStart || '_0'},
+          attribute last {$symStart || '_0'},
+          element nonterminal {
+            attribute name { $symStart },
+            attribute xml:id {$symStart || '_0'},
+            attribute nullable { false() },
+            attribute first {$symStart || '_0'},
+            attribute last {$symStart || '_0'}
+          } (: end nonterminal :)
+        } (: end alt :)
+      } (: end def :)
+    }, (: end rule :)
+    $G/rule
+  } (: end ixml :)
+};
+</scrap>
+</p>
+<p>We have a small utility function for making a new
+goal symbol that differs from all existing symbols.
+<scrap prev="eri-grammars-constructors"
+       name="Goal-symbol construction">
+ (: ................................................................
+   makeGoalsymbolG($G):  make a new goal symbol for grammar G,
+   ensuring that it's not the same as any existing symbol.
+   :)
+declare function ixi:makeGoalsymbolG(
+  $G as element(ixml)
+) as xs:string {
+  let $ln := distinct-values($G/rule/@name),
+      $n := ('Goal', '_Goal_', '_G_o_a_l_', '_G-o-a-l_')
+            [not(. = $ln)][1]
+  return if (exists($n)) 
+    then $n 
+    else ixi:mungesymbol(ixi:symStartG($G), $ln)
+};
+</scrap>
+</p>
+<p>And another utility for munging a given symbol.
+<scrap prev="eri-grammars-constructors"
+       name="Goal-symbol construction">
+(: ................................................................
+   mungesymbol:  given a symbol, munge it (by adding _ fore and aft)
+   until it is no longer in the list of symbols $ln (which is the
+   symbols already in the grammar).
+   :)
+declare function ixi:mungesymbol(
+  $n as xs:string,
+  $ln as xs:string*
+) as xs:string {
+  if ($n = $ln)
+    then ixi:mungesymbol('_' || $n || '_', $ln)
+    else $n
+};
+
+</scrap>
+</p>
+<p>
+<scrap id="eri-grammars-extractors"
+       name="Functions that extract information from grammars">
+(: ****************************************************************
+   * Grammars: extractors
+   :)
+   
+(: ................................................................
+   symStart G():  return start symbol(s) of G
+   :)
+declare function ixi:symStartG(
+  $G as element(ixml)
+) as xs:string+ {
+  $G/rule[1]/@name/normalize-space()
+};
+</scrap>
+</p>
+<p>
+<scrap id="eri-grammars-predicates"
+       name="Functions that check grammar properties">
+(: ****************************************************************
+   * Grammars:  predicates
+   *
+   * Note that predicates relating to symbols in context are
+   * here, not under symbol.  (Test:  is $G a parameter?)
+   :)
+(: ixi:fNullableNG($n, $G):  is nonterminal n nullable in G? 
+
+   For non-terminal N, fNullableNG(N,G) means an N element
+   in the result tree may be empty.
+
+   Here 'nullable' means it has a right-hand side whose
+   regex matches the empty string, which means in turn
+   that the parse tree may be empty, and non-terminal N
+   may appear as an N element in the result.
+   
+   N.B. this is not the same as fGES.
+  
+:)
+declare function  ixi:fNullableNG(
+  $n as xs:string, (: element(nonterminal), :)
+  $G as element(ixml)
+) as xs:boolean {
+  exists($G/rule[@name = $n][@nullable = ('true', '1')])
+};
+
+
+(: ixi:fGesNG($n, $G):  does nonterminal n generate the empty string 
+   in G? 
+   
+   N.B. this is not the same as fNullable.
+   
+   Discussions of parsing often use 'nullable' for nonterminals
+   that generate the empty string, but in the grammar 
+     S: X. X: .
+   X is nullable and GES, S is GES but not nullable.
+   
+   For non-terminal N, fGesNG(N,G) means an N element
+   in the result tree may have string(N) = ''.
+   
+:)
+(: this is a transitive closure algorithm and will 
+   require more work (including an accumulator to 
+   avoid looping).
+   
+   For now, suppress it and do without it.
+:)
+(:
+declare function  ixi:fGesNG(
+  $n as element(), 
+  $G as element(ixml)
+) as xs:boolean {
+  ($n/self::nonterminal 
+     and ixi:fNullable($n, $G)
+         or 
+         (some $d 
+          in $G/rule[@name=$n]/alt
+          satisfies ixi:fGesNG($d,$G)))
+  or ($n/self::def
+     and ($n/@nullable = ('true','1'))
+  or 
+  ()
+ 
+};
+:)
+
+(: ixi:lrulesXNG($n,$G) :)
+declare function ixi:lrulesXNG(
+  $n as element(nonterminal),
+  $G as element(ixml)
+) as element(rule)* {
+  $G/rule[@name = $n/@name]
+};
+
+
+(: ****************************************************************
+   * Grammars: predicates
+   :)
+
+</scrap>
+</p>
+</div>
+
+<div id="ll-rules">
+<head>Working with rules</head>
+
+<p>
+<scrap id="eri-rules"
+       name="Rules (constructors, extractors, etc.)">
+(: **************************************************************** 
+   * Rules and rule indexes
+   **************************************************************** :)
+(: A rule is a rule element as defined in the ixml DTD, but 
+   augmented with glushkov attributes.
+   
+   Note that functions relating to rules in context are not 
+   here but under Grammars above.  (Test: is $G a parameter?)
+   Functions here relate solely to the rule in isolation.
+   That may be why there are so few of them.
+:)
+
+(: ****************************************************************
+   * Rules and rule indexes: constructors
+   :)
+   
+(: ****************************************************************
+   * Rules and rule indexes: extractors
+   :)
+
+(: ixi:lriFinalstatesXR($r) :)
+declare function ixi:lriFinalstatesXR(
+  $r as element(rule)
+) as xs:string* {
+  (
+    if ($r/@nullable = ('true', '1'))
+    then 'q0' else (),
+    tokenize($r/@last,'\s+')[normalize-space()]
+  )
+
+};
+
+(: ixi:lriStartstatesXR($Rule):  return list of start-position
+   identifiers.
+ :)
+declare function ixi:lriStartstatesXR(
+  $r as element(rule)
+) as xs:string* {
+  'q0'
+  (: NOT 
+  tokenize($r/@first,'\s+')[normalize-space()]
+  :)
+};
+
+(: duplicate, apparently :)
+(:
+declare function ixi:initial-stateR(
+  $Rule as element(rule)
+) as xs:string* {
+  'q0'
+  (: NOT
+  tokenize($Rule/@first,'\s+')[. ne '']
+  Those are the follow states of q0.  Whoops.
+  :)
+};
+:)
+
+(: ****************************************************************
+   * Rules and rule indexes: predicates
+   :)
+</scrap>
+</p>
+</div>
+
+<div id="ll-symbols">
+<head>Working with symbols</head>
+
+<p>A symbol is (represented by) an element: one of nonterminal,
+literal, inclusion, exclusion.
+</p>
+<p>(Any references to elements named 'terminal' is a relic from the
+2016 grammar of ixml and now constitutes an error.)
+</p>
+<p>Note that functions relating to symbols in context are not here but
+under Grammars above.  (Test: is $G a parameter?)  Functions here
+relate solely to the symbol in isolation.  That may be why there
+are so few of them.</p>
+<p>Similarly any function that involves the input string is not here
+but under Input, below.
+<scrap id="eri-symbols"
+       name="Symbols (constructors, extractors, etc.)">
+(: **************************************************************** 
+   * Symbols
+   **************************************************************** :)
+
+(: ****************************************************************
+   * Symbols: constructors
+   :)
+   
+(: ****************************************************************
+   * Symbols: extractors
+   :)
+<ptr target="eri-sym-match-length"/>
+<ptr target="eri-sym-reXTerminal"/>
+ 
+(: ****************************************************************
+   * Symbols: predicates
+   :)
+<ptr target="eri-sym-fTerminal"/>
+<ptr target="eri-sym-fNonterminal"/>
+<ptr target="eri-sym-fSymbolmatchRRiSym"/>
+</scrap>
+</p>
+<p>In tree-builder, we want match-length info just from terminal; we
+don't have access to $I.  If terminals ever become variable-length,
+this will break.</p>
+<p>See also match-length#3 below under Input.
+<scrap id="eri-sym-match-length"
+       name="Define match-length()">
+(: ................................................................
+   match-length($t):  return length of any string that matches the
+   specified terminal.  
+   :)
+declare function ixi:match-length(
+  $t as element()
+) as xs:integer {
+  if ($t/self::literal) then ixi:string-length($t)
+  else 1
+};
+</scrap>
+</p>
+<p>The function <ident>reXTerminal($t)</ident> returns a regular
+expression, given a terminal element.  Note that the regular
+expression will match one character (or none) in the input; we don't
+have terminal symbols with indeterminate length in the input.
+</p>
+<p>At the moment, this is only ever called with
+character sets (<gi>inclusion</gi> and <gi>exclusion</gi>,
+but I've added code to handle literals as well, just in case.
+</p>
+<p>To do:  make the code that compiles Gluschkov automata
+also calculate regexes for terminals, so that we're not
+doing it again and again.
+<scrap id="eri-sym-reXTerminal"
+       name="Define reXTerminal(), regex from terminal">
+(: ................................................................
+   re X Terminal($t): return a regular expression, given a
+   character-set terminal element.
+   :)
+declare function ixi:reXTerminal(
+  $t as element() (: incl, excl, literal :)
+) as xs:string {
+  (: given a terminal element, produce a regex :)
+  if ($t/self::literal) then
+    ixi:sceXS( ixi:string-value($t) )
+  else 
+  let $le := $t/*,
+      $lsRegexbits := for $e in $le
+                      return if ($e/self::range)
+                        then ixi:sceXS($e/@from)
+		             || "-" || ixi:sceXS($e/@to)
+                        else if ($e/self::literal) 
+                        then ixi:sceXS($e/ixi:string-value($e)) 
+                        else if ($e/self::class)
+                        then ixi:catescXS($e/@code) 
+                        else () (: error :)
+  return if ($t/self::inclusion)
+    then "[" || string-join($lsRegexbits,'') || "]"
+    else if ($t/self::exclusion)
+    then "[^" || string-join($lsRegexbits,'') || "]"
+    else "--error in reXTerminal--"
+};
+</scrap>
+</p>
+<p>The function <ident>fTerminal()</ident> returns true iff the
+argument is a terminal symbol.  This version supports both my
+interpretation of the 2016 syntax (with element type 'terminal') and
+the 2019 syntax (literal, inclusion, exclusion).
+<scrap id="eri-sym-fTerminal"
+       name="Define fTerminal()">
+(: ................................................................
+   f Terminal($sym):  is $sym a terminal symbol?
+   :)
+declare function ixi:fTerminal(
+  $sym as item()
+) as xs:boolean {
+  exists($sym/self::element()[self::terminal
+    or self::literal
+    or self::inclusion
+    or self::exclusion
+  ])
+};
+</scrap>
+</p>
+<p>The function <ident>fNonterminal()</ident> performs
+a similar function for nonterminals.
+<scrap id="eri-sym-fNonterminal"
+       name="Define fNonterminal()">
+(: ................................................................
+   f Nonterminal($sym):  is $sym a nonterminal symbol?
+   :)
+declare function ixi:fNonterminal(
+  $sym as item()
+) as xs:boolean {
+  exists($sym/self::element()/self::nonterminal)
+};
+</scrap>
+</p>
+<p>The function <ident>fSymbolmatchRRiSym($r, $ri, $sym)</ident>
+determines whether a symbol element $sym matches rule index $ri in
+rule $r.  Equivalently: in the FSA for rule $r, does state $ri mean
+"we have just read (a string generated by) $sym"?</p>
+<p>N.B. $sym is an element, not a name or string, so simple comparison 
+is not enough here; we need a bit more.
+</p>
+<p>Called once, from ixi:leiAdvanceEiSymP(), called in turn thrice
+from Earley-recognizer:
+<list>
+<item>in ix:scan() with terminal from rule (so 'terminal' element),</item>
+<item>in ix:pred() with nullable nonterminal from rule,</item>
+<item>in ix:comp() with constructed nonterminal element created
+for the call.</item>
+</list>
+So for nonterminals, we need to compare the @name attributes.
+</p>
+<p>For terminals, the likelihood is that $sym is the element we just
+tested the input against, so we will use deep equality as a test.
+</p>
+<p>Note that this means that in a rule like 
+<eg>a: 'b', 'c'; 'b', 'd'.</eg>
+we will not be advancing both paths on a 'b'.  The caller will
+(or: must) call this once for each prediction, so with two different
+'terminal' elements.  Since we may be dealing with a copy of the
+terminal element, not the original, we must avoid reliance on
+element identity.
+</p>
+<p>Note that this will not be called with a state of 'q0'; it's always
+called with a state name corresponding to a symbol.  (We are,
+as it were, always checking from the end of the arc, not the start.)</p>
+<p>
+To do: adjust to 2019 syntax, which no longer has a single 'terminal' 
+element type but has 'quoted', 'inclusion', and 'exclusion'.
+<scrap id="eri-sym-fSymbolmatchRRiSym"
+       name="Define fSymbolmatchRRiSym()">
+(: ................................................................
+   fSymbolmatch R Ri Sym($r, $ri, $sym): does symbol element $sym 
+   match rule index $ri in rule $r?  
+   
+   :)
+declare function ixi:fSymbolmatchRRiSym(
+  $r as element(rule),
+  $ri as xs:string,
+  $sym as element() (: nonterminal or terminal :)
+) as xs:boolean {  
+  if ($sym/@xml:id = $ri)
+  then true()
+  else let $state := $r/descendant::*[@xml:id = $ri]
+       return if (local-name($sym) ne local-name($state))
+           (: we have a terminal trying to match a nonterminal,
+              or vice versa, or different kinds of terminal;
+              return false :)
+         then false()
+         
+         else if (ixi:fTerminal($sym))
+           (: we have terminals; they match if their children 
+              are deep-equal.  NB we are relying on the fact
+              that we have just extracted the terminal element
+              from the rule we are working on, so it really
+              ought to be deep-equal to itself.
+              :)
+         then deep-equal($state, $sym)
+         (: was: 
+         then deep-equal($state/*, $sym/*) 
+         but when the terminal element is empty, that doesn't work.
+         :)
+         
+         else if (ixi:fNonterminal($sym))
+           (: we have non-terminals, they match on name :)
+         then ($sym/@name eq $state/@name) 
+         
+         else (: something wrong :) false()
+};
+</scrap>
+</p>
+</div>
+
+<div id="ll-input">
+<head>Dealing with the input</head>
+
+<p>
+<scrap id="eri-input"
+       name="Input (constructors, extractors, etc.)">
+
+(: **************************************************************** 
+   * Input
+   **************************************************************** :)
+(: For now, the input is always a string. :)
+
+(: ****************************************************************
+   * Input: constructors
+   :)
+
+(: ****************************************************************
+   * Input: extractors
+   :)
+(: ................................................................
+   inputlength(): how long is the input?
+   
+   Used (once) for construction of an Earley item signaling
+   completion
+   :)
+declare function ixi:inputlength(
+  $I as xs:string
+) as xs:integer {
+  string-length($I)
+};
+
+(: ****************************************************************
+   * Input: predicates
+   :)
+
+(: ................................................................
+   fMatches I P T($I, $P, $T): does input $I match terminal $T
+   at position $P?
+
+   The terminals are elements in a rule's right-hand side (not
+   strings).  Possible forms:
+   In 2016 syntax:  terminal[quoted/@dstring], terminal[quoted/@sstring],
+   terminal[quoted/text()], charset, exclude.
+   In 2019 syntax:  literal[@dstring], literal[@sstring],
+   literal[@hex], inclusion, exclusion.
+   
+   Note that position is 0-based, not 1-based, so we add 1 to it
+   for XQuery substring calls.
+   :)
+declare function ixi:fMatchesIPT( 
+  $I as xs:string, 
+  $p as xs:integer,
+  $t as element()
+) as xs:boolean {
+  if ($t/self::literal) then
+     if (1 eq 0) then (: tracing code :)
+     let $sProbe := ixi:string-value($t),
+         $cPrLen := string-length($sProbe),
+         $sInseg := substring($I,$p+1,$cPrLen),
+         $fYesno := ($sProbe eq $sInseg)
+     return $fYesno
+     else (: normal code :)
+     let $sProbe := ixi:string-value($t),
+         $cPrLen := string-length($sProbe),
+         $sInseg := substring($I,$p+1,$cPrLen),
+         $fYesno := ($sProbe eq $sInseg)
+     return $fYesno
+  else if ($t/self::inclusion or $t/self::exclusion) then
+     let $sProbe := ixi:notrace(ixi:reXTerminal($t), 
+                              'regex for char set:'), 
+         $sInseg := ixi:notrace(substring($I,$p+1,1), 
+                              'substring (1 char):'),
+         $fYesno := ixi:notrace(matches($sInseg,'^'||$sProbe||'$'),
+	                      'matches?')
+     return $fYesno
+  else (: error :) false()
+  (: :)
+  (: 
+  $cMatchlength := if ($t/self::literal)
+  let $s := substring($I,$p + 1), (: Earley is 0-based, XPath 1-based :)
+      $f := if ($t/self::literal) 
+            then starts-with($s,ixi:string-value($t/quoted))
+            else if ($t/self::inclusion or $t/self::exclusion)
+            then let $re := ixi:reXTerminal($t)
+                 return matches($s,$re)
+            else (: error :) false(),
+       $trace := ixi:notrace($f,
+       concat(
+         '&amp;#xA;### fMatchesIPT: &amp;#xA;',
+         '  Input = ', $I, '&amp;#xA;',
+         '  p =', $p, '&amp;#xA;',
+         '  quoted = ', if ($t/self::literal) 
+                      then ixi:string-value($t) 
+                      else '(SEE RE)', '&amp;#xA;',
+         '  re = ', if ($t/self::inclusion or $t/self::exclusion)
+           then ixi:reXTermin
+al($t)
+           else '(SEE LITERAL)',
+         '&amp;#xA;Result: '
+       )
+       )
+  return $f
+  :)
+};
+
+(: ................................................................
+   match-length($I,$p,$t): return length of the match in input $I at
+   position $p of terminal $t.
+
+   In practice, this is called only when we know there is a match,
+   but because of the name, and the theoretical possibility of 
+   input-dependent answers (if we were to allow repetition operators
+   inside terminals), we also support cases where there is no match
+   and the answer is 0.
+
+   If we later allow repetition operators inside terminals, this will
+   become more complex, but for now, the value is always 1 if there is
+   a match at all for charset and exclude non-terminals, and
+   string-length of the literal for quoted strings.
+
+   To do: adjust for 2019 syntax.
+ :)
+declare function ixi:match-length(
+  $I as xs:string,
+  $p as xs:integer,
+  $t as element()
+) as xs:integer {
+  if (not(ixi:fMatchesIPT($I, $p, $t))) then 0
+  else if ($t/self::literal) then ixi:string-length($t)
+  else 1
+};
+
+(: See also match-length#1 above under Symbols. :)
+</scrap>
+</p></div>
+
+<div id="ll-utils">
+<head>Utilities and miscellaneous</head>
+
+<p>
+<scrap id="eri-utils-and-misc"
+       name="Utilities for recognizer internals module">
+(: **************************************************************** 
+   * Utilities
+   **************************************************************** :)
+(: Things with no other obvious home. :)
+
+(: ****************************************************************
+   * Utilities: string to regex conversion, string-length, 
+   * string-value, ...
+   :)
+</scrap>
+</p>
+<div id="ll-utils-strings">
+<head>Routines for strings and characters</head>
+<p>
+<scrap prev="eri-utils-and-misc"
+       name="Define sceXS() to read range ends">
+(: ................................................................
+   sce X S($s) : given a one-character string or hex expression $s 
+   (e.g. from a character terminal), check to see if it's a hex
+   expression (in which case expand and recur) or a magic character 
+   (in which case escape it) or is best represented for purposes of 
+   regex mapping) with a single-character escape (in which case
+   escape it).
+   
+   N.B. this is more than strictly necessary for character class
+   escapes, but it seems better to be more general.
+
+   To do:  adjust to new representation of terminals.
+:)
+declare function ixi:sceXS(
+  $s as xs:string
+) as xs:string {
+  (: reEscapists:  regex matching characters 
+     which must or may be escaped. :)  
+  if (matches($s,'^#[0-9a-fA-F]+$'))
+  then ixi:sceXS(ixi:charXhex(
+    $s
+    (: ixi:notrace($s,'sceXS calling charXhex on ' || $s)) :)
+  ))
+  else if (string-length($s) gt 1)
+  then ixi:escapedstringXS($s) 
+  else if (not(contains("&amp;#xA;&amp;#xD;&amp;#x9;\|.-^?$*+{}()[]",$s))) 
+  then $s
+  else if (contains("\|.-^?$*+{}()[]",$s)) 
+  then concat("\" (:":), $s)   (: commented dq to help de-confuse emacs :) 
+  else if ($s eq '&amp;#xA;')
+  then "\n"
+  else if ($s eq '&amp;#xD;')
+  then "\r"
+  else if ($s eq '&amp;#x9;')
+  then "\t"
+  else $s
+
+};
+
+declare function ixi:escapedstringXS(
+  $s as xs:string
+) as xs:string {
+  let $reEscapists := concat('[',
+                      '&amp;#xA;&amp;#xD;&amp;#x9;', 
+                      '\\\|\.\-\^\?\$\*\+',
+		      '\{\}\(\)\[\]',
+                      ']') 
+  return if (matches($s, $reEscapists))
+  then string-join(
+    for $i in 1 to string-length($s)
+    return ixi:sceXS(substring($s, $i, 1)),
+    '')
+  else $s
+};
+
+</scrap>
+</p>
+<p>
+<scrap prev="eri-utils-and-misc"
+       name="Define catescXS() to build category escape">
+(: ................................................................
+   catesc X S($s): given a two-character string from a class element,
+   return the appropriate category escape in XSD/XPath notation.
+
+   I should do some sanity checking here, but at the moment I'm
+   impatient, so I just wrap it in braces with \p in front.
+
+   The 2019 spec says "it is an error if there is no such class", so
+   probably I should raise an error if the category given does not 
+   match the list.  But for now, I'll just ignore it and return '.' 
+   to match one character, on the theory of "carry on irregardless."   
+
+   To do:  adjust as needed for 2019 syntax.
+   To do:  figure out how Aparecium should handle errors.
+:)
+declare function ixi:catescXS(
+  $s as xs:string
+) as xs:string {
+  if (matches($s,'^(L[ulmo]'
+     || '|M[nce]'
+     || '|N[dlo]'
+     || '|P[cdseifo]'
+     || '|Z[slp]'
+     || '|S[mcko]'
+     || '|C[cfon])$'))
+  then '\p{' || $s || '}'
+  else '.'
+  (: Letters: u[pper] l[ower] t[itlecase] m[odifier] o[other]
+     Marks: n[onspacing], [spacing ]c[ombining], e[nclosing]
+     Numbers: d[ecimal digit] l[etter] o[ther]
+     Punctuation: c[onnector] d[ash] s [= open]
+         e [= close] i[nitial quote] f[inal quote] o[ther]
+     Z separators: s[pace] l[ine] p[aragraph]
+     Symbols: m[ath] c[urrency] k[=modifier] o[ther]
+     C other: c[ontrol] f[ormat] o[=private  use] n[ot assigned]
+  :)
+};
+</scrap>
+</p>
+<p>
+<scrap prev="eri-utils-and-misc"
+       name="Define charXhex() to get character given hex expression">
+(: ................................................................
+   char X hex ($s):  accept a hex expression, return the character.
+:)
+declare function ixi:charXhex(
+  $s0 as xs:string
+) as xs:string {
+  (: let $tracing := ixi:notrace($s0,
+     'charXhex called with |' || $s0 || '|') :)
+  let $s := if (starts-with($s0,'#'))
+            then substring($s0,2)
+            else $s0
+  return if (not(matches($s, '^[0-9a-fA-F]+$')))
+         then '---error in charXhex---'
+         else codepoints-to-string(d2x:x2d($s))
+};
+</scrap>
+</p>
+<p>
+<scrap prev="eri-utils-and-misc"
+       name="Define string-length()">
+(: ................................................................
+   string-length:  calculate 'real' length of string.
+
+   We use this to hide possible variation in the form of 'quoted' 
+   strings.  (Q. Does that mean we are expecting quote doubling
+   to show up in the XML form of the literal?  It shouldn't.)
+
+   To do:  sanity check this, and delete if unnecessary.
+   :)
+declare function ixi:string-length(
+  $q as element(literal)
+) as xs:integer {
+  string-length(ixi:string-value($q))
+};
+</scrap>
+</p>
+<p>
+<scrap prev="eri-utils-and-misc"
+       name="Define string-value()">
+(: ................................................................
+   string-value:  calculate 'real' value of string.
+
+   We use this to hide possible variation in the form of quoted 
+   strings.  (Q. Does that mean we are expecting quote doubling
+   to show up in the XML form of the literal?  It shouldn't.)
+
+   To do:  handle 2019 syntax of literals.
+
+   To do:  sanity check this, and delete if unnecessary.
+   :)
+declare function ixi:string-value(
+  $q as element(literal)
+) as xs:string {
+  let $s := if ($q/@dstring)
+            then replace($q/@dstring,'""','"') (:":)
+            else if ($q/@sstring) 
+            then replace($q/@sstring,"''", "'") 
+            else if ($q/@hex) 
+            then ixi:charXhex($q/@hex)
+            else string($q)
+  return if (matches($s,'^#[0-9a-fA-F]+$'))
+         then ixi:charXhex(
+               ixi:notrace($s,'string-value calls cXh on ' || $s) 
+             )
+         else $s
+};
+</scrap>
+</p>
+</div>
+<div id="ll-utils-tracing">
+<head>Trace routines</head>
+<p>For debugging, it's helpful to make traces a little easier.</p>
+<p>First, a function to display an Earley item as a string.
+<scrap prev="eri-utils-and-misc"
+       name="Define s X ei() to build string form of Earley item">
+(: ................................................................
+   s X ei($E):  a utility function to help make traces more legible.
+   :)
+declare function ixi:sXei($E as map(xs:string, item())) as xs:string {
+  'item('
+  || $E('from') || ' ' 
+  || $E('to') || ' '
+  || $E('rule')/@name || '/' || $E('ri')
+  || ')'
+};
+</scrap>
+</p>
+<p>Next, a function to build an XML element representing an Earley
+item.  This is used less tracing than in returning verbose results.
+<scrap prev="eri-utils-and-misc"
+       name="Define eXei() to build 'item' element for Earley item">
+(: ................................................................
+   e X ei($E):  a utility function to help make traces and dumps
+   more legible.
+   :)
+declare function ixi:eXei(
+  $E as map(xs:string, item())
+) as element(item) {
+  element item {
+    attribute from { $E('from') },
+    attribute to { $E('to') },
+    attribute rulemark { $E('rule')/@mark },
+    attribute rulename { $E('rule')/@name },
+    attribute ri { $E('ri') }
+    }
+};
+</scrap>
+</p>
+<p>The actual trace function has two forms:  one for when
+we want debugging and tracing turned on, and one for when
+we want to turn it off globally.  There probably should be
+better ways of turning tracing on and off. 
+<scrap prev="eri-utils-and-misc"
+       name="Define trace() function for debugging">
+<ptr target="eri-trace-function"/>
+<ptr target="eri-notrace-function"/>
+</scrap></p>
+<p>The <ident>ixi:trace()</ident> function is just a wrapper around
+the built-in trace function which inserts newlines. 
+<scrap id="eri-trace-function"
+       name="Define trace() function">
+(: ................................................................
+   trace($i, $s):  a utility function to help make code being
+   traced stay more legible.
+   :)
+declare function ixi:trace(
+  $x as item()?,
+  $s as xs:string
+) as item()? {
+  trace($x, '&amp;#xA;' || $s || '&amp;#xA;')
+};
+</scrap>
+An alternative form also inserts asterisks, but in general that proves
+a little too busy.
+<scrap name="Starry trace() function">
+declare function ixi:trace($x as item()?, $s as xs:string) as item()? {
+trace(($x,'')[1], '&amp;#xA;&amp;#xA;********&amp;#xA;' || $s || '&amp;#xA;')
+};
+</scrap>
+</p>
+<p>It will be easier to turn tracing on and off at particular
+locations if we also define a <ident>notrace()</ident> function, which
+discards the string and returns the first argument. The dummy form
+just throws away the string and returns the item in the first
+argument.
+<scrap id="eri-notrace-function"
+       name="Define notrace() function for debugging">
+(: ................................................................
+   notrace($i, $s):  a utility function to help make code being
+   traced stay more legible.
+   :)
+declare function ixi:notrace(
+  $x as item()?,
+  $s as xs:string
+) as item()? {
+  $x 
+}; 
+</scrap>
+</p>
+<p>The dummy form of <ident>trace()</ident> does the same thing
+as <ident>notrace()</ident>
+<scrap id="eri-trace-dummy"
+       name="Define trace() function for debugging">
+(: ................................................................
+   trace($i, $s):  a utility function to help make code being
+   traced stay more legible.
+   :)
+declare function ixi:trace(
+  $x as item()?,
+  $s as xs:string
+) as item()? {
+  $x 
+}; 
+</scrap>
+</p>
+<p>We also want these available in other modules, like the
+Gluschkov module.
+<scrap id="gl-trace"
+       name="Define trace() function for debugging">
+(: ................................................................
+   trace($i, $s):  a utility function to help make code being
+   traced stay more legible.
+   :)
+declare function gl:trace(
+  $x as item()?,
+  $s as xs:string
+) as item() {
+  trace($x, '&amp;#xA;' || $s || '&amp;#xA;')  
+};  
+declare function gl:notrace(
+  $x as item()?,
+  $s as xs:string
+) as item()? {
+  $x 
+}; 
+(:
+declare function gl:trace($x as item()?, $s as xs:string) as item() {
+  $x 
+};
+:)
+</scrap>
+</p>
+
+</div>
+</div>
+</div>
+
+<div id="alt-calls">
+<head>Alternative interfaces</head>
+<p>The file Aparecium.xqm offers several different calls
+intended for users of the library.  They are defined here.</p>
+<div id="alt-calls-main">
+<head>Main user-facing calls</head>
+<p>The file Aparecium.xqm has the user-facing
+function definitions for the main interface
+and the alternative interfaces.  Also some
+maintenance routines.  <hi>To do:</hi> allow options
+on these to control what is returned, and how:
+<list>
+<item>parse tree(s) or parse-forest grammar?</item>
+<item>AST (as in the spec) or raw parse tree (for debugging)?</item>
+<item>with or without <att>_from</att> and <att>_to</att> attributes
+giving character offsets of the construct?</item>
+</list>
+</p>
+<p>The <ident>aparecium:doc()</ident> function is intended to be as close
+as possible to the <ident>fn:doc()</ident> function.  It is not yet
+implemented, because it requires a bit more infrastructure.
+<scrap id="aparecium-main"
+       name="Main interfaces for Aparecium">
+(: ****************************************************************
+   * Main interfaces (and the simplest) 
+   ****************************************************************
+   :)
+  
+(: ................................................................
+   doc($InputURI)
+   ................................................................
+   Given the URI of the input, fetch the ixml grammar describing it
+   and return the XML representation of the resource.
+:)
+
+(: TO BE IMPLEMENTED:  use html fetch to get both HTTP header
+and payload.  If MIME type is ixml, fetch grammar and call
+parse-string.  Otherwise, if XML and 200 return payload, 
+otherwise return header and payload.
+
+declare function aparecium:doc(
+  $uriI as xs:string
+) as element() {
+  let $sI := unparsed-text($uriI),
+      $sG := unparsed-text($uriG)
+  return aparecium:parse-string($sI, $sG)
+};
+:)
+
+</scrap>
+Before it can parse the resource, the <ident>doc()</ident> function
+will need to find a grammar for it.  There are two ways this
+can happen (maybe more).
+<list>
+<item><p>The web server hosting the resource can label it with an HTTP
+header in which a reference to the grammar is given.  In <ptr
+target="Pemberton-2013"/>, the example given is a CSS stylesheet which
+can be served either as <code>text/css</code> (which is usual)
+<emph>or</emph> with the HTTP mediatype header
+<code>application/xml-invisible;
+syntax=http://example.com/syntax/css</code>.  The media type
+<code>application/xml-invisible</code> (not currently standardized)
+signals that the resource is an invisible XML document; the
+<code>syntax</code> parameter gives the URI of an appropriate ixml
+grammar.</p>
+<p>This approach allows ixml to fit nicely into the architecture of
+the Web.  It has the drawback that for the foreseeable future few
+servers will provide such HTTP headers; of lesser importance in the
+long run (but one important reason the <ident>aparecium:doc()</ident> function
+has not yet been implemented) is that this approach requires
+the implementor of an invisible-XML parser to understand
+content negotiation and implement it correctly.</p>
+</item>
+<item><p>Even if the web server does not provide a pointer to an
+invisible-XML grammar, an ixml parser can keep a cache or directory of
+grammars for a set of known media types, and use the media type
+returned by the server to find an appropriate grammar.</p>
+<p>A parser's installation package might, for example, install
+grammars for common media types (<code>text/css</code>,
+<code>text/csv</code>, <!-- <code>text/javascript</code> or
+<code>application/javascript</code>, -->
+<code>text/markdown</code>,
+<code>application/sql</code>,
+<!-- <code>text/mizar</code>, 
+<code>text/n3</code>, 
+<code>text/php</code>, 
+<code>text/rfc822-headers</code>, 
+<code>text/rtf</code>, -->
+etc.) and use them when <ident>doc()</ident> is called on a resource
+with a known media type.  Since grammars for known media types will be
+useful for all ixml users, there might be reason to make the
+collection of grammars available on the web.</p>
+<p>A parser might allow the user to add grammars to the
+cache, to fill gaps in the collection.</p>
+<p>Unfortunately, a number of notations that might be of interest to
+ixml users have no MIME type registered with IANA, so this approach
+does not help for TeX or LaTeX files (even ones that do not change the
+default parsing rules), or for grammars in well known notations like
+ABNF or Wirth's EBNF or ISO-standard EBNF.  Other notations of
+possible interest for ixml users (such as SVG path expressions,
+XPath expressions, XSLT match patterns, and others) do not have
+registered media types because they are generally embedded in other
+contexts rather than being served as stand-alone resources.</p>
+</item>
+<item><p>In an environment where a small number of grammars are very
+often used, an ixml parser might emulate web browsers which sniff
+content by examining the first portion of a resource and seeing
+whether it <soCalled>looks</soCalled> like a known media type.  In the
+same way, an ixml parser could attempt to identify the grammar of an
+undocumented (or <code>text/plain</code>) resource by attempting to
+parse the first 100 characters using several grammars.  This seems
+unlikely to be generally useful, however: there are too many possible
+grammars.</p>
+</item>
+</list>
+</p>
+<p>Although its surface simplicity is attractive, the
+<ident>aparedium:doc()</ident> function is not going to cover
+all cases.  So we need interfaces that allow the user to specify
+both a resource and a grammar.  And for cases where the notation
+to be parsed is embedded in an XML document, the user needs to be
+able to specify the input to be parsed, and the grammar, either
+as a resource (using a URI) or as a string.
+The <ident>parse-string()</ident> takes both as strings.
+<scrap prev="aparecium-main"
+       name="Define parse-string()">
+(: ................................................................
+   parse-string($Input, $Grammar)
+   ................................................................
+   Given strings with the input and an ixml grammar describing it,
+   returns the XML representation of the resource.
+:)
+
+declare function aparecium:parse-string(
+  $sI as xs:string,
+  $sG as xs:string
+) as element() {
+  let $cG := aparecium:compile-grammar-from-string($sG)
+  return aparecium:parse-string-with-compiled-grammar($sI, $cG)
+};
+   
+</scrap>
+</p>
+<p>Given a string with the input and the pre-processed form of an ixml
+grammar describing it, the function
+<ident>parse-string-with-compiled-grammar()</ident> returns the XML
+representation of the string's parse tree.</p>
+<p>This is the workhorse of the library, called by many other
+functions.
+<scrap prev="aparecium-main"
+       name="Define parse-string-with-compiled-grammar()">
+(: ................................................................
+   parse-string-with-compiled-grammar($Input, $Grammar)
+   ................................................................
+:)
+declare function aparecium:parse-string-with-compiled-grammar(
+  $sI as xs:string,
+  $cG as element(ixml)
+) as element() {
+  let $trace := trace((),'&#xA;parse-string-with-compiled-grammar()&#xA;') 
+  let $result := earley:all-trees($sI, $cG) 
+  return if (count($result) eq 1)
+         then $result
+         else &lt;forest 
+              xmlns:ixml="http://invisiblexml.org/NS"
+	      >{$result}&lt;/forest>
+};
+</scrap>
+</p>
+</div>
+<div id="alt-calls-secondary">
+<head>Secondary user-facing calls</head>
+<p>Text here ...
+<scrap id="aparecium-secondary"
+       name="Secondary interfaces (a bit specialized)">
+(: ****************************************************************
+   * Secondary interfaces (a bit more specialized) 
+   ****************************************************************
+   :)
+   
+(: ................................................................
+   parse-grammar-from-uri($ixmlGrammar)
+   ................................................................
+   Given the URI of an ixml grammar, returns the XML 
+   representation of the grammar.  
+   
+   Retrieves the grammar and parses it by calling
+   parse-grammar-from-string().
+:)
+declare function aparecium:parse-grammar-from-uri(
+  $uriG as xs:string
+) as element() {
+  let $sG := unparsed-text($uriG)
+  return aparecium:parse-grammar-from-string($sG)
+};
+   
+(: ................................................................
+   parse-grammar-from-string($ixmlGrammar)
+   ................................................................
+   Given the string form of an ixml grammar, returns the XML 
+   representation of the grammar.  
+   
+   Retrieves the grammar and parses it by calling
+   parse-string-with-compiled-grammar with the ixml grammar
+   for ixml grammars.
+:)
+
+declare function aparecium:parse-grammar-from-string(
+  $G as xs:string
+) as element(ixml) {
+  (: CGIG:  compiled grammar for ixml grammars :)
+  let $CGIG := doc($aparecium:ixml.gl.xml)/ixml,
+      (: PG: parsed grammar :)
+      $PG := aparecium:parse-string-with-compiled-grammar($G,$CGIG)
+  return if ($PG/self::forest) 
+      then trace($PG/ixml,
+                 'Warning:  submitted grammar was ambiguous.') 
+      else if ($PG/self::Goal) 
+      then $PG/ixml 
+      else if ($PG/self::ixml) 
+      then $PG
+      else &lt;ixml>
+        &lt;!--* Something is very wrong here *-->
+        { $PG }
+      &lt;/ixml>
+};   
+      
+(: ................................................................
+   compile-grammar-from-uri($ixmlGrammar)
+   ................................................................
+   Given the URI of an ixml grammar, returns the compiled XML 
+   representation of the grammar. 
+:)  
+
+declare function aparecium:compile-grammar-from-uri(
+  $uriG as xs:string
+) as element() {
+  let $xmlG := aparecium:parse-grammar-from-uri($uriG)
+  return gluschkov:ME($xmlG)
+};
+      
+(: ................................................................
+   compile-grammar-from-string($ixmlGrammar)
+   ................................................................
+   Given the URI of an ixml grammar, returns the XML 
+   representation of the grammar.  
+:)  
+ 
+declare function aparecium:compile-grammar-from-string(
+  $sG as xs:string
+) as element() {
+  let $xmlG := aparecium:parse-grammar-from-string($sG)
+  return gluschkov:ME($xmlG)
+};
+
+(: ................................................................
+   compile-grammar-from-xml($ixmlGrammar)
+   ................................................................
+   Given the XML representation of an ixml grammar, returns an 
+   annotated representation of the grammar that makes it usable
+   by the Earley parser. 
+:)   
+
+declare function aparecium:compile-grammar-from-xml(
+  $xmlG as element(ixml)
+) as element(ixml) {
+  gluschkov:ME($xmlG)
+};
+
+</scrap>
+</p>
+</div>
+<div id="alt-calls-other">
+<head>Non-user-facing functions</head>
+<p>Some things are in the Aparecium module because
+they have to be, even though they are of no interest
+to library users.</p>
+<p>
+<scrap id="aparecium-tertiary"
+       name="Tertiary interfaces (of interest only for maintainer)">
+
+(: ****************************************************************
+   * Tertiary interfaces (of interest only for maintainer) 
+   ****************************************************************
+   :)
+
+(: This is bootstrapping code (for building the Gluschkov
+   automaton of the ixml grammar for ixml grammars.  It 
+   should be run once whenever the grammar changes -- that is,
+   almost never.  But for now, it's here. 
+   :)
+  
+(: Note that these don't save the result to disk; that's not
+   automated yet.
+   :)
+(: reparse-ixml-grammar():  produce fresh XML version :)
+(: The path starting from Goal on all these is a temporary hack. :)
+declare function aparecium:reparse-ixml-grammar() as element(ixml) {
+  aparecium:parse-grammar-from-uri($aparecium:ixml.ixml)/Goal/ixml
+};
+ 
+(: recompile-ixml-grammar():  produce fresh annotated XML :)
+declare function aparecium:recompile-ixml-grammar() as element(ixml) {
+  aparecium:compile-grammar-from-uri($aparecium:ixml.ixml)/Goal/ixml
+};
+</scrap>
+</p>
+<p>Where are these things? They really should be in a collection, 
+but collections are more complicated.  Maybe later.
+<scrap id="aparecium-variables"
+       name="Variables (of interest only for maintainer)">
+(: ****************************************************************
+   * Variables (of interest only for maintainer) 
+   ****************************************************************
+   :)
+</scrap>
+</p>
+<p>It is embarrassing to move things around by changing these
+strings, but ... that's what currently happens.
+First, what directory are these things in?
+<scrap prev="aparecium-variables"
+       name="Location of library">
+declare variable $aparecium:libloc as xs:string
+  := 'file://'
+     || '/Users/cmsmcq/'
+     || '2021/Aparecium/lib';
+</scrap>
+(Earlier values include 'http://blackmesatech.com/2018/demos/lib'
+and 'http://localhost/~cmsmcq/blackmesatech.com/2019/demos/lib'.
+The call <code>Q{org.basex.util.Prop}HOMEDIR()</code> is
+helpful in BaseX.)
+</p>
+<p>Where is the master (local) copy of the ixml grammar 
+for ixml grammars?  We have three forms:  the ixml grammar,
+the <soCalled>visible XML</soCalled> representation of
+the grammar, and the <soCalled>compiled</soCalled>
+representation, with annotations describing each RHS as
+an FSA.
+<scrap prev="aparecium-variables"
+       name="Location of ixml grammar">
+declare variable $aparecium:ixml.ixml as xs:string
+  := $aparecium:libloc || '/ixml.2021-09-14.ixml';
+
+declare variable $aparecium:ixml.xml as xs:string
+  := $aparecium:libloc || '/ixml.2021-09-14.ixml.xml';
+  
+declare variable $aparecium:ixml.gl.xml as xs:string
+  := $aparecium:libloc || '/ixml.2021-09-14.compiled.xml';  
+</scrap>
+</p>
+</div>
+</div>
+
+<div id="quarry">
+<head>Unsorted bits of legacy code</head>	
+<p>The first version of this document is being made
+by taking the existing code and embedding it in
+this document.  This section and its subsections
+contain portions of the code that have not yet
+been broken out into pieces.</p>
+
+
+<div id="legacy-Earley-parser.xqm">
+<head>Earley parser</head>
+<p>The file Earley-parser.xqm has the top-level
+function definitions for the parser.  These
+functions call the recognizer and construct
+a parse tree to return.</p>
+<p>General remarks:
+</p>
+<p>We have a few problems, for which we might as well sketch our
+solutions.
+<list>
+<item><p>Some sentences are infinitely ambiguous; they have loops in their
+derivation tree:  A is parent of sole child B is parent of sole child
+A.</p>
+<p>Solution;  cut out those loops, return only loopless trees.</p>
+<p>Mechanism:  keep track of the set of ancestors in progress, don't
+accept another node for the same nonterminal with the same frontier.</p>
+<p>Alternative solution:  fix maximum height of a tree for a given frontier,
+e.g. at 1 + number of non-terminals.  (Not an overall limit, just
+a limit for a subtree with a fixed frontier.)</p>
+</item>
+<item><p>Some sentences are infinitely ambiguous: there may be zero or more
+adjacent instances of nodes generating the empty string, e.g. in 
+the RHS X*, Y, Z*.  (This is an EBNF-specific problem, not possible
+for BNF.)</p>
+<p>Solution:  cut out loops, return only loopless paths through a RHS.</p>
+<p>Mechanism:  keep track of the states you have visited, don't accept
+another node for the same state (RHS position, *not* nonterminal)
+and the same frontier.</p>
+<p>Alternative solution:  fix maximum width for sequence of zero-width
+sibling nodes, e.t. at twice the number of positions in the RHS. </p>
+</item>
+<item><p>The user may want all trees, or one arbitrarily chosen tree, or one
+tree with the option to fetch more.</p>
+</item>
+</list>
+</p>
+<p>We will offer four functions (names subject to change):
+<list>
+<item><p>ep:alltrees($I,$G) will return all loopless parse
+trees</p></item>
+<item><p>ep:anytree($I, $G) will return the first tree it finds and
+stop</p></item>
+<item><p>ep:treecursor($I, $G) will return two items: the first tree
+it finds and a function to call for the next tree (and the next
+function); this involves wrapping up continuations and passing them
+around.  (It may be helpfl to do a five-finger exercise fetching the
+items of a sequence one at a time.)</p></item>
+<item><p>ep:parseforest($I, $G) will return a parse forest grammar for
+the trees.  It can and should include the looped parse trees.  It may
+have clean/dirty variants that do or don't bother to clean the grammar
+up (tbd; dunno yet).</p></item>
+</list>
+</p>
+<p>These are all intended to be user-facing; there will be
+corresponding functions internal to the module not intended to be
+called by the user.
+<scrap file="Earley-parser.xqm">
+
+(: Goal:  to return the set of parse trees recorded implicitly in the
+   Earley closure.
+   :)
+(: ep:alltrees($I,$G):  return all loopless parse trees :)
+declare function ep:all-trees(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as element()+ {
+  trace((), 'ep:all-trees calling epi:earley-parse'),
+  epi:earley-parse($I, $G, epi:all-trees#3),
+  trace((), 'epi:earley-parse has returned '
+        || 'and ep:all-trees is about to do so.') 
+};
+
+(: ep:anytree($I,$G):  return one (loopless) parse tree, 
+   whichever is found first 
+:)
+declare function ep:any-tree(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as element()? {
+  epi:earley-parse($I, $G, epi:any-tree#3)
+};
+
+(: ep:tree-cursor($I,$G):  return pair consisting of 
+   1 a parse tree, and
+   2 a function to return the next parsetree/function pair, or
+     when trees are exhausted to return a 'no-more-trees' signal.
+     
+   The name is intended to recall the cursor notion of SQL results.
+   
+   If you keep track of the number of trees delivered, the
+   no-more-trees signal can distinguish there-were-no-trees
+   from all-done-now signals.
+:)
+declare function ep:tree-cursor(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as item()* {
+  epi:earley-parse($I, $G, epi:tree-cursor#3)
+};
+
+(: ep:parseforestmap($I,$G):  return a map containing an and/or tree
+   representing the set of all parses.
+:)
+declare function ep:parse-forest-map(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as element()* {
+  epi:earley-parse($I, $G, epi:parse-forest-map#3)
+};
+
+(: ep:parseforestgrammar($I,$G):  return a BNF (not EBNF[?]) grammar
+   describing the set of all parses of $I against $G.
+:)
+declare function ep:parse-forest-grammar(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as element()* {
+  epi:earley-parse($I, $G, epi:parse-forest-grammar#3)
+};
+
+(:
+
+
+
+:)
+(: Given a final item, build a tree for it.
+:)</scrap>
+</p>
+</div>
+<div id="legacy-Earley-parser-internals.xqm">
+<head>Parser internals</head>
+<p>The file Earley-parser-internals has low-level
+function definitions for the parser,
+which are intended to be subject to change
+with minimal or no effect on the higher-level
+functions.</p>
+<div id="epi-earley-parse-function">
+<head>The <ident>earley-parse()</ident> function</head>
+<p>The function <ident>earley-parse()</ident> runs the Earley
+recognizer on the input and returns results as specified
+by the user.  This version of earley-parse() requires
+that the processor support higher-level functions.  Since
+Saxon HE does not provide that support, it should be revised
+so that the standard interfaces don't require higher-level
+functions.
+<scrap id="epi-earley-parse"
+       name="Define earley-parse()">
+(: ****************************************************************
+   earley-parse($I, $G, $f);  run Earley recognizer on 
+   input $I and grammar $G, return results using 
+   $f($leiClosure, $Ec, $I, $G)
+:)
+declare function epi:earley-parse(
+  $I as xs:string,
+  $G as element(ixml),
+  $f as function(
+    map(*)*  (: Ec :),
+    map(*)* (: Closure :),
+    xs:string (: Input :)
+    (: , element(ixml) (: Grammar :) :)
+  ) as item()* 
+) as item()* {
+  let $dummy := eri:trace((), 'epi:earley-parse() ...') 
+  let $mapResult := er:recognizeX($I, $G), 
+      $meiClosure := $mapResult('Closure'),
+      $leiCompletions := $mapResult('Completions')
+  return if ($mapResult('Result'))
+    then (: if we have a result, return each parse tree :)
+        let $dummy := eri:trace((), 'epi:earley-parse() has result') 
+        let $lpt := $f($leiCompletions, $meiClosure, $I (: , $G :) )
+        for $pt at $npt in $lpt
+        let $dummy := eri:trace((), 'epi:earley-parse() returning a result') 
+        (: return if (('raw','ast')[2] eq 'raw') 
+	       then $pt  
+               else epi:astXparsetree($pt, count($lpt)) :)
+        (: What an ugly hack!  Clean this up! :)
+        let $logfn := '/Users/cmsmcq/'
+                      || '2021/Aparecium/tests/output/raw.'
+	              || translate(
+                           string(
+                             adjust-dateTime-to-timezone(
+                               current-dateTime(), 
+                               ())),
+                           ' :',
+                           '__')
+                      || $npt
+                      || '.xml'   
+        return (file:write($logfn, $pt), 
+                epi:astXparsetree($pt, count($lpt)))
+        
+   else (: otherwise, send an apology and explanation :)
+   &lt;no-parse>
+   &lt;p>Sorry, no parse for this string and grammar.&lt;/p>
+   &lt;p>The completions are:&lt;/p>
+   &lt;completions>{$leiCompletions}&lt;/completions>
+   &lt;p>The map is:&lt;/p>
+   
+   &lt;Initial-Item>{eri:eXei($mapResult('Initial-Item'))}&lt;/Initial-Item>
+   &lt;Input>{$mapResult('Input')}&lt;/Input>
+   &lt;Input-Length>{$mapResult('Input-Length')}&lt;/Input-Length>
+   &lt;Completions>{
+     for $ei in $mapResult('Completions')
+     return eri:eXei($ei)
+   }&lt;/Completions>
+   &lt;Closure>{
+     let $mei := $mapResult('Closure')
+     for $n in map:keys($mei('to'))
+     order by $n descending
+     for $ei in $mei('to')($n)
+     return eri:eXei($ei)
+   }&lt;/Closure>
+   &lt;Result>{$mapResult('Result')}&lt;/Result>
+   &lt;grammar>{(: 'Omitted.' :) $mapResult('Grammar') }&lt;/grammar>
+   &lt;/no-parse>
+   (: we have to think about how to return that no-parse signal.
+   :)
+};
+</scrap>
+(Why do we produce parse trees in the recognizer?  We have
+the completion item or we don't; we don't need parse trees here.
+But since no one will ever actually want just a recognizer,
+I don't suppose it matters.)
+</p>
+</div>
+<div id="epi-tree-returns">
+<head>Functions to return one or more trees</head>
+
+<div id="epi-trf-all-trees">
+<head>The <ident>all-trees()</ident> function</head>
+<p>If the user wants all trees, we call the <ident>all-trees()</ident>
+function.</p>
+<p>For each completion item in $Ec, we return all parse trees for the
+nonterminal $n in $Ec's left-hand side, as documented by $Closure
+(a set of Earley items closed over scan(), pred(), and comp().</p>
+<p>The result will be one or more elements for nonterminal <code>$n</code>.</p>
+<p>The main function generates an empty vertical stack (to prevent
+looping on infinite sets of trees with unbounded vertical depth)
+and calls an auxiliary function to do the work.
+<scrap id="epi-all-trees"
+       name="Define all-trees()">
+(: ****************************************************************
+   all-trees($Closure, $Ec, $I, $G):  
+:)
+declare function epi:all-trees(
+  $leiCompletions as map(*)*,
+  $meiClosure as map(xs:string,
+                     map(xs:integer,
+                         map(xs:string, item())*)) (:MEI:),
+  $I as xs:string
+  (: $G as element(ixml) :)
+) as element()* {
+  (: Call auxiliary routine with a vertical stack for
+     loop prevention. :)
+  epi:all-trees($leiCompletions, $meiClosure, $I, ())
+};
+</scrap></p>
+<p>The auxiliary function for generating all trees is initially called
+for the item (0 $n Goal $q_final), but it's called again recursively,
+once for every completion relevant to the tree(s) we are constructing.
+<scrap prev="epi-all-trees"
+       name="Define auxiliary function for all-trees()">
+(: ****************************************************************
+   all-trees#5:  auxiliary function (more args, does the work) 
+:)
+   
+declare function epi:all-trees(
+  $leiCompletions as map(*)*,
+  $meiClosure as map(xs:string,
+                     map(xs:integer,
+                         map(xs:string, item())*)) (:MEI:),
+  $I as xs:string,
+  $leiVStack as map(*)*
+  (: $G as element(ixml) :)
+) as element()* {
+  <ptr target="epi-all-trees-for"/>
+  <ptr target="epi-all-trees-call-ans"/>
+  <ptr target="epi-all-trees-return-trees"/>
+}; 
+</scrap>
+</p>
+<p>For every original completion item in <code>$leiCompletions</code>,
+return parse trees for its nonterminal.
+<scrap id="epi-all-trees-for"
+       name="Iterate over the list of completion items">
+  for $Ec at $nEc in $leiCompletions
+             [not(
+               some $eiV in $leiVStack
+               satisfies deep-equal(.,$eiV)
+             )]
+  
+  let $dummy := eri:notrace($Ec,
+    'all-trees called with item '
+    || $nEc || ' (of ' || count($leiCompletions)
+    || ') = ' || eri:sXei($Ec) 
+  )
+</scrap></p>
+<p>Here, <code>$Ec</code> is the completion item for
+a nonterminal <code>$n</code>.
+Its LHS tells us which nonterminal.
+Its <ident>from</ident> and
+<ident>to</ident> positions tell us the frontier
+generated by <code>$n</code>.
+</p>
+<p>For each sequence <code>$ln</code> of adjacent nodes that
+<list>
+<item>span the range <ident>From</ident> .. <ident>To</ident>, and</item>
+<item>constitute a path through the RHS of <code>$n</code>,</item>
+</list>
+return a raw parse-tree element for <code>$n</code> with content
+<code>$ln</code>.
+</p>
+<p>
+We want one parse tree for each possible sequence <code>$ln</code>,
+but in order to iterate over them, we need to wrap them up in
+something (since XDM sequences don't nest).  We will wrap them up in
+elements (of type <gi>nt</gi>).  So in fact when we get the sequences
+back, they will already be wrapped up in the element; all we need to
+do is return them.
+<scrap id="epi-all-trees-call-ans"
+       name="Get the sequences, or rather raw parse trees">
+  let $parsetrees := epi:all-node-sequences(
+    $Ec,
+    $meiClosure,
+    (),
+    $Ec('from'), 
+    $Ec('to'), 
+    $I,
+    ($Ec, $leiVStack),
+    ()
+  )</scrap></p>
+<p>Once we get the trees, we just return them.
+<scrap id="epi-all-trees-return-trees"
+       name="Return the raw parse trees">
+  for $parsetree in $parsetrees
+  let $dummy := eri:notrace($parsetree,
+    'all-trees got this parsetree back from item Ec = ' || eri:sXei($Ec))
+  return $parsetree 
+</scrap></p>
+</div>
+<div id="epi-trf-anytree">
+<head>The <ident>any-tree()</ident> function</head>
+<p>If the user wants an arbitrary tree -- well, for now they are 
+out of luck. 
+<scrap id="epi-any-tree"
+       name="Define any-tree()">
+declare function epi:any-tree(
+  $leiCompletions as map(*)*,
+  $leiClosure as map(*)*,
+  $I as xs:string
+) as element()* {
+  &lt;any-tree-not-implemented-yet/>
+};
+</scrap></p>
+</div>
+<div id="epi-trf-cursor">
+<head>The <ident>tree-cursor()</ident> function</head>
+<p>We want (eventually) to provide an interface for a kind of
+<soCalled>tree cursor</soCalled>, which will allow the user to
+iterate over the set of parse trees in the same way as a cursor
+in SQL allows the application to read a sequence of results.
+In XQuery, the basic idea is to return not a tree but a pair
+consisting of (a) a tree and (b) a function to call to get
+the next pair.  If there is a finite set of trees, then on
+the last tree no function will be returned (or a special function
+that raises a particular error when called?).</p>
+<p>But for the moment, this is just a stub.
+<scrap id="epi-tree-cursor"
+       name="Define tree-cursor()">
+declare function epi:tree-cursor(
+  $leiCompletions as map(*)*,
+  $leiClosure as map(*)*,
+  $I as xs:string
+) as element()* {
+  &lt;tree-cursor-not-implemented-yet/>
+};
+</scrap></p>
+</div>
+<div id="epi-trf-pfm">
+<head>The <ident>parse-forest-map()</ident> function</head>
+<p>Also a stub are functions to return results in the form
+of parse forests.  One is a function which when completed
+should return a parse-forest map, that is a data structure
+with a directed graph containing all parse trees as sub-graphs.
+<scrap id="epi-parse-forest-map"
+       name="Define parse-forest-map()">
+declare function epi:parse-forest-map(
+  $leiCompletions as map(*)*,
+  $leiClosure as map(*)*,
+  $I as xs:string
+) as map(*) {
+  map { 'Result' : &lt;parse-forest-map-not-implemented-yet/> }
+};
+</scrap></p>
+</div>
+<div id="epi-trf-pfg">
+<head>The <ident>parse-forest-grammar()</ident> function</head>
+<p>Another parse-forest interface will return a parse-forest
+grammar.  (As this is written, I think this is the key:  from
+the Earley set, generate a parse-forest grammar, and generate
+all other forms of result from the parse-forest grammar.)
+<scrap id="epi-parse-forest-grammar"
+       name="Define parse-forest-grammar()">
+declare function epi:parse-forest-grammar(
+  $leiCompletions as map(*)*,
+  $leiClosure as map(*)*,
+  $I as xs:string
+) as element() {
+  &lt;parse-forest-grammar-not-implemented-yet/>
+};
+</scrap></p>
+</div>
+</div>
+<div id="epi-all-nodes">
+<head>Finding a sequence of items for a single right-hand side</head>
+<p>One crucial step in finding a tree in the Earley set is
+to identify a sequence of items that describe a path through
+the right-hand side of a given rule.</p>
+<p>The inspiration for the approach used here
+is Maarten van Emden's solution to the Eight Queens problem at 
+<xref href="https://vanemden.wordpress.com/2008/04/27/programming-language-x/"
+      >https://vanemden.wordpress.com/2008/04/27/programming-language-x/</xref>.
+There is no code for stopping when you get a solution, no
+backtracking,
+just full speed ahead over all possibilities.</p>
+<p>To perform this task, we define a function
+<ident>epi:all-node-sequences</ident>(<code>$item</code>,
+<code>$closure</code>, <code>$acc</code>, <code>$from</code>,
+<code>$to</code>, <code>$I</code>), which iterates selectively (by
+recursion) over elements in <code>$closure</code> to find items which
+form a path through the RHS of a given rule in &G;.  The items have
+the following properties.
+<list>
+<item>All items in the path-sequence have locations in the same rule
+for some non-terminal <code>$n</code>, namely
+<code>$item('rule')</code>.  (If they didn't have that rule, they
+could not describe a path through its RHS.)</item>
+<item>All items in the path-sequence have the same
+<ident>from</ident>-position (= <code>$from</code>).  (If they did
+not, they would not describe a single instance of the rule's
+nonterminal.)</item>
+<item>The first item has <ident>from</ident>-position =
+<ident>to</ident>-position = <code>$from</code>; that is, it is the
+item produced by the predictor for an instance of the
+nonterminal.</item>
+<item>The last item has <ident>from</ident>-position =
+<code>$from</code> and <ident>to</ident>-position =
+<code>$to</code>; that is, it's the completion item for
+one instance of the nonterminal.</item>
+<item>Each item in the path-sequence advances the path by one symbol;
+that is, for any two adjacent items
+<ident>EI</ident>[<ident>i</ident>]
+with <ident>to</ident> = <ident>p1</ident> 
+and
+<ident>EI</ident>[<ident>i</ident>+1]
+with <ident>to</ident> = <ident>p2</ident>, either
+<list>
+<item><ident>EI</ident>[<ident>i</ident>+1] will be the value of
+<ident>scan</ident>(<ident>E</ident>[<ident>i</ident>],
+<code>$I</code>) &mdash; in this case,
+<code>$I</code>[<ident>p1</ident> .. <ident>p2</ident>] matches the
+terminal <ident>EI</ident>[<ident>i</ident>+1]('ri') &mdash; or </item>
+<item><ident>EI</ident>[<ident>i</ident>+1] will be the value of
+<ident>comp</ident>(<ident>EIc</ident>,
+<ident>EI</ident>[<ident>i</ident>]) for some <ident>EIc</ident> in
+<code>$closure</code>.  In this case, <code>$closure</code> will
+include some completion item <ident>EIc</ident> with
+<ident>from</ident> = <ident>p1</ident>, <ident>to</ident> =
+<ident>p2</ident>, <ident>nonterminal</ident> =
+<ident>EI</ident>[<ident>i</ident>+1]('ri').</item>
+</list>
+</item>
+</list>
+</p>
+<p>At each step (i.e. on each call to this function) we identify one
+more item in the sequence.  There may be more than one (because there
+may be multiple paths); if so, we iterate recursively on each of them
+because we want all node sequences.
+</p>
+<p>The sequence we find is not represented explicitly, but implicitly
+by the sequence of items passed as the current $item (in reverse
+order, since we start with the completion).
+</p>
+<p>Along the way, we accumulate (in <code>$acc</code>) raw parse-tree
+nodes corresponding to the path:
+<list>
+<item><p>For normal <ident>scan()</ident> steps,
+<!-- text nodes with the
+     appropriate substring of <code>$I</code> -->
+we create <gi>lit</gi>, <gi>incl</gi>, or <gi>excl</gi> elements
+recording the matching string, with the <att>tmark</att> of the
+terminal symbol </p></item>
+<!--
+<item><p>for <ident>scan()</ident> steps marked <q><code>-</code></q>,
+element nodes for element ix:tacet (NB once this works, these can be
+omitted; for now we ignore that.)</p></item>
+-->
+<item><p>For <ident>comp()</ident> steps, we create <gi>nt</gi>
+elements, with <att>name</att> and <att>mark</att> recording the
+appropriate GI and annotation, and with content (found by a recursive
+call) showing the raw parse tree for that nonterminal; if there is
+more than one, we iterate over all of them.</p></item>
+<!--
+<item><p>for normal comp() steps, element nodes with the appropriate
+GI and content (found by a recursive call to all-trees()); if there is
+more than one, we iterate over all of them</p></item>
+<item><p>for comp() steps whose nonterminal symbol is marked "@", the element 
+node returned by all-trees() is converted to an attribute node before
+the recursive call; </p>
+<p>N.B. the marking may be either on our RHS position or present
+as the ix:mark attribute on the element returned by all-trees</p>
+</item>
+<item><p>for comp() steps whose nonterminal symbol is marked "-", the
+children of the element node(s) returned by all-trees() are placed in
+the accumulator, not the element node.  Again, the mark can be either
+on the RHS symbol or on the LHS of the defining rule.</p></item>
+-->
+</list>
+</p>
+<p>The function returns zero or more elements whose name is that on
+the left-hand-side of <code>$item</code>, whose string value is the
+input substring <code>$from</code> .. <code>$to</code>, and whose
+children are the concatenation of (a) the children found by the
+recursive call, with (b) those in the accumulator.
+<scrap id="epi-all-node-sequences"
+       name="Define all-node-sequences()">
+(: ****************************************************************
+   epi:all-node-sequences($item, $closure, $acc, $from, $to, $I)
+:)
+declare function epi:all-node-sequences(
+  $Ecur as map(*),
+  $meiClosure as map(xs:string, map(xs:integer, map(xs:string, item())*)),
+  $lnAcc as item()*,
+  $pFrom as xs:integer,
+  $pTo as xs:integer,
+  $I as xs:string,
+  $leiVStack as map(*)*,
+  $leiHStack as map(*)*
+) as element()* {
+  
+  let $dummy := eri:notrace(eri:sXei($Ecur),
+    'all-node-seqs (0) called with Ecur:')
+  return 
+  <ptr target="epi-ans-loopcheck"/>
+  <ptr target="epi-ans-basecase"/>
+  <ptr target="epi-ans-recursive"/>  
+};
+</scrap>
+</p>
+<p>Before we do any work, we should check to see whether we have
+already dealt with this item, in this sequence of nodes.  If we have,
+then we are looking at a sentence with an infinite number of parse
+trees, and we need to snip the loop.
+<scrap id="epi-ans-loopcheck"
+       name="Check for loops, which mean infinite ambiguity">
+  (: 1. Before anything else, loop detection:  have we already 
+     dealt with this item, in this sequence of nodes? :)
+  if (some $eiH in $leiHStack satisfies deep-equal($Ecur, $eiH) )
+  then let $dummy := eri:notrace(eri:sXei($Ecur),
+           'all-node-seqs (case 1) returns empty sequence, '
+           || 'current item has been seen before.')
+       return ()
+</scrap></p>
+<p>The base case, on which we terminate because it means we have
+completed the node sequence, is when the current Earley item is
+initial.  The detection of this case is simplified by the fact that
+all initial states are named q0, and only initial states are named q0.
+So when we find such a state, we just wrap everything up and return it
+to the caller.</p>
+<p>N.B. we always return an element, regardless of how our
+non-terminal is marked, but we pass the @mark attribute along
+so the caller can convert the element to an attribute, or
+replace it with its children, in a later pass which constructs
+the AST from the raw parse tree.
+<scrap id="epi-ans-basecase"
+       name="Handle base case:  current item is initial">
+  (: 2. Base case:  $Ecur is initial. :)
+  else if ($Ecur('ri') = 'q0'
+      and $Ecur('from') eq $Ecur('to')
+      and $Ecur('from') eq $pFrom)
+</scrap>
+For a state named q0, from = to should always be true.
+And for all q0, from = $pFrom should also always be true,
+or should follow from the tests made by the caller. 
+But we check anyway.  I don't trust this belt, and I don't trust 
+these suspenders. </p>
+<p>On the output element, we record the input span in
+attributes named <att>_from</att> and <att>_to</att>,
+and the mark.
+<hi>And for the moment, as a debugging measure, we also
+see whether we can successfully identify the RHS nonterminal
+that led to the prediction of this nonterminal.  We already
+have a little context information in the form of 
+the vertical stack <code>$leiVStack</code>,
+the horizontal stack <code>$leiHStack</code>,
+and the node list <code>$lnAcc</code>.
+Let's examine the tops of those stacks.</hi>
+<scrap prev="epi-ans-basecase"
+       name="Construct an element holding the node sequence">
+  then 
+    let $e := element nt {
+                 $Ecur('rule')/@name,
+                 attribute _from { $pFrom }, 
+                 attribute _to { $pTo }, 
+                 ( $Ecur('rule')/descendant::*
+                                [@xml:id = $Ecur('ri')]
+				/@mark
+                   ,
+                   $Ecur('rule')/@mark,
+		   attribute mark { '^' }
+                 )[1],
+                 $lnAcc
+               },
+        $trace := eri:notrace(eri:sXei($Ecur),
+                      'all-node-seqs (case 2) returns element ' 
+		      || 'named ' || name($e) || ' for Ecur:')
+    return $e
+</scrap>
+</p>
+<p>For safekeeping, here is the earlier version of this.
+It used the nonterminal name as the GI for the element,
+and it tried to handle attributes first.  Both of those
+should now be handled by the AST constructor.
+<scrap prev="epi-ans-basecase-2016"
+       name="Construct an element holding the node sequence">
+  then 
+    let $e := element {$Ecur('rule')/@name} {
+                 attribute _from { $pFrom },
+                 attribute _to { $pTo },
+                 ( $Ecur('rule')/descendant::*
+                                [@xml:id = $Ecur('ri')]
+				/@mark
+                   ,
+                   $Ecur('rule')/@mark
+                 )[1],
+                 $lnAcc[self::attribute()],
+                 $lnAcc[not(self::attribute())]                 
+               },
+        $trace := eri:notrace(eri:sXei($Ecur),
+                      'all-node-seqs (case 2) returns element ' 
+		      || 'named ' || name($e) || ' for Ecur:')
+    return $e
+</scrap>
+</p>
+
+<p>In the recursive case, <code>$Ecur</code> shows, in its rule
+location (= FSA state name or position), what symbol <code>$sym</code>
+we must jump back past.  For example, if <code>$Ecur</code> is <q>(0 8
+Goal/ixml_0)</q> (as it will be when we are constructing an XML
+representation of an ixml grammar eight characters long), then we know
+from the rule index <code>ixml_0</code> that we now need to find a
+parse for <ident>ixml</ident> ending at position 8, and then
+work out where that instance of <ident>ixml</ident> started.
+</p>
+<p>Find the item <code>$eiPrev</code> that was expecting that symbol
+(there may be many); for each such item <code>$eiPrev</code>, the
+Earley set documents a parse of <code>$sym</code> that dominates (or
+generates) the input range from <code>$eiPrev('to')</code> to
+<code>$Ecur('to')</code>.  In the example, we will first find
+<code>$sym</code>, the nonterminal with an ID of <code>ixml_0</code>
+in the rule for <ident>Goal</ident>.  How we look for
+<code>$eiPrev</code> depends on what <code>$sym</code> is.
+<scrap id="epi-ans-recursive"
+       name="Handle recursive case">
+  (: 3. Recursive case. :)
+  else (: 3. $Ecur('ri') is not a q0 / initial state :)
+    (: 3.a some preparation common to T and N alike :)
+    let $riCur := $Ecur('ri'),
+        $sym := $Ecur('rule')/descendant::*[@xml:id = $riCur],
+        $nParent := $Ecur('rule')/@name/string()
+    return
+      <ptr target="epi-ans-rec-terminal"/>
+      <ptr target="epi-ans-rec-nonterminal"/>
+      <ptr target="epi-ans-rec-whazzat"/>
+</scrap>
+</p>
+
+<p>If <code>$sym</code> is terminal, then our clue for finding <code>$eiPrev</code>
+is that the relation <code>scan($eiPrev, $I) =
+$Ecur</code> holds. Find it, and then push
+appropriate raw parse nodes <!-- Not, any longer, the string 
+<code>$I[$eiPrev('to')</code> .. <code>$Ecur('to')]</code> -->
+onto the accumulator and recur.
+Or rather, since there may be more than one,
+find <emph>them</emph> (in <code>$leiPrev</code>) and then
+recur on each of them, pushing the newly created parse node
+<code>$textnode</code> onto the accumulator.
+<scrap id="epi-ans-rec-terminal"
+       name="Handle recursion on terminal">
+      (: 3.b current $sym is terminal :)
+      if (eri:fTerminal($sym)) then
+         let $trace := eri:notrace(eri:sXei($Ecur),
+                       'all-node-seqs (case 3b) '
+                       || 'unscanning terminal symbol '
+		       || $riCur) 
+         let $cSymlength := eri:match-length($sym),
+             $pMedial := xs:integer($Ecur('to')) - $cSymlength,
+             $leiPrev := $meiClosure('to')($pMedial)[ 
+                eri:fScanrelEE(.,$Ecur)
+                (: and xs:integer(.('to')) eq $pMedial :)
+             ],
+	     $sVal := substring($I,$pMedial+1,$cSymlength),
+	     
+             $textnode := element { 
+                (: Rename the terminal to reduce confusion
+                between grammar and parse tree :)
+                if ($sym/self::inclusion) 
+                then 'incl' 
+                else if ($sym/self::exclusion) 
+                then 'excl' 
+                else if ($sym/self::literal)
+                then 'lit' 
+		else 'terminal---'
+	     } {
+	        $sym/@xml:id, 
+		$sym/@tmark,
+	        $sym/@regex, 
+		attribute string { $sVal },
+		attribute cps { string-to-codepoints($sVal) }
+             }
+
+         (: recur on each possible previous node :)
+         for $eiPrev in $leiPrev
+         let $trace := if (count($leiPrev) gt 1)
+	               then eri:notrace(eri:sXei($Ecur),
+                            'all-node-seqs (case 3b) finds '
+			    || count($leiPrev)
+                            || ' predecessors, now recurring on eiPrev='
+			    || eri:sXei($eiPrev))
+		       else eri:notrace(eri:sXei($Ecur),
+                            'all-node-seqs (case 3b) finds '
+		            || count($leiPrev)
+                            || ' predecessors, now recurring on eiPrev='
+			    || eri:sXei($eiPrev))
+
+         return epi:all-node-sequences($eiPrev,
+                                       $meiClosure,
+                                       ($textnode, $lnAcc),
+                                       $pFrom,
+                                       $pTo,
+                                       $I,
+                                       $leiVStack,
+                                       ($Ecur, $leiHStack)
+                                      )
+</scrap></p>
+<p>The initial version rendered terminals as text nodes and not as
+elements.  So it had no place to put a <att>tmark</att>.
+<scrap id="epi-ans-rec-terminal-2016"
+       name="Handle recursion on terminal">
+      (: 3.b current $sym is terminal :)
+      if (eri:fTerminal($sym)) then
+         let $trace := eri:notrace(eri:sXei($Ecur),
+                       'all-node-seqs (case 3b) '
+                       || 'unscanning terminal symbol '
+		       || $riCur) 
+         let $cSymlength := eri:match-length($sym),
+             $pMedial := xs:integer($Ecur('to')) - $cSymlength,
+             $leiPrev := $meiClosure('to')($pMedial)[ 
+                eri:fScanrelEE(.,$Ecur)
+                (: and xs:integer(.('to')) eq $pMedial :)
+              ],
+             $textnode := text { substring($I,$pMedial+1,$cSymlength) }
+             (: let $trace := eri:notrace($textnode,
+	                      'Adding a text node: ') :)
+         (: recur on each possible previous node :)
+         for $eiPrev in $leiPrev
+         let $trace := if (count($leiPrev) gt 1)
+	               then eri:notrace(eri:sXei($Ecur),
+                            'all-node-seqs (case 3b) finds '
+			    || count($leiPrev)
+                            || ' predecessors, now recurring on eiPrev='
+			    || eri:sXei($eiPrev))
+		       else eri:notrace(eri:sXei($Ecur),
+                            'all-node-seqs (case 3b) finds '
+		            || count($leiPrev)
+                            || ' predecessors, now recurring on eiPrev='
+			    || eri:sXei($eiPrev))
+
+         return epi:all-node-sequences($eiPrev,
+                                       $meiClosure,
+                                       ($textnode, $lnAcc),
+                                       $pFrom,
+                                       $pTo,
+                                       $I,
+                                       $leiVStack,
+                                       ($Ecur, $leiHStack)
+                                      )
+</scrap>
+</p>
+<p>If <code>$sym</code> is nonterminal, we can find
+<code>$eiPrev</code> by exploiting the fact that the relation
+<code>comp($EComp, $eiPrev, $G) = $Ecur</code> holds.  The closure
+should include at least one completion item of the form
+(<code>$eiPrev('to')</code>, <code>$Ecur('to')</code>,
+<code>$sym</code>, <code>$ri</code>), where <code>$ri</code> is a
+final state of a rule for <code>$sym</code>.
+</p>
+<p>We're going to break this down into steps.
+First, just identify this case (and possibly issue
+a trace messsage).
+<scrap id="epi-ans-rec-nonterminal"
+       name="Handle recursion on nonterminal">
+      (: 3.c current $sym is nonterminal :)
+      else if ($sym/self::nonterminal) then 
+         let $trace := eri:notrace(eri:sXei($Ecur), 
+                       'all-node-seqs (case 3c) '
+		       || 'trying to unparse nonterminal '
+		       || $riCur) 
+         <ptr target="epi-ans-recnt-leiprev"/>
+         <ptr target="epi-ans-recnt-lnodechild"/>
+         <ptr target="epi-ans-recnt-recur"/>
+</scrap></p>
+<p>Then find all completion items (<code>$leiPrev</code>) for
+nonterminal <code>$sym</code> finishing at this position.  That is, if
+<code>$sym</code> is a RHS reference to <ident>ixml</ident>, the
+completion items will have the form (<ident>start</ident>,
+<ident>to</ident>, <ident>ixml</ident>/<ident>q_f</ident>).  What we
+want is every item in the closure which (a) has the right
+<ident>to</ident>-position and (b) is final for the right nonterminal.
+<scrap id="epi-ans-recnt-leiprev"
+       name="Find the child completions for $sym">
+         let $leiPrev := $meiClosure('to')($Ecur('to'))[
+           eri:fFinalEiPN(.,$Ecur('to'),$sym)
+         ]
+</scrap>
+</p>
+<p>Now, for each child completion, find all possible parse trees, and
+then find all possible predictor items for <code>$sym</code> at the
+start position of the completion item.  That is, all items ending
+at that position, for which <code>$sym</code> is in the follow set.
+<scrap id="epi-ans-recnt-lnodechild"
+       name="Find parse trees for the child completions">
+         for $eiCC at $nEiCC in $leiPrev
+         let $trace := eri:notrace(eri:sXei($Ecur),
+	       'all-node-seqs (case 3c) finds completion item '
+               || '(' || $nEiCC || ' of '
+	       || count($leiPrev) || ')'
+               || ' for ' || $sym/@name
+	       || ', namely ' || eri:sXei($eiCC)
+	       || ' and calls all-trees for it.')
+         let $lnodeChild := epi:all-trees($eiCC,
+                                          $meiClosure,
+	                                  $I,
+					  $leiVStack), 
+             $leiPredictors := $meiClosure('to')($eiCC('from'))
+	                       [eri:fAdvanceNrelEE(.,$Ecur)
+                                (: and .('to') eq $eiCC('from') :)]
+
+	 (:
+         let $trace := for $nCh in $lnodeChild
+                       return eri:notrace($nCh,
+                              'all-node-seqs got this back'
+			      || ' from all-trees:') 
+         :)
+</scrap>
+</p>
+<p>For each pair of parse tree and predictor item,
+we need to recur appropriately.
+<scrap id="epi-ans-recnt-recur"
+       name="Recur on each predictor">
+         for $eiPred at $nEiP in $leiPredictors
+         let $trace := eri:notrace(eri:sXei($Ecur),
+	       'all-node-seqs (case 3c) finds predictor '
+               || '(' || $nEiP || ' of '
+	       || count($leiPredictors) || ')'
+               || ' for ' || $sym/@name
+	       || ', namely ' || eri:sXei($eiPred))
+         
+         for $nodeCh0 at $nNch in $lnodeChild
+         <ptr target="epi-ans-recnt-munge-mark"/>
+         let $trace := eri:notrace(eri:sXei($Ecur),
+	       'all-node-seqs recurs on child'
+               || '(' || $nNch
+	       || ' of ' || count($lnodeChild) || '),'
+               || ' (predictor' || $nEiP
+	       || ' of ' || count($leiPredictors) || '),'
+               || ' (Completion' || $nEiCC
+	       || ' of ' || count($leiPrev) || '),'
+			   )
+
+         return epi:all-node-sequences($eiPred,
+                                       $meiClosure,
+                                       ($nodeCh, $lnAcc),
+                                       $pFrom,
+                                       $pTo,
+                                       $I,
+                                       $leiVStack,
+                                       ($Ecur, $leiHStack)
+                                      )
+</scrap></p>
+<p>There's one more complication.  The trees produced
+by the call to <ident>all-trees()</ident> have <att>mark</att>
+attributes reflecting the mark on the rule for the nonterminal.
+If a mark is specified on the RHS reference to the nonterminal
+(that would be the <code>$sym</code> element), it needs to
+over-ride the mark on the rule.  So before we pop the
+child nodes into the accumulator, we make sure their
+<att>mark</att> attribute is correct.
+<scrap id="epi-ans-recnt-munge-mark"
+       name="Adjust mark attribute on $nodeCh as needed">
+         let $nodeCh := 
+             if (exists($sym/@mark)) 
+             then element { name($nodeCh0) } {
+	         $nodeCh0/(@* except @mark), 
+	         $sym/@mark,
+		 $nodeCh0/node()
+	     }
+             else $nodeCh0
+</scrap>
+</p>
+<p>If what we are looking at has not been recognized
+as a terminal or a nonterminal, then we are out of luck
+and can only report a problem.
+<scrap id="epi-ans-rec-whazzat"
+       name="Raise error if neither terminal nor nonterminal">
+      else (: not terminal, not nonterminal, we have a problem :)
+        &lt;error-in-all-node-sequences
+          from="{$pFrom}" to="{$pTo}">{
+            eri:sXei($Ecur)
+          }&lt;/error-in-all-node-sequences>
+</scrap>
+</p>
+<p>Here we appear to have some cruft that has been commented
+out but not removed.
+<scrap id="epi-lnDepXCleC"
+       name="Define lnDepXClEc()">
+(: lnDepXClEc($Closure, $Ec):  from the Earley closure $Closure,
+   extract the dependents of the node completed by $Ec.
+:)
+(: 
+declare function epi:lnDepXClEc(
+  $leiClosure as map(*)*, 
+  $Ec as map(*)
+) as item()* {
+  &lt;lnDepXClEc-not-implemented/>
+};
+  :)
+(: eMakeEcLndepLaLa($Ec,$ln,$lA,$lC):  given a completion item $Ec,
+   a (possibly partial) list of dependent nodes $ln, and 
+   accumulated lists of attributes and children, construct an
+   element.
+ :)
+ (:
+declare function epi:eMakeEcLndepLaLc(
+  $Ec as map(*),
+  $lnDep as item()*
+) as element() {
+  let $gi := $Ec('rule')/@name,
+      $lAtts := $lnDep[self::attribute()],
+      $lChildren := $lnDep[self::element() 
+                     or self::text() 
+                     or self::comment() 
+                     or self::processing-instruction()]
+  return element {$gi} { $lAtts, $lChildren }
+};
+
+:)  
+</scrap></p>
+</div>
+<div id="epi-ast-from-raw">
+<head>Extracting the abstract syntax tree from the raw parse tree</head>
+<p>The parse tree extraction routines defined elsewhere produce
+the raw parse tree, but ixml requires that we return an abstract
+syntax tree.  So we need a function to take a raw parse tree
+and return the corresponding AST.</p>
+<p>There are several different functions, depending on which
+situation we are in.
+<list>
+<item><p>The initial call expects to find the 'Goal' nonterminal at
+the root of the raw parse tree; it then passes its child element to a
+function that seeks to make the document element.</p>
+<p>If that function returns multiple children, the function
+provides an <gi>ixml:multiple-roots</gi> wrapper.</p></item>
+<item><p>The function to make a document element
+<soCalled>knows</soCalled> that so far we don't have any parent
+element, so in the normal case it just recurs looking for a
+nonterminal marked as an element.  It deals differently with
+different cases:
+<list>
+<item>A nonterminal marked <q><code>^</code></q> is passed to
+an element constructor.</item>
+<item>A nonterminal marked <q><code>-</code></q> is skipped; the
+function recurs on its children.  (It is this recursion which
+makes it possible for the function to return multiple results.)</item>
+<item>A nonterminal marked <q><code>@</code></q> is serialized as an
+element (as required by the spec).</item>
+<item>A terminal is wrapped in an <gi>ixml:wrapper</gi>
+element.</item>
+</list>
+</p></item>
+<item><p>The element constructor should be called only on nonterminals
+marked as elements.  It serializes the nonterminal as an element and
+calls other functions to collect its attributes and its
+content.</p></item>
+<item><p>The function to collect attributes for a parent element
+just constructed will recur through the relevant subtree of the raw
+parse tree, looking for nonterminals marked as attributes.  It will
+recur through hidden nonterminals, stop the recursion on
+element nonterminals, raise an error on terminals, and call an
+attribute-value constructor when it finds a nonterminal marked as an
+attribute.</p></item>
+<item><p>The attribute-value constructor function recurs, gathering
+character data from terminals and ignoring the markings on all
+intervening nodes.</p></item>
+<item><p>The function to gather content for a parent element just
+constructed will recur through the relevant subtree of the raw parse
+tree, ignoring attributes, serializing terminals, recurring through
+hidden nonterminals, and calling the element constructor on
+serializable nonterminals.</p></item>
+</list>
+</p>
+<div id="epi-ast-init">
+<head>The initial call</head>
+
+<p>The top-level AST constructor function descends past the Goal
+wrapper and passes its one descendant to the document-element
+constructor.  It assigns the result to a variable, so it can check how
+many nodes came back: if more than one, a special wrapper is needed.
+It also rewrites the outer element if needed, adding an ambi</p>
+<p>guity
+flag.</p>
+<p>To handle the ambiguity flag, we accept a parameter showing how
+many parse trees the caller got back from the
+<ident>recognizeX()</ident> function; if it's greater than one, we
+mark the result with <code>ixml:state="ambiguous"</code>, declaring
+the namespace as <code>xmlns:ixml="http://invisiblexml.org/NS"</code>.
+<scrap id="epi-astXparsetree"
+       name="Define astXparsetree() to make AST from raw parse">
+declare function epi:astXparsetree(
+  $E as element(nt),
+  $cpt as xs:integer
+) as node()* {
+  if (empty($E/nt)) 
+  then
+      element error {
+          text {
+              "Parse tree had wrapper",
+              "but no content."
+          }
+      }
+  else
+      let $doc0 :=
+              for $c in $E/*
+              return epi:doc-elementXpt($c),
+          $doc1 :=
+	      if (count($doc0) eq 1) 
+              then $doc0 
+	      else if (count($doc0) eq 0) 
+              then element ixml:no-roots {}
+	      else element ixml:multiple-roots {
+	          $doc0
+	      }
+      return
+          if ($cpt eq 1) 
+          then $doc1
+	  else element { name($doc1) } {
+	       attribute ixml:state { 'ambiguous' },
+	       $doc1/@*, 
+	       $doc1/node()
+	  }
+};
+<ptr target="epi-docelXpt"/>
+<ptr target="epi-elXpt"/>
+<ptr target="epi-attsXpt"/>
+<ptr target="epi-avXpt"/>
+<ptr target="epi-contentXpt"/>
+</scrap></p>
+</div>
+<div id="epi-ast-outer">
+<head>The document-element constructor</head>
+<p>The constructor for the document element is distinct from the
+ordinary element constructor because in the special case that the
+top-most node of the result is an attribute or a terminal symbol, we
+want to coerce the result into an element.</p>
+<p>
+<scrap id="epi-docelXpt"
+       name="Define doc-elementXpt() to make AST for document element">
+declare function epi:doc-elementXpt(
+  $E as element()*
+) as node()* {
+  (: Normal case :)
+  if ($E/self::nt[@mark = '^' or not(@mark)]) 
+  then epi:elementXpt($E)
+  
+  (: Hidden wrapper, recur :) 
+  else if ($E/self::nt[@mark = '-']) 
+  then for $c in $E/*
+      return epi:doc-elementXpt($c) 
+
+  (: Attribute (sic) :) 
+  else if ($E/self::nt[@mark = '@']) 
+  then element { $E/@name } {
+      attribute ixml:warning {
+          'Attribute found as root of AST'
+      }
+  }
+
+  (: Terminal (sic) :) 
+  else if ($E/self::*[name() = ('lit', 'incl', 'excl')])  
+  then element ixml:terminal {
+      attribute warning { 
+          'Terminal found as root of AST'
+      }, 
+      text { <ptr target="epi-sXpt"/> } 
+  }
+  
+  (: Unexpected input: what? :)
+  else &lt;oops>{$E}&lt;/oops>
+};
+</scrap>
+</p>
+<p>There are a couple of places where we will need to
+make a string from a raw parse tree terminal. This
+involves checking that the terminal is not marked
+hidden and then serializing from the list of code points.
+(An approximation of the string value will be in the
+
+<scrap id="epi-sXpt"
+       name="Make string from raw parse tree terminal $E">
+if ($E/@tmark = '-')  
+       then ()  
+       else codepoints-to-string(
+               for $t in tokenize(
+                   normalize-space($E/@cps),
+	           '\s')  
+               return xs:integer($t)
+       )
+</scrap>
+</p>
+</div>
+<div id="epi-ast-element">
+<head>The element constructor</head>
+<p>The ordinary element constructor creates an element with the
+appropriate name, then calls two functions to traverse the current
+part of the raw parse tree and collect attributes and content,
+respectively.  The argument is required to be an <gi>nt</gi>
+element and expected to be marked <q><code>^</code></q>.</p>
+<p>
+<scrap id="epi-elXpt"
+       name="Define elementXpt() to make AST for one element">
+declare function epi:elementXpt(
+  $E as element()
+) as node()* {
+  element { $E/@name } {
+      if ($E/@mark = ('-', '@'))
+      then attribute ixml:warning {
+          'Wrong mark (' || $E/@mark 
+          || ') on nonterminal'
+      }
+      else (),
+      for $c in $E/*
+      return epi:attributesXpt($c), 
+      for $c in $E/*
+      let $dummy := eri:trace(
+          concat(name($c), '/', $c/@name, '/', $c/@xml:id),
+          'constructing content from:') 
+      let $n := epi:contentXpt($c)
+      let $dummy := for $chunk in $n return
+          if ($chunk instance of text())
+          then eri:trace(concat('/',
+	  string-join(string-to-codepoints($chunk),' '), '/'), 'eXpt got text node') 
+          else if ($chunk instance of element())
+	  then eri:trace($chunk/name(), 'eXpt gets element:') 
+	  else eri:trace($chunk, 'eXpt gets unknown item:') 
+      return $n
+  }
+};
+</scrap></p>
+</div>
+<div id="epi-ast-attcoll">
+<head>The attribute collector</head>
+<p>The attribute collector traverses the subtree looking for things to
+serialize as attributes on the current element.  For
+each such nonterminal, it constructs the attribute and
+called the attribute value constructor to construct
+the value.
+<scrap id="epi-attsXpt"
+       name="Define attributesXpt() to collect attributes"> 
+declare function epi:attributesXpt(
+  $E as element()
+) as attribute()* {
+  (: Main case: make an attribute :)
+  if ($E/self::nt[@mark = '@']) 
+  then attribute { $E/@name } {
+      string-join(
+          (for $c in $E/*
+          return epi:avXpt($c)),
+	  '')
+  }
+
+  (: skip terminals and elements :)
+  else if ($E/name() = ('lit', 'incl', 'excl')) 
+  then () 
+  else if ($E/self::nt[@mark = '^' or not(@mark)])
+  then ()
+
+  (: recur through hidden nt :)
+  else if ($E/self::nt[@mark = '-']) 
+      then for $c in $E/*
+      return epi:attributesXpt($c)
+
+  else eri:trace((),
+      '! unexpected argument to attributesXpt()') 
+     
+};
+</scrap></p>
+</div>
+<div id="epi-ast-attvalue">
+<head>The attribute value constructor</head>
+<p>The attribute value constructor traverses a subtree constructing
+the string value of an attribute.  The spec says we serialize <q>all
+non-hidden terminal descendants of the node (regardless of marking of
+intermediate nonterminals)</q>. So we ignore the <q><code>^</code></q>
+marking and treats it the same as <q><code>-</code></q>, recurring
+through it. For an example of this treatment, see the handling of
+<ident>dchar</ident> and <ident>schar</ident> in the current ixml
+grammar.
+<scrap id="epi-avXpt"
+       name="Define avXpt() to collect attribute value">
+declare function epi:avXpt(
+  $E as element()
+) as xs:string* {
+  if ($E/(self::incl or self::excl or self::lit))
+  then <ptr target="epi-sXpt"/> 
+  else for $c in $E/*
+       return epi:avXpt($c)
+};
+</scrap>
+</p>
+</div>
+<div id="epi-ast-content">
+<head>The content collector</head>
+<p>The content collector traverses the subtree looking for things to
+serialize as content of the current element and either
+serializing them itself (if terminals) or passing them to the
+element constructor.
+<scrap id="epi-contentXpt"
+       name="Define contentXpt()">
+declare function epi:contentXpt(
+  $E as element()
+) as item()* {
+  if ($E/self::nt[@mark = '^' or not(@mark)])
+  then epi:elementXpt($E)
+  else if ($E/self::nt[@mark = '-'])
+  then for $c in $E/*
+       return epi:contentXpt($c)
+  else if ($E/self::nt[@mark = '@'])
+  then ()
+  else if ($E[self::incl or self::excl or self::lit])
+  then text { <ptr target="epi-sXpt"/> }
+  else element ixml:unexpected {
+       attribute f { "epi:contentXpt" }, 
+       $E
+  }
+};
+</scrap>
+</p>
+</div>
+</div>
+</div>
+
+<div id="legacy-Gluschkov.xqm">
+<head>Construction of the Gluschkov automaton</head>
+<p>The file Gluschkov.xqm has routines for annotating
+a grammar with attributes that allow the right-hand
+sides to be interpreted as Gluschkov automata:  that is,
+finite state automata whose states are the basic symbols
+of the regular expression.
+<scrap file="Gluschkov.xqm">
+module namespace gl =
+"http://blackmesatech.com/2019/iXML/Gluschkov";
+
+(: Constructs a Gluschkov automaton for ixml :)
+
+(: GPL ...:) 
+
+<ptr target="gl-prolog"/>
+<ptr target="gl-ME"/>
+<ptr target="gl-merge"/>
+<ptr target="gl-read-one-ixml-char"/>
+<ptr target="gl-trace"/>
+</scrap></p>
+<p>This module is one place affected by the syntax changes
+between 2013 and 2021.  Most scraps are defined twice,
+once in the initial version following the 2013 syntax,
+and again for today's syntax. 
+(Steven's original paper said something about bootstrapping
+and supporting multiple syntaxes, but I got confused and am
+not going to try to do that.  Too clever for me.)
+</p>
+<div id="leggl-prolog">
+<head>Module prolog</head>
+<p>The module prolog defines a namespace for follow sets, and a
+variable with the namespace name.  We also import the
+<ident>d2x</ident> library so we can use its hex-to-decimal
+conversion.
+<scrap id="gl-prolog"
+       name="Prolog for Gluschkov module">
+declare namespace follow =
+"http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
+
+import module namespace d2x =
+'http://blackmesatech.com/2019/iXML/d2x'
+at "d2x.xqm";
+
+declare variable $gl:follow-ns :=
+"http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
+</scrap>
+</p>
+</div>
+<div id="leggl-ME">
+<head>Calculating the Gluschkov automaton &ME;</head>
+
+
+<p>For a regular expression &E;, the Gluschkov automaton
+(conventionally referred to as &M_E;) is a finite state automaton
+derived from (and in some sense constructed on top of) &E;.  The
+states of &ME; are the basic symbols of &E;, with the fairly
+straightforward interpretation that we are in a given state &q; if and
+only if we have just read an input character (or, in the general case,
+character sequence) that matches the atomic symbol &q;.  We calculate
+the Gluschkov automaton by following the algorithm laid out in
+Brüggemann-Klein 1993, adapted for the XML form of ixml grammars.</p>
+<p>Each node <ident>$E</ident> in the expression gets:
+<list>
+<item><att>id</att> to identify the expression; in the case of positions (i.e. 
+       occurrences of symbols in the alphabet, as opposed to
+       parenthesized expressions etc.), this also
+       serves as an identifier for the FSA state.</item>
+<item><att>first</att> = set of positions which match the first symbol of some word
+       in &L..E;</item>
+<item><att>last</att> = set of positions which match the last symbol in some word
+       in &L..E;</item>
+<item><att>nullable</att> = true iff &L..E; contains the empty
+word</item>
+</list>
+</p>
+<p>We also have attributes to represent the
+<ident>follow</ident>(<ident>exp</ident>, <ident>sym</ident>) function
+for <ident>exp</ident>=<ident>$E</ident>.  For each position $p in $E
+we have an attribute in the follow namespace whose local name is the
+ID of $p; the value of the attribute is the set of positions which can
+follow $p in a path through $E.
+</p>
+<p>By representing follow($E,$p) as an attribute on $E we avoid having
+to traverse the tree multiple times.
+</p>
+
+<p>The
+construction of the Gluschkov automaton consists largely of
+calculating, from the structure of &E;, which symbols can follow which
+other symbols, and defining an appropriate transition function.
+Along the way, various auxiliary functions are computed for each
+subexpression of &E;.</p>
+<p>For the right-hand side of a rule in an ixml grammar, the basic
+symbols of the expression are terminal and nonterminal symbols, and
+the subexpressions include both the basic symbols and the other
+elements in the XML representation of the right-hand side.  For each
+subexpression, we add attributes to record various values:
+<list>
+<item>an ID (for use in referring to the state)</item>
+<item><att>nullable</att> (is the empty string in the language
+defined by this sub-expression?)</item>
+<item><att>first</att> (what are the initial states in the
+sub-automaton for this sub-expression?)</item>
+<item><att>last</att> (what are the final states in the
+sub-automaton for this sub-expression?)</item>
+<item>for each state &q; within (the sub-automaton for) this
+sub-expression, what are the follow states of &q;?  Here, we need one
+attribute for every state within the sub-expression; we make them by
+creating, for each such state, an attribute with a local name matching
+the ID of the state, in a namespace designed to hold such follow-state
+attributes.  So if the states in a given expression are named
+<ident>q0</ident>, <ident>q1</ident>, and <ident>q2</ident>, we would
+have attributes named <ident>follow:q0</ident>,
+<ident>follow:q1</ident>, and <ident>follow:q2</ident>.</item>
+<item>For later use in recognition, it will also be helpful to
+calculate an XPath 3 regular expression that matches the
+terminal.</item>
+</list>
+These attributes are for the most part of only transient interest:
+they are essential for calculating information for the next higher
+level of sub-expression, but the information we care about when
+running the Earley parser is just the information on the top-level
+element of the right-hand side.</p>
+<p>Since the values of these attributes are in general calculated
+inductively, the first step in handling any element &e; is to recur
+to handle the element's children, and then to construct the values
+for &e; itself.
+<scrap id="gl-ME"
+       name="Define function gl:ME()">
+declare function gl:ME (
+  $E as element()
+) as element() {
+  let $children := for $c in $E/node() 
+                   return if ($c/self::element())
+                          then gl:ME($c)
+                          else $c,
+      $ch := $children[self::element()]
+  return <ptr target="gl-ME-identity"/>
+  else <ptr target="gl-ME-terminals"/>
+  else <ptr target="gl-ME-nonterminal"/>
+  else <ptr target="gl-ME-option"/>
+  else <ptr target="gl-ME-repeats"/>   
+  else <ptr target="gl-ME-sep"/>     
+  else <ptr target="gl-ME-alt"/>
+  else <ptr target="gl-ME-def"/>
+  else <ptr target="gl-ME-rule"/>
+  else <ptr target="gl-ME-comment"/>
+  else <ptr target="gl-ME-ixml"/>
+  else <ptr target="gl-ME-whahhh"/>
+};
+</scrap></p>
+
+<p>In the 2013 grammar supported by Aparecium 0.1, the elements
+<gi>quoted</gi>, <gi>charset</gi>, and several others were always
+assumed wrapped in a <gi>terminal</gi> element.  They thus occur below
+the level of the basic symbol and need no decorations.  We need to
+handle them, since when the function is called on their parent
+element, it will recursively be called on them, too.  But they can and
+should be returned without change. 
+<scrap id="gl-ME-identity-2013"
+       name="Handle leaf nodes (v0.1)">
+if ($E/(self::quoted
+      or self::charset or self::exclude
+      or self::range
+      or self::schar or self::dchar))
+then 
+      $E</scrap>
+</p>
+<p>In the 2021 grammar, the <gi>range</gi> and
+<gi>class</gi> elements fall into this category (always
+children of <gi>inclusion</gi> or <gi>exclusion</gi>.
+The <gi>literal</gi> element falls into this category
+when it is a child of <gi>inclusion</gi> or <gi>exclusion</gi>,
+but it does no harm to handle it separately.</p>
+<p>For ranges, the calculation of the correct regular
+is straightforward in the simple case:  put a hyphen
+between the values of the <att>from</att> and
+<att>to</att> attributes, and wrap the entire thing
+in square brackets.  But while those attributes
+will usually contain single characters, they can
+contain doubled quotation marks or hexadecimal strings
+preceded by '#'.  It would be tempting to inline this,
+but it's just complicated enough that I am going to write
+a utility function to do it.
+<scrap id="gl-read-one-ixml-char"
+       name="Define gl:read-one-char-spec()">
+declare function gl:read-one-char-spec(
+  $s as xs:string
+) as xs:string {
+  if (string-length($s) eq 1)
+  then string($s)
+  else if ($s eq '""') 
+  then '"' 
+  else if ($s eq "''") 
+  then "'"
+  else if (starts-with($s,'#'))
+  then codepoints-to-string(d2x:x2d(substring($s, 2)))
+  else ""
+};
+</scrap>
+</p>
+<p>Armed with that little function, we can easily
+specify the regex for a range.
+<scrap id="gl-ME-identity"
+       name="Handle leaf nodes">
+if ($E/self::range)
+then 
+   element { name($E) } {
+      $E/@*, 
+      attribute regex {
+         '['
+         || gl:read-one-char-spec(string($E/@from))
+	 || '-'
+         || gl:read-one-char-spec(string($E/@to))
+	 || ']'	 
+      },
+      $E/child::node()
+   }
+</scrap>
+</p>
+<p>For character-class expressions, the regular expression we need is
+also very simple: just the class code wrapped in <q><code>\p{
+... }</code></q>.
+<scrap prev="gl-ME-identity"
+       name="Handle character-class expressions">
+else if ($E/self::class)
+then 
+   element { name($E) } {
+      $E/@*, 
+      attribute regex { '\p{' || $E/@code || '}'}
+   }
+</scrap>
+</p>
+<p>For terminal symbols, all attribute values are straightforward.
+They are non-nullable, they are their own first and last
+states, and they have no follow states.  In 2013, all terminals
+were <gi>terminal</gi> elements. 
+<scrap id="gl-ME-terminals-2013"
+       name="Handle terminal nodes (v0.1)">
+if ($E/self::terminal)
+then let $id := '_t_' || (1 + count($E/preceding::terminal))
+     return element terminal {
+       $E/@*,
+       attribute xml:id { $id },
+       attribute nullable { false() },
+       attribute first { $id },
+       attribute last { $id },
+       attribute {QName($gl:follow-ns, "follow:" || $id)} { },
+       $children
+     }</scrap></p>
+<p>In 2021, we distinguish several different terminals.
+<scrap id="gl-ME-terminals"
+       name="Handle terminal nodes">
+if ($E/self::inclusion or $E/self::exclusion
+    or $E/self::literal)
+then
+      let $id := '_t_' 
+                 || (1 + count(($E/preceding::* | $E/ancestor::*)
+                    [self::inclusion 
+                    or self::exclusion
+		    or self::literal])), 
+          $re := 'dummy' (:if ($E/self::inclusion) 
+                 then gl:inclusion-regex($E) 
+                 else if ($E/self::exclusion)
+                 then gl:exclusion-regex($E) 
+                 else if ($E/self::literal)
+		 then gl:literal-regex($E)
+		 else '[! error in gl:ME !]'
+		 :)
+      return element {name($E)} {
+         $E/@*,
+         attribute xml:id { $id },
+         attribute nullable { false() },
+         attribute first { $id },
+         attribute last { $id },
+         attribute {QName($gl:follow-ns, "follow:" || $id)} { },
+	 attribute regex { $re },
+         $children
+      }</scrap>
+</p>
+<p>We have now committed to writing functions to create
+regular expressions for inclusions, exclusions, and literals.
+(But it's not the most pressing need, so for the moment
+I'm commenting it out.)
+</p>
+<p>Nonterminals are similarly straightforward:  from the
+point of view of the Gluschkov automaton, they are
+indistinguishable from terminals.
+<scrap id="gl-ME-nonterminal"
+       name="Handle nonterminal symbols">
+if ($E/self::nonterminal)
+then
+     let $id := $E/@name || '_'
+                || (1 + count($E/preceding::nonterminal
+                              [@name = $E/@name]))
+     return element nonterminal {
+       $E/@*,
+       attribute xml:id { $id },
+       attribute nullable { false() },
+       attribute first { $id },
+       attribute last { $id },
+       attribute {QName($gl:follow-ns, "follow:" || $id)} { },
+       $children
+     }</scrap>
+</p>
+<p>Syntactically, an option is an expression to which a question mark
+has been added.  So any option &E; has the form (&F;?).  &E; is
+nullable regardless of whether &F; is or not, and &E; has the same
+first, final, and follow sets as &F;.
+Note than an <gi>option</gi> should only ever have one child element:
+a terminal symbol (inclusion, exclusion, literal), a nonterminal
+symbol, or a set of alternatives (<gi>alts</gi>).  If we ever see
+anything else, this case will not process it and it will fall through
+to the error case.
+<scrap id="gl-ME-option"
+       name="Handle options">
+if ($E/self::option
+    [count(*) eq 1]
+    [child::*[self::inclusion
+              or self::exclusion
+              or self::literal 
+              or self::nonterminal 
+	      or self::alts]])
+then
+     let $id := 'exp_option_' || (1 + count($E/preceding::option))
+     return element option {
+       $E/@*,
+       attribute xml:id { $id },
+       attribute nullable { true() },
+       attribute first { $children/@first },
+       attribute last { $children/@last },
+       for $follow-att in $children/@follow:* 
+       return $follow-att,
+       $children
+     }</scrap>
+</p>
+<p>Repeats will have either one child element or two.  The
+first will be a terminal, a nonterminal, or a set of alternatives;
+the optional second child is a separator.  If anything else is
+encountered, we are not ready for it and we'll fall through to
+the error case.</p>
+<p>In the 2013 grammar, a set of alternatives was a
+<gi>def</gi> element: 
+<scrap id="gl-ME-repeats-2013"
+       name="Handle repetitions (v0.1)">
+if ($E[self::repeat0 or self::repeat1]
+      [*[1][self::terminal or self::nonterminal or self::def]]
+      [count(*) eq 1 or child::*[2][self::sep]]
+         ) 
+then
+     let $gi := name($E)
+     let $id := 'exp_' || $gi || '_' 
+                || (1 + count($E/preceding::*[name() = $gi])),
+         $F := gl:notrace($ch[1], "repetition factor F: "),
+         $G := gl:notrace($ch[2], "repetition sep G: ")
+     return element {$gi} {
+       $E/@*,
+       attribute xml:id { $id },
+       attribute nullable { 
+         if ($gi = 'repeat0') 
+         then true() 
+         else $F/@nullable
+       },
+       attribute first { 
+         if (xs:boolean($F/@nullable) = true())
+         then concat($F/@first, ' ', $G/@first)
+         else $F/@first
+       },
+       attribute last { 
+         if (xs:boolean($F/@nullable) = true())
+         then concat($F/@last, ' ', $G/@last)
+         else $F/@last
+       },
+       <ptr target="gl-ME-rep-follow"/>
+       ,
+       $children
+     }
+</scrap></p>
+
+<p>In 2021, the functionality is the same, but the
+choice element is named <gi>alts</gi>:
+<scrap id="gl-ME-repeats"
+       name="Handle repetitions">
+if ($E[self::repeat0 or self::repeat1]
+      [*[1]
+        [self::inclusion or self::exclusion
+        or self::literal
+        or self::nonterminal
+	or self::alts]]
+      [count(*) eq 1 
+      or child::*[2][self::sep]]) 
+then let $gi := name($E)
+     let $id := 'exp_' || $gi || '_' 
+                || (1 + count($E/preceding::*[name() = $gi])),
+         $F := gl:notrace($ch[1], "F: "),
+         $G := gl:notrace($ch[2], "G: ")
+     return element {$gi} {
+       $E/@*,
+       attribute xml:id { $id },
+       attribute nullable { 
+         if ($gi = 'repeat0') 
+         then true() 
+         else $F/@nullable
+       },
+       attribute first { 
+         if (xs:boolean($F/@nullable) = true())
+         then concat($F/@first, ' ', $G/@first)
+         else $F/@first
+       },
+       attribute last { 
+         if (xs:boolean($F/@nullable) = true())
+         then concat($F/@last, ' ', $G/@last)
+         else $F/@last
+       },
+       <ptr target="gl-ME-rep-follow"/>
+       ,         
+       $children
+     }
+</scrap>
+</p>
+<p>The calculation of the follow set here has several
+cases.  Watch carefully.  First case:  no separator.
+So for all positions &p; in the expression &E;,
+<list>
+<item>if &p; is in last(&E;)
+then follow(&E;*, &p;) is 
+the union of follow(&E;, &p;) with first(&E;)</item>
+<item>otherwise
+follow(&E;*, &p;) is  
+just follow(&E;, &p;)
+with no additions.</item>
+</list>
+<scrap id="gl-ME-rep-follow"
+       name="Calculate follow:* attributes for repetitions">
+       if (count($ch) eq 1)
+       then
+         let $lastF := tokenize($F/@last,'\s+'),
+             $firstF := tokenize($F/@first,'\s+')
+         for $a in $F/@follow:*
+         return if (local-name($a) = $lastF)
+           then attribute { 
+               QName($gl:follow-ns, "follow:"||local-name($a) ) 
+             } { 
+               gl:merge((tokenize($a,'\s+'), $firstF))    
+             }
+           else $a
+</scrap>
+</p>
+<p>If there is a separator, then the same principle
+applies, but things are complicated by the presence
+of the separator in the way.
+For all &p;
+in &F;*&G; or &F;+&G;, its follow-set depends
+on <list>
+<item>whether &p; is in &F; or in &G;,</item>
+<item>whether it's in last(&F;) or last(&G;),
+and </item>
+<item>whether &F; and &G; are nullable.</item>
+</list>
+So we break out the detailed calculations.
+The overall pattern is as follows.  We pre-calculate
+<list>
+<item>the two <ident>last()</ident> sets,</item>
+<item>the two <ident>first()</ident> sets,</item>
+<item>whether &F; and &G; are nullable, and</item>
+<item>for each position in &F; or &G;, its local
+name and its follow-set within &F; or &G;.</item>
+</list>
+<scrap prev="gl-ME-rep-follow"
+       name="Calculate follow-set for repetition with separator">
+       else (: count($children) eq 2 :)
+         let $lastF := tokenize($F/@last,'\s+'),
+             $lastG := tokenize($G/@last,'\s+'),
+             $firstF := tokenize($F/@first,'\s+'),
+             $firstG := tokenize($G/@first,'\s+'),
+             $nullableF := (xs:boolean($F/@nullable) = true()), 
+             $nullableG := (xs:boolean($G/@nullable) = true())
+         return 
+           for $a in $children/@follow:* 
+           let $p := local-name($a),
+               $follow0 := tokenize($a,'\s+')
+           let $followset :=  
+             <ptr target="gl-ME-rep-follow-sep-1"/>
+             <ptr target="gl-ME-rep-follow-sep-2"/>
+             <ptr target="gl-ME-rep-follow-sep-3"/>
+             <ptr target="gl-ME-rep-follow-sep-4"/>
+             <ptr target="gl-ME-rep-follow-sep-5"/>
+           return attribute { 
+                    QName($gl:follow-ns, 
+                          "follow:"||local-name($a) ) 
+                } { 
+                    $followset    
+                    }</scrap>
+</p>
+<p>If &p; is final in &F; and &G; is nullable, then it's final
+in &F;*&G; or &F;+&G; and can thus be followed by any first
+state of &G; and any first state of &F;, as well as (naturally)
+its follow-set within &F;:
+<scrap id="gl-ME-rep-follow-sep-1"
+       name="Follow set when p in last(F), G nullable">
+             if ($p = $lastF and $nullableG) 
+             then gl:merge(($follow0, $firstG, $firstF))
+</scrap></p>
+<p>If &p; is final in &F; and &G; is <emph>not</emph> nullable, 
+then its follow-set omits the first sets of &F;. 
+<scrap id="gl-ME-rep-follow-sep-2"
+       name="Follow set when p in last(F), G not nullable">
+             else if ($p = $lastF and not($nullableG))
+             then gl:merge(($follow0, $firstG))
+</scrap></p>
+<p>If &p; is final in &G; and &F; is nullable, 
+then we again have a three-way merge for its follow-set:
+its follow-set within &G;, the first-set of &F;, and
+(skipping &F; entirely, since it's nullable)
+the first-set of &G;. 
+<scrap id="gl-ME-rep-follow-sep-3"
+       name="Follow set when p in last(G), F nullable">
+             else if ($p = $lastG and $nullableF)
+             then gl:merge(($follow0, $firstG, $firstF))
+</scrap></p>
+<p>If &p; is final in &G; and &F; is <emph>not</emph> nullable, 
+then the first-set of &G; is not included in the follow-set
+of &p;.
+<scrap id="gl-ME-rep-follow-sep-4"
+       name="Follow set when p in last(G), F not nullable">
+             else if ($p = $lastG and not($nullableF))
+             then gl:merge(($follow0, $firstF))
+</scrap></p>
+<p>Finally, if none of the above are true, then &p;
+is non-final in either &F; or &G; and its follow-set is
+unaffected by the repetition operator, so we just copy it
+out again.
+<scrap id="gl-ME-rep-follow-sep-5"
+       name="Follow set when p non-final in F or G">
+             else string($a)
+</scrap></p>
+
+<p>We have appealed to a little utility function for merging
+sets of IDs.  It's quite straightforward, really, thanks
+to <ident>distinct-values()</ident>.
+<scrap id="gl-merge"
+       name="Define gl:merge()">
+declare function gl:merge(
+  $ids as xs:string*
+) as xs:string {
+  string-join(distinct-values($ids),' ')
+};
+</scrap>
+</p>
+
+<p>The <gi>sep</gi> element contains a single factor and
+changes none of its properties.
+<scrap id="gl-ME-sep"
+       name="Handle separator expressions">
+if ($E/self::sep
+           [count(*) eq 1]
+           [child::*[self::inclusion
+                     or self::exclusion 
+                     or self::literal 
+                     or self::nonterminal 
+                     or self::alts]]
+          ) then
+     let $id := 'exp_sep_'
+                || (1 + count($E/preceding::sep)) 
+     return element sep {
+       $E/@*,
+       attribute xml:id { $id },
+       $ch/@nullable,
+       $ch/@first,
+       $ch/@last,
+       $ch/@follow:*,
+       $children
+     }
+</scrap>
+</p>
+<p>In 2013 the element names were different.  (Yawn.)
+<scrap id="gl-ME-sep-2013"
+       name="Handle separator expressions (v0.1)">
+if ($E/self::sep
+           [count(*) eq 1]
+           [child::*[self::terminal 
+                     or self::nonterminal
+                     or self::def]]
+          ) then
+     let $id := 'exp_sep_'
+                || (1 + count($E/preceding::sep)) 
+     return element sep {
+       $E/@*,
+       attribute xml:id { $id },
+       attribute nullable { $ch/@nullable },
+       attribute first { $ch/@first },
+       attribute last { $ch/@last },
+       for $follow-att in $ch/@follow:* 
+       return $follow-att,
+       $children
+     }
+</scrap>
+</p>
+<p>An <gi>alt</gi> is one choice among (sometimes) several; it
+contains a sequence of terms (i.e. terminal, nonterminal, repetition,
+option, nested set of alternatives).  Since it's an arbitrary-length
+sequence, not a binary operator, the calculation of first and last and
+follow gets a bit tricky.  We may end up needing to normalize to
+binary form just to keep things simple.
+<scrap id="gl-ME-alt"
+       name="Handle alt elements">
+if ($E/self::alt) then
+     let $id := 'exp_alt_'
+                || (1 + count($E/preceding::alt)) 
+     return element alt {
+       $E/@*,
+       attribute xml:id { $id },
+       attribute nullable { 
+         every $c in $ch
+         satisfies (xs:boolean($c/@nullable) eq true())
+       },
+       attribute first { 
+         string-join(
+           for $c at $pos in $ch
+           return if (every $lsib
+	              in $ch[position() lt $pos]
+                      satisfies
+		      (xs:boolean($lsib/@nullable)
+		      eq true() ))
+                  then $c/@first
+                  else (),
+           ' '
+         )
+       },
+       attribute last { 
+         string-join(
+           for $c at $pos in $ch
+           return if (every $rsib
+	              in $ch[position() gt $pos]
+                      satisfies
+		      (xs:boolean($rsib/@nullable)
+		      eq true() ))
+                  then $c/@last
+                  else (),
+           ' '
+         )
+       },
+       <ptr target="gl-ME-alt-follow"/>
+       ,
+       $children
+     }
+</scrap>
+</p>
+<p>Again, calculating the follow-set is the most complicated
+of the subcalculations for this type of expression.  So let's
+take it slowly.
+<list>
+<item>For every position &p; in each child &c;, the follow set 
+follow(&E;,&p;) includes follow(&c;,&p;).</item>
+<item>In addition, if &p; is in last(&c;) and &c; has a following sibling,
+then follow(&E;,&p;) should include start(next-sibling(&c;)).</item>
+<item>
+In addition, if &p; is in last(&c;) and &c; has a following sibling,
+and also next-sibling(&c;) is nullable, 
+then follow(&E;,&p;) should include start(nextsib(nextsib(&c;))).
+</item>
+<item>
+And so forth.</item>
+</list>
+
+<scrap id="gl-ME-alt-follow"
+       name="Calculate follow:* attributes for alt">
+       for $c at $cpos in $ch 
+       for $a in $c/@follow:*
+       let $p := local-name($a),
+           $lastC := tokenize($c/@last,'\s+'),
+           $rightsibs := $ch[position() gt $cpos],
+           $followset := if ($p = $lastC)
+	   then string-join(
+             (  $a,
+                for $rsib at $rpos in $rightsibs
+                let $inbetweens := $rightsibs
+		                   [position() lt $rpos]
+                return if (every $msib in $inbetweens
+                           satisfies
+                           (xs:boolean($msib/@nullable)
+			   = true() ))
+                       then $rsib/@first
+                       else ()
+             ),
+             ' '
+           )
+           else
+             $a
+       return attribute { 
+             QName($gl:follow-ns, "follow:"||$p )
+         } { 
+             $followset    
+         }
+</scrap>
+</p>
+<p>An <gi>alts</gi> element contains a set of alternatives,
+each an <gi>alt</gi> element.
+The 2013 alternative was the <gi>def</gi> element,
+but note that <gi>def</gi> was required as the top-level
+element of a right-hand side, which <gi>alts</gi> is not.
+That doesn't affect the treatment of this element,
+but it does affect
+the treatment of rules, below. 
+<scrap id="gl-ME-def"
+       name="Handle alts elements (= def)">
+if ($E[self::<ptr target="gl-alts-gi"/>]) then
+     let $id := 'exp_' || name($E) || '_' 
+                || (1 + count(
+                $E/preceding::<ptr target="gl-alts-gi"/>)
+		) 
+     <ptr target="gl-ME-alternatives"/>
+</scrap>
+We factor out the treatment of alternatives
+so that we can re-use it for rules, below.
+The properties should all be self-explanatory.
+<scrap id="gl-ME-alternatives"
+       name="Handle alternatives">
+     return element {name($E)} {
+       $E/@*,
+       attribute xml:id { $id },
+       attribute nullable { 
+         some $c in $ch
+         satisfies
+	 (xs:boolean($c/@nullable) eq true() )
+       },
+       attribute first { 
+         string-join($ch/@first, ' ')
+       },
+       attribute last { 
+         string-join($ch/@last, ' ')
+       },
+       
+       (: follow-set is simple here. :) 
+       for $a in $ch/@follow:*
+       return $a,
+       $children
+     }
+</scrap></p>
+<p>As an experiment, I am putting the generic identifier
+for the element in a scrap.  If this works, much of the
+duplication earlier in this section can be removed.
+(Why do ideas come so late?)
+<scrap id="gl-alts-gi"
+       name="GI for alts element">alts</scrap>
+In 2013, it was <gi>def</gi>:
+<scrap id="gl-alts-gi-2013"
+       name="GI for alts element (v0.1)">def</scrap>
+</p>
+<p>Since the alternatives inside a rule are not now wrapped
+in a <gi>def</gi> or <gi>alts</gi> elements, we need to
+put the properties for the rule as a whole on the <gi>rule</gi>
+element.
+<scrap id="gl-ME-rule"
+       name="Handle rule elements">
+if ($E/self::rule) then
+    let $id := $E/@name
+    <ptr target="gl-ME-alternatives"/>
+</scrap>
+</p>
+<p>In 2013, it was simpler.
+<scrap id="gl-ME-rule-2013"
+       name="Handle rule elements (v0.1)">
+if ($E/self::rule) then 
+    element rule {
+      $E/@*,
+      $children
+    }</scrap>
+</p>
+<p>Finally, a few miscellaneous elements.  Comments
+require no annotation.
+<scrap id="gl-ME-comment"
+       name="Handle comment elements">
+if ($E/self::comment) then
+    $E
+</scrap>
+</p>
+<p>The <gi>ixml</gi> element also requires no
+annotation.
+<scrap id="gl-ME-ixml"
+       name="Handle ixml elements (grammars)">
+if ($E/self::ixml) then 
+    element ixml {
+      $E/@*,
+      $children
+    }
+</scrap>
+</p>
+<p>And finally, at the bottom of the if-then-else ladder,
+we handle unexpected elements.
+<scrap id="gl-ME-whahhh"
+       name="Handle unexpected elements">
+if ($E/self::option or $E/self::sep)
+then &lt;error>Element {name($E)} with unexpected content: {$E}&lt;/error>
+else if ($E/(self::repeat1 or self::repeat0))
+then &lt;error>Element {name($E)} with unexpected content: {$E}&lt;/error>
+else &lt;error>Unexpected element {$E}&lt;/error></scrap>
+</p>
+</div>
+</div>
+
+</div>
+
+
+</body>
+<back>
+<div id="references">
+<head>References</head>
+<p><hi>Incomplete.</hi></p>
+<listBibl>
+<bibl id="Knuth-1984" n="Knuth 1984">
+<author>Donald E. Knuth</author>,
+<title level="a">Literate Programming,</title>
+<title level="j">The Computer Journal</title>
+27 (1984):  97-111,
+rpt. [rev.] in his
+<title level="m">Literate Programming</title>,
+<title level="s">CSLI Lecture Notes</title> Number 27
+([Stanford, California]:  Center for the Study of Language and
+Information, 1992), pp. 99-136, here p. 99.</bibl>
+
+<bibl id="pemberton-2013" n="Pemberton 2013">
+<author>Pemberton, Steven</author>.
+<date>2013</date>.
+<title level="a">Invisible XML</title>.
+Presented at Balisage: The Markup Conference 2013,
+Montréal, Canada, August 6 - 9, 2013.
+In
+<title level="m">Proceedings of Balisage: The Markup Conference 2013.</title>
+Balisage Series on Markup Technologies, vol. 10 (2013).
+DOI: 10.4242/BalisageVol10.Pemberton01.
+On the web at
+<xref>http://www.balisage.net/Proceedings/vol10/html/Pemberton01/BalisageVol10-Pemberton01.html</xref>.
+Revised version (January 2014) at
+<xref>https://homepages.cwi.nl/~steven/Talks/2013/08-07-invisible-xml/invisible-xml-3.html</xref>
+</bibl>
+
+<bibl id="pemberton-2021" n="Pemberton 2021">
+<author>Pemberton, Steven</author>.
+<date>2021</date>.
+<title level="a">Invisible XML Specification
+(Draft)</title>.
+On the web at
+<xref>https://invisiblexml.org/ixml-specification.html</xref>
+</bibl>
+
+<bibl id="msm-1996" n="Sperberg-McQueen 1996">
+<author>Sperberg-McQueen, C. M.</author>
+<title level="u">SWEB:
+an SGML Tag Set for Literate Programming</title>.
+Unpublished technical report, 1993, rev. 1994, 1995, 1996.
+On the web at
+http://cmsmcq.com/1993/sweb.{<xref
+href="http://cmsmcq.com/1993/sweb.xml"
+>xml</xref>,<xref
+href="http://cmsmcq.com/1993/sweb.html"
+>html</xref>}.</bibl>
+
+<bibl id="msm-2017" n="Sperberg-McQueen 2017">
+<author>Sperberg-McQueen, C. M.</author>
+<title level="a">Translating imperative algorithms
+into declarative, functional terms:
+towards Earley parsing in XSLT and XQuery</title>.
+Presented at Balisage: The Markup Conference 2017,
+Washington, DC, August 1 - 4, 2017.
+In
+<title level="m">Proceedings of Balisage:
+The Markup Conference 2017.</title>
+<title level="s">Balisage Series on Markup Technologies,
+vol. 19 (2017)</title>.
+<xref>https://doi.org/10.4242/BalisageVol19.Sperberg-McQueen01</xref>.
+</bibl>
+</listBibl>
+</div>
+
+<div id="notation">
+<head>Literate programming notation</head>
+<p><hi>To be supplied:  a description of the notation used here.</hi></p>
+</div>
+
+<div id="to-do">
+<head>To do</head>
+<p>As the reader will have noticed, in its current state this
+program is not finished. Hence the following to-do lists.</p>
+<div id="to-do-code">
+<head>Code changes</head>
+<p>Fixes / shorter-term changes to be made:</p>
+<list>
+<item>Make a common-utilities module for global project-level
+variables (e.g. version number, tracing level) and tracing / debugging
+routines.</item>
+<item>Insert GPL notices in all modules.</item>
+</list>
+
+<p>Enhancements longer-term changes to be made:</p>
+<list>
+<item>Make marks work correctly.  Why is S appearing in output when
+ixml is parsed?</item>
+<item>Allow options to turn _from and _to attributes on and off?</item>
+</list>
+</div>
+
+<div id="to-do-sweb">
+<head>SWeb upgrades</head>
+<p>To do asap:</p>
+<list>
+<item>make RNC schema for p3 + SWeb + XSLT</item>
+<item>ensure new schema allows any well formed XML in
+scraps, but enforces parent/child relations on XSLT</item>
+<item>add module to SWeb stylesheet, to handle
+XSLT and other XML elements within scraps</item>
+<item>when this document is a bit further along (and has
+decent display / translation into XHTML), move to github.</item>
+</list>
+<p>To do eventually:</p>
+<list>
+<item>make RNC schema for TEI P5 + SWeb + XSLT</item>
+<item>upgrade this document, SWeb weave processor, SWeb
+tangle processor</item>
+</list>
+</div>
+</div>
+
+<div id="change-logs">
+<head>Change logs</head>
+<div id="logs-v0.2">
+<head>Change log for version 0.2</head>
+<list>
+<item>2021-08-03 : CMSMcQ : put all (well, almost all) code into
+Aparecium.xml, an SWeb document.</item>
+</list>
+</div>
+<div id="logs-v0.1">
+<head>Change log for version 0.1</head>
+<p>The lists below are extracted from the revision histories
+at the beginnings of the individual modules.</p>
+<p>Aparecium.xqm:
+<list>
+<item>2021-10-03 : CMSMcQ : conversion to SWeb form.</item>
+<item>2019-06-03 : CMSMcQ : rename parse-string-with-compiledgrammar as
+                         parse-string-with-compiled-grammar.</item>
+<item>2019-04-19 : CMSMcQ : force myself to write first version</item>
+</list>
+</p>
+<p>Earley-parser.xqm:
+<list>
+<item>2021-10-03 : CMSMcQ : into sweb</item>
+<item>2019-04-16 : CMSMcQ : copy to new location, use new namespace names</item>
+<item>2018-04-05 : CMSMcQ : start file, hesitate a bit</item>
+</list>
+</p>
+<p>Earley-parser-internals.xqm:
+<list>
+<item>2019-06-30 : CMSMcQ : remove profiling code again (done for now).</item>
+<item>2019-06-29 : CMSMcQ : make item-as-map branch, change all type-aware
+                         references to items.  Add profiling code.</item>
+<item>2019-06-03 : CMSMcQ : first cut at trimming parse tree as specified in G</item>
+<item>2019-04-22 : CMSMcQ : On error, give input in full</item>
+<item>2019-04-16 : CMSMcQ : move to new location, assign new namespace name</item>
+<item>2018-04-08 : CMSMcQ : when ixml.xml is corrected and smart quotes
+                         corrected, parses all sample ixml grammars in
+                         teststrings.xml</item>
+<item>2018-04-08 : CMSMcQ : passes tests for grammars 1-4, parses most 
+                         but not all sample ixml grammars.</item>
+<item>2018-04-07 : CMSMcQ : made stubs of earley-parser and various
+                         functions for returning parse information</item>
+</list>
+</p>
+<p>Earley-recognizer.xqm:
+<list>
+<item>2019-06-30 : CMSMcQ : Remove profiling code again (done for now)</item>
+<item>2019-06-29 : CMSMcQ : Add profiling code to try to find speed issues</item>
+<item>2019-04-15 : CMSMcQ : Move to repo, adopt new namespace names.
+                      Adjust spelling of some function calls.</item>
+<item>2018-04-04 : CMSMcQ : Seem to have been interrupted in this; there is
+                      almost nothing here.  Starting again, from sketch
+                      made this morning away from desk.  (There are
+                      earlier sketches which I am not now consulting.)
+                      I'm transcribing the sketch, not trying to test.
+                      item() used as type for Earley items.</item>
+<item>2018-03-29 : CMSMcQ : made file.  Trying to do in XQuery what I did in
+                      Prolog:  small top level ignorant of data
+                      representation, lower level that knows.</item>
+</list>
+</p>
+<p>Earley-rec-internals.xqm:
+<list>
+<item>2019-06-30 : CMSMcQ : remove profiling code (done for now)</item>
+<item>2019-06-30 : CMSMcQ : restructure accumulator in earley-closure as
+                      map indexed by both start and end points:
+                      $acc($n)('from') provides all items with from=$n,
+                      $acc($n)('to') all items with to=$n.
+                      For now, no indexing by fFinal, fPredictive,
+                      or non-terminal.</item>
+<item>2019-06-29 : CMSMcQ : rewrite all Earley item constructors, extractors,
+                      and functions to use maps and not elements</item>
+<item>2019-06-29 : CMSMcQ : make item-as-map branch in git</item>
+<item>2019-06-03 : CMSMcQ : make reXTerminal deal properly with hex characters</item>
+<item>2019-05-27 : CMSMcQ : resuming work.</item>
+<item>2019-04-21 : CMSMcQ : tracing and other changes</item>
+<item>2019-04-17 : CMSMcQ : import d2x; add charXHex(); make fNullableNG 
+                      take string, not element(nonterminal); make 
+                      reXTerminal() handle quote.</item>
+<item>2019-04-16 : CMSMcQ : moved to repo; adopted new namespace names.
+                      Improved navigation comments.
+                      Improved (or supplied) function comments.</item>
+<item>2018-04-05 : CMSMcQ : fixed handling of 'quoted' to use attributes;
+                      worked on supplying missing functions;
+                      fixed symbol/position and initial-state 
+                        confusions in functions for rules and items.</item>
+<item>2018-04-04 : CMSMcQ : beginning filling out the details, guided
+                      by "Unknown function" messages in earley0.xq
+		      and here.</item>
+<item>2018-03-29 : CMSMcQ : made file.
+                      Trying to do in XQuery what I did in Prolog:
+                      small top level ignorant of data representation,
+                      lower level that knows.  This is the lower
+                      level.  To-do list in ~/2018/Earley/status...asc</item>
+</list>
+</p>
+<p>Gluschkov.xqm:
+<list>
+<item>2019-04-19 : CMSMcQ : Move to repo for easier imports.</item>
+<item>2016-04-05 : CMSMcQ : Completed Gluschkov constructor for use in 
+                         an Earley parser.</item>
+</list>
+</p>
+</div>
+</div>
+</back>
+</text>
+</TEI.2>

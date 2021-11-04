@@ -1,0 +1,135 @@
+<test-catalog xmlns="https://github.com/cmsmcq/ixml-tests"
+	      name="Level point-five tests"
+	      release-date="2021-10-05"
+	      >
+  <description>
+    <p>Contains a handful of tests used in the initial
+    bootstrapping of Aparecium 0.2.</p>
+    <p>You know how when you start on something you
+    take a single example or two and work it?  This is
+    the set of examples you do just after that one.</p>
+  </description>
+
+  <test-set name="a">
+    <created by="CMSMcQ" on="2021-10-14"/>
+    <description>
+      <p>Can we parse with a user-supplied grammar?</p>
+      <p>This language has just one word.</p>
+    </description>
+
+    <ixml-grammar>S : 'a'.</ixml-grammar>
+    <grammar-test>
+      <created by="CMSMcQ" on="2021-10-05"/>
+      <result>
+	<assert-xml-ref href="t1.ixml.xml"/>
+      </result>
+    </grammar-test>
+    
+    <test-case name="a1">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>a</test-string>
+      <result>
+	<assert-xml><S>a</S></assert-xml>
+      </result>
+    </test-case>
+    <test-case name="a2">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>A</test-string>
+      <result><assert-not-a-sentence/></result>
+    </test-case>
+    <test-case name="a3">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string></test-string>
+      <result><assert-not-a-sentence/></result>
+    </test-case>
+    <test-case name="a3">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>aa</test-string>
+      <result><assert-not-a-sentence/></result>
+    </test-case>
+    <test-case name="a3">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>b</test-string>
+      <result><assert-not-a-sentence/></result>
+    </test-case>
+  </test-set>
+  
+  <test-set name="vowels">
+    <created by="CMSMcQ" on="2021-10-14"/>
+    <ixml-grammar>S : 'magic'; 'b', "c"; ["v"; 'aeiou'].</ixml-grammar>
+    <grammar-test>
+      <created by="CMSMcQ" on="2021-10-05"/>
+      <result>
+	<assert-xml-ref href="t2.ixml.xml"/>
+      </result>
+    </grammar-test>
+    
+    <test-case name="vowels-ok1">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>magic</test-string>
+      <result><assert-xml>
+	<S>magic</S>
+      </assert-xml></result>
+    </test-case>
+    <test-case name="vowels-ok2">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>bc</test-string>
+      <result><assert-xml>
+	<S>bc</S>
+      </assert-xml></result>
+    </test-case>
+    <test-case name="vowels-ok3">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>v</test-string>
+      <result><assert-xml>
+	<S>v</S>
+      </assert-xml></result>
+    </test-case>
+    <test-case name="vowels-ok4">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>e</test-string>
+      <result><assert-xml>
+	<S>e</S>
+      </assert-xml></result>
+    </test-case>
+    <test-case name="vowels-ok5">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>u</test-string>
+      <result><assert-xml>
+	<S>u</S>
+      </assert-xml></result>
+    </test-case>
+    
+    <test-case name="vowels-nok1">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>magic </test-string>
+      <result><assert-not-a-sentence/></result>
+    </test-case>
+    <test-case name="vowels-nok2">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>b</test-string>
+      <result><assert-not-a-sentence/></result>
+    </test-case>
+    <test-case name="vowels-nok3">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>V</test-string>
+      <result><assert-not-a-sentence/></result>
+    </test-case>
+    <test-case name="vowels-nok4">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>aeiou</test-string>
+      <result><assert-not-a-sentence/></result>
+    </test-case>
+    <test-case name="vowels-nok5">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>b c</test-string>
+      <result><assert-not-a-sentence/></result>
+    </test-case>
+    
+    <test-case name="vowels-nok6">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>S : 'magic'; 'b', "c"; ["v"; 'aeiou'].</test-string>
+      <result><assert-not-a-sentence/></result>
+    </test-case>
+  </test-set>
+</test-catalog>

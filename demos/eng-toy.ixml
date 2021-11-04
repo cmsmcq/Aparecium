@@ -1,0 +1,27 @@
+{ A toy grammar for English }
+
+{ Clauses }
+-sentence: transitive-sentence; intransitive-sentence.
+transitive-sentence:  np, vp-t, stop.
+intransitive-sentence:  np, vp-i, stop.
+
+{ Phrases }
+np: pn; det?, n, pp*; pron.
+vp-t:  v-t, np, pp*.
+vp-i:  v-i, pp*.
+pp: prep, np.
+
+{ Word classes }
+pn: s, ('Sam'; 'Sarah').
+det: s, ('the'; 'some').
+n: s, ('cows'; 'plant'; 'grass'; 'people'; 'telescope'; 'hill').
+pron: s, ('I'; 'we'; 'you').
+
+v-t: s, ('ate'; 'saw').
+v-i: s, ('ate'; 'laughed').
+prep: s, ('on'; 'with'; 'for').
+
+
+{ Miscellaneous }
+-s: -[Zs]*.
+stop: s, [".!?"].

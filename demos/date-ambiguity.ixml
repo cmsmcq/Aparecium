@@ -1,0 +1,7 @@
+date: us; world.
+world:  day, '/', month, '/', year.
+us: month, '/', day, '/', year.
+day: ['012'], digit; '30'; '31'.
+month: '0', ['1'-'9']; '10'; '11'; '12'.
+year: digit, digit, digit, digit.
+-digit: ['0123456789'].

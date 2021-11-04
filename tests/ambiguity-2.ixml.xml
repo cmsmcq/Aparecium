@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ixml><rule name="S"
+	    >:<alt
+	    ><repeat0><nonterminal name="L"/>*</repeat0
+	    >,<literal sstring="a"
+	    />,<nonterminal name="R"/></alt
+	    >.</rule
+	    ><rule name="L"
+	    >:<alt/>.</rule
+	    ><rule name="R"
+	    >:<alt/>.</rule
+	    ><comment> infinite number of parse trees, arbitrary width. </comment
+></ixml>

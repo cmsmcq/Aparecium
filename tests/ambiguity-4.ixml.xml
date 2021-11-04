@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ixml>
+   <rule name="A">=  <alt>
+         <nonterminal name="B"/>
+      </alt>
+      <alt>
+         <nonterminal name="C"/>
+      </alt>. 
+</rule>
+   <rule name="B">=  <alt>
+         <literal sstring="a"/>
+      </alt>
+      <alt>
+         <nonterminal name="C"/>
+      </alt>. 
+</rule>
+   <rule name="C">:  <alt>
+         <literal sstring="a"/>
+      </alt>
+      <alt>
+         <nonterminal name="B"/>
+      </alt>. 
+<comment> infinite trees, unbounded depth, multiple original trees </comment>
+   </rule>
+</ixml>

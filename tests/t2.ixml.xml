@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ixml
+    ><rule name="S"
+	   >:<alt><literal sstring="magic"/></alt
+	   >;<alt><literal sstring="b"/>,<literal dstring="c"/></alt
+	   >;<alt><inclusion
+	     >[<literal dstring="v"
+	     />;<literal sstring="aeiou"
+	   />]</inclusion></alt
+    >.</rule
+></ixml>

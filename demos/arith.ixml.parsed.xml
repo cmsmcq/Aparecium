@@ -1,0 +1,47 @@
+<ixml>
+  <comment> simple arithmetic </comment>
+  <rule name="expr">:<alt>
+      <option>
+        <nonterminal name="s"/>?</option>,<nonterminal name="sum"/>,<option>
+        <nonterminal name="s"/>?</option>
+    </alt>.</rule>
+  <rule name="sum">:<alt>
+      <nonterminal name="product"/>
+    </alt>;<alt>
+      <nonterminal name="sum"/>,<nonterminal name="addop"/>,<nonterminal name="product"/>
+    </alt>.</rule>
+  <rule name="product">:<alt>
+      <nonterminal name="factor"/>
+    </alt>;<alt>
+      <nonterminal name="product"/>,<nonterminal name="mulop"/>,<nonterminal name="factor"/>
+    </alt>.</rule>
+  <rule name="factor">:<alt>
+      <nonterminal name="number"/>
+    </alt>;<alt>
+      <nonterminal name="var"/>
+    </alt>;<alt>
+      <literal sstring="("/>,<nonterminal name="expr"/>,<literal sstring=")"/>
+    </alt>.</rule>
+  <rule name="number">:<alt>
+      <repeat1>
+        <inclusion>[<range from="0" to="9">-</range>]</inclusion>+</repeat1>
+    </alt>.</rule>
+  <rule name="var">:<alt>
+      <repeat1>
+        <inclusion>[<range from="a" to="z">-</range>;<range from="A" to="Z">-</range>]</inclusion>+</repeat1>
+    </alt>.</rule>
+  <rule mark="@" name="addop">:<alt>
+      <option>
+        <nonterminal name="s"/>?</option>,<inclusion>[<literal sstring="+-"/>]</inclusion>,<option>
+        <nonterminal name="s"/>?</option>
+    </alt>.</rule>
+  <rule mark="@" name="mulop">:<alt>
+      <option>
+        <nonterminal name="s"/>?</option>,<inclusion>[<literal sstring="*/"/>]</inclusion>,<option>
+        <nonterminal name="s"/>?</option>
+    </alt>.</rule>
+  <rule mark="-" name="s">:<alt>
+      <repeat1>
+        <inclusion tmark="-">[<class code="Zs"/>]</inclusion>+</repeat1>
+    </alt>.</rule>
+</ixml>

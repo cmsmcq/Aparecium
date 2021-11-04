@@ -1,0 +1,45 @@
+<ixml>
+  <rule name="expr">:<alt>
+      <nonterminal name="term"/>
+    </alt>;<alt>
+      <nonterminal name="expr"/>,<option>
+        <nonterminal mark="-" name="s"/>?</option>,<literal dstring="+"/>,<option>
+        <nonterminal mark="-" name="s"/>?</option>,<nonterminal name="term"/>
+    </alt>;<alt>
+      <nonterminal name="expr"/>,<option>
+        <nonterminal mark="-" name="s"/>?</option>,<literal dstring="-"/>,<option>
+        <nonterminal mark="-" name="s"/>?</option>,<nonterminal name="term"/>
+    </alt>.</rule>
+  <rule name="term">:<alt>
+      <nonterminal name="factor"/>
+    </alt>;<alt>
+      <nonterminal name="term"/>,<option>
+        <nonterminal mark="-" name="s"/>?</option>,<literal dstring="*"/>,<option>
+        <nonterminal mark="-" name="s"/>?</option>,<nonterminal name="factor"/>
+    </alt>;<alt>
+      <nonterminal name="term"/>,<option>
+        <nonterminal mark="-" name="s"/>?</option>,<literal dstring="/"/>,<option>
+        <nonterminal mark="-" name="s"/>?</option>,<nonterminal name="factor"/>
+    </alt>.</rule>
+  <rule name="factor">:<alt>
+      <nonterminal name="num"/>
+    </alt>;<alt>
+      <nonterminal name="var"/>
+    </alt>;<alt>
+      <literal dstring="("/>,<option>
+        <nonterminal mark="-" name="s"/>?</option>,<nonterminal name="expr"/>,<option>
+        <nonterminal mark="-" name="s"/>?</option>,<literal dstring=")"/>
+    </alt>.</rule>
+  <rule name="num">:<alt>
+      <repeat1>
+        <inclusion>[<range from="0" to="9">-</range>]</inclusion>+</repeat1>
+    </alt>.</rule>
+  <rule name="var">:<alt>
+      <repeat1>
+        <inclusion>[<range from="a" to="z">-</range>]</inclusion>+</repeat1>
+    </alt>.</rule>
+  <rule mark="-" name="s">:<alt>
+      <repeat1>
+        <inclusion tmark="-">[<class code="Zs"/>]</inclusion>+</repeat1>
+    </alt>.</rule>
+</ixml>

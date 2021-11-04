@@ -1,0 +1,10 @@
+css: rule*s.
+rule: @selector, s, block.
+selector: -name.
+-block: -"{", s, (property)*semi, (semi|s), -"}".
+property:  @name, s, -":", s, @value.
+name: ["a"-"z"; '-_']+.
+value: propchar+, ([Zs]+, propchar+)*.
+propchar: ~[';'; '{}'].
+-semi: s, -";", s.
+-s: -[#20; #A; #D; #9]*.

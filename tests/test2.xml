@@ -1,0 +1,113 @@
+<test-catalog xmlns="https://github.com/cmsmcq/ixml-tests"
+	      name="Level point-five tests"
+	      release-date="2021-10-14"
+	      >
+  <description>
+    <p>Contains a handful of tests used in the initial
+    bootstrapping of Aparecium 0.2.</p>
+    <p>You know how when you start on something you
+    take a single example or two and work it?  This is
+    the set of examples a little later, when you start
+    getting more ambitious and hopeful that it actually
+    works.</p>
+  </description>
+
+  <test-set name="a">
+    <created by="CMSMcQ" on="2021-10-14"/>
+    <description>
+      <p>Can we parse the grammar for ixml?</p>
+    </description>
+
+    <ixml-grammar-ref href="../lib/ixml.2021-09-24.ixml"/>
+    <grammar-test>
+      <created by="CMSMcQ" on="2021-10-05"/>
+      <result>
+	<assert-xml-ref href="../lib/ixml.2021-09-14.ixml.xml"/>
+      </result>
+    </grammar-test>
+    
+  </test-set>
+  
+  <test-set name="ambiguity-1">
+    <created by="CMSMcQ" on="2021-10-14"/>
+    <ixml-grammar>S : S | 'a'.</ixml-grammar>
+    <description>
+      <p>An infinite number of parse trees of unbounded
+      depth.  Only one 'original' tree.</p>
+    </description>
+    <grammar-test>
+      <created by="CMSMcQ" on="2021-10-05"/>
+      <result>
+	<assert-xml-ref href="ambiguity-1.ixml.xml"/>
+      </result>
+    </grammar-test>
+    
+    <test-case name="vowels-ok1">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>magic</test-string>
+      <result><assert-xml>
+	<S>magic</S>
+      </assert-xml></result>
+    </test-case>
+    <test-case name="vowels-ok2">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>bc</test-string>
+      <result><assert-xml>
+	<S>bc</S>
+      </assert-xml></result>
+    </test-case>
+    <test-case name="vowels-ok3">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>v</test-string>
+      <result><assert-xml>
+	<S>v</S>
+      </assert-xml></result>
+    </test-case>
+    <test-case name="vowels-ok4">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>e</test-string>
+      <result><assert-xml>
+	<S>e</S>
+      </assert-xml></result>
+    </test-case>
+    <test-case name="vowels-ok5">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>u</test-string>
+      <result><assert-xml>
+	<S>u</S>
+      </assert-xml></result>
+    </test-case>
+    
+    <test-case name="vowels-nok1">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>magic </test-string>
+      <result><assert-not-a-sentence/></result>
+    </test-case>
+    <test-case name="vowels-nok2">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>b</test-string>
+      <result><assert-not-a-sentence/></result>
+    </test-case>
+    <test-case name="vowels-nok3">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>V</test-string>
+      <result><assert-not-a-sentence/></result>
+    </test-case>
+    <test-case name="vowels-nok4">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>aeiou</test-string>
+      <result><assert-not-a-sentence/></result>
+    </test-case>
+    <test-case name="vowels-nok5">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>b c</test-string>
+      <result><assert-not-a-sentence/></result>
+    </test-case>
+    
+    <test-case name="vowels-nok6">
+      <created by="CMSMcQ" on="2021-10-14"/>
+      <test-string>S : 'magic'; 'b', "c"; ["v"; 'aeiou'].</test-string>
+      <result><assert-not-a-sentence/></result>
+    </test-case>
+  </test-set>
+</test-catalog>

@@ -1,0 +1,49 @@
+<test-catalog xmlns="https://github.com/cmsmcq/ixml-tests"
+	      name="Level zero tests"
+	      release-date="2021-10-05"
+	      >
+  <description>
+    <p>Contains a handful of tests used in the initial
+    bootstrapping of Aparecium 0.2.</p>
+    <p>You know how when you start on something you
+    take a single example or two and work it?  This is
+    that set of examples.</p>
+  </description>
+
+  <test-set name="zero">
+    <created by="CMSMcQ" on="2021-10-05"/>
+    <description>
+      <p>First task:  make it work using the grammar for ixml.</p>
+    </description>
+    <vxml-grammar-ref href="../lib/ixml.2021-09-14.ixml.xml"/>
+    
+    <test-case>
+      <created by="CMSMcQ" on="2021-10-05"/>
+      <test-string>S : 'a'.</test-string>
+      <result>
+	<assert-xml-ref href="t1.ixml.xml"/>
+      </result>
+    </test-case>
+    <test-case>
+      <created by="CMSMcQ" on="2021-10-05"/>
+      <test-string-ref href="t1.ixml"/>
+      <result>
+	<assert-xml-ref href="t1.ixml.xml"/>
+      </result>
+    </test-case>
+    <test-case>
+      <created by="CMSMcQ" on="2021-10-05"/>
+      <test-string>S : 'magic'; 'b', "c"; ["v"; 'aeiou'].</test-string>
+      <result>
+	<assert-xml-ref href="t2.ixml.xml"/>
+      </result>
+    </test-case>
+    <test-case>
+      <created by="CMSMcQ" on="2021-10-05"/>
+      <test-string-ref href="t2.ixml"/>
+      <result>
+	<assert-xml-ref href="t2.ixml.xml"/>
+      </result>
+    </test-case>
+  </test-set>
+</test-catalog>
