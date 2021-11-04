@@ -20,7 +20,7 @@ import module
 
 let $fVerbose := ('always', 'never', 'failure')[1]
 
-let $basedir := '/Users/cmsmcq/2021/Aparecium',
+let $basedir := '..',
     $builddir := $basedir || '/build',
     $testindir := $basedir || '/tests',
     $testoutdir := $testindir || '/output',

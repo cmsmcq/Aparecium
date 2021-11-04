@@ -56,8 +56,7 @@ declare function epi:earley-parse(
 	       then $pt  
                else epi:astXparsetree($pt, count($lpt)) :)
         (: What an ugly hack!  Clean this up! :)
-        let $logfn := '/Users/cmsmcq/'
-                      || '2021/Aparecium/tests/output/raw.'
+        let $logfn := '../tests/output/raw.'
 	              || translate(
                            string(
                              adjust-dateTime-to-timezone(

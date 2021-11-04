@@ -226,9 +226,7 @@ declare function aparecium:recompile-ixml-grammar() as element(ixml) {
    ****************************************************************
    :)
 declare variable $aparecium:libloc as xs:string
-  := 'file://'
-     || '/Users/cmsmcq/'
-     || '2021/Aparecium/lib';
+  := '../lib';
 declare variable $aparecium:ixml.ixml as xs:string
   := $aparecium:libloc || '/ixml.2021-09-14.ixml';
 
