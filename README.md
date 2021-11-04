@@ -115,6 +115,15 @@ or the compiled version.
 
 ## Known bugs and other shortcomings
 
+* It's too slow.  Way too slow.  Sooo sloooooooooooooowwww!
+
+  Short inputs work OK, but if you're thinking of realistically
+  sized grammars, this software is not now and may never be what
+  you need. But it may be just the trick for figuring out or 
+  explaining to others what it is you need.
+
+* It needs more thorough testing.
+
 * Single-character Unicode class codes like `[L]` seem to work
 some of the time but not all of the time.  Or maybe they never
 work.  Two-character codes do seem to work, so if I write
@@ -136,13 +145,13 @@ element in the result, you will see something like this:
         ...
     </Closure>
 ```
-The highest value seen for the `item\@to` attribute tells you where in
-the input the parser stopped thinking it understood what was going on.
-Here, the two items say that the parser has managed to recognize the
-string from position 0 to position 4 (so the first four characters of
-the input) as some portion of a 'rule', and the string from 3 to 4 as
-an 's', or part of an 's'.  So the parse looked OK until position 4 of
-the input.  Then it all turned pear-shaped.
+  The highest value seen for the `item/@to` attribute tells you where in
+  the input the parser stopped thinking it understood what was going on.
+  Here, the two items say that the parser has managed to recognize the
+  string from position 0 to position 4 (so the first four characters of
+  the input) as some portion of a 'rule', and the string from 3 to 4 as
+  an 's', or part of an 's'.  So the parse looked OK until position 4 of
+  the input.  Then it all turned pear-shaped.
 
-It is possible to get better diagnostics out of the data structures,
-and one day Aparecium should do so.
+  It is possible to get better diagnostics out of the data structures,
+  and one day Aparecium will do so.
