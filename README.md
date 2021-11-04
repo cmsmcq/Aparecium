@@ -7,8 +7,8 @@ is a processor for invisible XML.
 
 Eventually, Aparecium will be available in both XQuery and 
 XSLT forms; at this writing (November 2021) only XQuery is
-available.  The schedule for the XSLT version is 'real soon 
-now'.
+available.  The schedule for the XSLT version is ‘real soon
+now’.
 
 ## Current status
 
@@ -32,23 +32,25 @@ grammar.
 ## How to use Aparecium to experiment with ixml
 
 The easiest way to play around is to load one of the query modules
-from the `demos` subdirectory into BaseX or Oxygen and
+from the `demos/` subdirectory into BaseX or Oxygen and
 evaluate the query, then modify it and evaluate it again.
 
 There are several demos:
 
-* `demo.date.xq` illustrates one of the date grammars from
-Steven Pemberton's ixml tutorial on the first day of
-Declarative Amsterdam.
+* `demo.date.xq` illustrates one of the date grammars from Steven
+Pemberton’s [ixml
+tutorial](https://homepages.cwi.nl/~steven/ixml/tutorial/tutorial.xhtml)
+on the first day of Declarative Amsterdam 2021.
 
 You will see, if you inspect it, that the demo has three main parts:
 first it imports the Aparecium module, then it creates an XML element
+(named `demo`)
 with one or more `grammar` elements
 and one or more `test-input` elements, and finally it
 returns the result of calling `aparecium:parse-string($i, $g)`
 for each test-input `$i` and each grammar `$g`.
 
-You can modify the grammar and/or the input and re-evaluate
+You can modify the grammar or the input (or both) and re-evaluate
 the query to see the effects of your changes.
 
 * `demo.s-expressions.xq` shows a grammar for simple
@@ -148,10 +150,10 @@ element in the result, you will see something like this:
   The highest value seen for the `item/@to` attribute tells you where in
   the input the parser stopped thinking it understood what was going on.
   Here, the two items say that the parser has managed to recognize the
-  string from position 0 to position 4 (so the first four characters of
-  the input) as some portion of a 'rule', and the string from 3 to 4 as
-  an 's', or part of an 's'.  So the parse looked OK until position 4 of
+  string from position 0 to position 4 (so the first five characters of
+  the input) as some portion of a rule, and the string from 3 to 4 as
+  an ‘s’, or part of an ‘s’.  So the parse looked OK until position 4 of
   the input.  Then it all turned pear-shaped.
 
   It is possible to get better diagnostics out of the data structures,
-  and one day Aparecium will do so.
+  and one day Aparecium will do so. Real soon now.
