@@ -156,4 +156,4 @@ element in the result, you will see something like this:
   the input.  Then it all turned pear-shaped.
 
   It is possible to get better diagnostics out of the data structures,
-  and one day Aparecium will do so.
+  and one day Aparecium will do so.  Real soon now.
