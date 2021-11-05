@@ -92,7 +92,7 @@ attributes to the elements in the parsed form, which you do not need
 to understand and which I am not going to try to explain here.)
 
 You can change the filename in the value of the `$g` variable to load
-`arith.ixml.compiled.xml`, `arith2`, `arith3`, or `arith4`.  The parse
+`arith.ixml.compiled.xml`, `arith2....`, `arith3....`, or `arith4....`.  The parse
 trees vary somewhat, reflecting the different grammars.
 
 * `parse-english-toy.demo.xq` parses sentences with a pre-compiled
