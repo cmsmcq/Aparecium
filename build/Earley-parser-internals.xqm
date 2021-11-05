@@ -56,7 +56,7 @@ declare function epi:earley-parse(
 	       then $pt  
                else epi:astXparsetree($pt, count($lpt)) :)
         (: What an ugly hack!  Clean this up! :)
-        let $logfn := '/Users/cmsmcq/'
+        (: let $logfn := '/Users/cmsmcq/'
                       || '2021/Aparecium/tests/output/raw.'
 	              || translate(
                            string(
@@ -68,7 +68,8 @@ declare function epi:earley-parse(
                       || $npt
                       || '.xml'   
         return (file:write($logfn, $pt), 
-                epi:astXparsetree($pt, count($lpt)))
+                epi:astXparsetree($pt, count($lpt))) :)
+        return epi:astXparsetree($pt, count($lpt)) 
         
    else (: otherwise, send an apology and explanation :)
    <no-parse>

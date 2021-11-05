@@ -9,13 +9,10 @@ let $demo := <demo>
   using the given grammar. Edit the grammar and test input and re-evaluate
   to see the effects of your changes.</p>
   <options show-parsed-grammar="no"/>
-  <grammar>list: item+s.
-  -item: name; number.
-  name: [Ll; Lu], [Ll; Lu; Nd; '-._']*.
-  number: [Nd]+, ('.', [Nd]+)?.
-  s: -[' '; #0a; #0d]+.
-  </grammar>
-  <test-input>12 45.23 hike six40.now</test-input>
+  <grammar>S: S; 'a'.</grammar>
+  <test-input>a</test-input>
+  <test-input>b</test-input>
+  <test-input></test-input>
 </demo>
 
 return <results>{
