@@ -32,15 +32,21 @@ grammar.
 ## How to use Aparecium to experiment with ixml
 
 The easiest way to play around is to load one of the query modules
-from the `demos/` subdirectory into BaseX or Oxygen and
+from the `demos/` subdirectory into BaseX (or Oxygen, but see below) and
 evaluate the query, then modify it and evaluate it again.
 
-*In BaseX, just open the demo you want and click the green "Run query"
+In BaseX, just open the demo you want and click the green "Run query"
 button. In Oxygen, you'll need to define an XQuery scenario which
 evaluates the current buffer; you may find it convenient to have it
 save the output to a file and open it in a buffer.  Then associate
 that transformation with file you want to work with, and click the
-"Run transformation" button to run the demo.*
+"Run transformation" button to run the demo.  
+
+*(Note, 5 Nov 2021:  It appears that I have not yet found a system-independent way of 
+specifying the location of the Aparecium library.  What is in the code
+now appears to work with BaseX, but not with Oxygen.  Sorry.  Adventurous 
+users may try updating the declaration of `$aparecium:libloc` 
+in Aparecium.xqm.)*
 
 There are several demos:
 
