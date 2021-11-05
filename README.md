@@ -44,7 +44,8 @@ that transformation with file you want to work with, and click the
 
 *(Note, 5 Nov 2021:  It appears that I have not yet found a system-independent way of 
 specifying the location of the Aparecium library.  What is in the code
-now appears to work with BaseX, but not with Oxygen.  Sorry.  Adventurous 
+now appears to work with BaseX, but I am getting conflicting reports
+about Oxygen:  works for some people and not for others.  Adventurous 
 users may try updating the declaration of `$aparecium:libloc` 
 in Aparecium.xqm.)*
 
