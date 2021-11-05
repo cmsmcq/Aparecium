@@ -140,7 +140,11 @@ work.  Two-character codes do seem to work, so if I write
 which amounts to the same thing.
 
 * If the input ixml grammar has syntax errors, the `parse-string()`
-function does not produce useful error diagnostics.
+function does not produce useful error diagnostics.  To debug 
+syntax errors in the input grammar, at the moment it's probably best to work
+with the `parse` option of `compile-a-grammar.xqm`.  That does not 
+help with semantic errors like references to undefined nonterminals,
+which Aparecium does not currently report.
 
 * If the input grammar is fine but the input is not grammatical,
 there are no error diagnostics to speak of; what you get is a
