@@ -35,6 +35,13 @@ The easiest way to play around is to load one of the query modules
 from the `demos/` subdirectory into BaseX or Oxygen and
 evaluate the query, then modify it and evaluate it again.
 
+*In BaseX, just open the demo you want and click the green "Run query"
+button. In Oxygen, you'll need to define an XQuery scenario which
+evaluates the current buffer; you may find it convenient to have it
+save the output to a file and open it in a buffer.  Then associate
+that transformation with file you want to work with, and click the
+"Run transformation" button to run the demo.*
+
 There are several demos:
 
 * `demo.date.xq` illustrates one of the date grammars from Steven
