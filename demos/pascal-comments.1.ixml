@@ -1,0 +1,24 @@
+{ Pascal-style comments.
+  This is a regular language and does not require context-free power,
+  so in fact a simple way to design it is as a finite state automaton,
+  which can be transcribed as a regular grammar.
+  }
+
+comment = '(*', q1.
+
+{ At q1, we have just read '(' }
+-q1 = '*', q2
+    | ')', qf
+    | ~['*'], q3.
+
+{ At q2, we have just read an asterisk. }
+-q2 = '*', q2
+    | ')', qf
+    | ~['*)'], q3.
+
+{ At q3, we have just read something other than an asterisk or '*)' }
+-q3 = '*', q2
+    | ~['*'], q3.
+
+{ At qf, we are done. }
+-qf = {final}.

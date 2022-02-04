@@ -1,0 +1,2 @@
+{ Pascal comments, compact }
+comment = '(*', (~['*'] | ('*'+, ~['*)']))*, '*'*, '*)'.

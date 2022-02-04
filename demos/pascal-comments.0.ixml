@@ -1,0 +1,6 @@
+comment = '(*', comment-element, '*)'.
+-comment-element = (nonstar | ssbnsc)*, star*.
+-nonstar = ~['*'].
+-star = '*'.
+{ star-something, but not star-closeparen }
+-ssbnsc = '*'+, ~['*)'].

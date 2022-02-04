@@ -3,12 +3,13 @@ import module namespace aparecium
 at "../build/Aparecium.xqm";
 
 (: A way to make it a little easier to experiment. :)
-let $option := ('parse', 'compile')[1]
-let $grammar-fn := 'arith.ixml',
-    $output-fn := 'file:///Users/cmsmcq/2021/github/Aparecium/demos/'
+let $option := ('parse', 'compile')[2]
+let $grammar-fn := 'pascal-comments.1.ixml',
+    $output-fn := 'file:///home/cmsmcq/2022/github/Aparecium/demos/'
                   || $grammar-fn || '.' 
                   || $option || 'd.xml',
-    $grammar := unparsed-text($grammar-fn)
+    $grammar := unparsed-text($grammar-fn) 
+                
 
 let $g0 := $grammar,
     $g1 := aparecium:parse-grammar-from-string($g0)
