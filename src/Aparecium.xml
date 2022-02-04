@@ -633,12 +633,13 @@ declare function aparecium:parse-resource(
    * ix:scan($E, $I)
    **************************************************************** :)
 (: If $E expects any terminals which occur as expected, return
-   the advance of E over that terminal. :)
+   the advance of E over those terminals.  There may be more than
+   one. :)
    
 declare function ix:scan(
   $E as item() (: ITEM :),
   $I as item() (: INPUT :)
-) as item()? (: ITEM? :) {
+) as item()* (: ITEM? :) {
   let $p := ixi:pToXEi($E),
       $lt := ixi:lsymExpectedXEi($E)[ixi:fTerminal(.)],
       $dummy := ixi:notrace(ixi:sXei($E), 'ix:scan() on item:') 

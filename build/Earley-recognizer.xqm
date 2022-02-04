@@ -16,7 +16,7 @@ at "Earley-rec-internals.xqm";
 declare function ix:scan(
   $E as item() (: ITEM :),
   $I as item() (: INPUT :)
-) as item()? (: ITEM? :) {
+) as item()* (: ITEM? :) {
   let $p := ixi:pToXEi($E),
       $lt := ixi:lsymExpectedXEi($E)[ixi:fTerminal(.)],
       $dummy := ixi:notrace(ixi:sXei($E), 'ix:scan() on item:') 
