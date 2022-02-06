@@ -11,8 +11,11 @@
 # and then use rsync --checksum to copy the output to the
 # build directory only if it has changed.
 
-BINDIR=/Users/cmsmcq/bin
-XSLTDIR=/Users/cmsmcq/blackmesatech.com/lib
+BINDIR=/home/cmsmcq/bin
+XSLTDIR=/home/cmsmcq/blackmesatech.com/lib
+
+### BINDIR=../../../bin
+### XSLTDIR=../../../blackmesatech.com/lib
 
 XSLT=$(BINDIR)/saxon-he-wrapper.sh
 WEAVEHTML=src/local.xsl
@@ -20,7 +23,7 @@ WEAVEHTML=src/local.xsl
 # Aparecium is a literate program.  To generate all outputs,
 # weave it and tangle it.
 
-all: tangled woven
+all: tangled woven testharness
 
 # Weave
 #
@@ -61,4 +64,26 @@ tangled: build/Aparecium.xqm
 build/Aparecium.xqm: src/Aparecium.xml
 	(cd tmp; $(XSLT) ../$< tangle.xsl zzz.tangle.out)
 	rsync --checksum tmp/*.xqm build
+
+
+# Addendum:  test harness.  Same operations (they should perhaps
+# be factored out into general rules)`
+
+testharness: tests/test-driver.xq \
+		build/test-harness.xqm \
+		doc/test-harness.xhtml
+
+build/test-harness.xqm:  src/test-harness.xml
+	(cd tmp; $(XSLT) ../$< tangle.xsl zzz.tangle.out)
+	rsync --checksum tmp/test-harness.xqm build
+	rsync --checksum tmp/test-driver.xq tests
+
+tests/test-driver.xq:  build/test-harness.xqm
+	rsync --checksum tmp/test-driver.xq tests
+
+doc/test-harness.xhtml: doc/test-harness.html
+	tidy -output $@ -asxhtml $<
+
+doc/test-harness.html: src/test-harness.xml
+	$(XSLT) $< $(WEAVEHTML) $@
 

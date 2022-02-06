@@ -1,6 +1,6 @@
 <test-catalog xmlns="https://github.com/cmsmcq/ixml-tests"
 	      name="Level zero tests"
-	      release-date="2021-10-05"
+	      release-date="2021-10-05"	      
 	      >
   <description>
     <p>Contains a handful of tests used in the initial
@@ -10,6 +10,11 @@
     that set of examples.</p>
   </description>
 
+  <description>
+    <p>Updated 2022-02-04 to make valid against the
+    current test-catalog schema.</p>
+  </description>
+
   <test-set name="zero">
     <created by="CMSMcQ" on="2021-10-05"/>
     <description>
@@ -17,28 +22,28 @@
     </description>
     <vxml-grammar-ref href="../lib/ixml.2021-09-14.ixml.xml"/>
     
-    <test-case>
+    <test-case name="t1i">
       <created by="CMSMcQ" on="2021-10-05"/>
       <test-string>S : 'a'.</test-string>
       <result>
 	<assert-xml-ref href="t1.ixml.xml"/>
       </result>
     </test-case>
-    <test-case>
+    <test-case name="t1x">
       <created by="CMSMcQ" on="2021-10-05"/>
       <test-string-ref href="t1.ixml"/>
       <result>
 	<assert-xml-ref href="t1.ixml.xml"/>
       </result>
     </test-case>
-    <test-case>
+    <test-case name="t2i">
       <created by="CMSMcQ" on="2021-10-05"/>
       <test-string>S : 'magic'; 'b', "c"; ["v"; 'aeiou'].</test-string>
       <result>
 	<assert-xml-ref href="t2.ixml.xml"/>
       </result>
     </test-case>
-    <test-case>
+    <test-case name="t2x">
       <created by="CMSMcQ" on="2021-10-05"/>
       <test-string-ref href="t2.ixml"/>
       <result>

@@ -1,0 +1,884 @@
+<!DOCTYPE HTML><html>
+<!--Need to find a way to insert the current date-->
+<head><meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
+<title>Test harness for Aparecium</title>
+
+<style type="text/css">
+      p {
+      margin-top: 0.6em;      
+      margin-bottom: 0.6em;
+    }
+    p.bibl {
+      margin-top: 0.6em;      
+      margin-bottom: 0.6em;
+      margin-left: 2em;
+      text-indent: -2em;
+    }
+    .Real-P {
+      margin-top: 0.6em;      
+      margin-bottom: 0.6em;
+    }
+    div.sp {
+      margin-top: 0.6em;      
+      margin-bottom: 0.6em;
+    }
+    div.address {
+      margin-top: 0.6em;      
+      margin-bottom: 0.6em;
+      margin-left: 2em;
+    }
+    div.note {
+      margin-top: 1em;      
+      margin-left: 2em;
+      
+    }
+    pre {  
+      font-family: monospace;
+      margin-left: 2em 
+    }  
+    a:hover { 
+      background: #CCF 
+    }
+    td.no { 
+      background: #CCF 
+    }
+    .author { 
+      font-size: x-large
+    }
+    .bio { 
+      font-size: small;
+      font-style: italic
+    }
+    span.decision { 
+    }
+    span.result { 
+      font-weight: bold
+    }
+    span.aye { 
+      display: block;
+      margin-left: 2em;
+    }
+    span.nay { 
+      display: block;
+      margin-left: 2em;
+    }
+    span.abstain { 
+      display: block;
+      margin-left: 2em;
+    }
+    span.result { 
+      display: block;
+      margin-left: 2em;
+      font-weight: bold
+    }
+    span.speaker { 
+      display: inline;
+    }
+    span.typename { 
+      display: inline;
+      font-family: monospace;
+    }
+   
+  div.scrap {
+    margin-top: 0.5em; 
+    background-color: #CFEFCF; 
+    background-color: #E7F7E7; 
+    padding: 0.6em;
+    margin-bottom: 0.5em;
+  }
+  pre.scrapbody {
+    margin-left: 0.5em; 
+    margin-bottom: 0.5em;
+  }
+  span.scrapcontinuations {
+    font-size:smaller; 
+  }
+  span.scrapinbound {
+    font-size:smaller;
+  }
+  span.scrapref {
+    font-family: New Times Roman, serif, Lucida Sans Unicode;
+  }
+  em.scrapptr {
+    font-family: New Times Roman, serif, Lucida Sans Unicode;
+  }
+  dl.desclist {
+    list-style-type: none;
+  }
+  dl.desclist > dt {
+    display: run-in;
+    padding-right: 0.5em;
+/*
+*/
+  }
+  dl.desclist > dd {
+    text-indent: -1em;
+    margin-left: 1em; 
+  }
+  ul.desclist { 
+    list-style-type: none;
+  }
+  ul.desclist > li {
+    margin-left: 2em;
+    text-indent: -2em;
+  }
+  div.epigraph .Real-P {margin-top: 0em; margin-bottom: 0em;} 
+  </style></head><body><div class="doc">
+
+
+
+
+
+
+<h1>Test harness</h1>
+<h1>for Aparecium</h1>
+
+
+<h3>C. M. Sperberg-McQueen</h3>
+<h3>4 February 2022</h3>
+
+<div class="versionList"><ul>
+<li id="qd" class="versionentry">Quick and dirty first cut</li>
+<li id="alt" class="versionentry">Alternative formulations of some constructs</li>
+</ul></div>
+
+<hr><a name="toc"></a>
+<ul><!-- and a 1! -->
+<li>1. <a href="#task">The task</a></li><li>2. <a href="#testcat">The structure of a test catalog</a></li><li>3. <a href="#testsets">Handling test catalogs and test sets</a><ul>
+<!-- and a 2! -->
+<li>3.1. <a href="#setup">Preparing to call the <i>t:run-tests()</i> function</a></li>
+<li>3.2. <a href="#run-tests">Handling one test catalog: the <i>run-tests()</i> function</a></li>
+<li>3.3. <a href="#run-test-set">Handling one test set: the <i>run-test-set()</i> function</a></li>
+</ul></li><li>4. <a href="#grammars">Loading and testing the grammar for a test set</a></li><li>5. <a href="#testcases">Running the test cases</a></li><li>6. <a href="#evaluation">Evaluating the test case results</a></li><li>7. <a href="#output">Reporting the results</a></li></ul>
+
+<hr>
+<div class="Real-P">This document describes a test harness for the invisible-XML
+processor Aparecium.  It is a &#x2018;literate program&#x2019;:
+the executable code (in this case an XQuery module) is embedded in
+English prose explaining the program.  The document assumes the reader
+is either familiar with XQuery, literate programming, invisible XML,
+and Aparecium, or else possessed of a remarkably high tolerance for
+boredom.  For more information on literate programming, Donald Knuth's
+article of that name remains a good source.</div>
+
+<div class="Real-P">In its current form, this document describes an initial quick and
+dirty first cut, taking a lot of shortcuts in order to get something
+running.  When that's done, I expect to come back and to a v0.2
+version that replaces some of those quick and dirty shortcuts with
+better code.</div>
+
+
+<div class="div">
+
+<h2><a name="task" id="task">1. </a>The task</h2>
+<div class="Real-P">Our task is to define a &#x2018;test harness&#x2019; for
+Aparecium.  That involves two things: first an XQuery library module
+which reads a test catalog, runs the tests, evaluates the results, and
+creates a report showing which test cases passed and which failed, and
+second a sample XQuery module which imports and calls the library on a
+particular catalog and may save or do something with the result.</div>
+<div class="Real-P">The overall structure of the calling module is straightforward:
+<div class="scrap"><span><a name="dr-top">&#x3008; 1  [File test-driver.xq]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+import module namespace t =
+"http://blackmesatech.com/2022/iXML/test-harness"
+at "../build/test-harness.xqm";
+
+declare namespace tc =
+"https://github.com/cmsmcq/ixml-tests";
+
+<span class="scrapref">&#x3008; <em class="scrapptr"><a href="#dr-setup">Set up variables and options 5</a></em> &#x3009;</span>
+
+let $results := t:run-tests($test-catalog-uri, $options),
+    $dummy   := file:create-dir($outdir)
+return ($results,
+        file:write($report-uri, $results))
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound"></span>
+</div>
+
+</div>
+<div class="Real-P">The overall structure of the library module is similarly
+conventional:
+<div class="scrap"><span><a name="lib-top">&#x3008; 2  [File test-harness.xqm]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+module namespace t =
+"http://blackmesatech.com/2022/iXML/test-harness";
+<span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-nsdecls">Namespace declarations and imports for library module 3</a></em> &#x3009;</span>
+
+<span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-functions">Declare library functions 4</a></em> &#x3009;</span>
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound"></span>
+</div>
+</div>
+<div class="Real-P">Since the test catalogs we are processing use the
+ixml-tests namespace, we need to declare it.
+<div class="scrap"><span><a name="lib-nsdecls">&#x3008; 3 Namespace declarations and imports for library module &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+declare namespace tc =
+"https://github.com/cmsmcq/ixml-tests";
+</pre>
+<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e338">Namespace declarations and imports, cont'd 18</a>&#x3009;<br></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-top">[File test-harness.xqm] 2</a> &#x3009; <br></span>
+</div>
+
+</div>
+<div class="Real-P">We can look ahead to the set of functions we will define:
+<div class="scrap"><span><a name="lib-functions">&#x3008; 4 Declare library functions &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+<span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-run-tests">The run-test() function 7</a></em> &#x3009;</span>
+<span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-run-test-set">The run-test-set() function 12</a></em> &#x3009;</span>
+<span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-load-grammar">The load-grammar() function 20</a></em> &#x3009;</span>
+<span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-test-grammar">The test-grammar() function 21</a></em> &#x3009;</span>
+<span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-run-test-case">The run-test-case() function 22</a></em> &#x3009;</span>
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-top">[File test-harness.xqm] 2</a> &#x3009; <br></span>
+</div>
+</div>
+</div>
+
+
+<div class="div">
+
+<h2><a name="testcat" id="testcat">2. </a>The structure of a test catalog</h2>
+
+<div class="Real-P">The test collections we are interested in running will all have
+test catalogs in XML, using the vocabulary defined in the author's
+<i>ixml-tests</i> repository on GitHub. A test catalog is an
+XML document containing one or more <em>test sets</em>; in the
+simple case a test set specifies an ixml grammar and a set of test
+cases which use that grammar.  Each test case specifies an input
+string to be parsed using the grammar and an expected result.</div>
+<div class="Real-P">Several variations are possible:
+<ul><li>A test set may contain nested test sets, to group tests in
+whatever way seems useful.</li>
+<li>Test sets, input grammars, input strings, and expected results
+may be embedded in the test catalog or stored externally and referred
+to from the catalog.  Grammars may be given in ixml (invisible XML) or
+vxml (&#x2018;visible&#x2019; XML) form.</li>
+<li>At each level (test catalog, test set, test case), metadata may
+be provided: prose descriptions, pointers to external documentation,
+and application-specific information (embedded in an &lt;<em>app-info</em>&gt;
+element).</li>
+</ul>
+</div>
+
+</div>
+
+
+<div class="div">
+
+<h2><a name="testsets" id="testsets">3. </a>Handling test catalogs and test sets</h2>
+
+<div class="Real-P">Given the test catalog structure just described, the natural
+structure for the test harness is thus to iterate over top-level test
+sets, and within a test set to iterate over nested test sets and test
+cases.</div>
+
+
+<div class="div">
+
+<h3><a name="setup" id="setup">3.1. </a>Preparing to call the <i>t:run-tests()</i> function</h3>
+<div class="Real-P">The driver will call the library's <i>run-tests()</i>
+function with the URI of the test catalog to be run.  Several test
+catalogs are available; the driver should make it easy to switch from
+one to another.  Since the easiest way to refer to a directory can
+vary on different machines, I'll start by putting the relevant
+directory names into variables.  I'll use relative paths where
+possible.  And while we're thinking about directory names, I'll define
+the directory where any output should go, including a timestamp in the
+directory name to allow the results of multiple test runs to be saved
+without interfering with each other.
+<div class="scrap"><span><a name="dr-setup">&#x3008; 5 Set up variables and options &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+let $syndir := "../../ixml/tests/steven/syntaxtests/",
+    $sptdir := "../../ixml/tests/steven/tests-SP-MSM/",
+    $spxdir := "../../ixml/tests/steven/",
+    $apadir := "../../Aparecium/tests/",
+    $ixtdir := "../../ixml-tests/tests-straw/",
+    $outdir := resolve-uri($apadir || 'results-' 
+               || adjust-dateTime-to-timezone(
+                    current-dateTime(), () )
+               || '/',
+	       static-base-uri() ),
+</pre>
+<span class="scrapcontinuations">Continued in &#x3008;<a href="#dr-catfiles">List of available test-catalog files 6</a>&#x3009;, &#x3008;<a href="#dr-options">Set the options for the test harness 23</a>&#x3009;<br></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#dr-top">[File test-driver.xq] 1</a> &#x3009; <br></span>
+</div>
+
+</div>
+<div class="Real-P">Next, I'll make a list of catalogs, and choose the one I want by
+indexing into the list.  It's easy to change the index.
+<div class="scrap"><span><a name="dr-catfiles">&#x3008; 6 List of available test-catalog files [continues <a href="#dr-setup">5 Set up variables and options</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+    $test-catalog-path := 
+        ($spxdir || "catalog.xml",
+
+         (: 2 3 4 :)
+         $syndir || "catalog-as-grammar-tests.xml",
+         $syndir || "catalog-as-instance-tests-ixml.xml",
+         $syndir || "catalog-as-instance-tests-ixml.xml",
+
+	 (: 5 :)
+         $sptdir || "tests-catalog.xml",
+	 
+	 (: 6 7 8 :)
+         $apadir || "test0.xml",
+         $apadir || "test1.xml",
+         $apadir || "test2.xml",
+
+	 (: 9-13, with 2, 7638, 2886, 1020, and 338 test cases.
+	    The positive test cases are broken. :)
+         $ixtdir || "arith/arith.test-catalog.pos.xml",
+         $ixtdir || "arith/arith.O3.test-catalog.arc.neg.xml",
+         $ixtdir || "arith/arith.O3.test-catalog.arc-final.neg.xml",
+         $ixtdir || "arith/arith.O3.test-catalog.state.neg.xml",
+         $ixtdir || "arith/arith.O3.test-catalog.state-final.neg.xml",
+
+	 (: Positive and negative catalogs for various small
+	    grammars: 14-27 :)
+	 $ixtdir || "gxxx/g010.test-catalog.xml",
+	 $ixtdir || "gxxx/g010.O3.test-catalog.all.neg.xml",
+	 $ixtdir || "gxxx/g011.test-catalog.xml",
+	 $ixtdir || "gxxx/g011.O3.test-catalog.all.neg.xml",
+	 $ixtdir || "gxxx/g012.test-catalog.xml",
+	 $ixtdir || "gxxx/g012.O3.test-catalog.all.neg.xml",
+	 $ixtdir || "gxxx/g022.test-catalog.xml",
+	 $ixtdir || "gxxx/g022.O3.test-catalog.all.neg.xml",
+	 $ixtdir || "gxxx/g101.test-catalog.xml",
+	 $ixtdir || "gxxx/g101.O3.test-catalog.all.neg.xml",
+	 $ixtdir || "gxxx/g102.test-catalog.xml",
+	 $ixtdir || "gxxx/g102.O3.test-catalog.all.neg.xml",
+	 $ixtdir || "gxxx/g112.test-catalog.xml",
+	 $ixtdir || "gxxx/g112.O3.test-catalog.all.neg.xml",
+
+	 (: 28:  straw-man tests on ixml itself
+	    (n.b. old version of ixml grammar) :)
+	 $ixtdir || "ixml/ixml.test-catalog.pos.xml"
+	 )[1],
+
+    $test-catalog-uri := resolve-uri($test-catalog-path, 
+                                     static-base-uri()),
+
+    $report-filename := 'test-results.' 
+                        || replace($test-catalog-uri,
+                                   "^(.*)/([^/]*)(\.xml)",
+                                   "$2")
+		        || '.xml', 
+    $report-uri := $outdir || $report-filename,
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound"></span>
+</div>
+
+</div>
+
+
+
+<div class="Real-P">At this point in the program, we will also want to prepare
+an &lt;<em>options</em>&gt; element to specify the options we want to use,
+but we will define those later.</div>
+</div>
+
+
+<div class="div">
+
+<h3><a name="run-tests" id="run-tests">3.2. </a>Handling one test catalog: the <i>run-tests()</i> function</h3>
+
+<div class="Real-P">Now for the top-level function of the library.  The
+<i>run-tests()</i> function gets a test catalog element and an
+&lt;<em>options</em>&gt; element and runs the tests in that test catalog.  It
+takes an &lt;<em>options</em>&gt; element to control some aspects of the
+library's behavior.
+<div class="scrap"><span><a name="lib-run-tests">&#x3008; 7 The run-test() function &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+declare function t:run-tests(
+  $catalog-uri as xs:string,
+  $options as element(options)
+) as element(tc:test-results) {
+
+  <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-rt-load-cat">Load catalog file into $catalog 8</a></em> &#x3009;</span>
+  return element tc:test-results {
+    <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-rt-metadata">Supply basic metadata for the test report 11</a></em> &#x3009;</span>
+    <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-rt-check-cat-read">Check for errors reading the catalog 10</a></em> &#x3009;</span>
+    for $test-set in $catalog/*/*
+        [self::tc:test-set or self::tc:test-set-ref]
+    return t:run-test-set($test-set)
+  }
+};
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-functions">Declare library functions 4</a> &#x3009; <br></span>
+</div>
+</div>
+<div class="Real-P">Let's try to be careful in our I/O.
+<div class="scrap"><span><a name="lib-rt-load-cat">&#x3008; 8 Load catalog file into $catalog &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+  let $catalog := try { 
+    doc($catalog-uri)
+  } catch err:FODC0002 {
+    &lt;no-such-catalog/&gt;
+  }
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound">Other versions of this code are in &#x3008; <a href="#d3e208">Load catalog file into $catalog 9</a> &#x3009; <br></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-run-tests">The run-test() function 7</a> &#x3009; <br></span>
+</div>
+
+A simpler version of this might be:
+<div class="scrap"><span><a name="d3e213">&#x3008; 9 Load catalog file into $catalog &#x3009; (for version <em>alt</em>) &#x2261;</a></span>
+<pre class="scrapbody">
+  let $catalog := if (doc-available($catalog-uri))
+                  then doc($catalog-uri)
+                  else &lt;no-such-catalog/&gt;
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is a variant of &#x3008; <a href="#lib-rt-load-cat">Load catalog file into $catalog 8</a> &#x3009; </span>
+</div>
+
+</div>
+<div class="Real-P">If we did not get a catalog, report that fact.
+<div class="scrap"><span><a name="lib-rt-check-cat-read">&#x3008; 10 Check for errors reading the catalog &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+    if ($catalog/self::no-such-catalog) then
+      element tc:error {
+        attribute id { "tc:tbd01" },
+        element tc:p {
+          text { "Nothing found at "},
+          $catalog-uri,
+          text { "." }
+        }
+      }
+    else
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-run-tests">The run-test() function 7</a> &#x3009; <br></span>
+</div>
+
+Note the trailing <tt>else</tt> here.
+</div>
+<div class="Real-P">At the top of the test report we should put some metadata:
+<div class="scrap"><span><a name="lib-rt-metadata">&#x3008; 11 Supply basic metadata for the test report &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+    attribute name {
+      'Test results for ' || $catalog/@name
+    },
+    attribute processor { "Aparecium" },
+    attribute processor-version { "v0.1" },
+    attribute catalog-uri { $catalog-uri },
+    attribute catalog-date { ($catalog/@release-date, '??')[1] },
+    attribute report-date { 
+      current-dateTime()
+    },
+
+    element tc:description {
+      element tc:p {
+        text { "Test report generated by test-harness.xqm." }
+      }
+    },
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-run-tests">The run-test() function 7</a> &#x3009; <br></span>
+</div>
+
+</div>
+<div class="Real-P">This may need further elaboration.</div>
+</div>
+
+
+<div class="div">
+
+<h3><a name="run-test-set" id="run-test-set">3.3. </a>Handling one test set: the <i>run-test-set()</i> function</h3>
+
+<div class="Real-P">The <i>run-test-set()</i> function gets a
+&lt;<em>test-set</em>&gt; element and an &lt;<em>options</em>&gt; element
+and runs the tests in that test set.  The function may
+return more than one element, because if it's called with
+a &lt;<em>test-set-ref</em>&gt; element, it will retrieve that catalog
+and return a test-set report for each &lt;<em>test-set</em>&gt;
+or &lt;<em>test-set-ref</em>&gt; in that catalog.</div>
+<div class="Real-P">This single-argument version of the function just
+calls a recursive version of the function with appropriate
+additional arguments.
+<div class="scrap"><span><a name="lib-run-test-set">&#x3008; 12 The run-test-set() function &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+declare function t:run-test-set(
+  $test-set as element()
+) as element() {
+  t:run-test-set($test-set, (), ())
+};
+</pre>
+<span class="scrapcontinuations">Continued in &#x3008;<a href="#lib-rts3">The recursive run-test-set() function 13</a>&#x3009;<br></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-functions">Declare library functions 4</a> &#x3009; <br></span>
+</div>
+
+</div>
+<div class="Real-P">The recursive version of <i>run-test-set()</i> takes two
+additional arguments, In addition to the test set element itself.
+<ul><li><div class="Real-P">The first is an optional grammar.</div>
+<div class="Real-P">Test cases normally use the grammar specified in their containing
+test set, but since test sets can nest, the grammar may have been
+specified by an ancestor.  So when a test set with a grammar calls the
+function recursively on nested test sets, it passes the grammar along
+as an argument.</div>
+</li>
+<li><div class="Real-P">The second is a stack of URIs that we have opened.  This is
+used to detect reference cycles and snip them.</div></li>
+</ul></div>
+<div class="Real-P">For now, this function doesn't do much: it just emits a
+place-holder element and then processes its children, who also emit
+place-holder elements.  Once we are traversing the test catalog
+successfully, we can start worrying about actually running tests.
+<div class="scrap"><span><a name="lib-rts3">&#x3008; 13 The recursive run-test-set() function [continues <a href="#lib-run-test-set">12 The run-test-set() function</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+declare function t:run-test-set(
+  $test-set as element(),
+  $grammar as element()?,
+  $uri-stack as xs:string*
+) as element()+ {
+
+  if ($test-set/self::tc:test-set-ref)
+  then <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-rts-do-ref">Handle a test-set reference 14</a></em> &#x3009;</span>
+  else <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-rts-do-inline">Handle an inline test-set 15</a></em> &#x3009;</span>
+};
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound"></span>
+</div>
+
+</div>
+<div class="Real-P">The element we are dealing with may be a &lt;<em>test-set</em>&gt; element
+(the normal case) or a &lt;<em>test-set-ref</em>&gt; element.  If it's the
+latter, we fetch the document and deal with its top-level test sets.
+<div class="scrap"><span><a name="lib-rts-do-ref">&#x3008; 14 Handle a test-set reference &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+       let $uri0 := base-uri($test-set),
+           $uri1 := string($test-set/@href),
+           $uri2 := resolve-uri($uri1, $uri0),
+	   $newcat := try {
+             doc($uri2)
+           } catch err:FODC0002 { 
+             &lt;no-such-test-set/&gt; 
+           }
+       return if ($newcat/self::no-such-test-set) then
+           element tc:error {
+             attribute id { "tc:tbd02" },
+             element tc:p {
+               text { "Nothing found at "},
+               $uri2,
+               text { "." }
+             }
+           }
+        else for $test-set 
+             in $newcat/*/*
+                [self::tc:test-set 
+                or self::tc:test-set-ref]
+             return t:run-test-set($test-set, $grammar, $uri-stack)
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-rts3">The recursive run-test-set() function 13</a> &#x3009; <br></span>
+</div>
+</div>
+<div class="Real-P">The main case is for a &#x2018;real&#x2019; test set.
+It may contain a grammar (inline or via reference, in ixml or xml),
+and it may contain test cases and nested test sets.  
+<div class="scrap"><span><a name="lib-rts-do-inline">&#x3008; 15 Handle an inline test-set &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+    element tc:test-set {
+      $test-set/@*, 
+      element tc:description {
+        (: temporary stub :)
+        element tc:p {
+          text { "Place-holder: "
+               || "Results from test set " },
+          $test-set/@name/string(),
+          text { " will go here." }
+        }
+      },
+      <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-rts-grammar">Handle the grammar specification in a test set 17</a></em> &#x3009;</span>
+      if ($grammar-test-ok) then
+      <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-rts-nested">Handle nested test sets and test cases 16</a></em> &#x3009;</span>
+      else (: no point trying to run tests :)
+          ($grammar-test-result,
+          element tc:description {
+            element tc:p {
+              test { "Grammar test failed, "
+                  || "test cases and nested "
+                  || "test sets skipped." }
+            }
+          })
+    }
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-rts3">The recursive run-test-set() function 13</a> &#x3009; <br></span>
+</div>
+
+</div>
+<div class="Real-P">Later sections will describe the handling of <a href="#grammars">grammars</a> and <a href="#testcases">test
+cases</a>, but the recursion on nested test sets is
+pretty much what might be expected:  we iterate over them
+and call the appropriate function to handle them.
+<div class="scrap"><span><a name="lib-rts-nested">&#x3008; 16 Handle nested test sets and test cases &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+      for $c in $test-set/*
+          [self::tc:test-set 
+          or self::tc:test-set-ref
+          or self::tc:test-case]
+      return if ($c/self::tc:test-set 
+                or $c/self::tc:test-set-ref)
+      then t:run-test-set($c, $grammar, $uri-stack)
+      else if ($c/tc:test-case)
+      then t:run-test-case($c, $grammar)
+      else element tc:error {
+        attribute id="tc:tbd03",
+        text { "The laws of logic have been abrogated?" }
+      }
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-rts-do-inline">Handle an inline test-set 15</a> &#x3009; <br></span>
+</div>
+
+</div>
+
+</div>
+</div>
+
+
+<div class="div">
+
+<h2><a name="grammars" id="grammars">4. </a>Loading and testing the grammar for a test set</h2>
+<div class="Real-P">A grammar may be given inline or externally, in ixml or in XML.  So
+we have a four-way branch on the nature of the grammar specification.
+The locally specified grammar unconditionally overrides any grammar
+passed in as an argument, and we keep life simple by using the same
+name for it.
+<div class="scrap"><span><a name="lib-rts-grammar">&#x3008; 17 Handle the grammar specification in a test set &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+      let $new-grammar := if ($test-set/tc:ixml-grammar)
+          then ap:compile-grammar-from-string(
+              $test-set/tc:ixml-grammar/string()
+          )
+          else if ($test-set/tc:vxml-grammar)
+          then ap:compile-grammar-from-xml(
+              $test/set/tc:vxml-grammar[1]
+          )
+          else if ($test-set/tc:ixml-grammar-ref)
+          then ap:compile-grammar-from-uri(
+              $test-set/tc:ixml-grammar-ref/@href
+          )
+          else if ($test-set/tc:vxml-grammar-ref)
+          then ap:compile-grammar-from-xml(
+              let $uri0 := $test/set/tc:vxml-grammar-ref
+                           /@href/string(),
+                  $uri1 := base-uri($test-set),
+                  $uri2 := resolve-uri($uri0, $uri1)
+              return doc($uri2)
+          )
+          else ()
+      let $grammar-test-result := if (exists($new-grammar))
+              then &lt;dummy-grammar-test-result/&gt;
+              else (),
+          $grammar-test-ok := if (exists($new-grammar))
+              then true() (: run test on $new-grammar :)
+              else true(),
+          $grammar := ($new-grammar, $grammar)[1]
+</pre>
+<span class="scrapcontinuations">Continued in &#x3008;<a href="#lib-rts-gtest">Handle the grammar test, if there is one 19</a>&#x3009;<br></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-rts-do-inline">Handle an inline test-set 15</a> &#x3009; <br></span>
+</div>
+
+<em>[TO DO:  prepare for and recover from errors]</em>
+</div>
+<div class="Real-P">In order to call these functions in the Aparecium library,
+we are going to need to import that library:
+<div class="scrap"><span><a name="d3e338">&#x3008; 18 Namespace declarations and imports, cont'd [continues <a href="#lib-nsdecls">3 Namespace declarations and imports for library module</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+import module namespace ap =
+"http://blackmesatech.com/2019/iXML/Aparecium"
+at "Aparecium.xqm";
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound"></span>
+</div>
+</div>
+<div class="Real-P">
+If a grammar is given, a &lt;<em>grammar-test</em>&gt; may also be specified.
+
+<div class="scrap"><span><a name="lib-rts-gtest">&#x3008; 19 Handle the grammar test, if there is one [continues <a href="#lib-rts-grammar">17 Handle the grammar specification in a test set</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+      if ($test-set/tc:grammar-test)
+
+
+      element tc:description {
+        (: temporary stub :)
+        element tc:p {
+          text { "Place-holder: "
+               || "Results from test set " },
+          $test-set/@name/string(),
+          text { " will go here." }
+        }
+      }
+
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound"></span>
+</div>
+
+</div>
+
+<div class="Real-P">The <i>load-grammar()</i> function ...
+<div class="scrap"><span><a name="lib-load-grammar">&#x3008; 20 The load-grammar() function &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-functions">Declare library functions 4</a> &#x3009; <br></span>
+</div>
+
+</div>
+
+<div class="Real-P">The <i>test-grammar()</i> function ...
+<div class="scrap"><span><a name="lib-test-grammar">&#x3008; 21 The test-grammar() function &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-functions">Declare library functions 4</a> &#x3009; <br></span>
+</div>
+
+</div>
+
+</div>
+
+
+<div class="div">
+
+<h2><a name="testcases" id="testcases">5. </a>Running the test cases</h2>
+<div class="Real-P">...</div>
+
+<div class="Real-P">The <i>run-test-case()</i> function ...
+<div class="scrap"><span><a name="lib-run-test-case">&#x3008; 22 The run-test-case() function &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-functions">Declare library functions 4</a> &#x3009; <br></span>
+</div>
+
+</div>
+
+<div class="Real-P">The options that control what is reported and whether individual
+files are written out for each test set or each test case are set in
+the driver.  In order to remind myself later of what the expected
+options are, I list them all and index into them to choose the one
+I want for a given run.
+<div class="scrap"><span><a name="dr-options">&#x3008; 23 Set the options for the test harness [continues <a href="#dr-setup">5 Set up variables and options</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+    $options := element options {
+      attribute files { 
+        ('by-case', 
+        'by-outer-set', 
+        'none')[1]
+      },
+      attribute report-input-grammar {
+        ('internal', 
+        'all',
+        'none')[2]
+      },
+      attribute report-input-string {
+        ('internal', 
+        'all',
+        'none')[2]
+      },
+      attribute report-result {
+        ('native', 
+        'reified',
+        'none')[2]
+      },
+      attribute report-expected-result {
+        ('on-error',
+        'always',
+        'none')[1]
+      },
+      attribute output-directory {
+        ($outdir
+        )[1]
+      }
+    }
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound"></span>
+</div>
+
+</div>
+</div>
+
+
+<div class="div">
+
+<h2><a name="evaluation" id="evaluation">6. </a>Evaluating the test case results</h2>
+<div class="Real-P">...</div>
+
+<div class="Real-P">The <i>evaluate-result()</i> function ...
+<div class="scrap"><span><a name="lib-evaluate">&#x3008; 24 The evaluate-result() function &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is not used elsewhere.<br></span>
+</div>
+
+</div>
+</div>
+
+
+<div class="div">
+
+<h2><a name="output" id="output">7. </a>Reporting the results</h2>
+<div class="Real-P">...</div>
+
+
+<div class="Real-P">The <i>...()</i> function ...
+<div class="scrap"><span><a name="lib-report-test-case">&#x3008; 25 The report-test-case() function &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">
+</pre>
+<span class="scrapcontinuations"></span>
+
+<span class="scrapinbound"></span><span class="scrapinbound">This code is not used elsewhere.<br></span>
+</div>
+
+</div>
+</div>
+
+<hr>
+<ul><li>test-driver.xq: defined in &#x3008; <a href="#dr-top">1 [File test-driver.xq]</a> &#x3009; </li><li>test-harness.xqm: defined in &#x3008; <a href="#lib-top">2 [File test-harness.xqm]</a> &#x3009; </li></ul>
+<ul><li><a href="#dr-top">[File test-driver.xq] 1</a></li><li><a href="#lib-top">[File test-harness.xqm] 2</a></li><li><a href="#lib-rt-check-cat-read">Check for errors reading the catalog 10</a></li><li><a href="#lib-functions">Declare library functions 4</a></li><li><a href="#lib-rts-do-ref">Handle a test-set reference 14</a></li><li><a href="#lib-rts-do-inline">Handle an inline test-set 15</a></li><li><a href="#lib-rts-nested">Handle nested test sets and test cases 16</a></li><li><a href="#lib-rts-grammar">Handle the grammar specification in a test set 17</a></li><li><a href="#lib-rts-gtest">Handle the grammar test, if there is one 19</a></li><li><a href="#dr-catfiles">List of available test-catalog files 6</a></li><li><a href="#lib-rt-load-cat">Load catalog file into $catalog 8</a></li><li><a href="#d3e213">Load catalog file into $catalog 9</a></li><li><a href="#lib-nsdecls">Namespace declarations and imports for library module 3</a></li><li><a href="#d3e338">Namespace declarations and imports, cont'd 18</a></li><li><a href="#dr-options">Set the options for the test harness 23</a></li><li><a href="#dr-setup">Set up variables and options 5</a></li><li><a href="#lib-rt-metadata">Supply basic metadata for the test report 11</a></li><li><a href="#lib-evaluate">The evaluate-result() function 24</a></li><li><a href="#lib-load-grammar">The load-grammar() function 20</a></li><li><a href="#lib-rts3">The recursive run-test-set() function 13</a></li><li><a href="#lib-report-test-case">The report-test-case() function 25</a></li><li><a href="#lib-run-tests">The run-test() function 7</a></li><li><a href="#lib-run-test-case">The run-test-case() function 22</a></li><li><a href="#lib-run-test-set">The run-test-set() function 12</a></li><li><a href="#lib-test-grammar">The test-grammar() function 21</a></li></ul>
+<ul><li>2022-02-04 : CMSMcQ : made file, to replace earlier test harness
+lost in a disk crash</li>
+</ul>
+
+
+</div></body></html>
+

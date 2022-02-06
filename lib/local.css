@@ -41,6 +41,11 @@ div.figure {
     margin: 1em;
 }
 
+/* scraps */
+span.scrapref {
+    display: inline-block;
+    text-indent: -0.4em;
+}
 /* references */
 div.bibitem { margin: 1em 0 1em 3em; text-indent: -3em; }
 

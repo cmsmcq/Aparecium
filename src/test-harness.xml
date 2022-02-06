@@ -1,0 +1,656 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="local.xsl"?>
+<!DOCTYPE TEI.2 [
+<!ENTITY date.last.touched '4 February 2022' >
+<!ATTLIST bibl id ID #REQUIRED>
+<!ATTLIST div  id ID #REQUIRED>
+<!ATTLIST scrap id ID #IMPLIED>
+
+<!ENTITY mdash  "&#x2014;" ><!--=em dash-->
+
+<!--* Reminder:
+      (progn
+        (make-variable-buffer-local 'nxml-child-indent)
+        (setq 'nxml-child-indent 0))
+
+      For now, do this manually.  I don't know how to
+      make Aquamacs do it using eval-last-sexp or eval-expression.
+    *-->
+]>
+<TEI.2>
+<teiHeader>
+<fileDesc>
+<titleStmt>
+<title>Test harness for Aparecium</title>
+<author>C. M. Sperberg-McQueen</author>
+</titleStmt>
+<publicationStmt>
+<date>2022</date>
+</publicationStmt>
+<sourceDesc>
+<p>The XML document using the TEI P3 + Sweb vocabulary is the original
+form of this document.</p>
+</sourceDesc>
+</fileDesc>
+<revisionDesc>
+<list>
+<item>2022-02-04 : CMSMcQ : made file, to replace earlier test harness
+lost in a disk crash</item>
+</list>
+</revisionDesc>
+</teiHeader>
+
+<text>
+<front>
+<titlePage>
+<docTitle>
+<titlePart>Test harness</titlePart>
+<titlePart>for Aparecium</titlePart>
+</docTitle>
+
+<docAuthor>C. M. Sperberg-McQueen</docAuthor>
+<docDate>4 February 2022</docDate>
+</titlePage>
+<versionList>
+<version id="qd">Quick and dirty first cut</version>
+<version id="alt">Alternative formulations of some constructs</version>
+</versionList>
+
+<divGen type="toc"/>
+</front>
+<body>
+<p>This document describes a test harness for the invisible-XML
+processor Aparecium.  It is a <soCalled>literate program</soCalled>:
+the executable code (in this case an XQuery module) is embedded in
+English prose explaining the program.  The document assumes the reader
+is either familiar with XQuery, literate programming, invisible XML,
+and Aparecium, or else possessed of a remarkably high tolerance for
+boredom.  For more information on literate programming, Donald Knuth's
+article of that name remains a good source.</p>
+
+<p>In its current form, this document describes an initial quick and
+dirty first cut, taking a lot of shortcuts in order to get something
+running.  When that's done, I expect to come back and to a v0.2
+version that replaces some of those quick and dirty shortcuts with
+better code.</p>
+
+<div id="task">
+<head>The task</head>
+<p>Our task is to define a <soCalled>test harness</soCalled> for
+Aparecium.  That involves two things: first an XQuery library module
+which reads a test catalog, runs the tests, evaluates the results, and
+creates a report showing which test cases passed and which failed, and
+second a sample XQuery module which imports and calls the library on a
+particular catalog and may save or do something with the result.</p>
+<p>The overall structure of the calling module is straightforward:
+<scrap id="dr-top" file="test-driver.xq">
+import module namespace t =
+"http://blackmesatech.com/2022/iXML/test-harness"
+at "../build/test-harness.xqm";
+
+declare namespace tc =
+"https://github.com/cmsmcq/ixml-tests";
+
+<ref target="dr-setup">Set up variables and options</ref>
+
+let $results := t:run-tests($test-catalog-uri, $options),
+    $dummy   := file:create-dir($outdir)
+return ($results,
+        file:write($report-uri, $results))
+</scrap>
+</p>
+<p>The overall structure of the library module is similarly
+conventional:
+<scrap id="lib-top" file="test-harness.xqm">
+module namespace t =
+"http://blackmesatech.com/2022/iXML/test-harness";
+<ptr target="lib-nsdecls"/>
+
+<ref target="lib-functions">Function declarations ...</ref>
+</scrap></p>
+<p>Since the test catalogs we are processing use the
+ixml-tests namespace, we need to declare it.
+<scrap id="lib-nsdecls"
+       name="Namespace declarations and imports for library module">
+declare namespace tc =
+"https://github.com/cmsmcq/ixml-tests";
+</scrap>
+</p>
+<p>We can look ahead to the set of functions we will define:
+<scrap id="lib-functions"
+       name="Declare library functions">
+<ptr target="lib-run-tests"/>
+<ptr target="lib-run-test-set"/>
+<ptr target="lib-load-grammar"/>
+<ptr target="lib-test-grammar"/>
+<ptr target="lib-run-test-case"/>
+</scrap></p>
+</div>
+
+<div id="testcat">
+<head>The structure of a test catalog</head>
+
+<p>The test collections we are interested in running will all have
+test catalogs in XML, using the vocabulary defined in the author's
+<ident>ixml-tests</ident> repository on GitHub. A test catalog is an
+XML document containing one or more <term>test sets</term>; in the
+simple case a test set specifies an ixml grammar and a set of test
+cases which use that grammar.  Each test case specifies an input
+string to be parsed using the grammar and an expected result.</p>
+<p>Several variations are possible:
+<list>
+<item>A test set may contain nested test sets, to group tests in
+whatever way seems useful.</item>
+<item>Test sets, input grammars, input strings, and expected results
+may be embedded in the test catalog or stored externally and referred
+to from the catalog.  Grammars may be given in ixml (invisible XML) or
+vxml (<soCalled>visible</soCalled> XML) form.</item>
+<item>At each level (test catalog, test set, test case), metadata may
+be provided: prose descriptions, pointers to external documentation,
+and application-specific information (embedded in an <gi>app-info</gi>
+element).</item>
+</list>
+</p>
+
+</div>
+
+<div id="testsets">
+<head>Handling test catalogs and test sets</head>
+
+<p>Given the test catalog structure just described, the natural
+structure for the test harness is thus to iterate over top-level test
+sets, and within a test set to iterate over nested test sets and test
+cases.</p>
+
+<div id="setup">
+<head>Preparing to call the <ident>t:run-tests()</ident> function</head>
+<p>The driver will call the library's <ident>run-tests()</ident>
+function with the URI of the test catalog to be run.  Several test
+catalogs are available; the driver should make it easy to switch from
+one to another.  Since the easiest way to refer to a directory can
+vary on different machines, I'll start by putting the relevant
+directory names into variables.  I'll use relative paths where
+possible.  And while we're thinking about directory names, I'll define
+the directory where any output should go, including a timestamp in the
+directory name to allow the results of multiple test runs to be saved
+without interfering with each other.
+<scrap id="dr-setup" name="Set up variables and options">
+let $syndir := "../../ixml/tests/steven/syntaxtests/",
+    $sptdir := "../../ixml/tests/steven/tests-SP-MSM/",
+    $spxdir := "../../ixml/tests/steven/",
+    $apadir := "../../Aparecium/tests/",
+    $ixtdir := "../../ixml-tests/tests-straw/",
+    $outdir := resolve-uri($apadir || 'results-' 
+               || adjust-dateTime-to-timezone(
+                    current-dateTime(), () )
+               || '/',
+	       static-base-uri() ),
+</scrap>
+</p>
+<p>Next, I'll make a list of catalogs, and choose the one I want by
+indexing into the list.  It's easy to change the index.
+<scrap prev="dr-setup" id="dr-catfiles"
+       name="List of available test-catalog files">
+    $test-catalog-path := 
+        ($spxdir || "catalog.xml",
+
+         (: 2 3 4 :)
+         $syndir || "catalog-as-grammar-tests.xml",
+         $syndir || "catalog-as-instance-tests-ixml.xml",
+         $syndir || "catalog-as-instance-tests-ixml.xml",
+
+	 (: 5 :)
+         $sptdir || "tests-catalog.xml",
+	 
+	 (: 6 7 8 :)
+         $apadir || "test0.xml",
+         $apadir || "test1.xml",
+         $apadir || "test2.xml",
+
+	 (: 9-13, with 2, 7638, 2886, 1020, and 338 test cases.
+	    The positive test cases are broken. :)
+         $ixtdir || "arith/arith.test-catalog.pos.xml",
+         $ixtdir || "arith/arith.O3.test-catalog.arc.neg.xml",
+         $ixtdir || "arith/arith.O3.test-catalog.arc-final.neg.xml",
+         $ixtdir || "arith/arith.O3.test-catalog.state.neg.xml",
+         $ixtdir || "arith/arith.O3.test-catalog.state-final.neg.xml",
+
+	 (: Positive and negative catalogs for various small
+	    grammars: 14-27 :)
+	 $ixtdir || "gxxx/g010.test-catalog.xml",
+	 $ixtdir || "gxxx/g010.O3.test-catalog.all.neg.xml",
+	 $ixtdir || "gxxx/g011.test-catalog.xml",
+	 $ixtdir || "gxxx/g011.O3.test-catalog.all.neg.xml",
+	 $ixtdir || "gxxx/g012.test-catalog.xml",
+	 $ixtdir || "gxxx/g012.O3.test-catalog.all.neg.xml",
+	 $ixtdir || "gxxx/g022.test-catalog.xml",
+	 $ixtdir || "gxxx/g022.O3.test-catalog.all.neg.xml",
+	 $ixtdir || "gxxx/g101.test-catalog.xml",
+	 $ixtdir || "gxxx/g101.O3.test-catalog.all.neg.xml",
+	 $ixtdir || "gxxx/g102.test-catalog.xml",
+	 $ixtdir || "gxxx/g102.O3.test-catalog.all.neg.xml",
+	 $ixtdir || "gxxx/g112.test-catalog.xml",
+	 $ixtdir || "gxxx/g112.O3.test-catalog.all.neg.xml",
+
+	 (: 28:  straw-man tests on ixml itself
+	    (n.b. old version of ixml grammar) :)
+	 $ixtdir || "ixml/ixml.test-catalog.pos.xml"
+	 )[1],
+
+    $test-catalog-uri := resolve-uri($test-catalog-path, 
+                                     static-base-uri()),
+
+    $report-filename := 'test-results.' 
+                        || replace($test-catalog-uri,
+                                   "^(.*)/([^/]*)(\.xml)",
+                                   "$2")
+		        || '.xml', 
+    $report-uri := $outdir || $report-filename,
+</scrap>
+</p>
+
+<!--
+<p>And finally, now that the file name for the test catalog
+has been initialized, we can fetch the catalog in order
+to pass it to the library function.
+<scrap prev="dr-setup" id="dr-fetch"
+       name="Read in the test catalog">
+    $test-catalog := doc($catfile)/tc:test-catalog,
+</scrap></p>
+
+<p>Well, wait, not quite finally:  we need to specify the options
+we want to use.  But we will define those later.</p>
+-->
+
+<p>At this point in the program, we will also want to prepare
+an <gi>options</gi> element to specify the options we want to use,
+but we will define those later.</p>
+</div>
+
+<div id="run-tests">
+<head>Handling one test catalog: the <ident>run-tests()</ident> function</head>
+
+<p>Now for the top-level function of the library.  The
+<ident>run-tests()</ident> function gets a test catalog element and an
+<gi>options</gi> element and runs the tests in that test catalog.  It
+takes an <gi>options</gi> element to control some aspects of the
+library's behavior.
+<scrap id="lib-run-tests"
+       name="The run-tests() function">
+declare function t:run-tests(
+  $catalog-uri as xs:string,
+  $options as element(options)
+) as element(tc:test-results) {
+
+  <ptr target="lib-rt-load-cat"/>
+  return element tc:test-results {
+    <ptr target="lib-rt-metadata"/>
+    <ptr target="lib-rt-check-cat-read"/>
+    for $test-set in $catalog/*/*
+        [self::tc:test-set or self::tc:test-set-ref]
+    return t:run-test-set($test-set)
+  }
+};
+</scrap></p>
+<p>Let's try to be careful in our I/O.
+<scrap id="lib-rt-load-cat"
+       name="Load catalog file into $catalog">
+  let $catalog := try { 
+    doc($catalog-uri)
+  } catch err:FODC0002 {
+    &lt;no-such-catalog/>
+  }
+</scrap>
+A simpler version of this might be:
+<scrap corresp="lib-rt-load-cat"
+       version="alt"
+       name="Load catalog file into $catalog">
+  let $catalog := if (doc-available($catalog-uri))
+                  then doc($catalog-uri)
+                  else &lt;no-such-catalog/>
+</scrap>
+</p>
+<p>If we did not get a catalog, report that fact.
+<scrap id="lib-rt-check-cat-read"
+       name="Check for errors reading the catalog">
+    if ($catalog/self::no-such-catalog) then
+      element tc:error {
+        attribute id { "tc:tbd01" },
+        element tc:p {
+          text { "Nothing found at "},
+          $catalog-uri,
+          text { "." }
+        }
+      }
+    else
+</scrap>
+Note the trailing <code>else</code> here.
+</p>
+<p>At the top of the test report we should put some metadata:
+<scrap id="lib-rt-metadata" name="Supply basic metadata for the test report">
+    attribute name {
+      'Test results for ' || $catalog/@name
+    },
+    attribute processor { "Aparecium" },
+    attribute processor-version { "v0.1" },
+    attribute catalog-uri { $catalog-uri },
+    attribute catalog-date { ($catalog/@release-date, '??')[1] },
+    attribute report-date { 
+      current-dateTime()
+    },
+
+    element tc:description {
+      element tc:p {
+        text { "Test report generated by test-harness.xqm." }
+      }
+    },
+</scrap>
+</p>
+<p>This may need further elaboration.</p>
+</div>
+
+<div id="run-test-set">
+<head>Handling one test set: the <ident>run-test-set()</ident> function</head>
+
+<p>The <ident>run-test-set()</ident> function gets a
+<gi>test-set</gi> element and an <gi>options</gi> element
+and runs the tests in that test set.  The function may
+return more than one element, because if it's called with
+a <gi>test-set-ref</gi> element, it will retrieve that catalog
+and return a test-set report for each <gi>test-set</gi>
+or <gi>test-set-ref</gi> in that catalog.</p>
+<p>This single-argument version of the function just
+calls a recursive version of the function with appropriate
+additional arguments.
+<scrap id="lib-run-test-set"
+       name="The run-test-set() function">
+declare function t:run-test-set(
+  $test-set as element()
+) as element() {
+  t:run-test-set($test-set, (), ())
+};
+</scrap>
+</p>
+<p>The recursive version of <ident>run-test-set()</ident> takes two
+additional arguments, In addition to the test set element itself.
+<list>
+<item><p>The first is an optional grammar.</p>
+<p>Test cases normally use the grammar specified in their containing
+test set, but since test sets can nest, the grammar may have been
+specified by an ancestor.  So when a test set with a grammar calls the
+function recursively on nested test sets, it passes the grammar along
+as an argument.</p>
+</item>
+<item><p>The second is a stack of URIs that we have opened.  This is
+used to detect reference cycles and snip them.</p></item>
+</list></p>
+<p>For now, this function doesn't do much: it just emits a
+place-holder element and then processes its children, who also emit
+place-holder elements.  Once we are traversing the test catalog
+successfully, we can start worrying about actually running tests.
+<scrap prev="lib-run-test-set"
+       id="lib-rts3"
+       name="The recursive run-test-set() function">
+declare function t:run-test-set(
+  $test-set as element(),
+  $grammar as element()?,
+  $uri-stack as xs:string*
+) as element()+ {
+
+  if ($test-set/self::tc:test-set-ref)
+  then <ptr target="lib-rts-do-ref"/>
+  else <ptr target="lib-rts-do-inline"/>
+};
+</scrap>
+</p>
+<p>The element we are dealing with may be a <gi>test-set</gi> element
+(the normal case) or a <gi>test-set-ref</gi> element.  If it's the
+latter, we fetch the document and deal with its top-level test sets.
+<scrap id="lib-rts-do-ref"
+       name="Handle a test-set reference">
+       let $uri0 := base-uri($test-set),
+           $uri1 := string($test-set/@href),
+           $uri2 := resolve-uri($uri1, $uri0),
+	   $newcat := try {
+             doc($uri2)
+           } catch err:FODC0002 { 
+             &lt;no-such-test-set/> 
+           }
+       return if ($newcat/self::no-such-test-set) then
+           element tc:error {
+             attribute id { "tc:tbd02" },
+             element tc:p {
+               text { "Nothing found at "},
+               $uri2,
+               text { "." }
+             }
+           }
+        else for $test-set 
+             in $newcat/*/*
+                [self::tc:test-set 
+                or self::tc:test-set-ref]
+             return t:run-test-set($test-set, $grammar, $uri-stack)
+</scrap></p>
+<p>The main case is for a <soCalled>real</soCalled> test set.
+It may contain a grammar (inline or via reference, in ixml or xml),
+and it may contain test cases and nested test sets.  
+<scrap id="lib-rts-do-inline"
+       name="Handle an inline test-set">
+    element tc:test-set {
+      $test-set/@*, 
+      element tc:description {
+        (: temporary stub :)
+        element tc:p {
+          text { "Place-holder: "
+               || "Results from test set " },
+          $test-set/@name/string(),
+          text { " will go here." }
+        }
+      },
+      <ptr target="lib-rts-grammar"/>
+      if ($grammar-test-ok) then
+      <ptr target="lib-rts-nested"/>
+      else (: no point trying to run tests :)
+          ($grammar-test-result,
+          element tc:description {
+            element tc:p {
+              test { "Grammar test failed, "
+                  || "test cases and nested "
+                  || "test sets skipped." }
+            }
+          })
+    }
+</scrap>
+</p>
+<p>Later sections will describe the handling of <ref
+target="grammars">grammars</ref> and <ref target="testcases">test
+cases</ref>, but the recursion on nested test sets is
+pretty much what might be expected:  we iterate over them
+and call the appropriate function to handle them.
+<scrap id="lib-rts-nested"
+       name="Handle nested test sets and test cases">
+      for $c in $test-set/*
+          [self::tc:test-set 
+          or self::tc:test-set-ref
+          or self::tc:test-case]
+      return if ($c/self::tc:test-set 
+                or $c/self::tc:test-set-ref)
+      then t:run-test-set($c, $grammar, $uri-stack)
+      else if ($c/tc:test-case)
+      then t:run-test-case($c, $grammar)
+      else element tc:error {
+        attribute id="tc:tbd03",
+        text { "The laws of logic have been abrogated?" }
+      }
+</scrap>
+</p>
+
+</div>
+</div>
+
+<div id="grammars">
+<head>Loading and testing the grammar for a test set</head>
+<p>A grammar may be given inline or externally, in ixml or in XML.  So
+we have a four-way branch on the nature of the grammar specification.
+The locally specified grammar unconditionally overrides any grammar
+passed in as an argument, and we keep life simple by using the same
+name for it.
+<scrap id="lib-rts-grammar"
+       name="Load the grammar specification for a test set">
+      let $new-grammar := if ($test-set/tc:ixml-grammar)
+          then ap:compile-grammar-from-string(
+              $test-set/tc:ixml-grammar/string()
+          )
+          else if ($test-set/tc:vxml-grammar)
+          then ap:compile-grammar-from-xml(
+              $test/set/tc:vxml-grammar[1]
+          )
+          else if ($test-set/tc:ixml-grammar-ref)
+          then ap:compile-grammar-from-uri(
+              $test-set/tc:ixml-grammar-ref/@href
+          )
+          else if ($test-set/tc:vxml-grammar-ref)
+          then ap:compile-grammar-from-xml(
+              let $uri0 := $test/set/tc:vxml-grammar-ref
+                           /@href/string(),
+                  $uri1 := base-uri($test-set),
+                  $uri2 := resolve-uri($uri0, $uri1)
+              return doc($uri2)
+          )
+          else ()
+      let $grammar-test-result := if (exists($new-grammar))
+              then &lt;dummy-grammar-test-result/>
+              else (),
+          $grammar-test-ok := if (exists($new-grammar))
+              then true() (: run test on $new-grammar :)
+              else true(),
+          $grammar := ($new-grammar, $grammar)[1]
+</scrap>
+<emph>[TO DO:  prepare for and recover from errors]</emph>
+</p>
+<p>In order to call these functions in the Aparecium library,
+we are going to need to import that library:
+<scrap prev="lib-nsdecls"
+       name="Namespace declarations and imports, cont'd">
+import module namespace ap =
+"http://blackmesatech.com/2019/iXML/Aparecium"
+at "Aparecium.xqm";
+</scrap></p>
+<p>
+If a grammar is given, a <gi>grammar-test</gi> may also be specified.
+
+<scrap prev="lib-rts-grammar"
+       id="lib-rts-gtest"
+       name="Handle the grammar test, if there is one">
+      if ($test-set/tc:grammar-test)
+
+
+      element tc:description {
+        (: temporary stub :)
+        element tc:p {
+          text { "Place-holder: "
+               || "Results from test set " },
+          $test-set/@name/string(),
+          text { " will go here." }
+        }
+      }
+
+</scrap>
+</p>
+
+<p>The <ident>load-grammar()</ident> function ...
+<scrap id="lib-load-grammar"
+       name="The load-grammar() function">
+</scrap>
+</p>
+
+<p>The <ident>test-grammar()</ident> function ...
+<scrap id="lib-test-grammar"
+       name="The test-grammar() function">
+</scrap>
+</p>
+
+</div>
+
+<div id="testcases">
+<head>Running the test cases</head>
+<p>...</p>
+
+<p>The <ident>run-test-case()</ident> function ...
+<scrap id="lib-run-test-case"
+       name="The run-test-case() function">
+</scrap>
+</p>
+
+<p>The options that control what is reported and whether individual
+files are written out for each test set or each test case are set in
+the driver.  In order to remind myself later of what the expected
+options are, I list them all and index into them to choose the one
+I want for a given run.
+<scrap prev="dr-setup" id="dr-options"
+       name="Set the options for the test harness">
+    $options := element options {
+      attribute files { 
+        ('by-case', 
+        'by-outer-set', 
+        'none')[1]
+      },
+      attribute report-input-grammar {
+        ('internal', 
+        'all',
+        'none')[2]
+      },
+      attribute report-input-string {
+        ('internal', 
+        'all',
+        'none')[2]
+      },
+      attribute report-result {
+        ('native', 
+        'reified',
+        'none')[2]
+      },
+      attribute report-expected-result {
+        ('on-error',
+        'always',
+        'none')[1]
+      },
+      attribute output-directory {
+        ($outdir
+        )[1]
+      }
+    }
+</scrap>
+</p>
+</div>
+
+<div id="evaluation">
+<head>Evaluating the test case results</head>
+<p>...</p>
+
+<p>The <ident>evaluate-result()</ident> function ...
+<scrap id="lib-evaluate"
+       name="The evaluate-result() function">
+</scrap>
+</p>
+</div>
+
+<div id="output">
+<head>Reporting the results</head>
+<p>...</p>
+
+
+<p>The <ident>...()</ident> function ...
+<scrap id="lib-report-test-case"
+       name="The report-test-case() function">
+</scrap>
+</p>
+</div>
+</body>
+<back>
+<divGen type="index-filenames"/>
+<divGen type="index-scrapnames"/>
+<divGen type="revision-history"/>
+</back>
+</text>
+</TEI.2>
