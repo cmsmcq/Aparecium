@@ -59,7 +59,7 @@ let $syndir := "../../ixml/tests/steven/syntaxtests/",
 	 (: 28:  straw-man tests on ixml itself
 	    (n.b. old version of ixml grammar) :)
 	 $ixtdir || "ixml/ixml.test-catalog.pos.xml"
-	 )[1],
+	 )[6],
 
     $test-catalog-uri := resolve-uri($test-catalog-path, 
                                      static-base-uri()),
@@ -105,5 +105,5 @@ let $syndir := "../../ixml/tests/steven/syntaxtests/",
 
 let $results := t:run-tests($test-catalog-uri, $options),
     $dummy   := file:create-dir($outdir)
-return (file:write($report-uri, $results),
-       $results)
+return ($results,
+        file:write($report-uri, $results))

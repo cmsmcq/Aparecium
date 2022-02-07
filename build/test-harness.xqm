@@ -1,15 +1,18 @@
 module namespace t =
 "http://blackmesatech.com/2022/iXML/test-harness";
-
 declare namespace tc =
 "https://github.com/cmsmcq/ixml-tests";
+import module namespace ap =
+"http://blackmesatech.com/2019/iXML/Aparecium"
+at "Aparecium.xqm";
+
 
 declare function t:run-tests(
   $catalog-uri as xs:string,
   $options as element(options)
 ) as element(tc:test-results) {
 
-  let $catalog := try { 
+    let $catalog := try { 
     doc($catalog-uri)
   } catch err:FODC0002 {
     <no-such-catalog/>
@@ -46,7 +49,7 @@ declare function t:run-tests(
 
     for $test-set in $catalog/*/*
         [self::tc:test-set or self::tc:test-set-ref]
-    return t:run-test-set($test-set)
+    return t:run-test-set($test-set, (), $catalog-uri)
   }
 };
 
@@ -83,7 +86,9 @@ declare function t:run-test-set(
              in $newcat/*/*
                 [self::tc:test-set 
                 or self::tc:test-set-ref]
-             return t:run-test-set($test-set, $grammar, $uri-stack)
+             return t:run-test-set($test-set, 
+                                   $grammar, 
+                                   ($uri2, $uri-stack))
 
   else     element tc:test-set {
       $test-set/@*, 
@@ -95,78 +100,138 @@ declare function t:run-test-set(
           $test-set/@name/string(),
           text { " will go here." }
         }
-      }
+      },
             let $new-grammar := if ($test-set/tc:ixml-grammar)
-          then ap:compile-grammar-from-string(
-              $test-set/tc:ixml-grammar/string()
-          )
+          then           try {
+               ap:compile-grammar-from-string(
+                 $test-set/tc:ixml-grammar/string()
+               )
+          } catch * {
+               element tc:error {
+                 attribute id { "t:tbd04" },
+                 text { "ixml compilation failed" }
+               }               
+          }
+
           else if ($test-set/tc:vxml-grammar)
-          then ap:compile-grammar-from-xml(
-              $test/set/tc:vxml-grammar[1]
-          )
+          then           try {
+               ap:compile-grammar-from-xml(
+                 $test-set/tc:vxml-grammar[1]/ixml
+               ) 
+          } catch * {
+               element tc:error {
+                 attribute id { "t:tbd05" },
+                 text { "vxml compilation failed" }
+               }               
+          }
+
           else if ($test-set/tc:ixml-grammar-ref)
-          then ap:compile-grammar-from-uri(
-              $test-set/tc:ixml-grammar-ref/@href
-          )
-          else if ($test-set/tc:vxml-grammar-ref)
-          then ap:compile-grammar-from-xml(
-              let $uri0 := $test/set/tc:vxml-grammar-ref
+          then           let $uri0 := $test-set/tc:ixml-grammar-ref
                            /@href/string(),
-                  $uri1 := base-uri($test-set),
-                  $uri2 := resolve-uri($uri0, $uri1)
-              return doc($uri2)
-          )
+              $uri1 := base-uri($test-set),
+              $uri2 := resolve-uri($uri0, $uri1)
+              return 
+                if (unparsed-text-available($uri2))
+                then try {
+		       ap:compile-grammar-from-uri($uri2)
+                     } catch * {
+                       element tc:error {
+                         attribute id { "t:tbd06" },
+			 text { "ixml compilation failed" }
+                       }
+                     }
+                else element tc:error {
+                       attribute id { "t:tbd07" },
+		       text { "external ixml not found" }
+                     }
+
+ 
+          else if ($test-set/tc:vxml-grammar-ref)
+          then           let $uri0 := $test-set/tc:ixml-grammar-ref
+                           /@href/string(),
+              $uri1 := base-uri($test-set),
+              $uri2 := resolve-uri($uri0, $uri1)
+              return 
+                if (unparsed-text-available($uri2))
+                then try {
+		       ap:compile-grammar-from-uri($uri2)
+                     } catch * {
+                       element tc:error {
+                         attribute id { "t:tbd06" },
+			 text { "ixml compilation failed" }
+                       }
+                     }
+                else element tc:error {
+                       attribute id { "t:tbd07" },
+		       text { "external ixml not found" }
+                     }
+
+
           else ()
-      let $grammar-test-result := if (exists($new-grammar))
-              then <dummy-grammar-test-result/>
-              else (),
-          $grammar-test-ok := if (exists($new-grammar))
-              then true() (: run test on $new-grammar :)
-              else true(),
-          $grammar := ($new-grammar, $grammar)[1]
-      if ($test-set/tc:grammar-test)
+      let $grammar-test-result := 
+          if (exists($new-grammar)
+             and exists($test-set/tc:grammar-test))
+          then (: place holder :)
+              let $gt := $test-set/tc:grammar-test
+              return element tc:grammar-test-result {
+                  (: temporary stub :)
+                  attribute result { "pass" },
+                  element tc:p {
+                      text { "Place-holder: "
+                          || "Results from test set " },
+                      $test-set/@name/string(),
+                      text { " will go here." }
+                  }
+              }
 
+          else ()
+      let $grammar := ($new-grammar, $grammar)[1]
 
-      element tc:description {
-        (: temporary stub :)
-        element tc:p {
-          text { "Place-holder: "
-               || "Results from test set " },
-          $test-set/@name/string(),
-          text { " will go here." }
-        }
-      }
-
-
-      if ($grammar-test-ok) then
-            for $c in $test-set/*
+      return (
+        $grammar-test-result ,
+        if (($grammar-test-result/@result = 'pass')
+	   or empty($grammar-test-result)) 
+        then (: run the tests, handle nested sets :)
+	           for $c in $test-set/*
           [self::tc:test-set 
           or self::tc:test-set-ref
           or self::tc:test-case]
       return if ($c/self::tc:test-set 
                 or $c/self::tc:test-set-ref)
       then t:run-test-set($c, $grammar, $uri-stack)
-      else if ($c/tc:test-case)
+      else if ($c/self::tc:test-case)
       then t:run-test-case($c, $grammar)
       else element tc:error {
-        attribute id="tc:tbd03",
+        attribute id { "t:tbd03" },
         text { "The laws of logic have been abrogated?" }
       }
 
-      else (: no point trying to run tests :)
-          ($grammar-test-result,
-          element tc:description {
-            element tc:p {
-              test { "Grammar test failed, "
-                  || "test cases and nested "
-                  || "test sets skipped." }
+        else (: no point trying to run tests :)
+            element tc:description {
+              element tc:p {
+                text { "Grammar test failed, "
+                    || "test cases and nested "
+                    || "test sets skipped." }
+              }
             }
-          })
+      )
     }
 
 };
 
 
 
+declare function t:run-test-case(
+  $test-case as element(tc:test-case),
+  $G as element(ixml)
+) as element() {
+  (: placeholder :)
+  element tc:test-case-result {
+    $test-case/@*,
+    element tc:p {
+      text { "Watch this space." }
+    }
+  }
+};
 
 

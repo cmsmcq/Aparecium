@@ -73,6 +73,14 @@ dirty first cut, taking a lot of shortcuts in order to get something
 running.  When that's done, I expect to come back and to a v0.2
 version that replaces some of those quick and dirty shortcuts with
 better code.</p>
+<p>
+<hi>The current version of some functions is not even a quick and
+dirty solution yet: the first version of each function just emits a
+Kilroy-was-here place-holder element, and the second version does that
+and then processes its children, who also emit place-holder elements.
+Once we are traversing the entire test catalog successfully, we can
+start worrying about actually running tests.</hi>
+</p>
 
 <div id="task">
 <head>The task</head>
@@ -235,7 +243,7 @@ indexing into the list.  It's easy to change the index.
 	 (: 28:  straw-man tests on ixml itself
 	    (n.b. old version of ixml grammar) :)
 	 $ixtdir || "ixml/ixml.test-catalog.pos.xml"
-	 )[1],
+	 )[6],
 
     $test-catalog-uri := resolve-uri($test-catalog-path, 
                                      static-base-uri()),
@@ -288,7 +296,7 @@ declare function t:run-tests(
     <ptr target="lib-rt-check-cat-read"/>
     for $test-set in $catalog/*/*
         [self::tc:test-set or self::tc:test-set-ref]
-    return t:run-test-set($test-set)
+    return t:run-test-set($test-set, (), $catalog-uri)
   }
 };
 </scrap></p>
@@ -384,10 +392,8 @@ as an argument.</p>
 <item><p>The second is a stack of URIs that we have opened.  This is
 used to detect reference cycles and snip them.</p></item>
 </list></p>
-<p>For now, this function doesn't do much: it just emits a
-place-holder element and then processes its children, who also emit
-place-holder elements.  Once we are traversing the test catalog
-successfully, we can start worrying about actually running tests.
+<p>The overall structure of the function is straightforward:
+we check the element we've been handed and handle it appropriately.
 <scrap prev="lib-run-test-set"
        id="lib-rts3"
        name="The recursive run-test-set() function">
@@ -429,7 +435,9 @@ latter, we fetch the document and deal with its top-level test sets.
              in $newcat/*/*
                 [self::tc:test-set 
                 or self::tc:test-set-ref]
-             return t:run-test-set($test-set, $grammar, $uri-stack)
+             return t:run-test-set($test-set, 
+                                   $grammar, 
+                                   ($uri2, $uri-stack))
 </scrap></p>
 <p>The main case is for a <soCalled>real</soCalled> test set.
 It may contain a grammar (inline or via reference, in ixml or xml),
@@ -448,17 +456,21 @@ and it may contain test cases and nested test sets.
         }
       },
       <ptr target="lib-rts-grammar"/>
-      if ($grammar-test-ok) then
-      <ptr target="lib-rts-nested"/>
-      else (: no point trying to run tests :)
-          ($grammar-test-result,
-          element tc:description {
-            element tc:p {
-              test { "Grammar test failed, "
-                  || "test cases and nested "
-                  || "test sets skipped." }
+      return (
+        $grammar-test-result,
+        if (($grammar-test-result/@result = 'pass')
+	   or empty($grammar-test-result)) 
+        then (: run the tests, handle nested sets :)
+	     <ptr target="lib-rts-nested"/>
+        else (: no point trying to run tests :)
+            element tc:description {
+              element tc:p {
+                text { "Grammar test failed, "
+                    || "test cases and nested "
+                    || "test sets skipped." }
+              }
             }
-          })
+      )
     }
 </scrap>
 </p>
@@ -476,10 +488,10 @@ and call the appropriate function to handle them.
       return if ($c/self::tc:test-set 
                 or $c/self::tc:test-set-ref)
       then t:run-test-set($c, $grammar, $uri-stack)
-      else if ($c/tc:test-case)
+      else if ($c/self::tc:test-case)
       then t:run-test-case($c, $grammar)
       else element tc:error {
-        attribute id="tc:tbd03",
+        attribute id { "t:tbd03" },
         text { "The laws of logic have been abrogated?" }
       }
 </scrap>
@@ -496,74 +508,189 @@ The locally specified grammar unconditionally overrides any grammar
 passed in as an argument, and we keep life simple by using the same
 name for it.
 <scrap id="lib-rts-grammar"
-       name="Load the grammar specification for a test set">
+       name="Load and test the grammar for a test set">
       let $new-grammar := if ($test-set/tc:ixml-grammar)
-          then ap:compile-grammar-from-string(
-              $test-set/tc:ixml-grammar/string()
-          )
+          then <ptr target="lib-rts-ld-ixml"/>
           else if ($test-set/tc:vxml-grammar)
-          then ap:compile-grammar-from-xml(
-              $test/set/tc:vxml-grammar[1]
-          )
+          then <ptr target="lib-rts-ld-vxml"/>
           else if ($test-set/tc:ixml-grammar-ref)
-          then ap:compile-grammar-from-uri(
-              $test-set/tc:ixml-grammar-ref/@href
-          )
+          then <ptr target="lib-rts-ld-ixml-ref"/> 
           else if ($test-set/tc:vxml-grammar-ref)
-          then ap:compile-grammar-from-xml(
-              let $uri0 := $test/set/tc:vxml-grammar-ref
-                           /@href/string(),
-                  $uri1 := base-uri($test-set),
-                  $uri2 := resolve-uri($uri0, $uri1)
-              return doc($uri2)
-          )
+          then <ptr target="lib-rts-ld-ixml-ref"/>
           else ()
-      let $grammar-test-result := if (exists($new-grammar))
-              then &lt;dummy-grammar-test-result/>
-              else (),
-          $grammar-test-ok := if (exists($new-grammar))
-              then true() (: run test on $new-grammar :)
-              else true(),
-          $grammar := ($new-grammar, $grammar)[1]
 </scrap>
 <emph>[TO DO:  prepare for and recover from errors]</emph>
 </p>
-<p>In order to call these functions in the Aparecium library,
-we are going to need to import that library:
+<p>Each of these needs to be done cautiously.  First is
+the inline ixml case.  We just wrap it in a try/catch
+and hope for the best.  (Quick and dirty, remember.)
+<scrap id="lib-rts-ld-ixml"
+       name="Cautiously compile ixml grammar">
+          try {
+               ap:compile-grammar-from-string(
+                 $test-set/tc:ixml-grammar/string()
+               )
+          } catch * {
+               element tc:error {
+                 attribute id { "t:tbd04" },
+                 text { "ixml compilation failed" }
+               }               
+          }
+</scrap></p>
+<p>In order to call the <ident>compile-grammar-from-string()</ident>
+function (and its relatives) in the Aparecium library, we are going to
+need to import that library:
 <scrap prev="lib-nsdecls"
        name="Namespace declarations and imports, cont'd">
 import module namespace ap =
 "http://blackmesatech.com/2019/iXML/Aparecium"
 at "Aparecium.xqm";
 </scrap></p>
+<p>The second is the inline vxml case.  Again, just wrap it in a try/catch
+and hope for the best.  
+<scrap id="lib-rts-ld-vxml"
+       name="Cautiously compile vxml grammar">
+          try {
+               ap:compile-grammar-from-xml(
+                 $test-set/tc:vxml-grammar[1]/ixml
+               ) 
+          } catch * {
+               element tc:error {
+                 attribute id { "t:tbd05" },
+                 text { "vxml compilation failed" }
+               }               
+          }
+</scrap></p>
+
+<p>The external-ixml case has several ways to fail.
+For now (quick and dirty) we don't cover them all.
+<scrap id="lib-rts-ld-ixml-ref"
+       name="Cautiously compile external ixml grammar">
+          let $uri0 := $test-set/tc:ixml-grammar-ref
+                           /@href/string(),
+              $uri1 := base-uri($test-set),
+              $uri2 := resolve-uri($uri0, $uri1)
+              return 
+                if (unparsed-text-available($uri2))
+                then try {
+		       ap:compile-grammar-from-uri($uri2)
+                     } catch * {
+                       element tc:error {
+                         attribute id { "t:tbd06" },
+			 text { "ixml compilation failed" }
+                       }
+                     }
+                else element tc:error {
+                       attribute id { "t:tbd07" },
+		       text { "external ixml not found" }
+                     }
+
+</scrap></p>
+
+<p>The external-vxml case also has several ways to fail, most not
+covered here.
+<scrap id="lib-rts-ld-vxml-ref"
+       name="Cautiously compile external vxml grammar">
+ap:compile-grammar-from-xml(
+              let $uri0 := $test-set/tc:vxml-grammar-ref
+                           /@href/string(),
+                  $uri1 := base-uri($test-set),
+                  $uri2 := resolve-uri($uri0, $uri1)
+              return doc($uri2)/ixml
+          )
+
+          let $uri0 := $test-set/tc:vxml-grammar-ref
+                           /@href/string(),
+              $uri1 := base-uri($test-set),
+              $uri2 := resolve-uri($uri0, $uri1)
+          return if (doc-available($uri2))
+                 then try {
+                        ap:compile-grammar-from-uri($uri2)
+                      } catch * {
+                        element tc:error {
+                          attribute id { "t:tbd08" },
+                          text { "vxml compilation failed" }
+                        }
+                      }
+                 else element tc:error {
+                        attribute id { "t:tbd09" },
+                        text { "external vxml grammar not found" }
+                      }
+               
+          }
+</scrap></p>
 <p>
 If a grammar is given, a <gi>grammar-test</gi> may also be specified.
-
+We need to check the value of <ident>$new-grammar</ident>; if it's a
+<gi>tc:error</gi> element, the grammar test failed and the
+<att>id</att> attribute should tell us roughly why.  If it's anything
+other than an <gi>ixml</gi> element, the grammar test failed, and we
+may or may not have any inkling of why.  <emph>Aparecium needs to do a
+much better job making the compilation of grammars reliable and
+robust.  It's tempting to start checking grammars for problems here,
+but that work belongs in Aparecium itself, so we do not do it
+here.</emph>
 <scrap prev="lib-rts-grammar"
-       id="lib-rts-gtest"
+       id="lib-rts-grammar-test"
        name="Handle the grammar test, if there is one">
-      if ($test-set/tc:grammar-test)
+      let $gt := $test-set/tc:grammar-test
+      let $grammar-test-result := 
+          if (empty($new-grammar) and empty($gt))
+          then ()
+          else element tc:grammar-test-result {
 
+              if ($new-grammar/self::ixml) 
+              then t:test-grammar($gt, $new-grammar)
 
-      element tc:description {
-        (: temporary stub :)
-        element tc:p {
-          text { "Place-holder: "
-               || "Results from test set " },
-          $test-set/@name/string(),
-          text { " will go here." }
-        }
-      }
+              else if ($new-grammar/self::tc:error
+                      /@id = ('tc:tbd04', 'tc:tbd06'))
+              then (
+                  (: ixml found but did not compile :)
+                  attribute result { "fail" },
+                  element tc:app-info {
+                      $new-grammar
+                  }
+              )
 
+              else if ($new-grammar/self::tc:error
+                      /@id = ('tc:tbd05', 'tc:tbd08'))
+              then (
+                  (: vxml found but did not compile :)
+                  attribute result { "fail" },
+                  element tc:app-info {
+                      $new-grammar
+                  }
+              )
+
+              else if ($new-grammar/self::tc:error
+                      /@id = ('tc:tbd07', 'tc:tbd09'))
+              then (
+                  (: external grammar not found :)
+                  attribute result { "not-run" },
+                  element tc:app-info {
+                      $new-grammar
+                  }
+              )
+
+              else if (not($new-grammar/self::ixml))
+              then (
+                  attribute result { "fail" },
+                  element tc:app-info {
+                      $new-grammar
+                  }
+              )
+          }      
+
+      let $grammar := ($new-grammar, $grammar)[1]
 </scrap>
 </p>
-
+<!--
 <p>The <ident>load-grammar()</ident> function ...
 <scrap id="lib-load-grammar"
        name="The load-grammar() function">
-</scrap>
+       </scrap>
 </p>
-
+-->
 <p>The <ident>test-grammar()</ident> function ...
 <scrap id="lib-test-grammar"
        name="The test-grammar() function">
@@ -579,6 +706,18 @@ If a grammar is given, a <gi>grammar-test</gi> may also be specified.
 <p>The <ident>run-test-case()</ident> function ...
 <scrap id="lib-run-test-case"
        name="The run-test-case() function">
+declare function t:run-test-case(
+  $test-case as element(tc:test-case),
+  $G as element(ixml)
+) as element() {
+  (: placeholder :)
+  element tc:test-case-result {
+    $test-case/@*,
+    element tc:p {
+      text { "Watch this space." }
+    }
+  }
+};
 </scrap>
 </p>
 

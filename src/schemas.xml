@@ -1,4 +1,6 @@
 <?xml version="1.0"?>
 <locatingRules xmlns="http://thaiopensource.com/ns/locating-rules/1.0">
+  <uri resource="test-harness.xml" typeId="TEI P3 + SWeb"/>
   <uri resource="Aparecium.xml" typeId="TEI P3 + SWeb"/>
+  <uri resource="test-harness" typeId="TEI P3 + SWeb"/>
 </locatingRules>
