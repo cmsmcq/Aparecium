@@ -176,6 +176,19 @@ and then processes its children, who also emit place-holder elements.
 Once we are traversing the entire test catalog successfully, we can
 start worrying about actually running tests.</i>
 </div>
+<div class="Real-P">
+<i>To do:</i>
+<ul><li><i>Revise the list of catalogs, arrange roughly from simple to
+complex, short to long.</i></li>
+<li><i>Work through test catalogs, fixing problems in the test
+harness or the tests, filing issue reports for problems in
+Aparecium.</i></li>
+<li><i>(Interleaved with the above:) Improve reports and
+diagnostics as occasion warrants.  In particular, in cases of failure
+record more about the test inputs.</i></li>
+<li><i>Resume work on more test sets.</i></li>
+</ul>
+</div>
 
 
 <div class="div">
@@ -233,7 +246,7 @@ ixml-tests namespace, we need to declare it.
 declare namespace tc =
 "https://github.com/cmsmcq/ixml-tests";
 </pre>
-<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e377">Namespace declarations and imports, cont'd 21</a>&#x3009;<br></span>
+<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e392">Namespace declarations and imports, cont'd 21</a>&#x3009;<br></span>
 
 <span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-top">[File test-harness.xqm] 2</a> &#x3009; <br></span>
 </div>
@@ -414,10 +427,10 @@ library's behavior.
 declare function t:run-tests(
   $catalog-uri as xs:string,
   $options as element(options)
-) as element(tc:test-results) {
+) as element(tc:test-report) {
 
   <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-rt-load-cat">Load catalog file into $catalog 8</a></em> &#x3009;</span>
-  return element tc:test-results {
+  return element tc:test-report {
     <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-rt-metadata">Supply basic metadata for the test report 11</a></em> &#x3009;</span>
     <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-rt-check-cat-read">Check for errors reading the catalog 10</a></em> &#x3009;</span>
     for $test-set in $catalog/*/*
@@ -445,11 +458,11 @@ declare function t:run-tests(
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound">Other versions of this code are in &#x3008; <a href="#d3e213">Load catalog file into $catalog 9</a> &#x3009; <br></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-run-tests">The run-tests() function 7</a> &#x3009; <br></span>
+<span class="scrapinbound">Other versions of this code are in &#x3008; <a href="#d3e228">Load catalog file into $catalog 9</a> &#x3009; <br></span><span class="scrapinbound">This code is used in &#x3008; <a href="#lib-run-tests">The run-tests() function 7</a> &#x3009; <br></span>
 </div>
 
 A simpler version of this might be:
-<div class="scrap"><span><a name="d3e218">&#x3008; 9 Load catalog file into $catalog &#x3009; (for version <em>alt</em>) &#x2261;</a></span>
+<div class="scrap"><span><a name="d3e233">&#x3008; 9 Load catalog file into $catalog &#x3009; (for version <em>alt</em>) &#x2261;</a></span>
 <pre class="scrapbody">
   let $catalog := if (doc-available($catalog-uri))
                   then doc($catalog-uri)
@@ -778,7 +791,7 @@ and hope for the best.  (Quick and dirty, remember.)
 <div class="Real-P">In order to call the <i>parse-grammar-from-string()</i>
 function (and its relatives) in the Aparecium library, we are going to
 need to import that library:
-<div class="scrap"><span><a name="d3e377">&#x3008; 21 Namespace declarations and imports, cont'd [continues <a href="#lib-nsdecls">3 Namespace declarations and imports for library module</a>]  &#x3009;  &#x2261;</a></span>
+<div class="scrap"><span><a name="d3e392">&#x3008; 21 Namespace declarations and imports, cont'd [continues <a href="#lib-nsdecls">3 Namespace declarations and imports for library module</a>]  &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">
 import module namespace ap =
 "http://blackmesatech.com/2019/iXML/Aparecium"
@@ -1056,8 +1069,8 @@ the other.  We perform a deep-equal comparison, and that's it.
          }
        )
 
-  else if ($expectation[self::assert-not-a-grammar
-           or self::assert-not-a-sentence]
+  else if ($expectation[self::tc:assert-not-a-grammar
+           or self::tc:assert-not-a-sentence]
            and
            $xml-grammar/self::tc:error[@id = 
            ("t:tbd04", "t:tbd06")])
@@ -1070,7 +1083,7 @@ the other.  We perform a deep-equal comparison, and that's it.
          }         
        )
 
-  else if ($expectation[self::assert-not-a-grammar]
+  else if ($expectation[self::tc:assert-not-a-grammar]
            and
            $xml-grammar/self::tc:error
                         [@id = "t:tbd10"])
@@ -1093,11 +1106,11 @@ the other.  We perform a deep-equal comparison, and that's it.
          (: grammar conformant but not as expected :)
          attribute result { "fail" },
          element tc:result {
-           element tc:p {
+           comment {
             "diagnostics should go here"
            },
-           $expectation,
-           $xml-grammar
+           element tc:assert-xml { $expectation },
+           element tc:reported-xml { $xml-grammar }
          }
        )
 </pre>
@@ -1129,7 +1142,7 @@ for the test set, catching exceptions.</li>
 <ul><li>If an exception was raised in parsing, mark the test
 case as failed.  Otherwise continue.</li>
 <li>If there was no parse, then
-<ul><li>if the expected result is not-a-sentence (or not-a-grammar?),
+<ul><li>if the expected result is assert-not-a-sentence (or assert-not-a-grammar?),
 then report success,</li>
 <li>else (expected result is an XML document) report failure.</li>
 </ul>
@@ -1218,13 +1231,15 @@ work.  (And be shorter.)
 </div>
 
 <div class="Real-P">If the expected results are external, we need to fetch them, too.
+We need to be careful to ensure that the value of
+<i>$expected</i> is an element and not a document node.
 <div class="scrap"><span><a name="lib-rtc-fetch-expected">&#x3008; 33 Fetch the expected results &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">
     let $expectations := 
         for $e in $test-case/tc:result/*
-        return if ($e/self::tc:not-a-sentence)
+        return if ($e/self::tc:assert-not-a-sentence)
             then $e
-            else if ($e/self::tc:not-a-grammar)
+            else if ($e/self::tc:assert-not-a-grammar)
             then $e
             else if ($e/self::tc:assert-xml)
             then $e/*
@@ -1235,7 +1250,7 @@ work.  (And be shorter.)
                      $uri2 := resolve-uri($uri0, $uri1)
                  return 
 		 if (doc-available($uri2))
-                 then doc($uri2)
+                 then doc($uri2)/*
                  else element tc:error {
                    attribute id { "t:tbd14" },
                    "Expected result at ",
@@ -1317,12 +1332,12 @@ the error.</i>
 <div class="scrap"><span><a name="lib-rtc-evaluate">&#x3008; 36 Evaluate the test results &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">
     return if ($parse-tree/self::no-parse
-              and $expectations/self::not-a-sentence)
+              and $expectations/self::tc:assert-not-a-sentence)
     then (
             attribute result { "pass" }
             (: optionally provide details :)
     ) else if ($parse-tree/self::no-parse
-              and $expectations/self::not-a-grammar)
+              and $expectations/self::tc:assert-not-a-grammar)
     then (
             attribute result { "pass" }
             (: optionally provide details :)
@@ -1330,11 +1345,11 @@ the error.</i>
 
     ) else if ($parse-tree/self::forest
               and 
-              empty(($expectations/self::not-a-grammar,
-	      $expectations/self::not-a-sentence))
+              empty(($expectations/self::tc:assert-not-a-grammar,
+	      $expectations/self::tc:assert-not-a-sentence))
               and 
-              (some $e1 in $expectations satisfies
-              (some $e2 in $parse-tree/* satisfies
+              (every $e1 in $parse-tree/* satisfies
+              (some $e2 in $expectations satisfies
               deep-equal($e1, $e2)))
               )
     then (
@@ -1349,17 +1364,19 @@ the error.</i>
 
     ) else (
             attribute result { "fail" },
-            $expectations[self::tc:not-a-grammar],
-            $expectations[self::tc:not-a-sentence],
-            for $e in $expectations[
-                not(self::tc:not-a-grammar)
-                and not(self::tc:not-a-sentence)
-            ] return element tc:assert-xml{$e},
-            if ($parse-tree/self::not-a-parse)
-            then element tc:reported-not-a-sentence {}
-            else if ($parse-tree/tc:error)
-            then ()
-            else element tc:reported-xml {$parse-tree}
+            element tc:result {
+              $expectations[self::tc:assert-not-a-grammar],
+              $expectations[self::tc:assert-not-a-sentence],
+              for $e in $expectations[
+                  not(self::tc:assert-not-a-grammar)
+                  and not(self::tc:assert-not-a-sentence)
+              ] return element tc:assert-xml{$e},
+              if ($parse-tree/self::no-parse)
+              then element tc:reported-not-a-sentence {}
+              else if ($parse-tree/self::tc:error)
+              then ()
+              else element tc:reported-xml {$parse-tree}
+            }
     )
 </pre>
 <span class="scrapcontinuations"></span>
@@ -1445,7 +1462,7 @@ I want for a given run.
 
 <hr>
 <ul><li>test-driver.xq: defined in &#x3008; <a href="#dr-top">1 [File test-driver.xq]</a> &#x3009; </li><li>test-harness.xqm: defined in &#x3008; <a href="#lib-top">2 [File test-harness.xqm]</a> &#x3009; </li></ul>
-<ul><li><a href="#dr-top">[File test-driver.xq] 1</a></li><li><a href="#lib-top">[File test-harness.xqm] 2</a></li><li><a href="#lib-rts-ld-ixml-ref">Cautiously fetch and parse external ixml grammar 23</a></li><li><a href="#lib-rts-ld-vxml-ref">Cautiously fetch external vxml grammar 24</a></li><li><a href="#lib-rts-ld-ixml">Cautiously parse ixml grammar 20</a></li><li><a href="#lib-rt-check-cat-read">Check for errors reading the catalog 10</a></li><li><a href="#lib-rtc-check-ready">Check for input and expected output 34</a></li><li><a href="#lib-rts-vxml-grammar-check">Check the XML grammar for conformance 25</a></li><li><a href="#lib-tc-compare">Compare the grammar with the expectation 30</a></li><li><a href="#lib-rts-grammar-compilation">Compile the new grammar, if there is one 27</a></li><li><a href="#lib-functions">Declare library functions 4</a></li><li><a href="#lib-rtc-evaluate">Evaluate the test results 36</a></li><li><a href="#lib-tc-fetch">Fetch expected result of grammar test 29</a></li><li><a href="#lib-rtc-fetch-expected">Fetch the expected results 33</a></li><li><a href="#lib-rtc-fetch-input">Fetch the test input string 32</a></li><li><a href="#lib-rts-do-ref">Handle a test-set reference 14</a></li><li><a href="#lib-rts-do-inline">Handle an inline test-set 15</a></li><li><a href="#lib-rts-nested">Handle nested test sets and test cases 16</a></li><li><a href="#lib-rts-grammar-test">Handle the grammar test, if there is one 26</a></li><li><a href="#dr-catfiles">List of available test-catalog files 6</a></li><li><a href="#lib-rts-grammar">Load and test the grammar for a test set 19</a></li><li><a href="#lib-rt-load-cat">Load catalog file into $catalog 8</a></li><li><a href="#d3e218">Load catalog file into $catalog 9</a></li><li><a href="#lib-nsdecls">Namespace declarations and imports for library module 3</a></li><li><a href="#d3e377">Namespace declarations and imports, cont'd 21</a></li><li><a href="#lib-rts-write-grammar-result">Optionally write out grammar test result 17</a></li><li><a href="#lib-rts-write-tsr">Optionally write out test set results 18</a></li><li><a href="#lib-rtc-parse">Parse the test input string 35</a></li><li><a href="#dr-options">Set the options for the test harness 37</a></li><li><a href="#dr-setup">Set up variables and options 5</a></li><li><a href="#lib-rt-metadata">Supply basic metadata for the test report 11</a></li><li><a href="#lib-rts-ld-vxml">Take the inline vxml grammar 22</a></li><li><a href="#lib-rts3">The recursive run-test-set() function 13</a></li><li><a href="#lib-report-test-case">The report-test-case() function 38</a></li><li><a href="#lib-run-test-case">The run-test-case() function 31</a></li><li><a href="#lib-run-test-set">The run-test-set() function 12</a></li><li><a href="#lib-run-tests">The run-tests() function 7</a></li><li><a href="#lib-test-grammar">The test-grammar() function 28</a></li></ul>
+<ul><li><a href="#dr-top">[File test-driver.xq] 1</a></li><li><a href="#lib-top">[File test-harness.xqm] 2</a></li><li><a href="#lib-rts-ld-ixml-ref">Cautiously fetch and parse external ixml grammar 23</a></li><li><a href="#lib-rts-ld-vxml-ref">Cautiously fetch external vxml grammar 24</a></li><li><a href="#lib-rts-ld-ixml">Cautiously parse ixml grammar 20</a></li><li><a href="#lib-rt-check-cat-read">Check for errors reading the catalog 10</a></li><li><a href="#lib-rtc-check-ready">Check for input and expected output 34</a></li><li><a href="#lib-rts-vxml-grammar-check">Check the XML grammar for conformance 25</a></li><li><a href="#lib-tc-compare">Compare the grammar with the expectation 30</a></li><li><a href="#lib-rts-grammar-compilation">Compile the new grammar, if there is one 27</a></li><li><a href="#lib-functions">Declare library functions 4</a></li><li><a href="#lib-rtc-evaluate">Evaluate the test results 36</a></li><li><a href="#lib-tc-fetch">Fetch expected result of grammar test 29</a></li><li><a href="#lib-rtc-fetch-expected">Fetch the expected results 33</a></li><li><a href="#lib-rtc-fetch-input">Fetch the test input string 32</a></li><li><a href="#lib-rts-do-ref">Handle a test-set reference 14</a></li><li><a href="#lib-rts-do-inline">Handle an inline test-set 15</a></li><li><a href="#lib-rts-nested">Handle nested test sets and test cases 16</a></li><li><a href="#lib-rts-grammar-test">Handle the grammar test, if there is one 26</a></li><li><a href="#dr-catfiles">List of available test-catalog files 6</a></li><li><a href="#lib-rts-grammar">Load and test the grammar for a test set 19</a></li><li><a href="#lib-rt-load-cat">Load catalog file into $catalog 8</a></li><li><a href="#d3e233">Load catalog file into $catalog 9</a></li><li><a href="#lib-nsdecls">Namespace declarations and imports for library module 3</a></li><li><a href="#d3e392">Namespace declarations and imports, cont'd 21</a></li><li><a href="#lib-rts-write-grammar-result">Optionally write out grammar test result 17</a></li><li><a href="#lib-rts-write-tsr">Optionally write out test set results 18</a></li><li><a href="#lib-rtc-parse">Parse the test input string 35</a></li><li><a href="#dr-options">Set the options for the test harness 37</a></li><li><a href="#dr-setup">Set up variables and options 5</a></li><li><a href="#lib-rt-metadata">Supply basic metadata for the test report 11</a></li><li><a href="#lib-rts-ld-vxml">Take the inline vxml grammar 22</a></li><li><a href="#lib-rts3">The recursive run-test-set() function 13</a></li><li><a href="#lib-report-test-case">The report-test-case() function 38</a></li><li><a href="#lib-run-test-case">The run-test-case() function 31</a></li><li><a href="#lib-run-test-set">The run-test-set() function 12</a></li><li><a href="#lib-run-tests">The run-tests() function 7</a></li><li><a href="#lib-test-grammar">The test-grammar() function 28</a></li></ul>
 <ul><li>2022-02-09 : CMSMcQ : finally reach the actual test cases ...</li>
 <li>2022-02-04 : CMSMcQ : made file, to replace earlier test harness
 lost in a disk crash</li>

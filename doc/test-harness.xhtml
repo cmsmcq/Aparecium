@@ -192,6 +192,19 @@ second version does that and then processes its children, who also
 emit place-holder elements. Once we are traversing the entire test
 catalog successfully, we can start worrying about actually running
 tests.</i></div>
+<div class="Real-P"><i>To do:</i>
+<ul>
+<li><i>Revise the list of catalogs, arrange roughly from simple to
+complex, short to long.</i></li>
+<li><i>Work through test catalogs, fixing problems in the test
+harness or the tests, filing issue reports for problems in
+Aparecium.</i></li>
+<li><i>(Interleaved with the above:) Improve reports and
+diagnostics as occasion warrants. In particular, in cases of
+failure record more about the test inputs.</i></li>
+<li><i>Resume work on more test sets.</i></li>
+</ul>
+</div>
 <div class="div">
 <h2><a name="task" id="task">1.</a> The task</h2>
 <div class="Real-P">Our task is to define a ‘test harness’ for
@@ -247,7 +260,7 @@ declare namespace tc =
 "https://github.com/cmsmcq/ixml-tests";
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e377">Namespace declarations and imports, cont'd
+"#d3e392">Namespace declarations and imports, cont'd
 21</a>〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#lib-top">[File test-harness.xqm] 2</a>
 〉<br /></span></div>
@@ -420,11 +433,11 @@ some aspects of the library's behavior.
 declare function t:run-tests(
   $catalog-uri as xs:string,
   $options as element(options)
-) as element(tc:test-results) {
+) as element(tc:test-report) {
 
   <span class="scrapref">〈 <em class="scrapptr"><a href=
 "#lib-rt-load-cat">Load catalog file into $catalog 8</a></em> 〉</span>
-  return element tc:test-results {
+  return element tc:test-report {
     <span class="scrapref">〈 <em class="scrapptr"><a href=
 "#lib-rt-metadata">Supply basic metadata for the test report 11</a></em> 〉</span>
     <span class="scrapref">〈 <em class="scrapptr"><a href=
@@ -454,12 +467,12 @@ declare function t:run-tests(
   }
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e213">Load catalog file into $catalog 9</a>
+<a href="#d3e228">Load catalog file into $catalog 9</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#lib-run-tests">The run-tests() function 7</a>
 〉<br /></span></div>
 A simpler version of this might be:
-<div class="scrap"><span><a name="d3e218" id="d3e218">〈 9 Load
+<div class="scrap"><span><a name="d3e233" id="d3e233">〈 9 Load
 catalog file into $catalog 〉 (for version <em>alt</em>)
 ≡</a></span>
 <pre class="scrapbody">
@@ -806,7 +819,7 @@ hope for the best. (Quick and dirty, remember.)
 <div class="Real-P">In order to call the
 <i>parse-grammar-from-string()</i> function (and its relatives) in
 the Aparecium library, we are going to need to import that library:
-<div class="scrap"><span><a name="d3e377" id="d3e377">〈 21
+<div class="scrap"><span><a name="d3e392" id="d3e392">〈 21
 Namespace declarations and imports, cont'd [continues</a> <a href=
 "#lib-nsdecls">3 Namespace declarations and imports for library
 module</a>] 〉 ≡</span>
@@ -1080,8 +1093,8 @@ that's it.
          }
        )
 
-  else if ($expectation[self::assert-not-a-grammar
-           or self::assert-not-a-sentence]
+  else if ($expectation[self::tc:assert-not-a-grammar
+           or self::tc:assert-not-a-sentence]
            and
            $xml-grammar/self::tc:error[@id = 
            ("t:tbd04", "t:tbd06")])
@@ -1094,7 +1107,7 @@ that's it.
          }         
        )
 
-  else if ($expectation[self::assert-not-a-grammar]
+  else if ($expectation[self::tc:assert-not-a-grammar]
            and
            $xml-grammar/self::tc:error
                         [@id = "t:tbd10"])
@@ -1117,11 +1130,11 @@ that's it.
          (: grammar conformant but not as expected :)
          attribute result { "fail" },
          element tc:result {
-           element tc:p {
+           comment {
             "diagnostics should go here"
            },
-           $expectation,
-           $xml-grammar
+           element tc:assert-xml { $expectation },
+           element tc:reported-xml { $xml-grammar }
          }
        )
 </pre>
@@ -1150,8 +1163,8 @@ grammar for the test set, catching exceptions.</li>
 failed. Otherwise continue.</li>
 <li>If there was no parse, then
 <ul>
-<li>if the expected result is not-a-sentence (or not-a-grammar?),
-then report success,</li>
+<li>if the expected result is assert-not-a-sentence (or
+assert-not-a-grammar?), then report success,</li>
 <li>else (expected result is an XML document) report failure.</li>
 </ul>
 </li>
@@ -1242,16 +1255,17 @@ be shorter.)
 〉<br /></span></div>
 </div>
 <div class="Real-P">If the expected results are external, we need
-to fetch them, too.
+to fetch them, too. We need to be careful to ensure that the value
+of <i>$expected</i> is an element and not a document node.
 <div class="scrap"><span><a name="lib-rtc-fetch-expected" id=
 "lib-rtc-fetch-expected">〈 33 Fetch the expected results 〉
 ≡</a></span>
 <pre class="scrapbody">
     let $expectations := 
         for $e in $test-case/tc:result/*
-        return if ($e/self::tc:not-a-sentence)
+        return if ($e/self::tc:assert-not-a-sentence)
             then $e
-            else if ($e/self::tc:not-a-grammar)
+            else if ($e/self::tc:assert-not-a-grammar)
             then $e
             else if ($e/self::tc:assert-xml)
             then $e/*
@@ -1262,7 +1276,7 @@ to fetch them, too.
                      $uri2 := resolve-uri($uri0, $uri1)
                  return 
                  if (doc-available($uri2))
-                 then doc($uri2)
+                 then doc($uri2)/*
                  else element tc:error {
                    attribute id { "t:tbd14" },
                    "Expected result at ",
@@ -1341,12 +1355,12 @@ expectations.
 "lib-rtc-evaluate">〈 36 Evaluate the test results 〉 ≡</a></span>
 <pre class="scrapbody">
     return if ($parse-tree/self::no-parse
-              and $expectations/self::not-a-sentence)
+              and $expectations/self::tc:assert-not-a-sentence)
     then (
             attribute result { "pass" }
             (: optionally provide details :)
     ) else if ($parse-tree/self::no-parse
-              and $expectations/self::not-a-grammar)
+              and $expectations/self::tc:assert-not-a-grammar)
     then (
             attribute result { "pass" }
             (: optionally provide details :)
@@ -1354,11 +1368,11 @@ expectations.
 
     ) else if ($parse-tree/self::forest
               and 
-              empty(($expectations/self::not-a-grammar,
-              $expectations/self::not-a-sentence))
+              empty(($expectations/self::tc:assert-not-a-grammar,
+              $expectations/self::tc:assert-not-a-sentence))
               and 
-              (some $e1 in $expectations satisfies
-              (some $e2 in $parse-tree/* satisfies
+              (every $e1 in $parse-tree/* satisfies
+              (some $e2 in $expectations satisfies
               deep-equal($e1, $e2)))
               )
     then (
@@ -1373,17 +1387,19 @@ expectations.
 
     ) else (
             attribute result { "fail" },
-            $expectations[self::tc:not-a-grammar],
-            $expectations[self::tc:not-a-sentence],
-            for $e in $expectations[
-                not(self::tc:not-a-grammar)
-                and not(self::tc:not-a-sentence)
-            ] return element tc:assert-xml{$e},
-            if ($parse-tree/self::not-a-parse)
-            then element tc:reported-not-a-sentence {}
-            else if ($parse-tree/tc:error)
-            then ()
-            else element tc:reported-xml {$parse-tree}
+            element tc:result {
+              $expectations[self::tc:assert-not-a-grammar],
+              $expectations[self::tc:assert-not-a-sentence],
+              for $e in $expectations[
+                  not(self::tc:assert-not-a-grammar)
+                  and not(self::tc:assert-not-a-sentence)
+              ] return element tc:assert-xml{$e},
+              if ($parse-tree/self::no-parse)
+              then element tc:reported-not-a-sentence {}
+              else if ($parse-tree/self::tc:error)
+              then ()
+              else element tc:reported-xml {$parse-tree}
+            }
     )
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
@@ -1500,10 +1516,10 @@ there is one 26</a></li>
 set 19</a></li>
 <li><a href="#lib-rt-load-cat">Load catalog file into $catalog
 8</a></li>
-<li><a href="#d3e218">Load catalog file into $catalog 9</a></li>
+<li><a href="#d3e233">Load catalog file into $catalog 9</a></li>
 <li><a href="#lib-nsdecls">Namespace declarations and imports for
 library module 3</a></li>
-<li><a href="#d3e377">Namespace declarations and imports, cont'd
+<li><a href="#d3e392">Namespace declarations and imports, cont'd
 21</a></li>
 <li><a href="#lib-rts-write-grammar-result">Optionally write out
 grammar test result 17</a></li>
