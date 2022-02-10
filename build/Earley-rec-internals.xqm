@@ -819,6 +819,8 @@ declare function ixi:inputlength(
    terminal[quoted/text()], charset, exclude.
    In 2019 syntax:  literal[@dstring], literal[@sstring],
    literal[@hex], inclusion, exclusion.
+   In 2022 syntax:  literal[@string], literal[@hex], 
+   inclusion, exclusion.
    
    Note that position is 0-based, not 1-based, so we add 1 to it
    for XQuery substring calls.
@@ -1045,14 +1047,14 @@ declare function ixi:string-length(
    strings.  (Q. Does that mean we are expecting quote doubling
    to show up in the XML form of the literal?  It shouldn't.)
 
-   To do:  handle 2019 syntax of literals.
-
    To do:  sanity check this, and delete if unnecessary.
    :)
 declare function ixi:string-value(
   $q as element(literal)
 ) as xs:string {
-  let $s := if ($q/@dstring)
+  let $s := if ($q/@string)
+            then string($q/@string)
+            else if ($q/@dstring)
             then replace($q/@dstring,'""','"') (:":)
             else if ($q/@sstring) 
             then replace($q/@sstring,"''", "'") 

@@ -2293,19 +2293,17 @@ declare function ixi:string-length(
    strings.  (Q. Does that mean we are expecting quote doubling
    to show up in the XML form of the literal?  It shouldn't.)
 
-   To do:  handle 2019 syntax of literals.
-
    To do:  sanity check this, and delete if unnecessary.
    :)
 declare function ixi:string-value(
   $q as element(literal)
 ) as xs:string {
-  let $s := if ($q/@dstring)
+  let $s := if ($q/@string)
+            then string($q/@string)
+            else if ($q/@dstring)
             then replace($q/@dstring,'""','"') (:":)
             else if ($q/@sstring) 
             then replace($q/@sstring,"''", "'") 
-            else if ($q/@string) 
-            then $q/@string/string()
             else if ($q/@hex) 
             then ixi:charXhex($q/@hex)
             else string($q)
