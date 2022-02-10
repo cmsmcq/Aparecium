@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '3 October 2021' >
+<!ENTITY date.last.touched '9 February 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
@@ -54,6 +54,8 @@
 </fileDesc>
 <revisionDesc>
 <list>
+<item>2022-02-09 : CMSMcQ : resuming work (some changes unlogged
+between October and now).</item>
 <item>2021-10-18 : CMSMcQ : take git snapshot of current state; then
 insert the changes I needed to make to make it work in Oxygen with
 Saxon.</item>
@@ -2028,6 +2030,8 @@ declare function ixi:inputlength(
    terminal[quoted/text()], charset, exclude.
    In 2019 syntax:  literal[@dstring], literal[@sstring],
    literal[@hex], inclusion, exclusion.
+   In 2022 syntax:  literal[@string], literal[@hex], 
+   inclusion, exclusion.
    
    Note that position is 0-based, not 1-based, so we add 1 to it
    for XQuery substring calls.
@@ -2202,8 +2206,9 @@ declare function ixi:escapedstringXS(
 <scrap prev="eri-utils-and-misc"
        name="Define catescXS() to build category escape">
 (: ................................................................
-   catesc X S($s): given a two-character string from a class element,
-   return the appropriate category escape in XSD/XPath notation.
+   catesc X S($s): given a one- or two-character string from a 
+   class element, return the appropriate category escape in 
+   XSD/XPath notation.
 
    I should do some sanity checking here, but at the moment I'm
    impatient, so I just wrap it in braces with \p in front.
@@ -2213,19 +2218,18 @@ declare function ixi:escapedstringXS(
    match the list.  But for now, I'll just ignore it and return '.' 
    to match one character, on the theory of "carry on irregardless."   
 
-   To do:  adjust as needed for 2019 syntax.
    To do:  figure out how Aparecium should handle errors.
 :)
 declare function ixi:catescXS(
   $s as xs:string
 ) as xs:string {
-  if (matches($s,'^(L[ulmo]'
-     || '|M[nce]'
-     || '|N[dlo]'
-     || '|P[cdseifo]'
-     || '|Z[slp]'
-     || '|S[mcko]'
-     || '|C[cfon])$'))
+  if (matches($s,'^(L[ulmo]?'
+     || '|M[nce]?'
+     || '|N[dlo]?'
+     || '|P[cdseifo]?'
+     || '|Z[slp]?'
+     || '|S[mcko]?'
+     || '|C[cfon]?)$'))
   then '\p{' || $s || '}'
   else '.'
   (: Letters: u[pper] l[ower] t[itlecase] m[odifier] o[other]
@@ -2300,6 +2304,8 @@ declare function ixi:string-value(
             then replace($q/@dstring,'""','"') (:":)
             else if ($q/@sstring) 
             then replace($q/@sstring,"''", "'") 
+            else if ($q/@string) 
+            then $q/@string/string()
             else if ($q/@hex) 
             then ixi:charXhex($q/@hex)
             else string($q)
@@ -2789,14 +2795,29 @@ an FSA.
 <scrap prev="aparecium-variables"
        name="Location of ixml grammar">
 declare variable $aparecium:ixml.ixml as xs:string
-  := $aparecium:libloc || '/ixml.2021-09-14.ixml';
+  := $aparecium:libloc || '/ixml.2022-01-25.ixml';
 
 declare variable $aparecium:ixml.xml as xs:string
-  := $aparecium:libloc || '/ixml.2021-09-14.ixml.xml';
+  := $aparecium:libloc || '/ixml.2022-01-25.ixml.xml';
   
 declare variable $aparecium:ixml.gl.xml as xs:string
-  := $aparecium:libloc || '/ixml.2021-09-14.compiled.xml';  
+  := $aparecium:libloc || '/ixml.2022-01-25.ixml.compiled.xml';  
 </scrap>
+</p>
+<p>Maintenance note: to move to a new version of the ixml grammar, the
+following steps should suffice:
+<list type="ordered">
+  <item>Place the new ixml.ixml and ixml.xml into the library
+  directory (embedding the date into the file name to reduce confusion
+  later).</item>
+  <item>Update the scrap above to show the new filenames.</item>
+  <item>Compile the new grammar to the ...compiled.xml file.</item>
+  <item>Run regression tests.</item>
+  <item>Make comparison copy of compiled grammar; recompile; compare.
+  Since the first compilation used the old grammar, and the second
+  used the new grammar, the first and second compiled versions may
+  differ; the second and third should not.</item>
+</list>
 </p>
 </div>
 </div>

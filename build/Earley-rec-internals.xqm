@@ -973,8 +973,9 @@ declare function ixi:escapedstringXS(
 };
 
 (: ................................................................
-   catesc X S($s): given a two-character string from a class element,
-   return the appropriate category escape in XSD/XPath notation.
+   catesc X S($s): given a one- or two-character string from a 
+   class element, return the appropriate category escape in 
+   XSD/XPath notation.
 
    I should do some sanity checking here, but at the moment I'm
    impatient, so I just wrap it in braces with \p in front.
@@ -984,19 +985,18 @@ declare function ixi:escapedstringXS(
    match the list.  But for now, I'll just ignore it and return '.' 
    to match one character, on the theory of "carry on irregardless."   
 
-   To do:  adjust as needed for 2019 syntax.
    To do:  figure out how Aparecium should handle errors.
 :)
 declare function ixi:catescXS(
   $s as xs:string
 ) as xs:string {
-  if (matches($s,'^(L[ulmo]'
-     || '|M[nce]'
-     || '|N[dlo]'
-     || '|P[cdseifo]'
-     || '|Z[slp]'
-     || '|S[mcko]'
-     || '|C[cfon])$'))
+  if (matches($s,'^(L[ulmo]?'
+     || '|M[nce]?'
+     || '|N[dlo]?'
+     || '|P[cdseifo]?'
+     || '|Z[slp]?'
+     || '|S[mcko]?'
+     || '|C[cfon]?)$'))
   then '\p{' || $s || '}'
   else '.'
   (: Letters: u[pper] l[ower] t[itlecase] m[odifier] o[other]

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '4 February 2022' >
+<!ENTITY date.last.touched '9 February 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
@@ -34,6 +34,7 @@ form of this document.</p>
 </fileDesc>
 <revisionDesc>
 <list>
+<item>2022-02-09 : CMSMcQ : finally reach the actual test cases ...</item>
 <item>2022-02-04 : CMSMcQ : made file, to replace earlier test harness
 lost in a disk crash</item>
 </list>
@@ -49,7 +50,7 @@ lost in a disk crash</item>
 </docTitle>
 
 <docAuthor>C. M. Sperberg-McQueen</docAuthor>
-<docDate>4 February 2022</docDate>
+<docDate>4 February 2022, last revised &date.last.touched;</docDate>
 </titlePage>
 <versionList>
 <version id="qd">Quick and dirty first cut</version>
@@ -101,8 +102,9 @@ declare namespace tc =
 
 <ref target="dr-setup">Set up variables and options</ref>
 
-let $results := t:run-tests($test-catalog-uri, $options),
-    $dummy   := file:create-dir($outdir)
+let $dummy   := file:create-dir($outdir),
+    $results := t:run-tests($test-catalog-uri, $options)
+    
 return ($results,
         file:write($report-uri, $results))
 </scrap>
@@ -129,7 +131,6 @@ declare namespace tc =
        name="Declare library functions">
 <ptr target="lib-run-tests"/>
 <ptr target="lib-run-test-set"/>
-<ptr target="lib-load-grammar"/>
 <ptr target="lib-test-grammar"/>
 <ptr target="lib-run-test-case"/>
 </scrap></p>
@@ -192,7 +193,7 @@ let $syndir := "../../ixml/tests/steven/syntaxtests/",
                || adjust-dateTime-to-timezone(
                     current-dateTime(), () )
                || '/',
-	       static-base-uri() ),
+               static-base-uri() ),
 </scrap>
 </p>
 <p>Next, I'll make a list of catalogs, and choose the one I want by
@@ -207,43 +208,43 @@ indexing into the list.  It's easy to change the index.
          $syndir || "catalog-as-instance-tests-ixml.xml",
          $syndir || "catalog-as-instance-tests-ixml.xml",
 
-	 (: 5 :)
+         (: 5 :)
          $sptdir || "tests-catalog.xml",
-	 
-	 (: 6 7 8 :)
+         
+         (: 6 7 8 :)
          $apadir || "test0.xml",
          $apadir || "test1.xml",
          $apadir || "test2.xml",
 
-	 (: 9-13, with 2, 7638, 2886, 1020, and 338 test cases.
-	    The positive test cases are broken. :)
+         (: 9-13, with 2, 7638, 2886, 1020, and 338 test cases.
+            The positive test cases are broken. :)
          $ixtdir || "arith/arith.test-catalog.pos.xml",
          $ixtdir || "arith/arith.O3.test-catalog.arc.neg.xml",
          $ixtdir || "arith/arith.O3.test-catalog.arc-final.neg.xml",
          $ixtdir || "arith/arith.O3.test-catalog.state.neg.xml",
          $ixtdir || "arith/arith.O3.test-catalog.state-final.neg.xml",
 
-	 (: Positive and negative catalogs for various small
-	    grammars: 14-27 :)
-	 $ixtdir || "gxxx/g010.test-catalog.xml",
-	 $ixtdir || "gxxx/g010.O3.test-catalog.all.neg.xml",
-	 $ixtdir || "gxxx/g011.test-catalog.xml",
-	 $ixtdir || "gxxx/g011.O3.test-catalog.all.neg.xml",
-	 $ixtdir || "gxxx/g012.test-catalog.xml",
-	 $ixtdir || "gxxx/g012.O3.test-catalog.all.neg.xml",
-	 $ixtdir || "gxxx/g022.test-catalog.xml",
-	 $ixtdir || "gxxx/g022.O3.test-catalog.all.neg.xml",
-	 $ixtdir || "gxxx/g101.test-catalog.xml",
-	 $ixtdir || "gxxx/g101.O3.test-catalog.all.neg.xml",
-	 $ixtdir || "gxxx/g102.test-catalog.xml",
-	 $ixtdir || "gxxx/g102.O3.test-catalog.all.neg.xml",
-	 $ixtdir || "gxxx/g112.test-catalog.xml",
-	 $ixtdir || "gxxx/g112.O3.test-catalog.all.neg.xml",
+         (: Positive and negative catalogs for various small
+            grammars: 14-27 :)
+         $ixtdir || "gxxx/g010.test-catalog.xml",
+         $ixtdir || "gxxx/g010.O3.test-catalog.all.neg.xml",
+         $ixtdir || "gxxx/g011.test-catalog.xml",
+         $ixtdir || "gxxx/g011.O3.test-catalog.all.neg.xml",
+         $ixtdir || "gxxx/g012.test-catalog.xml",
+         $ixtdir || "gxxx/g012.O3.test-catalog.all.neg.xml",
+         $ixtdir || "gxxx/g022.test-catalog.xml",
+         $ixtdir || "gxxx/g022.O3.test-catalog.all.neg.xml",
+         $ixtdir || "gxxx/g101.test-catalog.xml",
+         $ixtdir || "gxxx/g101.O3.test-catalog.all.neg.xml",
+         $ixtdir || "gxxx/g102.test-catalog.xml",
+         $ixtdir || "gxxx/g102.O3.test-catalog.all.neg.xml",
+         $ixtdir || "gxxx/g112.test-catalog.xml",
+         $ixtdir || "gxxx/g112.O3.test-catalog.all.neg.xml",
 
-	 (: 28:  straw-man tests on ixml itself
-	    (n.b. old version of ixml grammar) :)
-	 $ixtdir || "ixml/ixml.test-catalog.pos.xml"
-	 )[6],
+         (: 28:  straw-man tests on ixml itself
+            (n.b. old version of ixml grammar) :)
+         $ixtdir || "ixml/ixml.test-catalog.pos.xml"
+         )[7],
 
     $test-catalog-uri := resolve-uri($test-catalog-path, 
                                      static-base-uri()),
@@ -252,7 +253,7 @@ indexing into the list.  It's easy to change the index.
                         || replace($test-catalog-uri,
                                    "^(.*)/([^/]*)(\.xml)",
                                    "$2")
-		        || '.xml', 
+                        || '.xml', 
     $report-uri := $outdir || $report-filename,
 </scrap>
 </p>
@@ -291,12 +292,15 @@ declare function t:run-tests(
 ) as element(tc:test-results) {
 
   <ptr target="lib-rt-load-cat"/>
-  return element tc:test-results {
+  return element tc:test-report {
     <ptr target="lib-rt-metadata"/>
     <ptr target="lib-rt-check-cat-read"/>
     for $test-set in $catalog/*/*
         [self::tc:test-set or self::tc:test-set-ref]
-    return t:run-test-set($test-set, (), $catalog-uri)
+    return t:run-test-set($test-set, 
+                          (), 
+                          $catalog-uri, 
+                          $options)
   }
 };
 </scrap></p>
@@ -373,9 +377,10 @@ additional arguments.
 <scrap id="lib-run-test-set"
        name="The run-test-set() function">
 declare function t:run-test-set(
-  $test-set as element()
+  $test-set as element(),
+  $options as element(options)
 ) as element() {
-  t:run-test-set($test-set, (), ())
+  t:run-test-set($test-set, (), (), $options)
 };
 </scrap>
 </p>
@@ -400,7 +405,8 @@ we check the element we've been handed and handle it appropriately.
 declare function t:run-test-set(
   $test-set as element(),
   $grammar as element()?,
-  $uri-stack as xs:string*
+  $uri-stack as xs:string*,
+  $options as element(options)
 ) as element()+ {
 
   if ($test-set/self::tc:test-set-ref)
@@ -417,7 +423,7 @@ latter, we fetch the document and deal with its top-level test sets.
        let $uri0 := base-uri($test-set),
            $uri1 := string($test-set/@href),
            $uri2 := resolve-uri($uri1, $uri0),
-	   $newcat := try {
+           $newcat := try {
              doc($uri2)
            } catch err:FODC0002 { 
              &lt;no-such-test-set/> 
@@ -437,16 +443,18 @@ latter, we fetch the document and deal with its top-level test sets.
                 or self::tc:test-set-ref]
              return t:run-test-set($test-set, 
                                    $grammar, 
-                                   ($uri2, $uri-stack))
+                                   ($uri2, $uri-stack),
+                                   $options)
 </scrap></p>
 <p>The main case is for a <soCalled>real</soCalled> test set.
 It may contain a grammar (inline or via reference, in ixml or xml),
 and it may contain test cases and nested test sets.  
 <scrap id="lib-rts-do-inline"
        name="Handle an inline test-set">
-    element tc:test-set {
+    let $test-set-name := $test-set/@name/string(),
+        $test-set-results := element tc:test-set-results {
       $test-set/@*, 
-      element tc:description {
+      <!-- element tc:description {
         (: temporary stub :)
         element tc:p {
           text { "Place-holder: "
@@ -454,14 +462,15 @@ and it may contain test cases and nested test sets.
           $test-set/@name/string(),
           text { " will go here." }
         }
-      },
+      }, -->
       <ptr target="lib-rts-grammar"/>
       return (
         $grammar-test-result,
+        <ptr target="lib-rts-write-grammar-result"/>
         if (($grammar-test-result/@result = 'pass')
-	   or empty($grammar-test-result)) 
+           or empty($grammar-test-result)) 
         then (: run the tests, handle nested sets :)
-	     <ptr target="lib-rts-nested"/>
+             <ptr target="lib-rts-nested"/>
         else (: no point trying to run tests :)
             element tc:description {
               element tc:p {
@@ -472,6 +481,8 @@ and it may contain test cases and nested test sets.
             }
       )
     }
+    return (<ptr target="lib-rts-write-tsr"/>
+           $test-set-results)
 </scrap>
 </p>
 <p>Later sections will describe the handling of <ref
@@ -487,14 +498,49 @@ and call the appropriate function to handle them.
           or self::tc:test-case]
       return if ($c/self::tc:test-set 
                 or $c/self::tc:test-set-ref)
-      then t:run-test-set($c, $grammar, $uri-stack)
+      then t:run-test-set($c, 
+                          $grammar, 
+                          $uri-stack, 
+                          $options)
       else if ($c/self::tc:test-case)
-      then t:run-test-case($c, $grammar)
+      then t:run-test-case($c, $grammar, $options)
       else element tc:error {
         attribute id { "t:tbd03" },
         text { "The laws of logic have been abrogated?" }
       }
 </scrap>
+</p>
+<p>If the user has specified that results should be
+written out in separate files for separate tests, we
+need to write out the grammar test.
+<scrap id="lib-rts-write-grammar-result"
+       name="Optionally write out grammar test result">
+        if ($options/@files = 'by-case')
+        then let $outfn := 'grammar-test-' || $test-set-name 
+                           || '-results.xml',
+                 $out := concat(
+                         $options/@output-directory, 
+                         '/', $outfn)
+             return file:write($out, $grammar-test-result)
+        else (),
+</scrap>
+</p>
+<p>And similarly, if the user has specified that results should be
+written out in separate files at the test set level, then we
+need to write out the results for the test set.
+<scrap id="lib-rts-write-tsr"
+       name="Optionally write out test set results">
+        if ($options/@files = 'by-outer-set')
+        then let $outfn := 'test-set-' || $test-set-name 
+                           || '-results.xml',
+                 $out := concat(
+                         $options/@output-directory, 
+                         '/', $outfn)
+             return file:write($out, $test-set-results)
+        else (),
+</scrap>
+<hi>TO DO:  either figure out how to do test set results
+just for outer set, or strip the option out.</hi>
 </p>
 
 </div>
@@ -502,21 +548,25 @@ and call the appropriate function to handle them.
 
 <div id="grammars">
 <head>Loading and testing the grammar for a test set</head>
-<p>A grammar may be given inline or externally, in ixml or in XML.  So
-we have a four-way branch on the nature of the grammar specification.
+
+<p>A grammar may be given inline or externally, in ixml or in XML.
+The initial steps to be taken vary among the four cases, but once the
+grammar is in XML the steps are the same for all.  So we begin by
+getting the grammar into XML and into memory, with a four-way branch
+on the nature of the grammar specification.
 The locally specified grammar unconditionally overrides any grammar
 passed in as an argument, and we keep life simple by using the same
 name for it.
 <scrap id="lib-rts-grammar"
        name="Load and test the grammar for a test set">
-      let $new-grammar := if ($test-set/tc:ixml-grammar)
+      let $new-xml-grammar := if ($test-set/tc:ixml-grammar)
           then <ptr target="lib-rts-ld-ixml"/>
           else if ($test-set/tc:vxml-grammar)
           then <ptr target="lib-rts-ld-vxml"/>
           else if ($test-set/tc:ixml-grammar-ref)
           then <ptr target="lib-rts-ld-ixml-ref"/> 
           else if ($test-set/tc:vxml-grammar-ref)
-          then <ptr target="lib-rts-ld-ixml-ref"/>
+          then <ptr target="lib-rts-ld-vxml-ref"/>
           else ()
 </scrap>
 <emph>[TO DO:  prepare for and recover from errors]</emph>
@@ -525,11 +575,11 @@ name for it.
 the inline ixml case.  We just wrap it in a try/catch
 and hope for the best.  (Quick and dirty, remember.)
 <scrap id="lib-rts-ld-ixml"
-       name="Cautiously compile ixml grammar">
+       name="Cautiously parse ixml grammar">
           try {
-               ap:compile-grammar-from-string(
-                 $test-set/tc:ixml-grammar/string()
-               )
+                ap:parse-grammar-from-string(
+                    $test-set/tc:ixml-grammar/string()
+                )
           } catch * {
                element tc:error {
                  attribute id { "t:tbd04" },
@@ -537,7 +587,7 @@ and hope for the best.  (Quick and dirty, remember.)
                }               
           }
 </scrap></p>
-<p>In order to call the <ident>compile-grammar-from-string()</ident>
+<p>In order to call the <ident>parse-grammar-from-string()</ident>
 function (and its relatives) in the Aparecium library, we are going to
 need to import that library:
 <scrap prev="lib-nsdecls"
@@ -546,26 +596,17 @@ import module namespace ap =
 "http://blackmesatech.com/2019/iXML/Aparecium"
 at "Aparecium.xqm";
 </scrap></p>
-<p>The second is the inline vxml case.  Again, just wrap it in a try/catch
-and hope for the best.  
+<p>The second case is the inline vxml case.  Here the grammar is
+already in XML, so we just assign it.
 <scrap id="lib-rts-ld-vxml"
-       name="Cautiously compile vxml grammar">
-          try {
-               ap:compile-grammar-from-xml(
-                 $test-set/tc:vxml-grammar[1]/ixml
-               ) 
-          } catch * {
-               element tc:error {
-                 attribute id { "t:tbd05" },
-                 text { "vxml compilation failed" }
-               }               
-          }
+       name="Take the inline vxml grammar">
+          $test-set/tc:vxml-grammar[1]/ixml
 </scrap></p>
 
 <p>The external-ixml case has several ways to fail.
 For now (quick and dirty) we don't cover them all.
 <scrap id="lib-rts-ld-ixml-ref"
-       name="Cautiously compile external ixml grammar">
+       name="Cautiously fetch and parse external ixml grammar">
           let $uri0 := $test-set/tc:ixml-grammar-ref
                            /@href/string(),
               $uri1 := base-uri($test-set),
@@ -573,55 +614,66 @@ For now (quick and dirty) we don't cover them all.
               return 
                 if (unparsed-text-available($uri2))
                 then try {
-		       ap:compile-grammar-from-uri($uri2)
+                       ap:parse-grammar-from-uri($uri2)
                      } catch * {
                        element tc:error {
                          attribute id { "t:tbd06" },
-			 text { "ixml compilation failed" }
+                         text { "ixml compilation failed" }
                        }
                      }
                 else element tc:error {
                        attribute id { "t:tbd07" },
-		       text { "external ixml not found" }
+                       text { "external ixml not found" }
                      }
-
 </scrap></p>
 
 <p>The external-vxml case also has several ways to fail, most not
 covered here.
 <scrap id="lib-rts-ld-vxml-ref"
-       name="Cautiously compile external vxml grammar">
-ap:compile-grammar-from-xml(
-              let $uri0 := $test-set/tc:vxml-grammar-ref
-                           /@href/string(),
-                  $uri1 := base-uri($test-set),
-                  $uri2 := resolve-uri($uri0, $uri1)
-              return doc($uri2)/ixml
-          )
-
+       name="Cautiously fetch external vxml grammar">
           let $uri0 := $test-set/tc:vxml-grammar-ref
                            /@href/string(),
               $uri1 := base-uri($test-set),
               $uri2 := resolve-uri($uri0, $uri1)
           return if (doc-available($uri2))
-                 then try {
-                        ap:compile-grammar-from-uri($uri2)
-                      } catch * {
-                        element tc:error {
-                          attribute id { "t:tbd08" },
-                          text { "vxml compilation failed" }
-                        }
-                      }
+                 then let $xmlTmp := doc($uri2)
+                      return if (exists($xmlTmp/ixml))
+                             then $xmlTmp/ixml
+                             else element tc:error {
+                                    attribute id {"t:tbd08"},
+                                    $uri0,
+                                    "(" || $uri2 || ")",
+                                    " is not an ixml grammar."
+                             }
                  else element tc:error {
                         attribute id { "t:tbd09" },
-                        text { "external vxml grammar not found" }
+                        text { "external vxml grammar"
+                              || " not found at " },
+                        $uri0,
+                        text { " (i.e. "  },
+                        $uri2,
+                        text { ")." }
                       }
-               
-          }
+          
 </scrap></p>
+<p>Once we have the new XML grammar, we need to check it
+for conformance.  Aparecium currently lacks any function
+to do this, so for the moment this is a nop.
+<scrap prev="lib-rts-grammar"
+       id="lib-rts-vxml-grammar-check"
+       name="Check the XML grammar for conformance">
+      let $checked-xml-grammar := 
+          if (true()) (: place-holder :)
+          then $new-xml-grammar
+          else element tc:error {
+            attribute id { "t:tbd10" },
+            text { "XML grammar not conformant" }
+          }
+</scrap>
+</p>
 <p>
 If a grammar is given, a <gi>grammar-test</gi> may also be specified.
-We need to check the value of <ident>$new-grammar</ident>; if it's a
+We need to check the value of <ident>$new-xml-grammar</ident>; if it's a
 <gi>tc:error</gi> element, the grammar test failed and the
 <att>id</att> attribute should tell us roughly why.  If it's anything
 other than an <gi>ixml</gi> element, the grammar test failed, and we
@@ -635,53 +687,87 @@ here.</emph>
        name="Handle the grammar test, if there is one">
       let $gt := $test-set/tc:grammar-test
       let $grammar-test-result := 
-          if (empty($new-grammar) and empty($gt))
+          if (empty($new-xml-grammar) or empty($gt))
           then ()
-          else element tc:grammar-test-result {
+          else element tc:grammar-result {
 
-              if ($new-grammar/self::ixml) 
-              then t:test-grammar($gt, $new-grammar)
+              if ($new-xml-grammar/self::ixml) 
+              then t:test-grammar($gt, 
+                                  $new-xml-grammar, 
+                                  $options)
 
-              else if ($new-grammar/self::tc:error
+              else if ($new-xml-grammar/self::tc:error
                       /@id = ('tc:tbd04', 'tc:tbd06'))
               then (
-                  (: ixml found but did not compile :)
-                  attribute result { "fail" },
-                  element tc:app-info {
-                      $new-grammar
-                  }
+                  (: ixml found but did not parse.
+                     May be a pass, may be a fail; let
+                     t:test-grammar() decide. :)
+                  t:test-grammar($gt, 
+                                 $new-xml-grammar,
+                                 $options)                  
               )
 
-              else if ($new-grammar/self::tc:error
-                      /@id = ('tc:tbd05', 'tc:tbd08'))
-              then (
-                  (: vxml found but did not compile :)
-                  attribute result { "fail" },
-                  element tc:app-info {
-                      $new-grammar
-                  }
-              )
-
-              else if ($new-grammar/self::tc:error
-                      /@id = ('tc:tbd07', 'tc:tbd09'))
+              else if ($new-xml-grammar/self::tc:error
+                      /@id = ('tc:tbd07', 
+                              'tc:tbd08', 
+                              'tc:tbd09'))
               then (
                   (: external grammar not found :)
                   attribute result { "not-run" },
                   element tc:app-info {
-                      $new-grammar
+                      $new-xml-grammar
                   }
               )
 
-              else if (not($new-grammar/self::ixml))
+              else if ($new-xml-grammar/self::tc:error
+                      /@id = ('tc:tbd10'))
               then (
-                  attribute result { "fail" },
-                  element tc:app-info {
-                      $new-grammar
+                  (: parsed, but is not conformant :)
+                  t:test-grammar($gt, 
+                                 $new-xml-grammar,
+                                 $options)
+              )
+
+              else if (not($new-xml-grammar/self::ixml))
+              then (
+                  (: parsed, but did not produce 'ixml'
+                     root element :)
+                  t:test-grammar($gt, 
+                                 $new-xml-grammar,
+                                 $options)
+              )
+              else (
+                  attribute result { "other" },
+                  element tc:description {
+                    element tc:p {
+                      "what on earth happened?"
+                    }
                   }
               )
           }      
-
-      let $grammar := ($new-grammar, $grammar)[1]
+</scrap>
+<hi>TO DO: pass options down to this level, if user asks for
+individual tests to be reported to files, then do so.  At user option,
+on failure write both expected result and reported result to files, to
+simplify comparison.</hi>
+</p>
+<p>
+If the new grammar is OK so far, we need to compile it.
+<scrap prev="lib-rts-grammar"
+       id="lib-rts-grammar-compilation"
+       name="Compile the new grammar, if there is one">
+      let $grammar := if (exists($new-xml-grammar))
+          then try {
+            ap:compile-grammar-from-xml($new-xml-grammar)
+          } catch * {
+            element tc:error {
+              attribute id {"t:tbd11"},
+              text { 
+                "Error compiling grammar"
+              }
+            }
+          }
+      else $grammar
 </scrap>
 </p>
 <!--
@@ -691,33 +777,339 @@ here.</emph>
        </scrap>
 </p>
 -->
-<p>The <ident>test-grammar()</ident> function ...
+<p>The <ident>test-grammar()</ident> function is called when we have
+(a) what looks like an acceptable vxml grammar and (b) a request for a
+grammar test.  We must fetch the expected result, if it's external,
+and compare our result to the expected result.  For now, we assume
+there will never be more than one expected XML result for a grammar.
 <scrap id="lib-test-grammar"
        name="The test-grammar() function">
+declare function t:test-grammar(
+  $grammar-test as element(tc:grammar-test),
+  $xml-grammar as element(),
+  $options as element(options)
+) as item()* {
+  <ptr target="lib-tc-fetch"/>
+  <ptr target="lib-tc-compare"/>
+};
+</scrap></p>
+<p>First, we fetch any external result.
+<scrap id="lib-tc-fetch"
+       name="Fetch expected result of grammar test">
+  let $e0 := $grammar-test/tc:result/*[1],
+      $expectation :=
+        if ($e0/self::tc:assert-xml-ref)
+        then let $uri0 := $e0/@href/string(),
+                 $uri1 := base-uri($grammar-test),
+                 $uri2 := resolve-uri($uri0, $uri1)
+             return if (doc-available($uri2))
+                    then (doc($uri2)/ixml,
+                         element tc:error {
+                           attribute id { "t:tbd12" },
+                           $uri2,
+                           " is not an ixml grammar."
+                         })[1]
+                    else element tc:error {
+                      attribute id { "t:tbd13" },
+                      $uri2,
+                      text { " not found." }
+                    }
+        else $e0
 </scrap>
+</p>
+<p>We now have an ixml grammar in one hand and an expectation in
+the other.  We perform a deep-equal comparison, and that's it.
+<scrap id="lib-tc-compare"
+       name="Compare the grammar with the expectation">
+  return
+
+  if ($expectation/self::tc:error)
+  then ( 
+         (: something went wrong w assert-xml-ref :)
+         attribute result { "not-run" },
+         element tc:result {
+           $expectation 
+         }
+       )
+
+  else if ($expectation[self::assert-not-a-grammar
+           or self::assert-not-a-sentence]
+           and
+           $xml-grammar/self::tc:error[@id = 
+           ("t:tbd04", "t:tbd06")])
+  then (
+         (: grammar did not parse :)
+         attribute result { "pass" },
+         element tc:result {
+           $expectation,
+           $xml-grammar
+         }         
+       )
+
+  else if ($expectation[self::assert-not-a-grammar]
+           and
+           $xml-grammar/self::tc:error
+                        [@id = "t:tbd10"])
+  then (
+         (: grammar parsed but was nonconformant :)
+         attribute result { "pass" },
+         element tc:result {
+           $expectation,
+           $xml-grammar
+         }         
+       )
+
+  else if (deep-equal($xml-grammar, $expectation))
+  then (
+         (: grammar conformant and as expected :)
+         attribute result { "pass" }
+       )
+
+  else (
+         (: grammar conformant but not as expected :)
+         attribute result { "fail" },
+         element tc:result {
+           element tc:p {
+            "diagnostics should go here"
+           },
+           $expectation,
+           $xml-grammar
+         }
+       )
+</scrap>
+<hi>TO DO:  provide better diagnostics in case of failure.</hi>
 </p>
 
 </div>
 
 <div id="testcases">
 <head>Running the test cases</head>
-<p>...</p>
+<p>Once we reach a test case, we have a compiled grammar ready.
+To run and evaluate the test case:
+<list>
+<item>Fetch the test input string, if it's external, catching
+exceptions.</item>
+<item>Fetch the expected results, if they are external, catching
+exceptions.</item>
+<item>If we failed on either the input string or the expectations,
+mark the test case as not run.</item>
+<item>Otherwise, attempt to parse the string with the compiled grammar
+for the test set, catching exceptions.</item>
+<item>Otherwise, compare the expected result with the actual result.
+<list>
+<item>If an exception was raised in parsing, mark the test
+case as failed.  Otherwise continue.</item>
+<item>If there was no parse, then
+<list>
+<item>if the expected result is not-a-sentence (or not-a-grammar?),
+then report success,</item>
+<item>else (expected result is an XML document) report failure.</item>
+</list>
+</item>
+<item>If there was one parse, then
+<list>
+<item>if it is deep-equal to at least one XML document among the
+expected results, then report success,</item>
+<item>else (does not match the expected results) report
+failure.</item>
+<item></item>
+</list></item>
+<item>If there are multiple parses, then
+<list>
+<item>if every parse is deep-equal to at least one XML document among the
+expected results, then report success,</item>
+<item>else (some parse does not match the expected results) report
+failure.</item>
+<item></item>
+</list></item>
+</list>
+</item>
+</list>
+<hi>TO DO: find a simple way to do a comparison which ignores the
+presence or absence of an <att>ixml:state</att> attribute.</hi>
+</p>
 
 <p>The <ident>run-test-case()</ident> function ...
 <scrap id="lib-run-test-case"
        name="The run-test-case() function">
 declare function t:run-test-case(
   $test-case as element(tc:test-case),
-  $G as element(ixml)
+  $G as element(ixml),
+  $options as element(options)
 ) as element() {
   (: placeholder :)
-  element tc:test-case-result {
+  element tc:test-result {
     $test-case/@*,
-    element tc:p {
-      text { "Watch this space." }
-    }
+    <ptr target="lib-rtc-fetch-input"/>
+    <ptr target="lib-rtc-fetch-expected"/>
+    <ptr target="lib-rtc-check-ready"/>
+    <ptr target="lib-rtc-parse"/>
+    <ptr target="lib-rtc-evaluate"/>
   }
 };
+</scrap>
+</p>
+<p>If the input string is external, fetch it.  If we have a problem
+fetching it (i.e. if there is no text at that URI), we have a problem.
+We are expecting a string, and we can't return an error element.  And
+we're not set up to throw and catch exceptions.  So we use a magic
+string: the words <q>NOT FOUND</q> spelled out using the
+<soCalled>language tag</soCalled> characters originally put into
+Unicode for inline language marking and later deprecated.  We could
+use any string sufficiently unlikely to be used as an external test
+input.  For example, U+1D350 <q>Tetragram for failure</q> would also
+work.  (And be shorter.)
+<scrap id="lib-rtc-fetch-input"
+       name="Fetch the test input string">
+    let $input-string := 
+        if ($test-case/tc:test-string)
+        then string($test-case/tc:test-string)
+        else if ($test-case/tc:test-string-ref)
+        then let $uri0 := $test-case
+                          /tc:test-string-ref/@href
+                          /string(),
+                 $uri1 := base-uri($test-case),
+                 $uri2 := resolve-uri($uri0, $uri1)
+             return 
+		 if (unparsed-text-available($uri2))
+                 then unparsed-text($uri2)
+                 else "&#xE004E;&#xE004F;&#xE0054;"
+                   || "&#xE0020;&#xE0046;&#xE004F;"
+                   || "&#xE0055;&#xE004E;&#xE0044;"
+                   (: 'NOT FOUND' in tag block :)
+        else "Ich versteh die Welt nicht mehr"
+</scrap>
+</p>
+
+<p>If the expected results are external, we need to fetch them, too.
+<scrap id="lib-rtc-fetch-expected"
+       name="Fetch the expected results">
+    let $expectations := 
+        for $e in $test-case/tc:result/*
+        return if ($e/self::tc:not-a-sentence)
+            then $e
+            else if ($e/self::tc:not-a-grammar)
+            then $e
+            else if ($e/self::tc:assert-xml)
+            then $e/*
+            else if ($e/self::tc:assert-xml-ref)
+            then let $uri0 := $e/@href
+                              /string(),
+                     $uri1 := base-uri($test-case),
+                     $uri2 := resolve-uri($uri0, $uri1)
+                 return 
+		 if (doc-available($uri2))
+                 then doc($uri2)
+                 else element tc:error {
+                   attribute id { "t:tbd14" },
+                   "Expected result at ",
+                   $uri0,
+                   " not found. Looked for ",
+                   $uri2
+                 }
+            else element tc:error {
+                   attribute id { "t:tbd17" },
+                   "Unexpected expectation ",
+                   $e
+            }
+</scrap>
+</p>
+<p>
+<scrap id="lib-rtc-check-ready"
+       name="Check for input and expected output">
+    return if ($input-string eq 
+               "&#xE004E;&#xE004F;&#xE0054;"
+               || "&#xE0020;&#xE0046;&#xE004F;"
+               || "&#xE0055;&#xE004E;&#xE0044;")
+        then (
+          attribute result { "not-run" },
+          element tc:app-info {
+            element tc:error {
+              attribute id { "t:tbd15" },
+              "External test input not found."
+            }
+          }
+        ) else if (exists($expectations
+                   [self::tc:error])) then (
+          attribute result { "not-run" },
+          element tc:app-info {
+            $expectations[self::tc:error]
+          }
+        ) else 
+</scrap>
+</p>
+<p>We have input string and expectations ready.
+Time to run the test.
+<scrap id="lib-rtc-parse"
+       name="Parse the test input string">
+    let $parse-tree := try {
+          ap:parse-string-with-compiled-grammar(
+            $input-string,
+            $G
+          )
+        } catch * {
+          element tc:error {
+              attribute id { "t:tbd16" },
+              "Parse function blew up. ",
+              $err:code, $err:value, 
+              " module: ",
+              $err:module, 
+              "(", $err:line-number, ",", 
+              $err:column-number, ")"
+          }
+        }
+</scrap>
+<hi>TO DO:  in other uses of try/catch, record
+the error.</hi>
+</p>
+<p>Now we compare the parse tree to the expectations.
+<scrap id="lib-rtc-evaluate"
+       name="Evaluate the test results">
+    return if ($parse-tree/self::no-parse
+              and $expectations/self::not-a-sentence)
+    then (
+            attribute result { "pass" }
+            (: optionally provide details :)
+    ) else if ($parse-tree/self::no-parse
+              and $expectations/self::not-a-grammar)
+    then (
+            attribute result { "pass" }
+            (: optionally provide details :)
+            (: This case should not arise :)
+
+    ) else if ($parse-tree/self::forest
+              and 
+              empty(($expectations/self::not-a-grammar,
+	      $expectations/self::not-a-sentence))
+              and 
+              (some $e1 in $expectations satisfies
+              (some $e2 in $parse-tree/* satisfies
+              deep-equal($e1, $e2)))
+              )
+    then (
+            attribute result { "pass" }
+            (: optionally provide details :)
+
+    ) else if (some $e1 in $expectations satisfies
+              deep-equal($e1, $parse-tree))
+    then (
+            attribute result { "pass" }
+            (: optionally provide details :)
+
+    ) else (
+            attribute result { "fail" },
+            $expectations[self::tc:not-a-grammar],
+            $expectations[self::tc:not-a-sentence],
+            for $e in $expectations[
+                not(self::tc:not-a-grammar)
+                and not(self::tc:not-a-sentence)
+            ] return element tc:assert-xml{$e},
+            if ($parse-tree/self::not-a-parse)
+            then element tc:reported-not-a-sentence {}
+            else if ($parse-tree/tc:error)
+            then ()
+            else element tc:reported-xml {$parse-tree}
+    )
 </scrap>
 </p>
 
@@ -765,13 +1157,13 @@ I want for a given run.
 
 <div id="evaluation">
 <head>Evaluating the test case results</head>
-<p>...</p>
-
+<p>Oops.  Already explained that.</p>
+<!--
 <p>The <ident>evaluate-result()</ident> function ...
 <scrap id="lib-evaluate"
        name="The evaluate-result() function">
 </scrap>
-</p>
+</p> -->
 </div>
 
 <div id="output">

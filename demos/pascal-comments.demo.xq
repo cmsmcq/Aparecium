@@ -2,7 +2,7 @@ import module namespace aparecium
 = "http://blackmesatech.com/2019/iXML/Aparecium"
 at "../build/Aparecium.xqm";
 
-let $g := doc('pascal-comments.0.ixml.compiled.xml')/ixml
+let $g := doc('pascal-comments.sp.ixml.compiled.xml')/ixml
 
 let $demo := <demo>
   <p>This is a small demo of using ixml from inside an interactive XQuery

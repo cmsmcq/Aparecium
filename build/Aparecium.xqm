@@ -228,11 +228,11 @@ declare function aparecium:recompile-ixml-grammar() as element(ixml) {
 declare variable $aparecium:libloc as xs:string
   := '../lib';
 declare variable $aparecium:ixml.ixml as xs:string
-  := $aparecium:libloc || '/ixml.2021-09-14.ixml';
+  := $aparecium:libloc || '/ixml.2022-01-25.ixml';
 
 declare variable $aparecium:ixml.xml as xs:string
-  := $aparecium:libloc || '/ixml.2021-09-14.ixml.xml';
+  := $aparecium:libloc || '/ixml.2022-01-25.ixml.xml';
   
 declare variable $aparecium:ixml.gl.xml as xs:string
-  := $aparecium:libloc || '/ixml.2021-09-14.compiled.xml';  
+  := $aparecium:libloc || '/ixml.2022-01-25.ixml.compiled.xml';  
 
