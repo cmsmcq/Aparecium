@@ -10,7 +10,7 @@ at "Aparecium.xqm";
 declare function t:run-tests(
   $catalog-uri as xs:string,
   $options as element(options)
-) as element(tc:test-results) {
+) as element(tc:test-report) {
 
     let $catalog := try { 
     doc($catalog-uri)
@@ -18,7 +18,7 @@ declare function t:run-tests(
     <no-such-catalog/>
   }
 
-  return element tc:test-results {
+  return element tc:test-report {
         attribute name {
       'Test results for ' || $catalog/@name
     },
@@ -332,8 +332,8 @@ declare function t:test-grammar(
          }
        )
 
-  else if ($expectation[self::assert-not-a-grammar
-           or self::assert-not-a-sentence]
+  else if ($expectation[self::tc:assert-not-a-grammar
+           or self::tc:assert-not-a-sentence]
            and
            $xml-grammar/self::tc:error[@id = 
            ("t:tbd04", "t:tbd06")])
@@ -346,7 +346,7 @@ declare function t:test-grammar(
          }         
        )
 
-  else if ($expectation[self::assert-not-a-grammar]
+  else if ($expectation[self::tc:assert-not-a-grammar]
            and
            $xml-grammar/self::tc:error
                         [@id = "t:tbd10"])
@@ -369,11 +369,11 @@ declare function t:test-grammar(
          (: grammar conformant but not as expected :)
          attribute result { "fail" },
          element tc:result {
-           element tc:p {
+           comment {
             "diagnostics should go here"
            },
-           $expectation,
-           $xml-grammar
+           element tc:assert-xml { $expectation },
+           element tc:reported-xml { $xml-grammar }
          }
        )
 
@@ -407,9 +407,9 @@ declare function t:run-test-case(
 
         let $expectations := 
         for $e in $test-case/tc:result/*
-        return if ($e/self::tc:not-a-sentence)
+        return if ($e/self::tc:assert-not-a-sentence)
             then $e
-            else if ($e/self::tc:not-a-grammar)
+            else if ($e/self::tc:assert-not-a-grammar)
             then $e
             else if ($e/self::tc:assert-xml)
             then $e/*
@@ -420,7 +420,7 @@ declare function t:run-test-case(
                      $uri2 := resolve-uri($uri0, $uri1)
                  return 
 		 if (doc-available($uri2))
-                 then doc($uri2)
+                 then doc($uri2)/*
                  else element tc:error {
                    attribute id { "t:tbd14" },
                    "Expected result at ",
@@ -472,12 +472,12 @@ declare function t:run-test-case(
         }
 
         return if ($parse-tree/self::no-parse
-              and $expectations/self::not-a-sentence)
+              and $expectations/self::tc:assert-not-a-sentence)
     then (
             attribute result { "pass" }
             (: optionally provide details :)
     ) else if ($parse-tree/self::no-parse
-              and $expectations/self::not-a-grammar)
+              and $expectations/self::tc:assert-not-a-grammar)
     then (
             attribute result { "pass" }
             (: optionally provide details :)
@@ -485,11 +485,11 @@ declare function t:run-test-case(
 
     ) else if ($parse-tree/self::forest
               and 
-              empty(($expectations/self::not-a-grammar,
-	      $expectations/self::not-a-sentence))
+              empty(($expectations/self::tc:assert-not-a-grammar,
+	      $expectations/self::tc:assert-not-a-sentence))
               and 
-              (some $e1 in $expectations satisfies
-              (some $e2 in $parse-tree/* satisfies
+              (every $e1 in $parse-tree/* satisfies
+              (some $e2 in $expectations satisfies
               deep-equal($e1, $e2)))
               )
     then (
@@ -504,17 +504,19 @@ declare function t:run-test-case(
 
     ) else (
             attribute result { "fail" },
-            $expectations[self::tc:not-a-grammar],
-            $expectations[self::tc:not-a-sentence],
-            for $e in $expectations[
-                not(self::tc:not-a-grammar)
-                and not(self::tc:not-a-sentence)
-            ] return element tc:assert-xml{$e},
-            if ($parse-tree/self::not-a-parse)
-            then element tc:reported-not-a-sentence {}
-            else if ($parse-tree/tc:error)
-            then ()
-            else element tc:reported-xml {$parse-tree}
+            element tc:result {
+              $expectations[self::tc:assert-not-a-grammar],
+              $expectations[self::tc:assert-not-a-sentence],
+              for $e in $expectations[
+                  not(self::tc:assert-not-a-grammar)
+                  and not(self::tc:assert-not-a-sentence)
+              ] return element tc:assert-xml{$e},
+              if ($parse-tree/self::no-parse)
+              then element tc:reported-not-a-sentence {}
+              else if ($parse-tree/self::tc:error)
+              then ()
+              else element tc:reported-xml {$parse-tree}
+            }
     )
 
   }
