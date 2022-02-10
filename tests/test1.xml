@@ -29,7 +29,7 @@
       <created by="CMSMcQ" on="2021-10-14"/>
       <test-string>a</test-string>
       <result>
-	<assert-xml><S>a</S></assert-xml>
+	<assert-xml><S xmlns="">a</S></assert-xml>
       </result>
     </test-case>
     <test-case name="a2">
@@ -68,35 +68,35 @@
       <created by="CMSMcQ" on="2021-10-14"/>
       <test-string>magic</test-string>
       <result><assert-xml>
-	<S>magic</S>
+	<S xmlns="">magic</S>
       </assert-xml></result>
     </test-case>
     <test-case name="vowels-ok2">
       <created by="CMSMcQ" on="2021-10-14"/>
       <test-string>bc</test-string>
       <result><assert-xml>
-	<S>bc</S>
+	<S xmlns="">bc</S>
       </assert-xml></result>
     </test-case>
     <test-case name="vowels-ok3">
       <created by="CMSMcQ" on="2021-10-14"/>
       <test-string>v</test-string>
       <result><assert-xml>
-	<S>v</S>
+	<S xmlns="">v</S>
       </assert-xml></result>
     </test-case>
     <test-case name="vowels-ok4">
       <created by="CMSMcQ" on="2021-10-14"/>
       <test-string>e</test-string>
       <result><assert-xml>
-	<S>e</S>
+	<S xmlns="">e</S>
       </assert-xml></result>
     </test-case>
     <test-case name="vowels-ok5">
       <created by="CMSMcQ" on="2021-10-14"/>
       <test-string>u</test-string>
       <result><assert-xml>
-	<S>u</S>
+	<S xmlns="">u</S>
       </assert-xml></result>
     </test-case>
     
