@@ -152,7 +152,8 @@ constructs</li>
 <a name="toc" id="toc"></a>
 <ul><!-- and a 1! -->
 <li>1. <a href="#task">The task</a></li>
-<li>2. <a href="#testcat">The structure of a test catalog</a></li>
+<li>2. <a href="#testcat">The structure of a test catalog and the
+test report</a></li>
 <li>3. <a href="#testsets">Handling test catalogs and test sets</a>
 <ul><!-- and a 2! -->
 <li>3.1. <a href="#setup">Preparing to call the
@@ -165,10 +166,11 @@ constructs</li>
 </li>
 <li>4. <a href="#grammars">Loading and testing the grammar for a
 test set</a></li>
-<li>5. <a href="#testcases">Running the test cases</a></li>
-<li>6. <a href="#evaluation">Evaluating the test case
+<li>5. <a href="#output-options">Output options</a></li>
+<li>6. <a href="#testcases">Running the test cases</a></li>
+<li>7. <a href="#evaluation">Evaluating the test case
 results</a></li>
-<li>7. <a href="#output">Reporting the results</a></li>
+<li>8. <a href="#output">Reporting the results</a></li>
 </ul>
 <hr />
 <div class="Real-P">This document describes a test harness for the
@@ -260,7 +262,7 @@ declare namespace tc =
 "https://github.com/cmsmcq/ixml-tests";
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e392">Namespace declarations and imports, cont'd
+"#d3e465">Namespace declarations and imports, cont'd
 21</a>〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#lib-top">[File test-harness.xqm] 2</a>
 〉<br /></span></div>
@@ -277,7 +279,7 @@ will define:
 <span class="scrapref">〈 <em class="scrapptr"><a href=
 "#lib-test-grammar">The test-grammar() function 28</a></em> 〉</span>
 <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-run-test-case">The run-test-case() function 31</a></em> 〉</span>
+"#lib-run-test-case">The run-test-case() function 32</a></em> 〉</span>
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#lib-top">[File test-harness.xqm] 2</a> 〉<br /></span></div>
@@ -285,7 +287,7 @@ will define:
 </div>
 <div class="div">
 <h2><a name="testcat" id="testcat">2.</a> The structure of a test
-catalog</h2>
+catalog and the test report</h2>
 <div class="Real-P">The test collections we are interested in
 running will all have test catalogs in XML, using the vocabulary
 defined in the author's <i>ixml-tests</i> repository on GitHub. A
@@ -308,6 +310,47 @@ documentation, and application-specific information (embedded in an
 &lt;<em>app-info</em>&gt; element).</li>
 </ul>
 </div>
+<div class="Real-P">The test report we are generating will have a
+similar structure, with
+<ul>
+<li>&lt;<em>test-report</em>&gt; containing results for a given
+&lt;<em>test-catalog</em>&gt;</li>
+<li>&lt;<em>test-set-results</em>&gt; containing results for a
+given &lt;<em>test-set</em>&gt;</li>
+<li>&lt;<em>grammar-result</em>&gt; containing the result for a
+given &lt;<em>grammar-test</em>&gt;</li>
+<li>&lt;<em>test-result</em>&gt; containing the result for a given
+&lt;<em>test-case</em>&gt;</li>
+</ul>
+External test sets will be brought inline, so the report does not
+distinguish between &lt;<em>test-set</em>&gt; and
+&lt;<em>test-set-ref</em>&gt; elements in the input.</div>
+<div class="Real-P">The schema allows
+&lt;<em>grammar-result</em>&gt; and &lt;<em>test-result</em>&gt; to
+record the details of the test and its results. So a
+&lt;<em>grammar-result</em>&gt; can contain
+<ul>
+<li>&lt;<em>ixml-grammar</em>&gt;,
+&lt;<em>ixml-grammar-ref</em>&gt;, &lt;<em>vxml-grammar</em>&gt;,
+or &lt;<em>vxml-grammar-ref</em>&gt; (or several of these)</li>
+<li>a &lt;<em>result</em>&gt; element containing any of the
+assertions possible in a &lt;<em>grammar-test</em>&gt;, followed by
+any of
+<ul>
+<li>&lt;<em>reported-xml</em>&gt;</li>
+<li>&lt;<em>reported-xml-ref</em>&gt;</li>
+<li>&lt;<em>reported-not-a-sentence</em>&gt;</li>
+<li>&lt;<em>reported-not-a-grammar</em>&gt;</li>
+</ul>
+of which the first two can repeat and can occur together</li>
+</ul>
+</div>
+<div class="Real-P">A &lt;<em>test-result</em>&gt; element
+similarly can repeat the test input and expected results from the
+test catalog, and it can also include the grammar used and the
+results actually returned by the parser.</div>
+<div class="Real-P">I'll specify user options to control the
+output; see <a href="#output-options">below</a>.</div>
 </div>
 <div class="div">
 <h2><a name="testsets" id="testsets">3.</a> Handling test catalogs
@@ -347,7 +390,7 @@ let $syndir := "../../ixml/tests/steven/syntaxtests/",
 <span class="scrapcontinuations">Continued in 〈<a href=
 "#dr-catfiles">List of available test-catalog files 6</a>〉,
 〈<a href="#dr-options">Set the options for the test harness
-37</a>〉<br /></span> <span class="scrapinbound">This code is used
+31</a>〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#dr-top">[File test-driver.xq] 1</a>
 〉<br /></span></div>
 </div>
@@ -467,12 +510,12 @@ declare function t:run-tests(
   }
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e228">Load catalog file into $catalog 9</a>
+<a href="#d3e301">Load catalog file into $catalog 9</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#lib-run-tests">The run-tests() function 7</a>
 〉<br /></span></div>
 A simpler version of this might be:
-<div class="scrap"><span><a name="d3e233" id="d3e233">〈 9 Load
+<div class="scrap"><span><a name="d3e306" id="d3e306">〈 9 Load
 catalog file into $catalog 〉 (for version <em>alt</em>)
 ≡</a></span>
 <pre class="scrapbody">
@@ -819,7 +862,7 @@ hope for the best. (Quick and dirty, remember.)
 <div class="Real-P">In order to call the
 <i>parse-grammar-from-string()</i> function (and its relatives) in
 the Aparecium library, we are going to need to import that library:
-<div class="scrap"><span><a name="d3e392" id="d3e392">〈 21
+<div class="scrap"><span><a name="d3e465" id="d3e465">〈 21
 Namespace declarations and imports, cont'd [continues</a> <a href=
 "#lib-nsdecls">3 Namespace declarations and imports for library
 module</a>] 〉 ≡</span>
@@ -1144,7 +1187,152 @@ that's it.
 <i>TO DO: provide better diagnostics in case of failure.</i></div>
 </div>
 <div class="div">
-<h2><a name="testcases" id="testcases">5.</a> Running the test
+<h2><a name="output-options" id="output-options">5.</a> Output
+options</h2>
+<div class="Real-P">At this point, we need to digress for a moment
+to think about the output from specific grammar tests and test
+cases.</div>
+<div class="Real-P">Experience makes me believe that when running
+tests is fast, and there aren't many tests, I'm happy to have all
+the results in a single document. When running tests is slow, I
+find myself wishing I could examine the results from earlier tests
+while waiting for the run to finish. So I would like to have the
+option of having test details written out test-by-test or
+not.</div>
+<div class="Real-P">And depending on what I'm doing I may want more
+or less detail on tests. Steven Pemberton's test-result files have
+proven very handy, with their repetition of the input grammar, the
+input string, and the produced output. I would like to have
+optional control of what details are recorded, and where.</div>
+<div class="Real-P">Also, when a test fails because the expected
+result and the reported result differ, I frequently end up saving
+each to disk in a separate file so I can use an interactive
+comparison program to find differences. I'd like an option for
+that, too.</div>
+<div class="Real-P">So the basic questions seem to be:
+<ul>
+<li>The basic information on a test, i.e. of test name and
+pass/fail/not-run result, will be given unconditionally. Should
+additional details of tests be given
+<ul>
+<li>in the main output?, or</li>
+<li>test-by-test in separate files (default)?, or</li>
+<li>not at all?</li>
+</ul>
+</li>
+<li>When details are given, should the grammar be recorded
+<ul>
+<li>inline, in an &lt;<em>ixml-grammar</em>&gt; or
+&lt;<em>xml-grammar</em>&gt; element?, or</li>
+<li>inline if short (smaller than some user-specified threshold)
+and externally otherwise?, or</li>
+<li>externally, using an &lt;<em>ixml-grammar-ref</em>&gt; or a
+&lt;<em>vxml-grammar-ref</em>&gt; element, or both?, or</li>
+<li>not at all?</li>
+</ul>
+When external representation is requested, the grammar will be
+written out to the test-reporting directory and pointed to using a
+relative URI. The name will be generated automatically from the
+test-set name.</li>
+<li>When details are given, should the input string be recorded
+<ul>
+<li>inline, in a &lt;<em>test-input</em>&gt; element?, or</li>
+<li>inline if short (smaller than some user-specified threshold)
+and externally otherwise?, or</li>
+<li>externally, using a &lt;<em>test-string-ref</em>&gt; element?,
+or</li>
+<li>not at all?</li>
+</ul>
+</li>
+<li>When details are given, the expected result will be recorded if
+the test fails. When given, how should it be given?
+<ul>
+<li>inline, in an &lt;<em>assert-*</em>&gt; element?, or</li>
+<li>inline if short (smaller than some user-specified threshold)
+and externally otherwise?, or</li>
+<li>externally, using a &lt;<em>assert-xml-ref</em>&gt; element?,
+or</li>
+<li>not at all?</li>
+</ul>
+</li>
+<li>When details are given, should the reported result be recorded
+<ul>
+<li>inline, in an &lt;<em>reported-*</em>&gt; element?, or</li>
+<li>inline if short (smaller than some user-specified threshold)
+and externally otherwise?, or</li>
+<li>externally, using a &lt;<em>reported-xml-ref</em>&gt; element?,
+or</li>
+<li>not at all?</li>
+</ul>
+</li>
+<li>In case a test is failed, should the expected and reported
+results be written to disk as separate files for easier comparison,
+independently of what the user specified on the previous two
+questions? Yes or no.</li>
+</ul>
+</div>
+<div class="Real-P">The options that control what is reported and
+whether individual files are written out for each test set or each
+test case are set in the driver. In order to remind myself later of
+what the expected options are, I list them all and index into them
+to choose the one I want for a given run.
+<div class="scrap"><span><a name="dr-options" id="dr-options">〈 31
+Set the options for the test harness [continues</a> <a href=
+"#dr-setup">5 Set up variables and options</a>] 〉 ≡</span>
+<pre class="scrapbody">
+    $options := element options {
+      attribute details { 
+        ('inline', 
+        'by-case', 
+        'none')[2]
+      },
+      attribute input-grammar {
+        ('inline',
+        'inline-if-short', 
+        'external',
+        'none')[2]
+      },
+      attribute input-string {
+        ('inline', 
+        'inline-if-short', 
+        'external',
+        'none')[2]
+      },
+      attribute reported-result {
+        ('inline', 
+        'inline-if-short',
+        'external',
+        'none')[1]
+      },
+      attribute expected-result {
+        ('inline', 
+        'inline-if-short',
+        'external',
+        'none')[1]
+      },
+      attribute files-on-failure {
+        ('yes', 
+        'no')[1]
+      },
+      attribute inline-string-limit {
+        400 
+      },
+      attribute inline-xml-limit {
+        10
+      },
+      attribute output-directory {
+        ($outdir)[1]
+      }
+    }
+</pre></div>
+</div>
+<div class="Real-P"><i>Note to future-self: if comparison becomes a
+burden, you may wish to offer a result-format option with the
+choices <tt>native</tt>, <tt>reified</tt>, or
+<tt>both</tt>.</i></div>
+</div>
+<div class="div">
+<h2><a name="testcases" id="testcases">6.</a> Running the test
 cases</h2>
 <div class="Real-P">Once we reach a test case, we have a compiled
 grammar ready. To run and evaluate the test case:
@@ -1190,7 +1378,7 @@ failure.</li>
 presence or absence of an <em>ixml:state</em> attribute.</i></div>
 <div class="Real-P">The <i>run-test-case()</i> function ...
 <div class="scrap"><span><a name="lib-run-test-case" id=
-"lib-run-test-case">〈 31 The run-test-case() function 〉
+"lib-run-test-case">〈 32 The run-test-case() function 〉
 ≡</a></span>
 <pre class="scrapbody">
 declare function t:run-test-case(
@@ -1198,20 +1386,33 @@ declare function t:run-test-case(
   $G as element(ixml),
   $options as element(options)
 ) as element() {
-  (: placeholder :)
-  element tc:test-result {
+  <span class="scrapref">〈 <em class="scrapptr"><a href=
+"#lib-rtc-misc-var">Set some handy variables 34</a></em> 〉</span>
+  <span class="scrapref">〈 <em class="scrapptr"><a href=
+"#lib-rtc-fetch-input">Set $input-string 33</a></em> 〉</span>
+  <span class="scrapref">〈 <em class="scrapptr"><a href=
+"#lib-rtc-fetch-expected">Set $expectations 35</a></em> 〉</span>
+  <span class="scrapref">〈 <em class="scrapptr"><a href=
+"#lib-rtc-parse">Set $parse-tree by parsing the test input string 36</a></em> 〉</span>
+  <span class="scrapref">〈 <em class="scrapptr"><a href=
+"#lib-rtc-evaluate">Set $result 37</a></em> 〉</span>
+  <span class="scrapref">〈 <em class="scrapptr"><a href=
+"#lib-rtc-errors">Set $error-details 38</a></em> 〉</span>
+  <span class="scrapref">〈 <em class="scrapptr"><a href=
+"#lib-rtc-details">Set $details 40</a></em> 〉</span>
+  
+  return (element tc:test-result {
     $test-case/@*,
+    attribute result { $result },
     <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-fetch-input">Fetch the test input string 32</a></em> 〉</span>
-    <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-fetch-expected">Fetch the expected results 33</a></em> 〉</span>
-    <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-check-ready">Check for input and expected output 34</a></em> 〉</span>
-    <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-parse">Parse the test input string 35</a></em> 〉</span>
-    <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-evaluate">Evaluate the test results 36</a></em> 〉</span>
-  }
+"#lib-rtc-report-error">If errors arose in a test case, report them 39</a></em> 〉</span>,
+    if ($options/@details eq 'inline')
+    then $details
+    else ()
+  },
+  <span class="scrapref">〈 <em class="scrapptr"><a href=
+"#lib-rtc-write-test-result">Optionally write out test result 48</a></em> 〉</span>
+  )
 };
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
@@ -1222,15 +1423,9 @@ declare function t:run-test-case(
 we have a problem fetching it (i.e. if there is no text at that
 URI), we have a problem. We are expecting a string, and we can't
 return an error element. And we're not set up to throw and catch
-exceptions. So we use a magic string: the words “NOT FOUND” spelled
-out using the ‘language tag’ characters originally put into Unicode
-for inline language marking and later deprecated. We could use any
-string sufficiently unlikely to be used as an external test input.
-For example, U+1D350 “Tetragram for failure” would also work. (And
-be shorter.)
+exceptions. So we use a magic string.
 <div class="scrap"><span><a name="lib-rtc-fetch-input" id=
-"lib-rtc-fetch-input">〈 32 Fetch the test input string 〉
-≡</a></span>
+"lib-rtc-fetch-input">〈 33 Set $input-string 〉 ≡</a></span>
 <pre class="scrapbody">
     let $input-string := 
         if ($test-case/tc:test-string)
@@ -1244,22 +1439,42 @@ be shorter.)
              return 
                  if (unparsed-text-available($uri2))
                  then unparsed-text($uri2)
-                 else "󠁎󠁏󠁔"
-                   || "󠀠󠁆󠁏"
-                   || "󠁕󠁎󠁄"
-                   (: 'NOT FOUND' in tag block :)
+                 else $failure-string
         else "Ich versteh die Welt nicht mehr"
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-run-test-case">The run-test-case() function 31</a>
+"#lib-run-test-case">The run-test-case() function 32</a>
 〉<br /></span></div>
+</div>
+<div class="Real-P">As our magic string we use the words “NOT
+FOUND” spelled out using the ‘language tag’ characters originally
+put into Unicode for inline language marking and later deprecated.
+We could use any string sufficiently unlikely to be used as an
+external test input. For example, U+1D350 “Tetragram for failure”
+would also work. (And be shorter.) For that matter, U+FFFD
+“Replacement character” might be apposite here. It's usually used
+when transcoding into UCS does not work; this is roughly analogous.
+<div class="scrap"><span><a name="lib-rtc-misc-var" id=
+"lib-rtc-misc-var">〈 34 Set some handy variables 〉 ≡</a></span>
+<pre class="scrapbody">
+  let $failure-string := ("󠁎󠁏󠁔"
+                      || "󠀠󠁆󠁏"
+                      || "󠁕󠁎󠁄"
+                         (: 'NOT FOUND' in tag block :),
+                         "𝍐",
+                         "�")[2]
+</pre>
+<span class="scrapcontinuations">Continued in 〈<a href=
+"#lib-rtc-mv-testset">Set $test-set-name, $test-case-ID
+41</a>〉<br /></span> <span class="scrapinbound">This code is used
+in 〈 <a href="#lib-run-test-case">The run-test-case() function
+32</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">If the expected results are external, we need
 to fetch them, too. We need to be careful to ensure that the value
 of <i>$expected</i> is an element and not a document node.
 <div class="scrap"><span><a name="lib-rtc-fetch-expected" id=
-"lib-rtc-fetch-expected">〈 33 Fetch the expected results 〉
-≡</a></span>
+"lib-rtc-fetch-expected">〈 35 Set $expectations 〉 ≡</a></span>
 <pre class="scrapbody">
     let $expectations := 
         for $e in $test-case/tc:result/*
@@ -1291,44 +1506,22 @@ of <i>$expected</i> is an element and not a document node.
             }
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-run-test-case">The run-test-case() function 31</a>
+"#lib-run-test-case">The run-test-case() function 32</a>
 〉<br /></span></div>
 </div>
-<div class="Real-P">
-<div class="scrap"><span><a name="lib-rtc-check-ready" id=
-"lib-rtc-check-ready">〈 34 Check for input and expected output 〉
-≡</a></span>
-<pre class="scrapbody">
-    return if ($input-string eq 
-               "󠁎󠁏󠁔"
-               || "󠀠󠁆󠁏"
-               || "󠁕󠁎󠁄")
-        then (
-          attribute result { "not-run" },
-          element tc:app-info {
-            element tc:error {
-              attribute id { "t:tbd15" },
-              "External test input not found."
-            }
-          }
-        ) else if (exists($expectations
-                   [self::tc:error])) then (
-          attribute result { "not-run" },
-          element tc:app-info {
-            $expectations[self::tc:error]
-          }
-        ) else 
-</pre>
-<span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-run-test-case">The run-test-case() function 31</a>
-〉<br /></span></div>
-</div>
-<div class="Real-P">We have input string and expectations ready.
-Time to run the test.
+<div class="Real-P">We have input string and expectations ready, or
+else we are holding error markers in their place. Time to run the
+test.
 <div class="scrap"><span><a name="lib-rtc-parse" id=
-"lib-rtc-parse">〈 35 Parse the test input string 〉 ≡</a></span>
+"lib-rtc-parse">〈 36 Set $parse-tree by parsing the test input
+string 〉 ≡</a></span>
 <pre class="scrapbody">
-    let $parse-tree := try {
+    let $parse-tree := 
+        if ($input-string eq $failure-string)
+        then ()
+        else if ($expectations/self::tc:error)
+        then ()
+        else try {
           ap:parse-string-with-compiled-grammar(
             $input-string,
             $G
@@ -1346,18 +1539,296 @@ Time to run the test.
         }
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-run-test-case">The run-test-case() function 31</a>
+"#lib-run-test-case">The run-test-case() function 32</a>
 〉<br /></span></div>
 <i>TO DO: in other uses of try/catch, record the error.</i></div>
 <div class="Real-P">Now we compare the parse tree to the
-expectations.
+expectations and set the three variables <i>$result</i>,
+<i>$error-details</i>, and <i>$details</i>. Some of the conditions
+will be repeated, but I don't see a good way to avoid the
+repetition.
 <div class="scrap"><span><a name="lib-rtc-evaluate" id=
-"lib-rtc-evaluate">〈 36 Evaluate the test results 〉 ≡</a></span>
+"lib-rtc-evaluate">〈 37 Set $result 〉 ≡</a></span>
 <pre class="scrapbody">
-    return if ($parse-tree/self::no-parse
-              and $expectations/self::tc:assert-not-a-sentence)
-    then (
-            attribute result { "pass" }
+    let $result :=
+        if ($input-string eq $failure-string)
+        then "not-run"
+        else if (exists($expectations
+                   [self::tc:error])) 
+        then "not-run"
+        else if ($parse-tree/self::no-parse
+                 and $expectations
+                 /self::tc:assert-not-a-sentence)
+        then "pass"
+        else if ($parse-tree/self::no-parse
+                 and $expectations
+                 /self::tc:assert-not-a-grammar)
+        then "pass" (: This case should not arise :)
+        else if ($parse-tree/self::forest
+              and 
+              empty(($expectations/self::tc:assert-not-a-grammar,
+              $expectations/self::tc:assert-not-a-sentence))
+              and 
+              (every $e1 in $parse-tree/* satisfies
+              (some $e2 in $expectations satisfies
+              deep-equal($e1, $e2)))
+        then "pass" 
+        else if (some $e1 in $expectations satisfies
+                deep-equal($e1, $parse-tree))
+        then "pass"
+        else "fail"
+</pre>
+<span class="scrapinbound">This code is used in 〈 <a href=
+"#lib-run-test-case">The run-test-case() function 32</a>
+〉<br /></span></div>
+</div>
+<div class="Real-P">We only need the error details for the
+conditions where we caught an error of some kind.
+<div class="scrap"><span><a name="lib-rtc-errors" id=
+"lib-rtc-errors">〈 38 Set $error-details 〉 ≡</a></span>
+<pre class="scrapbody">
+    let $error-details :=
+        if ($input-string eq $failure-string)
+        then element tc:error {
+               attribute id { "t:tbd15" },
+               "External test input not found."
+             }
+        else if (exists($expectations
+                 [self::tc:error])) 
+        then $expectations[self::tc:error]
+        else ()
+</pre>
+<span class="scrapinbound">This code is used in 〈 <a href=
+"#lib-run-test-case">The run-test-case() function 32</a>
+〉<br /></span></div>
+</div>
+<div class="Real-P">If and only if we caught an error, we will want
+to wrap it in an &lt;<em>app-info</em>&gt; element for reporting:
+<div class="scrap"><span><a name="lib-rtc-report-error" id=
+"lib-rtc-report-error">〈 39 If errors arose in a test case, report
+them 〉 ≡</a></span>
+<pre class="scrapbody">\
+    if (exists($error-details))
+    then element tc:app-info {
+         $error-details
+    }
+    else ()
+</pre>
+<span class="scrapinbound">This code is used in 〈 <a href=
+"#lib-run-test-case">The run-test-case() function 32</a>
+〉<br /></span></div>
+</div>
+<div class="Real-P">If the user asked for details, we provide them.
+This gets a little tedious, so I've broken it out into smaller
+bits.
+<div class="scrap"><span><a name="lib-rtc-details" id=
+"lib-rtc-details">〈 40 Set $details 〉 ≡</a></span>
+<pre class="scrapbody">
+    let $details :=
+        if ($options/@details := 'none')
+        then ()
+        else (
+            <span class="scrapref">〈 <em class="scrapptr"><a href=
+"#lib-rtc-rpt-grammar">Optionally report grammar used 42</a></em> 〉</span>,
+            <span class="scrapref">〈 <em class="scrapptr"><a href=
+"#lib-rtc-rpt-string">Optionally report input string 43</a></em> 〉</span>,
+            <span class="scrapref">〈 <em class="scrapptr"><a href=
+"#lib-rtc-rpt-expected">Optionally report expected result 44</a></em> 〉</span>,
+            <span class="scrapref">〈 <em class="scrapptr"><a href=
+"#lib-rtc-rpt-reported">Optionally report parser output 45</a></em> 〉</span>,
+            <span class="scrapref">〈 <em class="scrapptr"><a href=
+"#lib-rtc-rpt-failure-result">On failure, optionally write expected and actual results to files 46</a></em> 〉</span>
+        )
+</pre>
+<span class="scrapinbound">This code is used in 〈 <a href=
+"#lib-run-test-case">The run-test-case() function 32</a>
+〉<br /></span></div>
+</div>
+<div class="Real-P">When the user asks for things to be written out
+externally, we will need a file name. Since test cases are supposed
+to be named uniquely within a test set, and test sets within a test
+catalog, we should be able to just concatenate the two names.
+<div class="scrap"><span><a name="lib-rtc-mv-testset" id=
+"lib-rtc-mv-testset">〈 41 Set $test-set-name, $test-case-ID
+[continues</a> <a href="#lib-rtc-misc-var">34 Set some handy
+variables</a>] 〉 ≡</span>
+<pre class="scrapbody">
+    let $test-set-parent := $test-case/parent::tc:test-set,
+        $test-set-grammar-host := $test-case/
+            ancestor::tc:test-set
+            [ixml-grammar or vxml-grammar
+            or ixml-grammar-ref
+            or vxml-grammar-ref]
+            [1],
+        $test-set-name := $test-set-parent/@name/string(),
+        $grammar-name := 'grammar-' 
+                         || $test-set-grammar-host
+                            /@name/string()
+                         || '.xml',
+        $test-case-ID := concat($test-set-name, 
+                                '-', 
+                                $test-case
+                                /@name/string())
+</pre></div>
+<i>In the current version of this test harness, writing things out
+externally is not actually supported. And the grammar provided is
+the compiled grammar, not the grammar supplied by the
+user.</i></div>
+<div class="Real-P">I ran out of patience with the inline-if-short
+option, so for now we only do the other three. We write the ixml
+grammar if it's easy to get it, otherwise the vxml grammar if it's
+easy to get, and the compiled grammar if neither of the other two
+are available.
+<div class="scrap"><span><a name="lib-rtc-rpt-grammar" id=
+"lib-rtc-rpt-grammar">〈 42 Optionally report grammar used 〉
+≡</a></span>
+<pre class="scrapbody">
+            let $kw := $options/@input-grammar
+            let $g0 := $test-set-grammar-host
+                       /*[self::ixml-grammar
+                       or self::vxml-grammar
+                       or self::ixml-grammar-ref
+                       or self::vxml-grammar-ref]
+
+            return if ($kw eq 'inline')
+            then ($g0/self::tc:ixml-grammar, 
+                  $g0/self::tc:vxml-grammar, 
+                  $G)[1]
+            else if ($kw eq 'external')
+            then element tc:vxml-grammar-ref { 
+                   attribute href { $grammar-name },
+                   (: and let's write the file :)
+                   file:write($options/@output-directory
+                             || '/' || $grammar-name,
+                             $g0)
+                 }
+            else ()
+</pre>
+<span class="scrapinbound">This code is used in 〈 <a href=
+"#lib-rtc-details">Set $details 40</a> 〉<br /></span></div>
+</div>
+<div class="Real-P">For the input string, I lost patience even
+earlier. (But here the test is actually quite simple.)
+<div class="scrap"><span><a name="lib-rtc-rpt-string" id=
+"lib-rtc-rpt-string">〈 43 Optionally report input string 〉
+≡</a></span>
+<pre class="scrapbody">
+            let $kw := $options/@input-string,
+                $fn := 'input-'||$test-case-ID||'.txt'
+            return if ($kw eq 'inline')
+            then element tc:test-string {
+                   $input-string
+                 }
+            else if ($kw eq 'external')
+            then element tc:test-string-ref { 
+                   attribute href { $fn },
+                   (: and let's write the file :)
+                   file:write($options/@output-directory
+                             || '/' || $fn,
+                             $input-string)
+                 }
+            else ()
+</pre>
+<span class="scrapinbound">This code is used in 〈 <a href=
+"#lib-rtc-details">Set $details 40</a> 〉<br /></span></div>
+</div>
+<div class="Real-P">We write out the expected result only if the
+test case failed, but not if there was some error. If the
+expectation is not-a-sentence or not-a-grammar, then we report it
+regardless of the user's option. If we have an XML expectation,
+then
+<ul>
+<li>If the user asked for it inline, we serialize it inline.</li>
+<li>If the user asked for it externally (through either the
+<i>expected-result</i> option or the <i>files-on-failure</i>
+option), we serialize it externally.</li>
+</ul>
+<div class="scrap"><span><a name="lib-rtc-rpt-expected" id=
+"lib-rtc-rpt-expected">〈 44 Optionally report expected result 〉
+≡</a></span>
+<pre class="scrapbody">
+            let $kwD := $options/@expected-result,
+                $kwE := $options/@files-on-failure
+            return (
+            if ($result eq 'fail')
+
+            then if ($expectations
+                     [self::tc:assert-not-a-sentence
+                     or
+                     self::tc:assert-not-a-grammar]
+                 then $expectations
+
+                 else ( 
+                      if ($kwD eq 'inline')
+                      then element tc:assert-xml {
+                             $expectations
+                           }
+                       else (),
+
+                       if (($kwD eq 'external')
+                       or
+                       ($kwE eq 'yes'))
+                   then element tc:assert-xmlref
+                 )
+            then element tc:ixml-grammar-ref { 
+                   attribute href { 
+                     'input-'
+                     ||
+                     $test-case/parent::tc:test-set
+                     /@name/string()
+                     || '-'
+                     $test-case
+                     /@name/string()
+                     || '.txt'
+                   } 
+                 (: you should write the file ... :)
+                 }
+            else ()
+            )
+</pre>
+<span class="scrapinbound">This code is used in 〈 <a href=
+"#lib-rtc-details">Set $details 40</a> 〉<br /></span></div>
+<div class="scrap"><span><a name="lib-rtc-rpt-reported" id=
+"lib-rtc-rpt-reported">〈 45 Optionally report parser output 〉
+≡</a></span>
+<pre class="scrapbody">
+</pre>
+<span class="scrapinbound">This code is used in 〈 <a href=
+"#lib-rtc-details">Set $details 40</a> 〉<br /></span></div>
+<div class="scrap"><span><a name="lib-rtc-rpt-failure-result" id=
+"lib-rtc-rpt-failure-result">〈 46 On failure, optionally write
+expected and actual results to files 〉 ≡</a></span>
+<pre class="scrapbody">
+</pre>
+<span class="scrapinbound">This code is used in 〈 <a href=
+"#lib-rtc-details">Set $details 40</a> 〉<br /></span></div>
+</div>
+<div class="Real-P">
+<div class="scrap"><span><a name="d3e842" id="d3e842">〈 47
+Temporary 〉 ≡</a></span>
+<pre class="scrapbody">
+
+        if ($input-string eq $failure-string)
+        then (
+          attribute result { "not-run" },
+          element tc:app-info {
+            element tc:error {
+              attribute id { "t:tbd15" },
+              "External test input not found."
+            }
+          }
+        ) else if (exists($expectations
+                   [self::tc:error])) then (
+          attribute result { "not-run" },
+          element tc:app-info {
+            $expectations[self::tc:error]
+          }
+        ) else if ($parse-tree/self::no-parse
+                  and 
+                  $expectations
+                  /self::tc:assert-not-a-sentence)
+        then (
+          attribute result { "pass" },
             (: optionally provide details :)
     ) else if ($parse-tree/self::no-parse
               and $expectations/self::tc:assert-not-a-grammar)
@@ -1401,65 +1872,47 @@ expectations.
               else element tc:reported-xml {$parse-tree}
             }
     )
+)
+</pre>
+<span class="scrapinbound">This code is not used
+elsewhere.<br /></span></div>
+</div>
+<div class="Real-P">If the user has specified that results should
+be written out in separate files for separate tests, we need to
+write out the test result.
+<div class="scrap"><span><a name="lib-rtc-write-test-result" id=
+"lib-rtc-write-test-result">〈 48 Optionally write out test result 〉
+≡</a></span>
+<pre class="scrapbody">
+        if ($options/@files = 'by-case')
+        then let $outfn := 'test-' 
+                           || $test-case/parent::tc:test-set
+                              /@name
+                           || '-'
+                           || $test-case/@name
+                           || '-result.xml',
+                 $out := concat(
+                         $options/@output-directory, 
+                         '/', $outfn)
+             return file:write($out, $grammar-test-result)
+        else (),
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-run-test-case">The run-test-case() function 31</a>
+"#lib-run-test-case">The run-test-case() function 32</a>
 〉<br /></span></div>
-</div>
-<div class="Real-P">The options that control what is reported and
-whether individual files are written out for each test set or each
-test case are set in the driver. In order to remind myself later of
-what the expected options are, I list them all and index into them
-to choose the one I want for a given run.
-<div class="scrap"><span><a name="dr-options" id="dr-options">〈 37
-Set the options for the test harness [continues</a> <a href=
-"#dr-setup">5 Set up variables and options</a>] 〉 ≡</span>
-<pre class="scrapbody">
-    $options := element options {
-      attribute files { 
-        ('by-case', 
-        'by-outer-set', 
-        'none')[1]
-      },
-      attribute report-input-grammar {
-        ('internal', 
-        'all',
-        'none')[2]
-      },
-      attribute report-input-string {
-        ('internal', 
-        'all',
-        'none')[2]
-      },
-      attribute report-result {
-        ('native', 
-        'reified',
-        'none')[2]
-      },
-      attribute report-expected-result {
-        ('on-error',
-        'always',
-        'none')[1]
-      },
-      attribute output-directory {
-        ($outdir
-        )[1]
-      }
-    }
-</pre></div>
 </div>
 </div>
 <div class="div">
-<h2><a name="evaluation" id="evaluation">6.</a> Evaluating the test
+<h2><a name="evaluation" id="evaluation">7.</a> Evaluating the test
 case results</h2>
 <div class="Real-P">Oops. Already explained that.</div>
 </div>
 <div class="div">
-<h2><a name="output" id="output">7.</a> Reporting the results</h2>
+<h2><a name="output" id="output">8.</a> Reporting the results</h2>
 <div class="Real-P">...</div>
 <div class="Real-P">The <i>...()</i> function ...
 <div class="scrap"><span><a name="lib-report-test-case" id=
-"lib-report-test-case">〈 38 The report-test-case() function 〉
+"lib-report-test-case">〈 49 The report-test-case() function 〉
 ≡</a></span>
 <pre class="scrapbody">
 </pre>
@@ -1485,8 +1938,6 @@ grammar 24</a></li>
 20</a></li>
 <li><a href="#lib-rt-check-cat-read">Check for errors reading the
 catalog 10</a></li>
-<li><a href="#lib-rtc-check-ready">Check for input and expected
-output 34</a></li>
 <li><a href="#lib-rts-vxml-grammar-check">Check the XML grammar for
 conformance 25</a></li>
 <li><a href="#lib-tc-compare">Compare the grammar with the
@@ -1494,14 +1945,8 @@ expectation 30</a></li>
 <li><a href="#lib-rts-grammar-compilation">Compile the new grammar,
 if there is one 27</a></li>
 <li><a href="#lib-functions">Declare library functions 4</a></li>
-<li><a href="#lib-rtc-evaluate">Evaluate the test results
-36</a></li>
 <li><a href="#lib-tc-fetch">Fetch expected result of grammar test
 29</a></li>
-<li><a href="#lib-rtc-fetch-expected">Fetch the expected results
-33</a></li>
-<li><a href="#lib-rtc-fetch-input">Fetch the test input string
-32</a></li>
 <li><a href="#lib-rts-do-ref">Handle a test-set reference
 14</a></li>
 <li><a href="#lib-rts-do-inline">Handle an inline test-set
@@ -1510,36 +1955,60 @@ if there is one 27</a></li>
 cases 16</a></li>
 <li><a href="#lib-rts-grammar-test">Handle the grammar test, if
 there is one 26</a></li>
+<li><a href="#lib-rtc-report-error">If errors arose in a test case,
+report them 39</a></li>
 <li><a href="#dr-catfiles">List of available test-catalog files
 6</a></li>
 <li><a href="#lib-rts-grammar">Load and test the grammar for a test
 set 19</a></li>
 <li><a href="#lib-rt-load-cat">Load catalog file into $catalog
 8</a></li>
-<li><a href="#d3e233">Load catalog file into $catalog 9</a></li>
+<li><a href="#d3e306">Load catalog file into $catalog 9</a></li>
 <li><a href="#lib-nsdecls">Namespace declarations and imports for
 library module 3</a></li>
-<li><a href="#d3e392">Namespace declarations and imports, cont'd
+<li><a href="#d3e465">Namespace declarations and imports, cont'd
 21</a></li>
+<li><a href="#lib-rtc-rpt-failure-result">On failure, optionally
+write expected and actual results to files 46</a></li>
+<li><a href="#lib-rtc-rpt-expected">Optionally report expected
+result 44</a></li>
+<li><a href="#lib-rtc-rpt-grammar">Optionally report grammar used
+42</a></li>
+<li><a href="#lib-rtc-rpt-string">Optionally report input string
+43</a></li>
+<li><a href="#lib-rtc-rpt-reported">Optionally report parser output
+45</a></li>
 <li><a href="#lib-rts-write-grammar-result">Optionally write out
 grammar test result 17</a></li>
+<li><a href="#lib-rtc-write-test-result">Optionally write out test
+result 48</a></li>
 <li><a href="#lib-rts-write-tsr">Optionally write out test set
 results 18</a></li>
-<li><a href="#lib-rtc-parse">Parse the test input string
-35</a></li>
+<li><a href="#lib-rtc-details">Set $details 40</a></li>
+<li><a href="#lib-rtc-errors">Set $error-details 38</a></li>
+<li><a href="#lib-rtc-fetch-expected">Set $expectations 35</a></li>
+<li><a href="#lib-rtc-fetch-input">Set $input-string 33</a></li>
+<li><a href="#lib-rtc-parse">Set $parse-tree by parsing the test
+input string 36</a></li>
+<li><a href="#lib-rtc-evaluate">Set $result 37</a></li>
+<li><a href="#lib-rtc-mv-testset">Set $test-set-name, $test-case-ID
+41</a></li>
+<li><a href="#lib-rtc-misc-var">Set some handy variables
+34</a></li>
 <li><a href="#dr-options">Set the options for the test harness
-37</a></li>
+31</a></li>
 <li><a href="#dr-setup">Set up variables and options 5</a></li>
 <li><a href="#lib-rt-metadata">Supply basic metadata for the test
 report 11</a></li>
 <li><a href="#lib-rts-ld-vxml">Take the inline vxml grammar
 22</a></li>
+<li><a href="#d3e842">Temporary 47</a></li>
 <li><a href="#lib-rts3">The recursive run-test-set() function
 13</a></li>
 <li><a href="#lib-report-test-case">The report-test-case() function
-38</a></li>
+49</a></li>
 <li><a href="#lib-run-test-case">The run-test-case() function
-31</a></li>
+32</a></li>
 <li><a href="#lib-run-test-set">The run-test-set() function
 12</a></li>
 <li><a href="#lib-run-tests">The run-tests() function 7</a></li>
