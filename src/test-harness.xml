@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '9 February 2022' >
+<!ENTITY date.last.touched '12 February 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
@@ -34,7 +34,8 @@ form of this document.</p>
 </fileDesc>
 <revisionDesc>
 <list>
-<item>2022-02-09 : CMSMcQ : finally reach the actual test cases ...</item>
+<item>2022-02-09/2022-02-12 : CMSMcQ : finally reach the actual test
+cases and slowly knock off rough edges here and there</item>
 <item>2022-02-04 : CMSMcQ : made file, to replace earlier test harness
 lost in a disk crash</item>
 </list>
@@ -74,25 +75,15 @@ dirty first cut, taking a lot of shortcuts in order to get something
 running.  When that's done, I expect to come back and to a v0.2
 version that replaces some of those quick and dirty shortcuts with
 better code.</p>
-<p>
-<hi>The current version of some functions is not even a quick and
-dirty solution yet: the first version of each function just emits a
-Kilroy-was-here place-holder element, and the second version does that
-and then processes its children, who also emit place-holder elements.
-Once we are traversing the entire test catalog successfully, we can
-start worrying about actually running tests.</hi>
-</p>
+
 <p>
 <hi>To do:</hi>
 <list>
-<item><hi>Tell the processor to respect whitespace when
-reading the catalog and when reading expected results.  It
-appears that this can be done with an invocation-time option,
-with a database command from the GUI before running the
-query driver, with the pragma <code>(# db:chop false #){ ... }</code>,
-with <code>declare option db:chop "false"</code></hi></item>
-<item><hi>Revise the list of catalogs, arrange roughly from simple to
-complex, short to long.</hi></item>
+<item><hi>Revise grammar-test handling to put details where
+the user asked for them.</hi></item>
+<item><hi>Write out external expected/reported pairs only if there is
+an error; currently the R side is too eager to write a
+file.</hi></item>
 <item><hi>Work through test catalogs, fixing problems in the test
 harness or the tests, filing issue reports for problems in
 Aparecium.</hi></item>
@@ -100,6 +91,15 @@ Aparecium.</hi></item>
 diagnostics as occasion warrants.  In particular, in cases of failure
 record more about the test inputs.</hi></item>
 <item><hi>Resume work on more test sets.</hi></item>
+
+<!-- Keep this around in case I need it again. -->
+<!-- <item><hi>Tell the processor to respect whitespace when
+reading the catalog and when reading expected results.  It
+appears that this can be done with an invocation-time option,
+with a database command from the GUI before running the
+query driver, with the pragma <code>(# db:chop false #){ ... }</code>,
+with <code>declare option db:chop "false"</code></hi></item> -->
+
 </list>
 </p>
 
@@ -766,23 +766,23 @@ here.</emph>
           then ()
           else element tc:grammar-result {
 
-              if ($new-xml-grammar/self::ixml) 
+              if ($checked-xml-grammar/self::ixml) 
               then t:test-grammar($gt, 
-                                  $new-xml-grammar, 
+                                  $checked-xml-grammar, 
                                   $options)
 
-              else if ($new-xml-grammar/self::tc:error
+              else if ($checked-xml-grammar/self::tc:error
                       /@id = ('tc:tbd04', 'tc:tbd06'))
               then (
                   (: ixml found but did not parse.
                      May be a pass, may be a fail; let
                      t:test-grammar() decide. :)
                   t:test-grammar($gt, 
-                                 $new-xml-grammar,
+                                 $checked-xml-grammar,
                                  $options)                  
               )
 
-              else if ($new-xml-grammar/self::tc:error
+              else if ($checked-xml-grammar/self::tc:error
                       /@id = ('tc:tbd07', 
                               'tc:tbd08', 
                               'tc:tbd09'))
@@ -790,25 +790,25 @@ here.</emph>
                   (: external grammar not found :)
                   attribute result { "not-run" },
                   element tc:app-info {
-                      $new-xml-grammar
+                      $checked-xml-grammar
                   }
               )
 
-              else if ($new-xml-grammar/self::tc:error
+              else if ($checked-xml-grammar/self::tc:error
                       /@id = ('tc:tbd10'))
               then (
                   (: parsed, but is not conformant :)
                   t:test-grammar($gt, 
-                                 $new-xml-grammar,
+                                 $checked-xml-grammar,
                                  $options)
               )
 
-              else if (not($new-xml-grammar/self::ixml))
+              else if (not($checked-xml-grammar/self::ixml))
               then (
                   (: parsed, but did not produce 'ixml'
                      root element :)
                   t:test-grammar($gt, 
-                                 $new-xml-grammar,
+                                 $checked-xml-grammar,
                                  $options)
               )
               else (
@@ -834,7 +834,7 @@ If the new grammar is OK so far, we need to compile it.
 
       let $grammar := if (exists($new-xml-grammar))
           then try {
-            ap:compile-grammar-from-xml($new-xml-grammar)
+            ap:compile-grammar-from-xml($checked-xml-grammar)
           } catch * {
             element tc:error {
               attribute id {"t:tbd11"},
@@ -866,12 +866,12 @@ declare function t:test-grammar(
   $xml-grammar as element(),
   $options as element(options)
 ) as item()* {
-  <ptr target="lib-tc-fetch"/>
-  <ptr target="lib-tc-compare"/>
+  <ptr target="lib-tg-fetch"/>
+  <ptr target="lib-tg-compare"/>
 };
 </scrap></p>
 <p>First, we fetch any external result.
-<scrap id="lib-tc-fetch"
+<scrap id="lib-tg-fetch"
        name="Fetch expected result of grammar test">
 
   let $e0 := $grammar-test/tc:result/*[1],
@@ -896,12 +896,39 @@ declare function t:test-grammar(
 </scrap>
 </p>
 <p>We now have an ixml grammar in one hand and an expectation in
-the other.  We perform a deep-equal comparison, and that's it.
-<scrap id="lib-tc-compare"
+the other.  The core task here is to perform a deep-equal comparison
+on the grammar and the expectation, but we also need to check
+for error conditions of various kinds.  We break the if-then-else
+chain up into several code scraps to avoid having any of them get
+too long.  (Informally:  if I can't see it all on one screen, the
+scrap is probably too long.)
+<scrap id="lib-tg-compare"
        name="Compare the grammar with the expectation">
 
   return
+  <ptr target="lib-tg-cf-errors"/>
+  <ptr target="lib-tg-cf-ok"/>
+  <ptr target="lib-tg-cf-other"/>
 
+</scrap>
+<hi>TO DO:  provide better diagnostics in case of failure.</hi>
+</p>
+<p>The main case is here:
+<scrap id="lib-tg-cf-ok"
+       name="Return pass if grammar is as expected">
+  else if (deep-equal($xml-grammar, $expectation))
+  then (
+         (: grammar conformant and as expected :)
+         attribute result { "pass" }
+       )
+</scrap>
+</p>
+<p>However, we can't just run that test without checking
+first to make sure the grammar and expectation are
+as they should be.  So before the comparison is run, 
+we check for and weed out a lot of other cases.
+<scrap id="lib-tg-cf-errors"
+       name="Check for error conditions, non-conformant grammar">
   if ($expectation/self::tc:error)
   then ( 
          (: something went wrong w assert-xml-ref :)
@@ -940,13 +967,13 @@ the other.  We perform a deep-equal comparison, and that's it.
            $xml-grammar
          }         
        )
-
-  else if (deep-equal($xml-grammar, $expectation))
-  then (
-         (: grammar conformant and as expected :)
-         attribute result { "pass" }
-       )
-
+</scrap>
+</p>
+<p>Finally, if no error conditions were detected but the 
+grammar was not deep-equal to the expected result, we 
+have a sort of catch-all error case.
+<scrap id="lib-tg-cf-other"
+       name="Grammar conformant but not as expected">
   else (
          (: grammar conformant but not as expected :)
          attribute result { "fail" },
@@ -959,7 +986,6 @@ the other.  We perform a deep-equal comparison, and that's it.
          }
        )
 </scrap>
-<hi>TO DO:  provide better diagnostics in case of failure.</hi>
 </p>
 
 <p>If the user has specified that results should be
@@ -1034,7 +1060,7 @@ presence or absence of an <att>ixml:state</att> attribute.</hi>
 
 declare function t:run-test-case(
   $test-case as element(tc:test-case),
-  $G as element(ixml),
+  $G as element()?,
   $options as element(options)
 ) as element() {
   <ptr target="lib-rtc-misc-var"/>
@@ -1150,6 +1176,14 @@ Time to run the test.
         then ()
         else if ($expectations/self::tc:error)
         then ()
+        else if (not($G/self::ixml))
+        then element tc:error {
+               attribute id { "t:tbd18" },
+               element tc:msg {
+                 "This is not an ixml grammar: "
+               },
+               $G
+             }
         else try {
           ap:parse-string-with-compiled-grammar(
             $input-string,
@@ -1190,6 +1224,9 @@ but I don't see a good way to avoid the repetition.
         else if (exists($expectations
                    /self::tc:error)) 
         then "not-run"
+        else if (exists($parse-tree
+                 /self::tc:error[@id = 't:tbd18'])) 
+        then "fail" (: or should this be "not-run"? :)
         else if ($parse-tree/self::no-parse
                  and $expectations
                  /self::tc:assert-not-a-sentence)
@@ -1226,6 +1263,9 @@ an error of some kind.
         else if (exists($expectations
                  /self::tc:error)) 
         then $expectations/self::tc:error
+        else if (exists($parse-tree
+                 /self::tc:error)) 
+        then $parse-tree
         else ()
 </scrap>
 </p>
@@ -1520,9 +1560,14 @@ we need to wrap them in a <gi>tc:result</gi> element.
 <scrap id="lib-rtc-rpt-output"
        name="Optionally report expected and actual output">
 
-            if (($options/@expected-result ne 'none')
-               or ($options/@reported-result ne 'none')
-               or ($options/@files-on-failure ne 'no'))
+            if (
+                ($options/@expected-result ne 'none')
+                or 
+                ($options/@reported-result ne 'none')
+                or 
+                (($options/@files-on-failure ne 'no')
+                 and ($result eq 'fail'))
+               )
             then element tc:result {
               <ptr target="lib-rtc-rpt-expected"/>,
               <ptr target="lib-rtc-rpt-reported"/>
@@ -1608,7 +1653,10 @@ conditional on failure of the test.
 
                    if (($kwD eq 'external')
                        or
-                       ($kwE eq 'yes'))
+                       (($kwE eq 'yes') 
+                        and 
+                        ($result eq 'fail'))
+                      )
                    then element tc:reported-xml-ref {
                           attribute href {$fn},
                           file:write(

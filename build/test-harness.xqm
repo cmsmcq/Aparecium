@@ -196,23 +196,23 @@ declare function t:run-test-set(
           then ()
           else element tc:grammar-result {
 
-              if ($new-xml-grammar/self::ixml) 
+              if ($checked-xml-grammar/self::ixml) 
               then t:test-grammar($gt, 
-                                  $new-xml-grammar, 
+                                  $checked-xml-grammar, 
                                   $options)
 
-              else if ($new-xml-grammar/self::tc:error
+              else if ($checked-xml-grammar/self::tc:error
                       /@id = ('tc:tbd04', 'tc:tbd06'))
               then (
                   (: ixml found but did not parse.
                      May be a pass, may be a fail; let
                      t:test-grammar() decide. :)
                   t:test-grammar($gt, 
-                                 $new-xml-grammar,
+                                 $checked-xml-grammar,
                                  $options)                  
               )
 
-              else if ($new-xml-grammar/self::tc:error
+              else if ($checked-xml-grammar/self::tc:error
                       /@id = ('tc:tbd07', 
                               'tc:tbd08', 
                               'tc:tbd09'))
@@ -220,25 +220,25 @@ declare function t:run-test-set(
                   (: external grammar not found :)
                   attribute result { "not-run" },
                   element tc:app-info {
-                      $new-xml-grammar
+                      $checked-xml-grammar
                   }
               )
 
-              else if ($new-xml-grammar/self::tc:error
+              else if ($checked-xml-grammar/self::tc:error
                       /@id = ('tc:tbd10'))
               then (
                   (: parsed, but is not conformant :)
                   t:test-grammar($gt, 
-                                 $new-xml-grammar,
+                                 $checked-xml-grammar,
                                  $options)
               )
 
-              else if (not($new-xml-grammar/self::ixml))
+              else if (not($checked-xml-grammar/self::ixml))
               then (
                   (: parsed, but did not produce 'ixml'
                      root element :)
                   t:test-grammar($gt, 
-                                 $new-xml-grammar,
+                                 $checked-xml-grammar,
                                  $options)
               )
               else (
@@ -253,7 +253,7 @@ declare function t:run-test-set(
 
       let $grammar := if (exists($new-xml-grammar))
           then try {
-            ap:compile-grammar-from-xml($new-xml-grammar)
+            ap:compile-grammar-from-xml($checked-xml-grammar)
           } catch * {
             element tc:error {
               attribute id {"t:tbd11"},
@@ -341,8 +341,7 @@ declare function t:test-grammar(
 
   
   return
-
-  if ($expectation/self::tc:error)
+    if ($expectation/self::tc:error)
   then ( 
          (: something went wrong w assert-xml-ref :)
          attribute result { "not-run" },
@@ -381,13 +380,13 @@ declare function t:test-grammar(
          }         
        )
 
-  else if (deep-equal($xml-grammar, $expectation))
+    else if (deep-equal($xml-grammar, $expectation))
   then (
          (: grammar conformant and as expected :)
          attribute result { "pass" }
        )
 
-  else (
+    else (
          (: grammar conformant but not as expected :)
          attribute result { "fail" },
          element tc:result {
@@ -399,12 +398,14 @@ declare function t:test-grammar(
          }
        )
 
+
+
 };
 
 
 declare function t:run-test-case(
   $test-case as element(tc:test-case),
-  $G as element(ixml),
+  $G as element()?,
   $options as element(options)
 ) as element() {
   
@@ -484,6 +485,14 @@ declare function t:run-test-case(
         then ()
         else if ($expectations/self::tc:error)
         then ()
+        else if (not($G/self::ixml))
+        then element tc:error {
+               attribute id { "t:tbd18" },
+               element tc:msg {
+                 "This is not an ixml grammar: "
+               },
+               $G
+             }
         else try {
           ap:parse-string-with-compiled-grammar(
             $input-string,
@@ -508,6 +517,9 @@ declare function t:run-test-case(
         else if (exists($expectations
                    /self::tc:error)) 
         then "not-run"
+        else if (exists($parse-tree
+                 /self::tc:error[@id = 't:tbd18'])) 
+        then "fail" (: or should this be "not-run"? :)
         else if ($parse-tree/self::no-parse
                  and $expectations
                  /self::tc:assert-not-a-sentence)
@@ -540,6 +552,9 @@ declare function t:run-test-case(
         else if (exists($expectations
                  /self::tc:error)) 
         then $expectations/self::tc:error
+        else if (exists($parse-tree
+                 /self::tc:error)) 
+        then $parse-tree
         else ()
 
   
@@ -596,9 +611,14 @@ declare function t:run-test-case(
             else ()
 ,
             
-            if (($options/@expected-result ne 'none')
-               or ($options/@reported-result ne 'none')
-               or ($options/@files-on-failure ne 'no'))
+            if (
+                ($options/@expected-result ne 'none')
+                or 
+                ($options/@reported-result ne 'none')
+                or 
+                (($options/@files-on-failure ne 'no')
+                 and ($result eq 'fail'))
+               )
             then element tc:result {
               
             let $kwD := $options/@expected-result,
@@ -659,7 +679,10 @@ declare function t:run-test-case(
 
                    if (($kwD eq 'external')
                        or
-                       ($kwE eq 'yes'))
+                       (($kwE eq 'yes') 
+                        and 
+                        ($result eq 'fail'))
+                      )
                    then element tc:reported-xml-ref {
                           attribute href {$fn},
                           file:write(
