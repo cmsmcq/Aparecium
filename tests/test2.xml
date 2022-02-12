@@ -11,22 +11,6 @@
     getting more ambitious and hopeful that it actually
     works.</p>
   </description>
-
-  <test-set name="a">
-    <created by="CMSMcQ" on="2021-10-14"/>
-    <description>
-      <p>Can we parse the grammar for ixml?</p>
-    </description>
-
-    <ixml-grammar-ref href="../lib/ixml.2021-09-24.ixml"/>
-    <grammar-test>
-      <created by="CMSMcQ" on="2021-10-05"/>
-      <result>
-	<assert-xml-ref href="../lib/ixml.2021-09-14.ixml.xml"/>
-      </result>
-    </grammar-test>
-    
-  </test-set>
   
   <test-set name="ambiguity-1">
     <created by="CMSMcQ" on="2021-10-14"/>
@@ -109,5 +93,22 @@
       <test-string>S : 'magic'; 'b', "c"; ["v"; 'aeiou'].</test-string>
       <result><assert-not-a-sentence/></result>
     </test-case>
+  </test-set>
+  
+
+  <test-set name="a">
+    <created by="CMSMcQ" on="2021-10-14"/>
+    <description>
+      <p>Can we parse the grammar for ixml?</p>
+    </description>
+
+    <ixml-grammar-ref href="../lib/ixml.2022-01-25.ixml"/>
+    <grammar-test>
+      <created by="CMSMcQ" on="2021-10-05"/>
+      <result>
+	<assert-xml-ref href="../lib/ixml.2022-01-25.ixml.xml"/>
+      </result>
+    </grammar-test>
+    
   </test-set>
 </test-catalog>

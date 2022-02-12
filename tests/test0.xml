@@ -17,10 +17,12 @@
 
   <test-set name="zero">
     <created by="CMSMcQ" on="2021-10-05"/>
+    <modified by="CMSMcQ" on="2022-02-11"
+	      change="use current ixml grammar, not old one"/>
     <description>
       <p>First task:  make it work using the grammar for ixml.</p>
     </description>
-    <vxml-grammar-ref href="../lib/ixml.2021-09-14.ixml.xml"/>
+    <vxml-grammar-ref href="../lib/ixml.2022-01-25.ixml.xml"/>
     
     <test-case name="t1i">
       <created by="CMSMcQ" on="2021-10-05"/>

@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ixml>
-   <rule name="S">:<alt>
-         <nonterminal name="S"/>
-      </alt>
-      <alt>
-         <literal sstring="a"/>
-      </alt>.</rule>
-</ixml>
+<ixml
+  ><rule name="S"
+    ><alt
+      ><nonterminal name="S"
+    /></alt
+    ><alt
+      ><literal string="a"
+    /></alt
+  ></rule
+></ixml>
