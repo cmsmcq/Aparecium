@@ -33,7 +33,7 @@ all: tangled woven testharness
 woven: doc/Aparecium.xhtml
 
 doc/Aparecium.xhtml: doc/Aparecium.html
-	tidy -output $@ -asxhtml $< 2>/dev/null
+	-tidy -output $@ -asxhtml $< 2>/dev/null
 
 doc/Aparecium.html: src/Aparecium.xml
 	$(XSLT) $< $(WEAVEHTML) $@ 
@@ -82,7 +82,7 @@ tests/test-driver.xq:  build/test-harness.xqm
 	rsync --checksum tmp/test-driver.xq tests
 
 doc/test-harness.xhtml: doc/test-harness.html
-	tidy -output $@ -asxhtml $< 2>/dev/null
+	-tidy -output $@ -asxhtml $< 2>/dev/null
 
 doc/test-harness.html: src/test-harness.xml
 	$(XSLT) $< $(WEAVEHTML) $@
