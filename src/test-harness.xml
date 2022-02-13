@@ -60,6 +60,7 @@ lost in a disk crash</item>
 
 <divGen type="toc"/>
 </front>
+
 <body>
 <p>This document describes a test harness for the invisible-XML
 processor Aparecium.  It is a <soCalled>literate program</soCalled>:
@@ -91,6 +92,10 @@ Aparecium.</hi></item>
 diagnostics as occasion warrants.  In particular, in cases of failure
 record more about the test inputs.</hi></item>
 <item><hi>Resume work on more test sets.</hi></item>
+<item><hi>As occasion dictates and opportunity arises,
+do better at protecting against and diagnosing errors.</hi></item>
+<item><hi>TO DO: in all uses of try/catch, record the error details as
+is done now in <ptr target="lib-rtc-parse"/>.</hi></item>
 
 <!-- Keep this around in case I need it again. -->
 <!-- <item><hi>Tell the processor to respect whitespace when
@@ -558,32 +563,21 @@ latter, we fetch the document and deal with its top-level test sets.
 <p>The main case is for a <soCalled>real</soCalled> test set.
 It may contain a grammar (inline or via reference, in ixml or xml),
 and it may contain test cases and nested test sets.  
-<scrap id="lib-rts-do-inline"
+<scrap id="lib-rts-do-inline" 
        name="Handle an inline test-set">
 
-    let $test-set-name := $test-set/@name/string(),
-        $test-set-results := element tc:test-set-results {
+    let $test-set-name := $test-set/@name/string()
+    <ptr target="lib-rts-grammar"/>
+    <ptr target="lib-rts-grammar-test"/>
+    return element tc:test-set-results {
           $test-set/@*, 
-          <ptr target="lib-rts-grammar"/>
-          return (
-            $grammar-test-result,
-            <ptr target="lib-rts-write-grammar-result"/>
-            if (($grammar-test-result/@result = 'pass')
-               or empty($grammar-test-result)) 
-            then (: run the tests, handle nested sets :)
-                 <ptr target="lib-rts-nested"/>
-            else (: no point trying to run tests :)
-                element tc:description {
-                  element tc:p {
-                    text { "Grammar test failed, "
-                        || "test cases and nested "
-                        || "test sets skipped." }
-                  }
-                }
-          )
+          <ptr target="lib-rts-write-grammar-result"/>
+          <ptr target="lib-rts-abort"/>
+          else <ptr target="lib-rts-nested"/>
         }
     return $test-set-results
 </scrap>
+<hi>There is an old version of this <ref target="geniza">in the appendix</ref>.</hi>
 </p>
 <p>Later sections will describe the handling of <ref
 target="grammars">grammars</ref> and <ref target="testcases">test
@@ -616,7 +610,9 @@ function to handle them.
 </div>
 
 <div id="grammars">
-<head>Loading and testing the grammar for a test set</head>
+<head>Handling the grammar for a test set</head>
+<div id="grammar-load">
+<head>Loading the grammar</head>
 
 <p>A grammar may be given inline or externally, in ixml or in XML.
 The initial steps to be taken vary among the four cases, but once the
@@ -625,9 +621,24 @@ getting the grammar into XML and into memory, with a four-way branch
 on the nature of the grammar specification.
 The locally specified grammar unconditionally overrides any grammar
 passed in as an argument, and we keep life simple by using the same
-name for it.
+name for it.</p>
+<p>In order to cater for the possibility of multiple outputs (both the
+main output of the <ident>t:run-test-set()</ident> function and a file
+reporting just the grammar test), we assign the results of the test to
+variables which may be combined in different ways in different output.
 <scrap id="lib-rts-grammar"
-       name="Load and test the grammar for a test set">
+       name="Load and compile the grammar for a test set">
+      <ptr target="lib-rts-g-new"/>
+      <ptr target="lib-rts-vxml-grammar-check"/>
+      <ptr target="lib-rts-grammar-compilation"/>
+</scrap>
+<hi>Old version in <ref target="geniza">appendix</ref>.</hi>
+</p>
+
+<p>If a grammar is specified, we get it into XML form as the value
+of <ident>$new-xml-grammar</ident>. 
+<scrap id="lib-rts-g-new"
+       name="Set $new-xml-grammar">
 
       let $new-xml-grammar := if ($test-set/tc:ixml-grammar)
           then <ptr target="lib-rts-ld-ixml"/>
@@ -639,7 +650,6 @@ name for it.
           then <ptr target="lib-rts-ld-vxml-ref"/>
           else ()
 </scrap>
-<emph>[TO DO:  prepare for and recover from errors]</emph>
 </p>
 <p>Each of these needs to be done cautiously.  First is
 the inline ixml case.  We just wrap it in a try/catch
@@ -729,108 +739,31 @@ covered here.
                       }
           
 </scrap></p>
-<p>Once we have the new XML grammar, we need to check it
-for conformance.  Aparecium currently lacks any function
-to do this, so for the moment this is a nop.
-<scrap prev="lib-rts-grammar"
-       id="lib-rts-vxml-grammar-check"
-       name="Check the XML grammar for conformance">
-
-      let $checked-xml-grammar := 
-          if (true()) (: place-holder :)
-          then $new-xml-grammar
-          else element tc:error {
-            attribute id { "t:tbd10" },
-            text { "XML grammar not conformant" }
-          }
-</scrap>
-</p>
-<p>
-If a grammar is given, a <gi>grammar-test</gi> may also be specified.
-We need to check the value of <ident>$new-xml-grammar</ident>; if it's a
-<gi>tc:error</gi> element, the grammar test failed and the
-<att>id</att> attribute should tell us roughly why.  If it's anything
-other than an <gi>ixml</gi> element, the grammar test failed, and we
-may or may not have any inkling of why.  <emph>Aparecium needs to do a
+<p>Once we have the new XML grammar, we need to check it for
+conformance.  Aparecium currently lacks any function to do this, so
+for the moment this is basically a nop.  <emph>Aparecium needs to do a
 much better job making the compilation of grammars reliable and
 robust.  It's tempting to start checking grammars for problems here,
 but that work belongs in Aparecium itself, so we do not do it
 here.</emph>
-<scrap prev="lib-rts-grammar"
-       id="lib-rts-grammar-test"
-       name="Handle the grammar test, if there is one">
+<scrap id="lib-rts-vxml-grammar-check"
+       name="Set $checked-xml-grammar">
 
-      let $gt := $test-set/tc:grammar-test
-      let $grammar-test-result := 
-          if (empty($new-xml-grammar) or empty($gt))
-          then ()
-          else element tc:grammar-result {
-
-              if ($checked-xml-grammar/self::ixml) 
-              then t:test-grammar($gt, 
-                                  $checked-xml-grammar, 
-                                  $options)
-
-              else if ($checked-xml-grammar/self::tc:error
-                      /@id = ('tc:tbd04', 'tc:tbd06'))
-              then (
-                  (: ixml found but did not parse.
-                     May be a pass, may be a fail; let
-                     t:test-grammar() decide. :)
-                  t:test-grammar($gt, 
-                                 $checked-xml-grammar,
-                                 $options)                  
-              )
-
-              else if ($checked-xml-grammar/self::tc:error
-                      /@id = ('tc:tbd07', 
-                              'tc:tbd08', 
-                              'tc:tbd09'))
-              then (
-                  (: external grammar not found :)
-                  attribute result { "not-run" },
-                  element tc:app-info {
-                      $checked-xml-grammar
-                  }
-              )
-
-              else if ($checked-xml-grammar/self::tc:error
-                      /@id = ('tc:tbd10'))
-              then (
-                  (: parsed, but is not conformant :)
-                  t:test-grammar($gt, 
-                                 $checked-xml-grammar,
-                                 $options)
-              )
-
-              else if (not($checked-xml-grammar/self::ixml))
-              then (
-                  (: parsed, but did not produce 'ixml'
-                     root element :)
-                  t:test-grammar($gt, 
-                                 $checked-xml-grammar,
-                                 $options)
-              )
-              else (
-                  attribute result { "other" },
-                  element tc:description {
-                    element tc:p {
-                      "what on earth happened?"
-                    }
-                  }
-              )
-          }      
+      let $checked-xml-grammar := 
+          if ($new-xml-grammar/self::ixml)
+          then $new-xml-grammar
+          else element tc:error {
+            attribute id { "t:tbd10" },
+            text { "XML grammar not conformant:" },
+            $new-xml-grammar
+          }
 </scrap>
-<hi>TO DO: pass options down to this level, if user asks for
-individual tests to be reported to files, then do so.  At user option,
-on failure write both expected result and reported result to files, to
-simplify comparison.</hi>
 </p>
 <p>
 If the new grammar is OK so far, we need to compile it.
-<scrap prev="lib-rts-grammar"
+<scrap 
        id="lib-rts-grammar-compilation"
-       name="Compile the new grammar, if there is one">
+       name="Set $grammar to compiled grammar">
 
       let $grammar := if (exists($new-xml-grammar))
           then try {
@@ -846,13 +779,128 @@ If the new grammar is OK so far, we need to compile it.
       else $grammar
 </scrap>
 </p>
-<!--
-<p>The <ident>load-grammar()</ident> function ...
-<scrap id="lib-load-grammar"
-       name="The load-grammar() function">
-       </scrap>
+<p>At this point, the code digresses to checking whether the user
+requested a grammar test or not; that is described in the next
+section.  Within the <ident>t:run-test-set()</ident> function,
+the effect of the grammar test is to set some variables.</p>
+<p>Then we return the <gi>test-set-results</gi> element, as shown
+above in <ptr target="lib-rts-do-inline"/>.</p>
+
+<p>We start by writing out the result of any grammar test, if
+one was request.  If the user has specified that results should be
+written out in separate files for separate tests, we also need 
+to write out the file for the grammar test.
+<hi>Revision needed here.  The results variable will be a
+<gi>grammar-test-result</gi> element with all details.
+If the user wants details by-file, just take the element
+and the attributes, strip the children.</hi>
+<scrap id="lib-rts-write-grammar-result"
+       name="Record grammar test result">
+
+        if (($options/@details = 'by-case')
+           and exists($grammar-test-result))
+        then (element tc:grammar-test {
+                $grammar-test-results/@*
+             }, 
+             let $outfn := 'grammar-test-' 
+                           || $test-set-name 
+                           || '-results.xml',
+                 $out := concat(
+                         $options/@output-directory, 
+                         '/', $outfn)
+             return file:write($out, $grammar-test-result)
+             )
+
+        else $grammar-test-results
+        ,
+</scrap>
 </p>
--->
+
+<p>Before recurring on nested test sets and contained test cases, we
+should check that the grammar is in fact OK.  The check includes
+seeing that <ident>t:test-grammar()</ident> said, but even if no
+grammar test was run we need to check to make sure we actually have a
+usable grammar.  First, we check for error signals in the
+<ident>$checked-xml-grammar</ident>.
+<scrap id="lib-rts-abort"
+       name="If grammar is bad, stop now">
+    if ($checked-xml-grammar/self::tc:error)
+    then (element tc:description {
+           element tc:p {
+             "No workable grammar.  Skipping test",
+             "&#xA;cases and nested test sets."
+           }
+         },
+         element tc:app-info { $checked-xml-grammar }
+         )
+</scrap></p>
+
+<p>Then, in a slightly paranoid way, we check that the
+grammar is actually an <gi>ixml</gi> element.
+<scrap prev="lib-rts-abort"
+       name="If grammar is not good, stop now">
+    else if (not($checked-xml-grammar/self::ixml))
+    then (element tc:description {
+           element tc:p {
+             "No workable grammar.  Skipping test",
+             "&#xA;cases and nested test sets."
+             "&#xA;This case is not supposed to happen."
+           }
+         },
+         element tc:app-info { $checked-xml-grammar }
+         )
+</scrap>
+</p>
+<p>We also check to make sure that we actually passed
+the grammar test.
+<scrap prev="lib-rts-abort"
+       name="If we failed the grammar test, stop now">
+    else if ($grammar-test-result/@result ne 'pass')
+    then element tc:description {
+           element tc:p {
+             "Failed grammar test.  Skipping test",
+             "&#xA;cases and nested test sets."
+           }
+         }
+</scrap>
+</p>
+<p>If something went wrong in the compilation step, the
+compiled grammar will be an error element.
+<scrap prev="lib-rts-abort"
+       name="If grammar compilation failed, stop now">
+    else if ($grammar/self::tc:error)
+    then (element tc:description {
+           element tc:p {
+             "Grammar compilation failed.  Skipping",
+             "&#xA; test cases and nested test sets."
+           }
+         },
+         element tc:app-info { $grammar }
+         )
+</scrap>
+</p>
+<p>There may be other conditions we should be checking for;
+they should be inserted here.</p>
+</div>
+
+<div id="grammar-tests">
+<head>Running the <gi>grammar-test</gi></head>
+<p>If a grammar is given, a <gi>grammar-test</gi> may also be
+specified.  If so, we delegate the handling of the test to the
+<ident>t:test-grammar()</ident> function.
+<scrap id="lib-rts-grammar-test"
+       name="Set $grammar-test-result">
+
+    let $gt := $test-set/tc:grammar-test
+    let $grammar-test-result := 
+        if (exists($gt))
+        then t:test-grammar($gt, 
+                            $checked-xml-grammar, 
+                            $options)
+        else ()
+</scrap>
+</p>
+
 <p>The <ident>test-grammar()</ident> function is called when we have
 (a) what looks like an acceptable vxml grammar and (b) a request for a
 grammar test.  We must fetch the expected result, if it's external,
@@ -865,7 +913,7 @@ declare function t:test-grammar(
   $grammar-test as element(tc:grammar-test),
   $xml-grammar as element(),
   $options as element(options)
-) as item()* {
+) as element(gt:grammar-result) {
   <ptr target="lib-tg-fetch"/>
   <ptr target="lib-tg-compare"/>
 };
@@ -905,70 +953,133 @@ scrap is probably too long.)
 <scrap id="lib-tg-compare"
        name="Compare the grammar with the expectation">
 
-  return
-  <ptr target="lib-tg-cf-errors"/>
-  <ptr target="lib-tg-cf-ok"/>
-  <ptr target="lib-tg-cf-other"/>
-
+  return element tc:grammar-result {
+    <ptr target="lib-tg-cf-errors"/>  
+    <ptr target="lib-tg-cf-ok"/>
+    <ptr target="lib-tg-cf-other"/>
+  }
 </scrap>
-<hi>TO DO:  provide better diagnostics in case of failure.</hi>
 </p>
 <p>The main case is here:
 <scrap id="lib-tg-cf-ok"
        name="Return pass if grammar is as expected">
-  else if (deep-equal($xml-grammar, $expectation))
-  then (
-         (: grammar conformant and as expected :)
-         attribute result { "pass" }
-       )
+
+    else if (deep-equal($xml-grammar, $expectation))
+    then (
+           (: grammar conformant and as expected :)
+           attribute result { "pass" }
+         )
 </scrap>
 </p>
 <p>However, we can't just run that test without checking
 first to make sure the grammar and expectation are
 as they should be.  So before the comparison is run, 
 we check for and weed out a lot of other cases.
+</p>
+<p>If we were unable to fetch the expected result,
+then the test case counts as not having been run.
 <scrap id="lib-tg-cf-errors"
        name="Check for error conditions, non-conformant grammar">
-  if ($expectation/self::tc:error)
-  then ( 
-         (: something went wrong w assert-xml-ref :)
-         attribute result { "not-run" },
-         element tc:result {
-           $expectation 
-         }
-       )
 
-  else if ($expectation[self::tc:assert-not-a-grammar
-           or self::tc:assert-not-a-sentence]
-           and
-           ($xml-grammar/self::tc:error[@id = 
-           ("t:tbd04", "t:tbd06")]
-           or $xml-grammar/self::no-parse)
-          )
-  then (
-         (: grammar did not parse :)
-         attribute result { "pass" },
-         () (:
-         element tc:result {
-           $expectation,
-           $xml-grammar
-         } :)
-       )
-
-  else if ($expectation[self::tc:assert-not-a-grammar]
-           and
-           $xml-grammar/self::tc:error
-                        [@id = "t:tbd10"])
-  then (
-         (: grammar parsed but was nonconformant :)
-         attribute result { "pass" },
-         element tc:result {
-           $expectation,
-           $xml-grammar
-         }         
-       )
+    if ($expectation/self::tc:error)
+    then ( 
+           attribute result { "not-run" },
+           element tc:description {
+             element tc:p {
+               "Expected result not found."
+             } 
+           },
+           element tc:app-info {
+             $expectation 
+           }
+         )
 </scrap>
 </p>
+
+<p>If the <ident>$xml-grammar</ident> parameter is a
+<gi>tc:error</gi> element indicating the grammar was not
+found, then again we did not run the test.
+<scrap prev="lib-tg-cf-errors"
+       name="Check for grammar-not-found errors">
+
+    else if ($xml-grammar/self::tc:error
+             [@id = ("t:tbd07", "t:tbd08", "t:tbd09")])
+    then (
+           (: grammar parsed but was nonconformant :)
+           attribute result { "not-run" },
+           element tc:result {
+             $expectation
+           },
+           element tc:app-info { $xml-grammar }
+         )
+</scrap>
+</p>
+<p>If we caught intentional syntax errors in the grammar,
+then we pass the test.
+<scrap prev="lib-tg-cf-errors"
+       name="Check for syntax errors in grammar">
+
+    else if ($expectation[self::tc:assert-not-a-grammar
+             or self::tc:assert-not-a-sentence]
+             and
+             ($xml-grammar/self::tc:error[@id = 
+             ("t:tbd04", "t:tbd06")]
+             or $xml-grammar/self::no-parse)
+            )
+    then (
+           (: grammar did not parse :)
+           attribute result { "pass" },
+           element tc:result {
+             $expectation
+           },
+           element tc:app-info { $xml-grammar }
+         )
+</scrap>
+</p>
+<p>If the grammar is syntactically OK but intentionally not
+conforming, then we pass the test.
+<scrap prev="lib-tg-cf-errors"
+       name="Check for not-a-grammar test">
+
+    else if ($expectation[self::tc:assert-not-a-grammar]
+             and
+             $xml-grammar/self::tc:error
+                          [@id = "t:tbd10"])
+    then (
+           (: grammar parsed but was nonconformant :)
+           attribute result { "pass" },
+           element tc:result {
+             $expectation
+           },
+           element tc:app-info { $xml-grammar }
+         )
+</scrap>
+</p>
+<p>There may be other conditions we should be checking for;
+they can be inserted as further if-then-else clauses here.</p>
+
+<p>As a final filter before comparing the grammar to the
+expectation we catch any <gi>tc:error</gi> elements we
+have not tested for specifically in the grammar argument.
+<scrap prev="lib-tg-cf-errors"
+       name="Check for other errors in grammar">
+
+    else if ($xml-grammar/self::tc:error)
+    then (
+           attribute result { "fail" },
+           element tc:result {
+             $expectation
+           },
+           element tc:description {
+             element tc:p {
+               "Unexpected error in gramar parameter."
+             }
+	   },
+           element tc:app-info { $xml-grammar }
+         )
+</scrap>
+</p>
+
 <p>Finally, if no error conditions were detected but the 
 grammar was not deep-equal to the expected result, we 
 have a sort of catch-all error case.
@@ -988,26 +1099,12 @@ have a sort of catch-all error case.
 </scrap>
 </p>
 
-<p>If the user has specified that results should be
-written out in separate files for separate tests, we
-need to write out the grammar test.
-<scrap id="lib-rts-write-grammar-result"
-       name="Optionally write out grammar test result">
-
-        if (($options/@details = 'by-case')
-           and exists($grammar-test-result))
-        then let $outfn := 'grammar-test-' || $test-set-name 
-                           || '-results.xml',
-                 $out := concat(
-                         $options/@output-directory, 
-                         '/', $outfn)
-             return file:write($out, $grammar-test-result)
-        else (),
-</scrap>
-</p>
+</div>
 </div>
 
 <div id="testcases">
+<head>Handling individual test cases</head>
+<div id="testcases-running">
 <head>Running the test cases</head>
 <p>Once we reach a test case, we have a compiled grammar ready.
 To run and evaluate the test case:
@@ -1201,8 +1298,6 @@ Time to run the test.
           }
         }
 </scrap>
-<hi>TO DO:  in other uses of try/catch, record
-the error.</hi>
 </p>
 
 </div>
@@ -1638,10 +1733,20 @@ conditional on failure of the test.
                 $fn  := $test-case-ID || '.reported.xml'
             return 
             if ($parse-tree/self::no-parse)
-            then (element tc:reported-not-a-sentence{},
-                  element tc:app-info {
-                    $parse-tree
-                  })
+            then (element tc:reported-not-a-sentence{
+                    element tc:app-info {
+                      $parse-tree
+                    }
+                 },
+                 if (($kwE eq 'yes') 
+                    and ($result eq 'fail'))
+                 then file:write(
+                        $options/@output-directory
+                        || '/' || $fn,
+                        $parse-tree
+                      )
+                 else ()
+                 )
 
             else ( 
                    if ($kwD = ('inline', 
@@ -1696,11 +1801,136 @@ result.
 </scrap>
 </p>
 </div>
+</div>
 </body>
+
 <back>
+<div id="indices">
+<head>Indices</head>
 <divGen type="index-filenames"/>
 <divGen type="index-scrapnames"/>
+</div>
+
 <divGen type="revision-history"/>
+
+<div id="geniza">
+<head>Old code</head>
+<p>Earlier versions of some code are kept here for reference,
+and as a fallback if necessary.</p>
+
+<p><hi>The old version is kept around for a bit.</hi>
+<scrap corresp="lib-rts-do-inline" version="alt"
+       name="Handle an inline test-set">
+
+    let $test-set-name := $test-set/@name/string(),
+        $test-set-results := element tc:test-set-results {
+          $test-set/@*, 
+          <ptr target="lib-rts-grammar"/>
+          return (
+            $grammar-test-result,
+            <ptr target="lib-rts-write-grammar-result"/>
+            if (($grammar-test-result/@result = 'pass')
+               or empty($grammar-test-result)) 
+            then (: run the tests, handle nested sets :)
+                 <ptr target="lib-rts-nested"/>
+            else (: no point trying to run tests :)
+                element tc:description {
+                  element tc:p {
+                    text { "Grammar test failed, "
+                        || "test cases and nested "
+                        || "test sets skipped." }
+                  }
+                }
+          )
+        }
+    return $test-set-results
+</scrap>
+</p><p><hi>The original version of this had a slightly different structure.
+I keep it around partly as a menetekel to remind myself that
+sometimes things need to be refactored, but mostly in case I need
+to go back to it.</hi>
+<scrap corresp="lib-rts-grammar" version="alt"
+       name="Load and test the grammar for a test set">
+      <ptr target="lib-rts-g-new"/>
+      <ptr target="lib-rts-vxml-grammar-check"/>
+      <ptr target="lib-rts-grammar-test"/>
+      <ptr target="lib-rts-grammar-compilation"/>
+</scrap>
+</p>
+<p>
+The initial version of the grammar-test code is retained here as a
+fallback, for a while.
+<scrap version="alt"
+       corresp="lib-rts-grammar-test"
+       name="Set $grammar-test-result">
+
+      let $gt := $test-set/tc:grammar-test
+      let $grammar-test-result := 
+          if (empty($new-xml-grammar) or empty($gt))
+          then ()
+          else element tc:grammar-result {
+
+              if ($checked-xml-grammar/self::ixml) 
+              then t:test-grammar($gt, 
+                                  $checked-xml-grammar, 
+                                  $options)
+
+              else if ($checked-xml-grammar/self::tc:error
+                      /@id = ('tc:tbd04', 'tc:tbd06'))
+              then (
+                  (: ixml found but did not parse.
+                     May be a pass, may be a fail; let
+                     t:test-grammar() decide. :)
+                  t:test-grammar($gt, 
+                                 $checked-xml-grammar,
+                                 $options)                  
+              )
+
+              else if ($checked-xml-grammar/self::tc:error
+                      /@id = ('tc:tbd07', 
+                              'tc:tbd08', 
+                              'tc:tbd09'))
+              then (
+                  (: external grammar not found :)
+                  attribute result { "not-run" },
+                  element tc:app-info {
+                      $checked-xml-grammar
+                  }
+              )
+
+              else if ($checked-xml-grammar/self::tc:error
+                      /@id = ('tc:tbd10'))
+              then (
+                  (: parsed, but is not conformant :)
+                  t:test-grammar($gt, 
+                                 $checked-xml-grammar,
+                                 $options)
+              )
+
+              else if (not($checked-xml-grammar/self::ixml))
+              then (
+                  (: parsed, but did not produce 'ixml'
+                     root element :)
+                  t:test-grammar($gt, 
+                                 $checked-xml-grammar,
+                                 $options)
+              )
+              else (
+                  attribute result { "other" },
+                  element tc:description {
+                    element tc:p {
+                      "what on earth happened?"
+                    }
+                  }
+              )
+          }      
+</scrap>
+<hi>TO DO: pass options down to this level, if user asks for
+individual tests to be reported to files, then do so.  At user option,
+on failure write both expected result and reported result to files, to
+simplify comparison.</hi>
+</p>
+</div>
 </back>
 </text>
 </TEI.2>
