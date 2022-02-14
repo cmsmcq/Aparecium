@@ -132,9 +132,15 @@ declare option db:chop "false";
 
 <ref target="dr-setup">Set up variables and options</ref>
 
-let $dummy   := file:create-dir($outdir),
-    $results := t:run-tests($test-catalog-uri, $options)
+let $dummy  := file:create-dir($outdir),
+    $report := t:run-tests($test-catalog-uri, $options)
 
+<ptr target="dr-counts"/>
+    
+return ($report,
+        file:write($report-uri, $report))
+</scrap>
+<!--
 <ptr target="dr-counts"/>
     
 return (element results { 
@@ -142,7 +148,7 @@ return (element results {
             $results
         },
         file:write($report-uri, $results))
-</scrap>
+-->
 </p>
 <p>The overall structure of the library module is similarly
 conventional:
@@ -299,7 +305,7 @@ indexing into the list.  It's easy to change the index.
          (: 4 5 6 :)
          $invdir || "syntax/catalog-as-grammar-tests.xml",
          $invdir || "syntax/catalog-as-instance-tests-ixml.xml",
-         $invdir || "syntax/catalog-as-instance-tests-ixml.xml",
+         $invdir || "syntax/catalog-as-instance-tests-xml.xml",
 
          (: 7 8 9 :)
          $invdir || "correct/test-catalog.xml",
@@ -335,7 +341,10 @@ indexing into the list.  It's easy to change the index.
          $ixtdir || "gxxx/g112.test-catalog.xml",
          $ixtdir || "gxxx/g112.O3.test-catalog.all.neg.xml",
 
-         (: 26-30, with 2, 7638, 2886, 1020, and 338 test cases.
+	 (: 26 embeds 12-25 so they can be done in a single run :)
+         $ixtdir || "gxxx/gxxx-test-catalog.xml",
+
+         (: 27-31, with 2, 7638, 2886, 1020, and 338 test cases.
             The positive test cases are broken. :)
          $ixtdir || "arith/arith.test-catalog.pos.xml",
          $ixtdir || "arith/arith.O3.test-catalog.arc.neg.xml",
@@ -343,12 +352,12 @@ indexing into the list.  It's easy to change the index.
          $ixtdir || "arith/arith.O3.test-catalog.state.neg.xml",
          $ixtdir || "arith/arith.O3.test-catalog.state-final.neg.xml",
 
-         (: 31:  straw-man tests on ixml itself
+         (: 32:  straw-man tests on ixml itself
             (n.b. old version of ixml grammar) :)
          $ixtdir || "ixml/ixml.test-catalog.pos.xml",
 
-         (: 32:  wisps test set (currently in progress) :)
-         $ixtdir || "wisps/wisp-catalog.pos.xml"
+         (: 33:  wisps test set (currently in progress) :)
+         $ixtdir || "wisps/wisp-catalog.xml"
 
          
          )[$catalog-number],
@@ -356,7 +365,7 @@ indexing into the list.  It's easy to change the index.
     $test-catalog-uri := resolve-uri($test-catalog-path, 
                                      static-base-uri()),
 
-    $report-filename := 'test-results.' 
+    $report-filename := 'test-report.' 
                         || replace($test-catalog-uri,
                                    "^(.*)/([^/]*)(\.xml)",
                                    "$2")
@@ -806,7 +815,7 @@ and the attributes, strip the children.</hi>
 
         if (($options/@details = 'by-case')
            and exists($grammar-test-result))
-        then (element tc:grammar-test {
+        then (element tc:grammar-result {
                 $grammar-test-result/@*
              }, 
              let $outfn := 'grammar-test-' 
@@ -1604,11 +1613,76 @@ reported results becomes a burden, it may be worthwhile to offer a
 <head>Reporting the results</head>
 
 <p>The top-level function <ident>t:run-tests()</ident> returns a
-<gi>tc:test-report</gi> element; the caller is responsible for writing
-it out to a file if desired.</p>
+<gi>tc:test-report</gi> element; it would be nice to have a summary of
+the results near the top.  Nothing more is needed, I think, in the
+test-harness library: the caller is responsible for writing the report
+out to a file if desired.</p>
 
 <p>But when the user wants separate reports for different test cases,
 the caller cannot do the work; the library must handle it.</p>
+
+<p>The subsections below take care of these two tasks.</p>
+
+<div id="count-results">
+<head>Providing a summary of the results</head>
+
+<p>I'd like to have a summary at the head of the report
+showing how many tests were found, how many were passed and failed, and
+so on.  This could be done by the test-harness library, but for now
+I'm just going to handle it in the driver. We get back the report,
+we make the counts,and we insert them into the report before writing
+it out.
+
+<scrap id="dr-counts"
+       name="Count tests and classify results">
+let $grammar-tests := $report//tc:grammar-result
+let $gt-summary := element tc:p {
+                     "Grammar tests (" 
+                     || count($grammar-tests)
+                     || "): ",
+                     for $gt in $grammar-tests
+                     let $res := $gt/@result/string()
+                     group by $res
+                     return $res[1] || ": " || count($gt) || '. '
+                   }
+let $test-cases := $report//tc:test-result
+let $tc-summary := element tc:p {
+                     "Test cases (" 
+                     || count($test-cases)
+                     || "): ",
+                     for $gt in $test-cases
+                     let $res := $gt/@result/string()
+                     group by $res
+                     return $res[1] || ": " || count($gt) || '. '
+                   }
+let $summary := element tc:description {
+                  element tc:p {
+                    "Tests run / passed / failed"
+                    || " / not-run / other:"
+                  },
+                  $gt-summary,
+                  $tc-summary
+                }
+<ptr target="dr-insert-counts"/>
+</scrap></p>
+<p>The XQuery update facility provides a nice way to
+do a near-identity update.  This particular formulation
+relies on a clean handling of identifier scopes.  It's
+purely declarative even though it looks and behaves a
+little bit like a mutating assignment.
+<scrap id="dr-insert-counts"
+       name="Insert result summary into $report">
+
+let $report := copy $x-report := $report
+               modify insert node $summary
+                      after $x-report/tc:metadata
+               return $x-report
+</scrap>
+</p>
+</div>
+
+<div id="output-details">
+<head>Recording the details of a test</head>
 
 <p>If the user asked for details, we provide them.  This gets
 a little tedious, so I've broken it out into smaller bits.
@@ -1879,47 +1953,7 @@ result.
         else ()
 </scrap>
 </p>
-
-<p>It would be convenient to have a summary at the head of the report
-showing how many tests were found, how many were passed and failed, and
-so on.  Ideally this should go into the report itself, but for now
-I'm just going to glue it into a wrapper.
-<scrap id="dr-counts"
-       name="Count tests and classify results">
-let $grammar-tests := $results//tc:grammar-result
-let $gt-summary := element tc:p {
-                     "Grammar tests (" 
-                     || count($grammar-tests)
-                     || "): ",
-                     for $gt in $grammar-tests
-                     let $res := $gt/@result/string()
-                     group by $res
-                     return $res[1] || ": " || count($gt) || '. '
-                   }
-let $test-cases := $results//tc:test-result
-let $tc-summary := element tc:p {
-                     "Test cases (" 
-                     || count($test-cases)
-                     || "): ",
-                     for $gt in $test-cases
-                     let $res := $gt/@result/string()
-                     group by $res
-                     return $res[1] || ": " || count($gt) || '. '
-                   }
-</scrap>
-<scrap id="dr-insert-counts"
-       name="Insert result summary">
-
-            element tc:description {
-              element tc:p {
-                "Tests run / passed / failed"
-                || " / not-run / other:"
-              },
-              $gt-summary,
-              $tc-summary
-            }
-</scrap>
-</p>
+</div>
 </div>
 </div>
 </body>

@@ -10,7 +10,7 @@ declare namespace db =
 
 declare option db:chop "false";
 
-let $catalog-number := 19 (: which catalog to run? 1..31 or so :)
+let $catalog-number := 1 (: which catalog to run? 1..31 or so :)
 
 let $invdir := "../../ixml/tests/",
     $apadir := "../../Aparecium/tests/",
@@ -32,7 +32,7 @@ let $invdir := "../../ixml/tests/",
          (: 4 5 6 :)
          $invdir || "syntax/catalog-as-grammar-tests.xml",
          $invdir || "syntax/catalog-as-instance-tests-ixml.xml",
-         $invdir || "syntax/catalog-as-instance-tests-ixml.xml",
+         $invdir || "syntax/catalog-as-instance-tests-xml.xml",
 
          (: 7 8 9 :)
          $invdir || "correct/test-catalog.xml",
@@ -68,7 +68,10 @@ let $invdir := "../../ixml/tests/",
          $ixtdir || "gxxx/g112.test-catalog.xml",
          $ixtdir || "gxxx/g112.O3.test-catalog.all.neg.xml",
 
-         (: 26-30, with 2, 7638, 2886, 1020, and 338 test cases.
+	 (: 26 embeds 12-25 so they can be done in a single run :)
+         $ixtdir || "gxxx/gxxx-test-catalog.xml",
+
+         (: 27-31, with 2, 7638, 2886, 1020, and 338 test cases.
             The positive test cases are broken. :)
          $ixtdir || "arith/arith.test-catalog.pos.xml",
          $ixtdir || "arith/arith.O3.test-catalog.arc.neg.xml",
@@ -76,12 +79,12 @@ let $invdir := "../../ixml/tests/",
          $ixtdir || "arith/arith.O3.test-catalog.state.neg.xml",
          $ixtdir || "arith/arith.O3.test-catalog.state-final.neg.xml",
 
-         (: 31:  straw-man tests on ixml itself
+         (: 32:  straw-man tests on ixml itself
             (n.b. old version of ixml grammar) :)
          $ixtdir || "ixml/ixml.test-catalog.pos.xml",
 
-         (: 32:  wisps test set (currently in progress) :)
-         $ixtdir || "wisps/wisp-catalog.pos.xml"
+         (: 33:  wisps test set (currently in progress) :)
+         $ixtdir || "wisps/wisp-catalog.xml"
 
          
          )[$catalog-number],
@@ -89,7 +92,7 @@ let $invdir := "../../ixml/tests/",
     $test-catalog-uri := resolve-uri($test-catalog-path, 
                                      static-base-uri()),
 
-    $report-filename := 'test-results.' 
+    $report-filename := 'test-report.' 
                         || replace($test-catalog-uri,
                                    "^(.*)/([^/]*)(\.xml)",
                                    "$2")
@@ -145,10 +148,10 @@ let $invdir := "../../ixml/tests/",
     }
 
 
-let $dummy   := file:create-dir($outdir),
-    $results := t:run-tests($test-catalog-uri, $options)
+let $dummy  := file:create-dir($outdir),
+    $report := t:run-tests($test-catalog-uri, $options)
 
-let $grammar-tests := $results//tc:grammar-result
+let $grammar-tests := $report//tc:grammar-result
 let $gt-summary := element tc:p {
                      "Grammar tests (" 
                      || count($grammar-tests)
@@ -158,7 +161,7 @@ let $gt-summary := element tc:p {
                      group by $res
                      return $res[1] || ": " || count($gt) || '. '
                    }
-let $test-cases := $results//tc:test-result
+let $test-cases := $report//tc:test-result
 let $tc-summary := element tc:p {
                      "Test cases (" 
                      || count($test-cases)
@@ -168,19 +171,21 @@ let $tc-summary := element tc:p {
                      group by $res
                      return $res[1] || ": " || count($gt) || '. '
                    }
+let $summary := element tc:description {
+                  element tc:p {
+                    "Tests run / passed / failed"
+                    || " / not-run / other:"
+                  },
+                  $gt-summary,
+                  $tc-summary
+                }
+
+let $report := copy $x-report := $report
+               modify insert node $summary
+                      after $x-report/tc:metadata
+               return $x-report
+
 
     
-return (element results { 
-            
-            element tc:description {
-              element tc:p {
-                "Tests run / passed / failed"
-                || " / not-run / other:"
-              },
-              $gt-summary,
-              $tc-summary
-            },
-
-            $results
-        },
-        file:write($report-uri, $results))
+return ($report,
+        file:write($report-uri, $report))

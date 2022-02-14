@@ -222,7 +222,7 @@ declare function t:run-test-set(
           
         if (($options/@details = 'by-case')
            and exists($grammar-test-result))
-        then (element tc:grammar-test {
+        then (element tc:grammar-result {
                 $grammar-test-result/@*
              }, 
              let $outfn := 'grammar-test-' 
