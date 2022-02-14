@@ -4,11 +4,11 @@ at "../build/Aparecium.xqm";
 
 (: A way to make it a little easier to experiment. :)
 let $option := ('parse', 'compile')[2]
-let $grammar-fn := 'pascal-comments.sp.ixml',
+let $grammar-fn := 't1.ixml',
     $output-fn := 'file:///home/cmsmcq/2022/github/Aparecium/demos/'
                   || $grammar-fn || '.' 
                   || $option || 'd.xml',
-    $grammar := unparsed-text($grammar-fn) 
+    $grammar := unparsed-text('../tests/' || $grammar-fn) 
                 
 
 let $g0 := $grammar,

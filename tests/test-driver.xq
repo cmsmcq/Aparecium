@@ -10,7 +10,7 @@ declare namespace db =
 
 declare option db:chop "false";
 
-let $catalog-number := 1 (: which catalog to run? 1..31 or so :)
+let $catalog-number := 19 (: which catalog to run? 1..31 or so :)
 
 let $invdir := "../../ixml/tests/",
     $apadir := "../../Aparecium/tests/",
@@ -138,12 +138,49 @@ let $invdir := "../../ixml/tests/",
       },
       attribute output-directory {
         ($outdir)[1]
-      }
+      },
+      
+      attribute timeout { 600 }
+
     }
 
 
 let $dummy   := file:create-dir($outdir),
     $results := t:run-tests($test-catalog-uri, $options)
+
+let $grammar-tests := $results//tc:grammar-result
+let $gt-summary := element tc:p {
+                     "Grammar tests (" 
+                     || count($grammar-tests)
+                     || "): ",
+                     for $gt in $grammar-tests
+                     let $res := $gt/@result/string()
+                     group by $res
+                     return $res[1] || ": " || count($gt) || '. '
+                   }
+let $test-cases := $results//tc:test-result
+let $tc-summary := element tc:p {
+                     "Test cases (" 
+                     || count($test-cases)
+                     || "): ",
+                     for $gt in $test-cases
+                     let $res := $gt/@result/string()
+                     group by $res
+                     return $res[1] || ": " || count($gt) || '. '
+                   }
+
     
-return ($results,
+return (element results { 
+            
+            element tc:description {
+              element tc:p {
+                "Tests run / passed / failed"
+                || " / not-run / other:"
+              },
+              $gt-summary,
+              $tc-summary
+            },
+
+            $results
+        },
         file:write($report-uri, $results))

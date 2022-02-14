@@ -128,7 +128,7 @@ declare function t:run-test-set(
           }
 
           else if ($test-set/tc:vxml-grammar)
-          then           $test-set/tc:vxml-grammar[1]/ixml
+          then           $test-set/tc:vxml-grammar[1]/*
 
           else if ($test-set/tc:ixml-grammar-ref)
           then 
@@ -182,7 +182,9 @@ declare function t:run-test-set(
 
       
       let $checked-xml-grammar := 
-          if ($new-xml-grammar/self::ixml)
+          if (empty($new-xml-grammar))
+          then ()
+          else if ($new-xml-grammar/self::ixml)
           then $new-xml-grammar
           else element tc:error {
             attribute id { "t:tbd10" },
@@ -191,7 +193,8 @@ declare function t:run-test-set(
           }
 
       
-      let $grammar := if (exists($new-xml-grammar))
+      let $grammar := if (exists($new-xml-grammar)
+                         and $checked-xml-grammar/self::ixml)
           then try {
             ap:compile-grammar-from-xml($checked-xml-grammar)
           } catch * {
@@ -220,7 +223,7 @@ declare function t:run-test-set(
         if (($options/@details = 'by-case')
            and exists($grammar-test-result))
         then (element tc:grammar-test {
-                $grammar-test-results/@*
+                $grammar-test-result/@*
              }, 
              let $outfn := 'grammar-test-' 
                            || $test-set-name 
@@ -231,27 +234,26 @@ declare function t:run-test-set(
              return file:write($out, $grammar-test-result)
              )
 
-        else $grammar-test-results
+        else $grammar-test-result
         ,
 
               if ($checked-xml-grammar/self::tc:error)
     then (element tc:description {
            element tc:p {
              "No workable grammar.  Skipping test",
-             "
-cases and nested test sets."
+             "&#xA;cases and nested test sets."
            }
          },
          element tc:app-info { $checked-xml-grammar }
          )
-    else if (not($checked-xml-grammar/self::ixml))
+    else if (exists($checked-xml-grammar)
+             and 
+             not($checked-xml-grammar/self::ixml))
     then (element tc:description {
            element tc:p {
              "No workable grammar.  Skipping test",
-             "
-cases and nested test sets."
-             "
-This case is not supposed to happen."
+             "&#xA;cases and nested test sets.",
+             "&#xA;This case is not supposed to happen."
            }
          },
          element tc:app-info { $checked-xml-grammar }
@@ -260,16 +262,14 @@ This case is not supposed to happen."
     then element tc:description {
            element tc:p {
              "Failed grammar test.  Skipping test",
-             "
-cases and nested test sets."
+             "&#xA;cases and nested test sets."
            }
          }
     else if ($grammar/self::tc:error)
     then (element tc:description {
            element tc:p {
              "Grammar compilation failed.  Skipping",
-             "
- test cases and nested test sets."
+             "&#xA; test cases and nested test sets."
            }
          },
          element tc:app-info { $grammar }
@@ -294,7 +294,6 @@ cases and nested test sets."
       }
 
         }
-    return $test-set-results
 
 };
 
@@ -303,7 +302,7 @@ declare function t:test-grammar(
   $grammar-test as element(tc:grammar-test),
   $xml-grammar as element(),
   $options as element(options)
-) as element(gt:grammar-result) {
+) as element(tc:grammar-result) {
   
   let $e0 := $grammar-test/tc:result/*[1],
       $expectation :=
@@ -497,6 +496,7 @@ declare function t:run-test-case(
 
   
     let $parse-tree := 
+        
         if ($input-string eq $failure-string)
         then ()
         else if ($expectations/self::tc:error)
@@ -509,11 +509,32 @@ declare function t:run-test-case(
                },
                $G
              }
+
         else try {
-          ap:parse-string-with-compiled-grammar(
-            $input-string,
-            $G
-          )
+          
+          let $query := "import module namespace aparecium
+                = 'http://blackmesatech.com/2019/iXML/Aparecium'
+                at '../build/Aparecium.xqm';
+                declare variable $s external;
+                declare variable $g external;
+                aparecium:parse-string-with-compiled-grammar($s, $g)",
+              $bindings := map {
+                             's' : $input-string,
+                             'g' : $G
+                           },
+              $options := map { 
+                            'timeout' : 
+                            ($options/@timeout/number(), 600)[1]
+                          }
+          return xquery:eval($query, $bindings, $options)
+
+        } catch xquery:timeout {
+          element tc:error {
+              attribute id { "t:tbd19" },
+              "Parse function timed out at ",
+              ($options/@timeout/number(), 600)[1],
+	      " seconds."
+          }
         } catch * {
           element tc:error {
               attribute id { "t:tbd16" },
@@ -536,6 +557,9 @@ declare function t:run-test-case(
         else if (exists($parse-tree
                  /self::tc:error[@id = 't:tbd18'])) 
         then "fail" (: or should this be "not-run"? :)
+        else if (exists($parse-tree
+                 /self::tc:error[@id = 't:tbd19'])) 
+        then "other" (: timed out - or "not-run"? :)
         else if ($parse-tree/self::no-parse
                  and $expectations
                  /self::tc:assert-not-a-sentence)

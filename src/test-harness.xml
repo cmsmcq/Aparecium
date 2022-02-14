@@ -134,8 +134,13 @@ declare option db:chop "false";
 
 let $dummy   := file:create-dir($outdir),
     $results := t:run-tests($test-catalog-uri, $options)
+
+<ptr target="dr-counts"/>
     
-return ($results,
+return (element results { 
+            <ptr target="dr-insert-counts"/>,
+            $results
+        },
         file:write($report-uri, $results))
 </scrap>
 </p>
@@ -575,7 +580,6 @@ and it may contain test cases and nested test sets.
           <ptr target="lib-rts-abort"/>
           else <ptr target="lib-rts-nested"/>
         }
-    return $test-set-results
 </scrap>
 <hi>There is an old version of this <ref target="geniza">in the appendix</ref>.</hi>
 </p>
@@ -681,7 +685,7 @@ at "Aparecium.xqm";
 already in XML, so we just assign it.
 <scrap id="lib-rts-ld-vxml"
        name="Take the inline vxml grammar">
-          $test-set/tc:vxml-grammar[1]/ixml
+          $test-set/tc:vxml-grammar[1]/*
 </scrap></p>
 
 <p>The external-ixml case has several ways to fail.
@@ -750,7 +754,9 @@ here.</emph>
        name="Set $checked-xml-grammar">
 
       let $checked-xml-grammar := 
-          if ($new-xml-grammar/self::ixml)
+          if (empty($new-xml-grammar))
+          then ()
+          else if ($new-xml-grammar/self::ixml)
           then $new-xml-grammar
           else element tc:error {
             attribute id { "t:tbd10" },
@@ -765,7 +771,8 @@ If the new grammar is OK so far, we need to compile it.
        id="lib-rts-grammar-compilation"
        name="Set $grammar to compiled grammar">
 
-      let $grammar := if (exists($new-xml-grammar))
+      let $grammar := if (exists($new-xml-grammar)
+                         and $checked-xml-grammar/self::ixml)
           then try {
             ap:compile-grammar-from-xml($checked-xml-grammar)
           } catch * {
@@ -800,7 +807,7 @@ and the attributes, strip the children.</hi>
         if (($options/@details = 'by-case')
            and exists($grammar-test-result))
         then (element tc:grammar-test {
-                $grammar-test-results/@*
+                $grammar-test-result/@*
              }, 
              let $outfn := 'grammar-test-' 
                            || $test-set-name 
@@ -811,7 +818,7 @@ and the attributes, strip the children.</hi>
              return file:write($out, $grammar-test-result)
              )
 
-        else $grammar-test-results
+        else $grammar-test-result
         ,
 </scrap>
 </p>
@@ -828,7 +835,7 @@ usable grammar.  First, we check for error signals in the
     then (element tc:description {
            element tc:p {
              "No workable grammar.  Skipping test",
-             "&#xA;cases and nested test sets."
+             "&amp;#xA;cases and nested test sets."
            }
          },
          element tc:app-info { $checked-xml-grammar }
@@ -839,12 +846,14 @@ usable grammar.  First, we check for error signals in the
 grammar is actually an <gi>ixml</gi> element.
 <scrap prev="lib-rts-abort"
        name="If grammar is not good, stop now">
-    else if (not($checked-xml-grammar/self::ixml))
+    else if (exists($checked-xml-grammar)
+             and 
+             not($checked-xml-grammar/self::ixml))
     then (element tc:description {
            element tc:p {
              "No workable grammar.  Skipping test",
-             "&#xA;cases and nested test sets."
-             "&#xA;This case is not supposed to happen."
+             "&amp;#xA;cases and nested test sets.",
+             "&amp;#xA;This case is not supposed to happen."
            }
          },
          element tc:app-info { $checked-xml-grammar }
@@ -859,7 +868,7 @@ the grammar test.
     then element tc:description {
            element tc:p {
              "Failed grammar test.  Skipping test",
-             "&#xA;cases and nested test sets."
+             "&amp;#xA;cases and nested test sets."
            }
          }
 </scrap>
@@ -872,7 +881,7 @@ compiled grammar will be an error element.
     then (element tc:description {
            element tc:p {
              "Grammar compilation failed.  Skipping",
-             "&#xA; test cases and nested test sets."
+             "&amp;#xA; test cases and nested test sets."
            }
          },
          element tc:app-info { $grammar }
@@ -913,7 +922,7 @@ declare function t:test-grammar(
   $grammar-test as element(tc:grammar-test),
   $xml-grammar as element(),
   $options as element(options)
-) as element(gt:grammar-result) {
+) as element(tc:grammar-result) {
   <ptr target="lib-tg-fetch"/>
   <ptr target="lib-tg-compare"/>
 };
@@ -1269,6 +1278,88 @@ Time to run the test.
        name="Set $parse-tree by parsing the test input string">
 
     let $parse-tree := 
+        <ptr target="lib-rtc-parse-precheck"/>
+        else try {
+          <ptr target="lib-rtc-parse-with-timeout"/>
+        } catch xquery:timeout {
+          element tc:error {
+              attribute id { "t:tbd19" },
+              "Parse function timed out at ",
+              ($options/@timeout/number(), 600)[1],
+	      " seconds."
+          }
+        } catch * {
+          element tc:error {
+              attribute id { "t:tbd16" },
+              "Parse function blew up. ",
+              $err:code, $err:value, 
+              " module: ",
+              $err:module, 
+              "(", $err:line-number, ",", 
+              $err:column-number, ")"
+          }
+        }
+</scrap></p>
+
+<p>The initial version of the parser call was straightforward:
+<scrap corresp="lib-rtc-parse-with-timeout"
+       version="alt"
+       name="Direct invocation of parse for test case">
+          ap:parse-string-with-compiled-grammar(
+            $input-string,
+            $G
+          )
+</scrap>
+But that has some drawbacks.  Wrapping it in a try/catch expression
+helps with some of them, but not all.  It is embarrassing to admit it,
+but at the moment, there are some tests in the test suites that
+Aparecium currently executes very slowly.  Indeed, there are some for
+which I don't have timings because I have always run out of patience
+and canceled them before they ran to completion.  Maybe they would
+have finished eventually, or maybe they are exercising an infinite
+loop of some kind.  I don't know.</p>
+<p>But to avoid making it a contest of patience every time I run
+certain test cases, I would like to have the tests time out after some
+user-specified point number of seconds.  We can do this with the third
+parameter to the BaseX <ident>xquery:eval()</ident> function.
+<scrap id="lib-rtc-parse-with-timeout"
+       name="Parse the input, with a time limit">
+
+          let $query := "import module namespace aparecium
+                = 'http://blackmesatech.com/2019/iXML/Aparecium'
+                at '../build/Aparecium.xqm';
+                declare variable $s external;
+                declare variable $g external;
+                aparecium:parse-string-with-compiled-grammar($s, $g)",
+              $bindings := map {
+                             's' : $input-string,
+                             'g' : $G
+                           },
+              $options := map { 
+                            'timeout' : 
+                            ($options/@timeout/number(), 600)[1]
+                          }
+          return xquery:eval($query, $bindings, $options)
+</scrap></p>
+<p>Note that this formulation gives us a processor dependency; when I
+get around to trying to run the test harness in Saxon, a different
+formulation will be necessary.  (If push comes to shove, we can
+generate different modules for BaseX and Saxon, but it would be nicer
+to have them co-exist.)</p>
+<p>The mechanism for setting options has not yet been described,
+but it will be no surprise that it involves an XML document.  We can
+set the <ident>timeout</ident> option this way:
+<scrap id="set-timeout-option"
+       name="Set timeout option">
+
+      attribute timeout { 600 }
+</scrap>
+</p>
+<p>The preliminary checks before parsing are for failures in fetching
+the input string or the expectations, or for a bad grammar.
+<scrap id="lib-rtc-parse-precheck"
+       name="If input string, grammar, or expectations is bad, stop now">
+
         if ($input-string eq $failure-string)
         then ()
         else if ($expectations/self::tc:error)
@@ -1281,22 +1372,6 @@ Time to run the test.
                },
                $G
              }
-        else try {
-          ap:parse-string-with-compiled-grammar(
-            $input-string,
-            $G
-          )
-        } catch * {
-          element tc:error {
-              attribute id { "t:tbd16" },
-              "Parse function blew up. ",
-              $err:code, $err:value, 
-              " module: ",
-              $err:module, 
-              "(", $err:line-number, ",", 
-              $err:column-number, ")"
-          }
-        }
 </scrap>
 </p>
 
@@ -1322,6 +1397,9 @@ but I don't see a good way to avoid the repetition.
         else if (exists($parse-tree
                  /self::tc:error[@id = 't:tbd18'])) 
         then "fail" (: or should this be "not-run"? :)
+        else if (exists($parse-tree
+                 /self::tc:error[@id = 't:tbd19'])) 
+        then "other" (: timed out - or "not-run"? :)
         else if ($parse-tree/self::no-parse
                  and $expectations
                  /self::tc:assert-not-a-sentence)
@@ -1508,7 +1586,8 @@ I want for a given run.
       },
       attribute output-directory {
         ($outdir)[1]
-      }
+      },
+      <ptr target="set-timeout-option"/>
     }
 </scrap>
 <hi>N.B. In the current version of this test harness, not all of these
@@ -1798,6 +1877,47 @@ result.
                       }
                     )
         else ()
+</scrap>
+</p>
+
+<p>It would be convenient to have a summary at the head of the report
+showing how many tests were found, how many were passed and failed, and
+so on.  Ideally this should go into the report itself, but for now
+I'm just going to glue it into a wrapper.
+<scrap id="dr-counts"
+       name="Count tests and classify results">
+let $grammar-tests := $results//tc:grammar-result
+let $gt-summary := element tc:p {
+                     "Grammar tests (" 
+                     || count($grammar-tests)
+                     || "): ",
+                     for $gt in $grammar-tests
+                     let $res := $gt/@result/string()
+                     group by $res
+                     return $res[1] || ": " || count($gt) || '. '
+                   }
+let $test-cases := $results//tc:test-result
+let $tc-summary := element tc:p {
+                     "Test cases (" 
+                     || count($test-cases)
+                     || "): ",
+                     for $gt in $test-cases
+                     let $res := $gt/@result/string()
+                     group by $res
+                     return $res[1] || ": " || count($gt) || '. '
+                   }
+</scrap>
+<scrap id="dr-insert-counts"
+       name="Insert result summary">
+
+            element tc:description {
+              element tc:p {
+                "Tests run / passed / failed"
+                || " / not-run / other:"
+              },
+              $gt-summary,
+              $tc-summary
+            }
 </scrap>
 </p>
 </div>
