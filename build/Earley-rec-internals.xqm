@@ -339,28 +339,21 @@ declare function ixi:earley-closure(
   $I as xs:string,
   $G as element(ixml)
 ) as map(xs:string, map(xs:integer, map(xs:string, item())*)) (:MEI:) {
-  (: if pending list is done, so are we; return the accumulator :)
-  if (empty($leiPending))
+    if (empty($leiPending))
   then $meiAccum
+
   else 
-  (: normal case:  we have items to process :)
-  (: Take head of pending list, run PCS function on it, dedup it, 
-     remove items already in the accumulator, and recur,
-     adding new items to the accumulator :)
   let $E := head($leiPending), 
-      $dummy := ixi:notrace(count($leiPending), 'e-c() has pending items: '), 
-      $dummy := ixi:notrace(
-                    ixi:sXei($E),
-                    'ixi:earley-closure running on pending item: '), 
+
       (: get everything from leiPCSrel :)
       $leiCs0 := ixi:leiPCSrel($E,$meiAccum,$I,$G),
-      $dummy := ixi:notrace(count($leiCs0), 'e-c() initial closure has items: '), 
+                 
+      
       (: dedup results from leiPCSrel :) 
       $leiCs := $leiCs0[
                    not(some $i in 1 to (position() - 1)
                        satisfies deep-equal(., $leiCs0[$i])
                    )],
-      $dummy := ixi:notrace(count($leiCs), 'e-c() deduped closure has items: '), 
         	
       (: remove non-new results from leiPCSrel :)
       $leiNew := for $ei in $leiCs
@@ -368,6 +361,14 @@ declare function ixi:earley-closure(
 		 where not(some $e in $meiAccum('from')($from)
 		           satisfies deep-equal($e, $ei))
 		 return $ei,
+
+      
+      $dummy := ixi:notrace(count($leiPending), 'e-c() has pending items: '), 
+      $dummy := ixi:notrace(
+                    ixi:sXei($E),
+                    'ixi:earley-closure running on pending item: '), 
+      $dummy := ixi:notrace(count($leiCs0), 'e-c() initial closure has items: '), 
+      $dummy := ixi:notrace(count($leiCs), 'e-c() deduped closure has items: '), 
       $dummy := ixi:notrace(count($leiNew), 'e-c() New items: '), 
 
 		 
@@ -402,26 +403,34 @@ declare function ixi:leiPCSrel(
   $G as element(ixml)
 ) as map(xs:string, item())* {
   (: If $E expects terminals, perform scan :)
+  
   ix:scan($E,$I),
   
+  
   (: If $E expects nonterminals, perform prediction :)
+  
   ix:pred($E,$G), 
+  
   
   (: If $E expects a nonterminal, look for a completion $Ec and 
      perform comp($Ec,$E) :)
+  
   if (ixi:fExpectsN-Ei($E))
   then for $Ec in $meiAccum('from')($E('to'))
        where ixi:fFinalEi($Ec)
        return ix:comp($Ec,$E)
   else (), 
+  
     
   (: If $E is a completion, look for a prediction $Ep and 
      perform comp($E,$Ep) :)
+  
   if (ixi:fFinalEi($E)) 
   then for $Ep in $meiAccum('to')($E('from'))
        where ixi:fExpectsN-Ei($Ep)
        return ix:comp($E,$Ep)
   else ()
+  
     
   (: N.B. In BNF, $E can only expect one symbol, so either scan
      or pred applies, but not both.  But we are expecting EBNF

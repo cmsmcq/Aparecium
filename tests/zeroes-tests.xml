@@ -1,0 +1,337 @@
+<tc:test-catalog xmlns:tc="https://github.com/cmsmcq/ixml-tests"
+		 name="Zeroes"
+		 release-date="2022-02-16"
+		 >
+  <tc:description>
+    <tc:p>Contains a handful of tests which grew out of discussions with
+    Norm Walsh about the rewriting of EBNF into BNF.</tc:p>
+    <tc:p>The bad performance on some of these tests surprised me a
+    lot, as did the sharp rise in run time on some grammars
+    as the input gets longer.</tc:p>
+    <tc:p>The initial timings are from a report I made in December
+    2022.</tc:p>
+  </tc:description>
+
+  <tc:test-set name="z01">
+    <tc:created by="CMSMcQ" on="2022-02-16"/>
+    <tc:ixml-grammar>
+      s: a, b?.
+      a: '0'.
+      b: '1'.
+    </tc:ixml-grammar>
+
+    <tc:test-case name="a">
+      <tc:test-string>0</tc:test-string>
+      <tc:result>
+	<tc:assert-xml><s><a>0</a></s></tc:assert-xml>
+      </tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="ab">
+      <tc:test-string>01</tc:test-string>
+      <tc:result>
+	<tc:assert-xml><s><a>0</a><b>1</b></s></tc:assert-xml>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+  <!-- more variants of this language expected here -->
+
+  
+  <tc:test-set name="zeroes-ebnf">
+    <tc:created by="CMSMcQ" on="2022-02-16"/>
+    <tc:ixml-grammar>n: d+. d: '0'.</tc:ixml-grammar>
+
+    <tc:test-case name="t-1x1">
+      <tc:test-string>1</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-1x0">
+      <tc:test-string>0</tc:test-string>
+      <tc:result><tc:assert-xml><n><d>0</d></n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-2x0">
+      <tc:test-string>00</tc:test-string>
+      <tc:result><tc:assert-xml><n><d>0</d><d>0</d></n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-5x0">
+      <tc:test-string>00000</tc:test-string>
+      <tc:result><tc:assert-xml><n><d>0</d><d>0</d><d>0</d><d>0</d><d>0</d></n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-20x0">
+      <tc:test-string>00000000000000000000</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<n><d>0</d><d>0</d><d>0</d><d>0</d><d>0</d
+	><d>0</d><d>0</d><d>0</d><d>0</d><d>0</d
+	><d>0</d><d>0</d><d>0</d><d>0</d><d>0</d
+	><d>0</d><d>0</d><d>0</d><d>0</d><d>0</d></n>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+    
+  </tc:test-set>
+  
+  <tc:test-set name="zeroes-lrec">
+    <tc:created by="CMSMcQ" on="2022-02-16"/>
+    <tc:ixml-grammar>n: d; n, d. d: '0'.</tc:ixml-grammar>
+
+    <tc:test-case name="t-1x1">
+      <tc:test-string>1</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-1x0">
+      <tc:test-string>0</tc:test-string>
+      <tc:result><tc:assert-xml><n><d>0</d></n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-2x0">
+      <tc:test-string>00</tc:test-string>
+      <tc:result><tc:assert-xml><n><n><d>0</d></n><d>0</d></n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-5x0">
+      <tc:test-string>00000</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<n><n><n><n><n><d>0</d></n><d>0</d></n><d>0</d></n><d>0</d></n><d>0</d></n>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-20x0">
+      <tc:test-string>00000000000000000000</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<n><n><n><n><n><n><n><n><n><n
+	><n><n><n><n><n><n><n><n><n><n
+        ><d>0</d></n><d>0</d></n><d>0</d></n><d>0</d></n><d>0</d></n
+        ><d>0</d></n><d>0</d></n><d>0</d></n><d>0</d></n><d>0</d></n
+        ><d>0</d></n><d>0</d></n><d>0</d></n><d>0</d></n><d>0</d></n
+        ><d>0</d></n><d>0</d></n><d>0</d></n><d>0</d></n><d>0</d></n>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>    
+  </tc:test-set>
+  
+  <tc:test-set name="zeroes-lrec-hidden">
+    <tc:created by="CMSMcQ" on="2022-02-16"/>
+    <tc:ixml-grammar>n: d; -n, d. -d: '0'.</tc:ixml-grammar>
+
+    <tc:test-case name="t-1x1">
+      <tc:test-string>1</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-1x0">
+      <tc:test-string>0</tc:test-string>
+      <tc:result><tc:assert-xml><n>0</n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-2x0">
+      <tc:test-string>00</tc:test-string>
+      <tc:result><tc:assert-xml><n>00</n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-5x0">
+      <tc:test-string>00000</tc:test-string>
+      <tc:result><tc:assert-xml> <n>00000</n> </tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-20x0">
+      <tc:test-string>00000000000000000000</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<n>00000000000000000000</n>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>    
+  </tc:test-set>
+  
+  <tc:test-set name="zeroes-rrec">
+    <tc:created by="CMSMcQ" on="2022-02-16"/>
+    <tc:ixml-grammar>n: d; d, n. d: '0'.</tc:ixml-grammar>
+
+    <tc:test-case name="t-1x1">
+      <tc:test-string>1</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-1x0">
+      <tc:test-string>0</tc:test-string>
+      <tc:result><tc:assert-xml><n><d>0</d></n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-2x0">
+      <tc:test-string>00</tc:test-string>
+      <tc:result><tc:assert-xml><n><d>0</d><n><d>0</d></n></n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-5x0">
+      <tc:test-string>00000</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<n><d>0</d><n><d>0</d><n><d>0</d><n><d>0</d><n><d>0</d></n></n></n></n></n>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <!-- 10 zeroes is already 800 seconds, 20 would be too much -->
+    <tc:test-case name="t-10x0">
+      <tc:test-string>0000000000</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<n><d>0</d><n><d>0</d><n><d>0</d><n><d>0</d><n><d>0</d
+        ><n><d>0</d><n><d>0</d><n><d>0</d><n><d>0</d><n><d>0</d
+        ></n></n></n></n></n></n></n></n></n></n>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>    
+  </tc:test-set>
+  
+  <tc:test-set name="zeroes-rrec-hidden">
+    <tc:created by="CMSMcQ" on="2022-02-16"/>
+    <tc:ixml-grammar>n: d; d, -n. -d: '0'.</tc:ixml-grammar>
+
+    <tc:test-case name="t-1x1">
+      <tc:test-string>1</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-1x0">
+      <tc:test-string>0</tc:test-string>
+      <tc:result><tc:assert-xml><n>0</n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-2x0">
+      <tc:test-string>00</tc:test-string>
+      <tc:result><tc:assert-xml><n>00</n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-5x0">
+      <tc:test-string>00000</tc:test-string>
+      <tc:result><tc:assert-xml> <n>00000</n> </tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-10x0">
+      <tc:test-string>0000000000</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<n>0000000000</n>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>    
+  </tc:test-set>
+  
+  <tc:test-set name="zeroes-2020-10-22">
+    <tc:created by="CMSMcQ" on="2022-02-16"/>
+    <tc:description>
+      <tc:p>Derived from the EBNF using the rewrites given
+      in the spec of 22 October 2020.</tc:p>
+    </tc:description>
+    <tc:ixml-grammar>
+      n: d-plus.
+      -d-plus: d, d-plus-option.
+      -d-plus-option: d-plus; .
+      -d: '0'.
+    </tc:ixml-grammar>
+
+    <tc:test-case name="t-1x1">
+      <tc:test-string>1</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-1x0">
+      <tc:test-string>0</tc:test-string>
+      <tc:result><tc:assert-xml><n>0</n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-2x0">
+      <tc:test-string>00</tc:test-string>
+      <tc:result><tc:assert-xml><n>00</n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-5x0">
+      <tc:test-string>00000</tc:test-string>
+      <tc:result><tc:assert-xml> <n>00000</n> </tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <!-- For this grammar we max out at 6 -->
+    <tc:test-case name="t-6x0">
+      <tc:test-string>000000</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<n>000000</n>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>    
+  </tc:test-set>
+  
+  <tc:test-set name="zeroes-2021-09-14">
+    <tc:created by="CMSMcQ" on="2022-02-16"/>
+    <tc:description>
+      <tc:p>Derived from the EBNF using the rewrites given
+      in the spec of 14 September 2021, and also
+      those of 14 December (different rules but they
+      come out to the same thing).</tc:p>
+    </tc:description>
+    <tc:ixml-grammar>
+      n: d-plus.
+      -d-plus: d, d-star.
+      -d-star: d, d-star; .
+      -d: '0'.
+    </tc:ixml-grammar>
+
+    <tc:test-case name="t-1x1">
+      <tc:test-string>1</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-1x0">
+      <tc:test-string>0</tc:test-string>
+      <tc:result><tc:assert-xml><n>0</n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-2x0">
+      <tc:test-string>00</tc:test-string>
+      <tc:result><tc:assert-xml><n>00</n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-5x0">
+      <tc:test-string>00000</tc:test-string>
+      <tc:result><tc:assert-xml> <n>00000</n> </tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-9x0">
+      <tc:test-string>000000000</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<n>000000000</n>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>    
+  </tc:test-set>
+  
+  <tc:test-set name="zeroes-gone-bad">
+    <tc:created by="CMSMcQ" on="2022-02-16"/>
+    <tc:description>
+      <tc:p>Derived from the EBNF using mechanical rewrites that
+      unintentionally introduce ambiguity.</tc:p>
+    </tc:description>
+    <tc:ixml-grammar>
+      n: dp.
+      -dp: d, ds; d.
+      -ds: md.
+      -md: dp, ds; dp.
+      -d: '0'.
+    </tc:ixml-grammar>
+
+    <tc:test-case name="t-1x1">
+      <tc:test-string>1</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-1x0">
+      <tc:test-string>0</tc:test-string>
+      <tc:result><tc:assert-xml><n>0</n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-2x0">
+      <tc:test-string>00</tc:test-string>
+      <tc:result><tc:assert-xml><n>00</n></tc:assert-xml></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="t-4x0">
+      <tc:test-string>0000</tc:test-string>
+      <tc:result><tc:assert-xml> <n>0000</n> </tc:assert-xml></tc:result>
+    </tc:test-case>    
+  </tc:test-set>
+
+  
+</tc:test-catalog>

@@ -89,10 +89,13 @@ declare function aparecium:parse-string-with-compiled-grammar(
   $sI as xs:string,
   $cG as element(ixml)
 ) as element() {
-  let $trace := trace((),'
+  (: let $trace := trace((),'
 parse-string-with-compiled-grammar()
-') 
-  let $result := earley:all-trees($sI, $cG) 
+') :)
+  let $result := prof:time(
+                 earley:all-trees($sI, $cG) 
+                 , '0 Outer call: ')
+
   return if (count($result) eq 1)
          then $result
          else <forest 

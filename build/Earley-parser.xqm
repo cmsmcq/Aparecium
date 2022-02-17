@@ -16,10 +16,12 @@ declare function ep:all-trees(
   $I as item() (: INPUT :),
   $G as item() (: GRAMMAR :)
 ) as element()+ {
-  trace((), 'ep:all-trees calling epi:earley-parse'),
-  epi:earley-parse($I, $G, epi:all-trees#3),
-  trace((), 'epi:earley-parse has returned '
-        || 'and ep:all-trees is about to do so.') 
+  (: trace((), 'ep:all-trees calling epi:earley-parse'), :)
+
+  epi:earley-parse($I, $G, epi:all-trees#3)
+  
+  (: trace((), 'epi:earley-parse has returned '
+        || 'and ep:all-trees is about to do so.') :)
 };
 
 (: ep:anytree($I,$G):  return one (loopless) parse tree, 

@@ -54,6 +54,9 @@
 </fileDesc>
 <revisionDesc>
 <list>
+<item>2022-02-16 : CMSMcQ : insert timing requests in earley-closure.
+Conjecture:  4/5 of the time will be in the call to leiPCSrel(),
+very little in deduping etc.</item>
 <item>2022-02-09 : CMSMcQ : resuming work (some changes unlogged
 between October and now).</item>
 <item>2021-10-18 : CMSMcQ : take git snapshot of current state; then
@@ -1371,7 +1374,8 @@ found.
 prediction must also check for completions of its predicted
 non-terminals, which increases the number of times we must scan
 through the accumulator and offers a low-hanging target for improving
-speed.
+speed. <hi>TO DO: pluck that low-hanging fruit.</hi></p>
+<p>The function has two cases:  either we are done, or we are done.
 <scrap prev="eri-items-closure"
        name="Define earley-closure($pending, $accumulator, $I, $G)">
 
@@ -1385,28 +1389,87 @@ declare function ixi:earley-closure(
   $I as xs:string,
   $G as element(ixml)
 ) as map(xs:string, map(xs:integer, map(xs:string, item())*)) (:MEI:) {
-  (: if pending list is done, so are we; return the accumulator :)
+  <ptr target="eri-items-closure-termination"/>
+  else <ptr target="eri-items-closure-normal"/>};
+</scrap>
+</p>
+<p>The base case arises when the pending list is done.  If nothing
+remains to be done, then we are done and can return the accumulator.
+<scrap id="eri-items-closure-termination"
+       name="Terminal case for Earley closure">
   if (empty($leiPending))
   then $meiAccum
-  else 
-  (: normal case:  we have items to process :)
-  (: Take head of pending list, run PCS function on it, dedup it, 
-     remove items already in the accumulator, and recur,
-     adding new items to the accumulator :)
+</scrap>
+</p>
+<p>In the normal case, we have items to process.  We
+<list>
+<item>take the head of the pending list,</item>
+<item>run the PCS function on it,</item>
+<item>dedup the returned items,</item>
+<item>drop any items that are already in the accumulator, and</item>
+<item>recur, while adding new items to the accumulator.</item>
+</list>
+<note type="block">
+<p>Note, February 2022.</p>
+<p>When trying to find out where time is going in the recognizer, the
+first step is to wrap each step here in prof:time().  The conjecture
+before examining the results is that 80% of the time, or more, will be
+spent in <ident>ixi:leiPCSrel()</ident>, and minimal time in the
+deduping steps.</p>
+<p>If this conjecture holds true, the second step will be to
+instrument <ident>leiPCSrel()</ident>.  But: one thing at a time.</p>
+</note>
+<note type="block">
+<p>Note, February 2022.</p>
+<p>Results of one run on test0 (trivial examples):
+<list>
+<item>1.63 ms checking PCS results against accumulator</item>
+<item>0.54 ms deduping PCS results</item>
+<item>35.48 ms running PCS function</item>
+</list>
+So nearer 94% than 80% of the time.  (It might be nice to have an
+automated way of getting these numbers, but for now what I did is
+copy and paste the messages out of the GUI's info window, use an
+impromptu Emacs keyboard macro to change lines like
+<q><code>PCS: 0.87 ms</code></q> to
+<q><code>0.87 ; ms PCS:</code></q>, sort to get the
+different measurements together, and wrap each set of
+messages in <q><code>(+</code></q> ... <q><code>)</code></q>.
+Then ^x^e to evaluate the Lisp expression.)
+</p>
+<p>On a longer test set (test2), which ran for 1215 seconds,
+the results were:
+<list>
+<item>1782.91 ms checking PCS results against accumulator</item>
+<item>357.39 ms deduping PCS results</item>
+<item>19967.69 ms running PCS function</item>
+</list>
+As the accumulator gets larger, searching it for items
+already present appears to become more expensive.
+</p>
+<p>Further testing seems unnecessary.</p>
+<!-- <p>And on ixml-corr, the results were:
+<list>
+<item> ms checking PCS results against accumulator</item>
+<item> ms deduping PCS results</item>
+<item> ms running PCS function</item>
+</list>
+</p>-->
+</note>
+<scrap id="eri-items-closure-normal"
+       name="Normal case for Earley closure">
+
   let $E := head($leiPending), 
-      $dummy := ixi:notrace(count($leiPending), 'e-c() has pending items: '), 
-      $dummy := ixi:notrace(
-                    ixi:sXei($E),
-                    'ixi:earley-closure running on pending item: '), 
+
       (: get everything from leiPCSrel :)
       $leiCs0 := ixi:leiPCSrel($E,$meiAccum,$I,$G),
-      $dummy := ixi:notrace(count($leiCs0), 'e-c() initial closure has items: '), 
+                 
+      
       (: dedup results from leiPCSrel :) 
       $leiCs := $leiCs0[
                    not(some $i in 1 to (position() - 1)
                        satisfies deep-equal(., $leiCs0[$i])
                    )],
-      $dummy := ixi:notrace(count($leiCs), 'e-c() deduped closure has items: '), 
         	
       (: remove non-new results from leiPCSrel :)
       $leiNew := for $ei in $leiCs
@@ -1414,8 +1477,8 @@ declare function ixi:earley-closure(
 		 where not(some $e in $meiAccum('from')($from)
 		           satisfies deep-equal($e, $ei))
 		 return $ei,
-      $dummy := ixi:notrace(count($leiNew), 'e-c() New items: '), 
 
+      <ptr target="eri-itcl-traces"/>
 		 
       $meiNewaccum := map {
 	'from' : map:merge(
@@ -1432,13 +1495,46 @@ declare function ixi:earley-closure(
     $meiNewaccum,
     $I,
     $G)
-};
+</scrap>
+</p>
+
+<p>When debugging this, it is helpful to have trace messages showing
+each step in this process.
+<scrap id="eri-itcl-traces"
+       name="Issue trace messages for earley-closure()">
+
+      $dummy := ixi:notrace(count($leiPending), 'e-c() has pending items: '), 
+      $dummy := ixi:notrace(
+                    ixi:sXei($E),
+                    'ixi:earley-closure running on pending item: '), 
+      $dummy := ixi:notrace(count($leiCs0), 'e-c() initial closure has items: '), 
+      $dummy := ixi:notrace(count($leiCs), 'e-c() deduped closure has items: '), 
+      $dummy := ixi:notrace(count($leiNew), 'e-c() New items: '), 
 </scrap>
 </p>
 <p>The function <ident>leiPCSrel()</ident> takes an Earley
 item (and an accumulator, the input, and the grammar) and
 returns all the items that stand in the scan, pred, or
 comp relations to the given item.
+<note place="block">
+<p>February 2022: timings within this function on test0:
+<list>
+<item>89.09 ms in ix:scan()</item>
+<item>173.29 ms in ix:pred()</item>
+<item>118.13 ms looking for completion and performing comp()</item>
+<item>186.01 ms looking for prediction and performing comp()</item>
+</list>
+and on ABNF.ixml (which ran 1675 seconds):
+<list>
+<item>3972.56 ms in ix:scan()</item>
+<item>6868.14 ms in ix:pred()</item>
+<item>4076.04 ms looking for completion and performing comp()</item>
+<item>11520.97 ms looking for prediction and performing comp()</item>
+</list>
+That's only 27 seconds out of 1675 - where did that time all
+go?!
+</p>
+</note>
 <scrap prev="eri-items-closure"
        name="Define earley-closure($pending, $accumulator, $I, $G)">
 
@@ -1456,26 +1552,34 @@ declare function ixi:leiPCSrel(
   $G as element(ixml)
 ) as map(xs:string, item())* {
   (: If $E expects terminals, perform scan :)
+  
   ix:scan($E,$I),
   
+  
   (: If $E expects nonterminals, perform prediction :)
+  
   ix:pred($E,$G), 
+  
   
   (: If $E expects a nonterminal, look for a completion $Ec and 
      perform comp($Ec,$E) :)
+  
   if (ixi:fExpectsN-Ei($E))
   then for $Ec in $meiAccum('from')($E('to'))
        where ixi:fFinalEi($Ec)
        return ix:comp($Ec,$E)
   else (), 
+  
     
   (: If $E is a completion, look for a prediction $Ep and 
      perform comp($E,$Ep) :)
+  
   if (ixi:fFinalEi($E)) 
   then for $Ep in $meiAccum('to')($E('from'))
        where ixi:fExpectsN-Ei($Ep)
        return ix:comp($E,$Ep)
   else ()
+  
     
   (: N.B. In BNF, $E can only expect one symbol, so either scan
      or pred applies, but not both.  But we are expecting EBNF
@@ -2613,8 +2717,11 @@ declare function aparecium:parse-string-with-compiled-grammar(
   $sI as xs:string,
   $cG as element(ixml)
 ) as element() {
-  let $trace := trace((),'&#xA;parse-string-with-compiled-grammar()&#xA;') 
-  let $result := earley:all-trees($sI, $cG) 
+  (: let $trace := trace((),'&#xA;parse-string-with-compiled-grammar()&#xA;') :)
+  let $result := prof:time(
+                 earley:all-trees($sI, $cG) 
+                 , '0 Outer call: ')
+
   return if (count($result) eq 1)
          then $result
          else &lt;forest 
@@ -2896,10 +3003,12 @@ declare function ep:all-trees(
   $I as item() (: INPUT :),
   $G as item() (: GRAMMAR :)
 ) as element()+ {
-  trace((), 'ep:all-trees calling epi:earley-parse'),
-  epi:earley-parse($I, $G, epi:all-trees#3),
-  trace((), 'epi:earley-parse has returned '
-        || 'and ep:all-trees is about to do so.') 
+  (: trace((), 'ep:all-trees calling epi:earley-parse'), :)
+
+  epi:earley-parse($I, $G, epi:all-trees#3)
+  
+  (: trace((), 'epi:earley-parse has returned '
+        || 'and ep:all-trees is about to do so.') :)
 };
 
 (: ep:anytree($I,$G):  return one (loopless) parse tree, 
@@ -2992,16 +3101,21 @@ declare function epi:earley-parse(
     (: , element(ixml) (: Grammar :) :)
   ) as item()* 
 ) as item()* {
-  let $dummy := eri:trace((), 'epi:earley-parse() ...') 
-  let $mapResult := er:recognizeX($I, $G), 
+  let $dummy := eri:notrace((), 'epi:earley-parse() ...') 
+  let $mapResult := prof:time(
+                    er:recognizeX($I, $G), 
+                    '0a recognize(): '),
+
       $meiClosure := $mapResult('Closure'),
       $leiCompletions := $mapResult('Completions')
   return if ($mapResult('Result'))
     then (: if we have a result, return each parse tree :)
-        let $dummy := eri:trace((), 'epi:earley-parse() has result') 
-        let $lpt := $f($leiCompletions, $meiClosure, $I (: , $G :) )
+        let $dummy := eri:notrace((), 'epi:earley-parse() has result') 
+        let $lpt := prof:time(
+                    $f($leiCompletions, $meiClosure, $I (: , $G :) )
+                    , '0b making trees: ')
         for $pt at $npt in $lpt
-        let $dummy := eri:trace((), 'epi:earley-parse() returning a result') 
+        let $dummy := eri:notrace((), 'epi:earley-parse() returning a result') 
         (: return if (('raw','ast')[2] eq 'raw') 
 	       then $pt  
                else epi:astXparsetree($pt, count($lpt)) :)
@@ -3983,17 +4097,17 @@ declare function epi:elementXpt(
       for $c in $E/*
       return epi:attributesXpt($c), 
       for $c in $E/*
-      let $dummy := eri:trace(
+      let $dummy := eri:notrace(
           concat(name($c), '/', $c/@name, '/', $c/@xml:id),
           'constructing content from:') 
       let $n := epi:contentXpt($c)
       let $dummy := for $chunk in $n return
           if ($chunk instance of text())
-          then eri:trace(concat('/',
+          then eri:notrace(concat('/',
 	  string-join(string-to-codepoints($chunk),' '), '/'), 'eXpt got text node') 
           else if ($chunk instance of element())
-	  then eri:trace($chunk/name(), 'eXpt gets element:') 
-	  else eri:trace($chunk, 'eXpt gets unknown item:') 
+	  then eri:notrace($chunk/name(), 'eXpt gets element:') 
+	  else eri:notrace($chunk, 'eXpt gets unknown item:') 
       return $n
   }
 };

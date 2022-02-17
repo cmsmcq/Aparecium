@@ -42,16 +42,21 @@ declare function epi:earley-parse(
     (: , element(ixml) (: Grammar :) :)
   ) as item()* 
 ) as item()* {
-  let $dummy := eri:trace((), 'epi:earley-parse() ...') 
-  let $mapResult := er:recognizeX($I, $G), 
+  let $dummy := eri:notrace((), 'epi:earley-parse() ...') 
+  let $mapResult := prof:time(
+                    er:recognizeX($I, $G), 
+                    '0a recognize(): '),
+
       $meiClosure := $mapResult('Closure'),
       $leiCompletions := $mapResult('Completions')
   return if ($mapResult('Result'))
     then (: if we have a result, return each parse tree :)
-        let $dummy := eri:trace((), 'epi:earley-parse() has result') 
-        let $lpt := $f($leiCompletions, $meiClosure, $I (: , $G :) )
+        let $dummy := eri:notrace((), 'epi:earley-parse() has result') 
+        let $lpt := prof:time(
+                    $f($leiCompletions, $meiClosure, $I (: , $G :) )
+                    , '0b making trees: ')
         for $pt at $npt in $lpt
-        let $dummy := eri:trace((), 'epi:earley-parse() returning a result') 
+        let $dummy := eri:notrace((), 'epi:earley-parse() returning a result') 
         (: return if (('raw','ast')[2] eq 'raw') 
 	       then $pt  
                else epi:astXparsetree($pt, count($lpt)) :)
@@ -467,17 +472,17 @@ declare function epi:elementXpt(
       for $c in $E/*
       return epi:attributesXpt($c), 
       for $c in $E/*
-      let $dummy := eri:trace(
+      let $dummy := eri:notrace(
           concat(name($c), '/', $c/@name, '/', $c/@xml:id),
           'constructing content from:') 
       let $n := epi:contentXpt($c)
       let $dummy := for $chunk in $n return
           if ($chunk instance of text())
-          then eri:trace(concat('/',
+          then eri:notrace(concat('/',
 	  string-join(string-to-codepoints($chunk),' '), '/'), 'eXpt got text node') 
           else if ($chunk instance of element())
-	  then eri:trace($chunk/name(), 'eXpt gets element:') 
-	  else eri:trace($chunk, 'eXpt gets unknown item:') 
+	  then eri:notrace($chunk/name(), 'eXpt gets element:') 
+	  else eri:notrace($chunk, 'eXpt gets unknown item:') 
       return $n
   }
 };

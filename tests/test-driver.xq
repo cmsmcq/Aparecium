@@ -10,84 +10,117 @@ declare namespace db =
 
 declare option db:chop "false";
 
-let $catalog-number := 1 (: which catalog to run? 1..31 or so :)
+let $catalog-index := 'test0' (: which catalog to run? short name :)
 
 let $invdir := "../../ixml/tests/",
     $apadir := "../../Aparecium/tests/",
     $ixtdir := "../../ixml-tests/tests-straw/",
     $outdir := resolve-uri($apadir || 'results-' 
+               || $catalog-index 
+               || '-'
                || adjust-dateTime-to-timezone(
                     current-dateTime(), () )
                || '/',
                static-base-uri() ),
 
-    $test-catalog-path := 
-        (
+    $catalog-of-catalogs := <test-catalogs>
 
-         (: 1 2 3 :)
-         $apadir || "test0.xml",
-         $apadir || "test1.xml",
-         $apadir || "test2.xml",
+      <!-- local catalogs, mostly simple -->
+      <catalog n="test0" path="{$apadir}test0.xml"/>
+      <catalog n="test1" path="{$apadir}test1.xml"/>
+      <catalog n="test2" path="{$apadir}test2.xml"/>
+      <catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/>
 
-         (: 4 5 6 :)
-         $invdir || "syntax/catalog-as-grammar-tests.xml",
-         $invdir || "syntax/catalog-as-instance-tests-ixml.xml",
-         $invdir || "syntax/catalog-as-instance-tests-xml.xml",
+      <!-- syntax error tests in ixml repo -->
+      <catalog n="syntax-cagt"
+       path="{$invdir}syntax/catalog-as-grammar-tests.xml"/>
+      <catalog n="syntax-caii"
+       path="{$invdir}syntax/catalog-as-instance-tests-ixml.xml"/>
+      <catalog n="syntax-caix"
+       path="{$invdir}syntax/catalog-as-instance-tests-xml.xml"/>
 
-         (: 7 8 9 :)
-         $invdir || "correct/test-catalog.xml",
-         $invdir || "ambiguous/test-catalog.xml",
-         $invdir || "parse/test-catalog.xml",
+      <!-- other tests in ixml repo -->
+      <catalog n="ixml-corr"
+	       path="{$invdir}correct/test-catalog.xml"/>
+      <catalog n="ixml-ambi"
+	       path="{$invdir}ambiguous/test-catalog.xml"/>
+      <catalog n="ixml-parse"
+	       path="{$invdir}parse/test-catalog.xml"/>
 
-         (: 10 slow :)
-         $invdir || "ixml/test-catalog.xml",
+      <!-- ixml-ixml is slow -->
+      <catalog n="ixml-ixml"
+	       path="{$invdir}ixml/test-catalog.xml"/>
+      
+      <!-- ixml-all is very slow: 
+           all of the tests in the ixml repo -->
+      <catalog n="ixml-all"
+	       path="{$invdir}test-catalog.xml"/>
 
-         (: 11 very slow - all of the tests in the ixml repo :)
-         $invdir || "test-catalog.xml",
 
+      <!-- Positive and negative catalogs for various small grammars -->
 
-         (: Positive and negative catalogs for various small
-            grammars :)
-         (: 12 13 14 15 :)
-         $ixtdir || "gxxx/g010.test-catalog.xml",
-         $ixtdir || "gxxx/g010.O3.test-catalog.all.neg.xml",
-         $ixtdir || "gxxx/g011.test-catalog.xml",
-         $ixtdir || "gxxx/g011.O3.test-catalog.all.neg.xml",
+      <catalog n="g010"
+	       path="{$ixtdir}gxxx/g010.test-catalog.xml"/>
+      <catalog n="g010neg"
+	       path="{$ixtdir}gxxx/g010.O3.test-catalog.all.neg.xml"/>
+      <catalog n="g011"
+	       path="{$ixtdir}gxxx/g011.test-catalog.xml"/>
+      <catalog n="g011neg"
+	       path="{$ixtdir}gxxx/g011.O3.test-catalog.all.neg.xml"/>
+      <catalog n="g012"
+	       path="{$ixtdir}gxxx/g012.test-catalog.xml"/>
+      <catalog n="g012neg"
+	       path="{$ixtdir}gxxx/g012.O3.test-catalog.all.neg.xml"/>
+      <catalog n="g022"
+	       path="{$ixtdir}gxxx/g022.test-catalog.xml"/>
+      <catalog n="g022neg"
+	       path="{$ixtdir}gxxx/g022.O3.test-catalog.all.neg.xml"/>
+      
+      <catalog n="g101"
+	       path="{$ixtdir}gxxx/g101.test-catalog.xml"/>
+      <catalog n="g101neg"
+	       path="{$ixtdir}gxxx/g101.O3.test-catalog.all.neg.xml"/>
+      <catalog n="g102"
+	       path="{$ixtdir}gxxx/g102.test-catalog.xml"/>
+      <catalog n="g102neg"
+	       path="{$ixtdir}gxxx/g102.O3.test-catalog.all.neg.xml"/>
+      <catalog n="g112"
+	       path="{$ixtdir}gxxx/g112.test-catalog.xml"/>
+      <catalog n="g112neg"
+	       path="{$ixtdir}gxxx/g112.O3.test-catalog.all.neg.xml"/>
 
-         (: 16 - 20 :)
-         $ixtdir || "gxxx/g012.test-catalog.xml",
-         $ixtdir || "gxxx/g012.O3.test-catalog.all.neg.xml",
-         $ixtdir || "gxxx/g022.test-catalog.xml",
-         $ixtdir || "gxxx/g022.O3.test-catalog.all.neg.xml",
-         $ixtdir || "gxxx/g101.test-catalog.xml",
+      <!-- embeds all the gxxx catalogs so they can be done in a single run -->
+      <catalog n="gxxx"
+	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/>
 
-         (: 21 - 25 :)
-         $ixtdir || "gxxx/g101.O3.test-catalog.all.neg.xml",
-         $ixtdir || "gxxx/g102.test-catalog.xml",
-         $ixtdir || "gxxx/g102.O3.test-catalog.all.neg.xml",
-         $ixtdir || "gxxx/g112.test-catalog.xml",
-         $ixtdir || "gxxx/g112.O3.test-catalog.all.neg.xml",
+      <!-- arithmetic expressions, with 
+           2, 7638, 2886, 1020, and 338 test cases.
+           Broken. -->
+      <catalog n="arith-pos"
+	       path="{$ixtdir}arith/arith.test-catalog.pos.xml"/>
+      <catalog n="arith-a-neg"
+	       path="{$ixtdir}arith/arith.O3.test-catalog.arc.neg.xml"/>
+      <catalog n="arith-af-neg"
+	       path="{$ixtdir}arith/arith.O3.test-catalog.arc-final.neg.xml"/>
+      <catalog n="arith-s-neg"
+	       path="{$ixtdir}arith/arith.O3.test-catalog.state.neg.xml"/>
+      <catalog n="arith-sf-neg"
+	       path="{$ixtdir}arith/arith.O3.test-catalog.state-final.neg.xml"/>
 
-	 (: 26 embeds 12-25 so they can be done in a single run :)
-         $ixtdir || "gxxx/gxxx-test-catalog.xml",
+      <!--  straw-man tests on ixml itself
+           (n.b. old version of ixml grammar) -->
+      <catalog n="straw-ixml"
+	       path="{$ixtdir}ixml/ixml.test-catalog.pos.xml"/>
 
-         (: 27-31, with 2, 7638, 2886, 1020, and 338 test cases.
-            The positive test cases are broken. :)
-         $ixtdir || "arith/arith.test-catalog.pos.xml",
-         $ixtdir || "arith/arith.O3.test-catalog.arc.neg.xml",
-         $ixtdir || "arith/arith.O3.test-catalog.arc-final.neg.xml",
-         $ixtdir || "arith/arith.O3.test-catalog.state.neg.xml",
-         $ixtdir || "arith/arith.O3.test-catalog.state-final.neg.xml",
-
-         (: 32:  straw-man tests on ixml itself
-            (n.b. old version of ixml grammar) :)
-         $ixtdir || "ixml/ixml.test-catalog.pos.xml",
-
-         (: 33:  wisps test set (currently in progress) :)
-         $ixtdir || "wisps/wisp-catalog.xml"
-
+      <!--  wisps test set (currently in progress) -->
+      <catalog n="wisps"
+	       path="{$ixtdir}wisps/wisp-catalog.xml"/>
          
-         )[$catalog-number],
+    </test-catalogs>,
+
+    $test-catalog-path := $catalog-of-catalogs
+                          /catalog[@n=$catalog-index]
+                          /@path/string(),
 
     $test-catalog-uri := resolve-uri($test-catalog-path, 
                                      static-base-uri()),
