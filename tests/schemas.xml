@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
 <locatingRules xmlns="http://thaiopensource.com/ns/locating-rules/1.0">
+  <uri resource="misc-tests.xml" typeId="Invisible XML Test Catalog"/>
   <uri resource="zeroes-tests.xml" uri="../../ixml-tests/lib/test-catalog.rnc"/>
   <uri resource="test2.xml" uri="../../ixml-tests/lib/test-catalog.rnc"/>
   <uri resource="test1.xml" uri="../../ixml-tests/lib/test-catalog.rnc"/>

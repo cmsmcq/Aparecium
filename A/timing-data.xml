@@ -1,0 +1,261 @@
+<timing-data>  
+  <head>Timing data for Aparecium</head>
+  <date>16-17 February 2022</date>
+  <p>All times in ms.</p>
+  <!--
+	    <th>Test set</th>
+	    <th>Total time (from GUI)</th>
+	    <th>Outer call (in all-trees)</th>
+	    <th>Inner A (recognizer)</th>
+	    <th>Inner B (constructor)</th>
+
+  -->
+  <test-set name="test0" total="801.94">
+    <test-case outer="624.75" rec="453.01" tree="168.86"/>
+    <!-- an amalgam, really -->
+  </test-set>
+  <test-set name="test1" total="755.58">
+    <test-case outer="54.31" rec="43.18" tree="10.27"/>
+
+    <test-case outer="1.38" rec="0.73" tree="0.34"/>
+    <test-case outer="0.68" rec="0.44" tree="0"/>
+    <test-case outer="0.67" rec="0.44" tree="0"/>
+    <test-case outer="1.0" rec="0.72" tree="0"/>
+    <test-case outer="0.65" rec="0.43" tree="0"/>
+    <test-case outer="290.96" rec="228.81" tree="61.36"/>
+    <test-case outer="1.56" rec="0.92" tree="0.37"/>
+    <test-case outer="1.6" rec="1.06" tree="0.3"/>
+    <test-case outer="1.41" rec="0.95" tree="0.23"/>
+    <test-case outer="1.55" rec="1.07" tree="0.25"/>
+    <test-case outer="1.6" rec="1.0" tree="0.36"/>
+    <test-case outer="1.2" rec="1.0" tree="0"/>
+    <test-case outer="1.03" rec="0.83" tree="0"/>
+    <test-case outer="0.8" rec="0.63" tree="0"/>
+    <test-case outer="1.57" rec="1.37" tree="0"/>
+    <test-case outer="1.08" rec="0.87" tree="0"/>
+    <test-case outer="0.8" rec="0.62" tree="0"/>
+  </test-set>
+
+  <test-set name="ABNF.ixml">
+    <test-case outer="834695.71" rec="561315.33" tree="273330.44"/>
+  </test-set>
+
+  <test-set name="ixml-corr" outer="133349.49" rec="107622.12" tree="25713.69">
+
+    <test-case outer="139.2" rec="94.0" tree="44.31"/>
+    <test-case outer="3437.22" rec="2218.81" tree="1216.41"/>
+    <test-case outer="2.97" rec="1.78" tree="0.79"/>
+    <test-case outer="219.66" rec="162.59" tree="56.29"/>
+    <test-case outer="2.72" rec="1.92" tree="0.53"/>
+    <test-case outer="30578.66" rec="23448.24" tree="7126.79"/>
+    <test-case outer="344.15" rec="185.99" tree="156.87"/>
+    <test-case outer="48181.25" rec="28156.58" tree="20019.27"/>
+    <test-case outer="450.59" rec="218.75" tree="229.61"/>
+    <test-case outer="29536.55" rec="17118.47" tree="12414.25"/>
+    <test-case outer="207.08" rec="97.91" tree="107.91"/>
+    <test-case outer="9900.82" rec="5684.77" tree="4212.14"/>
+    <test-case outer="98.67" rec="63.82" tree="34.11"/>
+    <test-case outer="31165.83" rec="18698.47" tree="12462.22"/>
+    <test-case outer="37.18" rec="27.06" tree="9.35"/>
+    <test-case outer="30745.95" rec="18940.68" tree="11799.58"/>
+    <test-case outer="21793.86" rec="12849.16" tree="8940.95"/>
+    <test-case outer="49.32" rec="38.86" tree="9.92"/>
+    <test-case outer="30620.1" rec="18665.43" tree="11951.06"/>
+    <test-case outer="61.76" rec="47.75" tree="13.47"/>
+    <test-case outer="14749.92" rec="8570.77" tree="6175.74"/>
+    <test-case outer="29.22" rec="21.46" tree="7.19"/>
+    <test-case outer="37162.48" rec="23727.81" tree="13429.62"/>
+    <test-case outer="8.67" rec="6.4" tree="1.95"/>
+    <test-case outer="52738.14" rec="32704.9" tree="20028.85"/>
+    <test-case outer="40.58" rec="29.74" tree="10.24"/>
+    <test-case outer="2336.82" rec="1597.17" tree="737.7"/>
+    <test-case outer="33.97" rec="18.37" tree="15.02"/>
+    <test-case outer="151.16" rec="114.9" tree="35.71"/>
+    <test-case outer="1.29" rec="0.85" tree="0.24"/>
+    <test-case outer="134.22" rec="103.64" tree="30.08"/>
+    <test-case outer="1.35" rec="0.76" tree="0.28"/>
+    <test-case outer="161.52" rec="124.79" tree="36.19"/>
+    <test-case outer="139582.48" rec="107501.1" tree="32070.92"/>
+    <test-case outer="101848.43" rec="67395.34" tree="34445.34"/>
+    <test-case outer="53.16" rec="36.08" tree="16.41"/>
+    <test-case outer="548.58" rec="411.78" tree="136.07"/>
+    <test-case outer="36.8" rec="28.83" tree="7.46"/>
+    <test-case outer="301.78" rec="228.4" tree="72.75"/>
+    <test-case outer="2.43" rec="1.58" tree="0.51"/>
+    <test-case outer="430.81" rec="290.42" tree="139.39"/>
+    <test-case outer="1.5" rec="0.95" tree="0.31"/>
+    <test-case outer="1421.97" rec="921.08" tree="499.37"/>
+    <test-case outer="13.15" rec="12.48" tree="0"/>
+    <test-case outer="9296.33" rec="6407.54" tree="2884.23"/>
+    <test-case outer="30.4" rec="23.45" tree="6.44"/>
+    <test-case outer="102980.51" rec="74951.69" tree="28022.7"/>
+    <test-case outer="27.06" rec="16.88" tree="9.56"/>
+    <test-case outer="739.19" rec="511.17" tree="227.16"/>
+    <test-case outer="2192.65" rec="1497.52" tree="693.67"/>
+    <test-case outer="5.81" rec="2.98" tree="2.22"/>
+    <test-case outer="597.84" rec="456.23" tree="140.37"/>
+    <test-case outer="2.67" rec="1.92" tree="0.47"/>
+    <test-case outer="375.71" rec="277.58" tree="97.45"/>
+    <test-case outer="1.41" rec="0.86" tree="0.32"/>
+    <test-case outer="104.41" rec="77.75" tree="25.92"/>
+    <test-case outer="3.06" rec="1.88" tree="0.83"/>
+    <test-case outer="101.22" rec="76.91" tree="23.64"/>
+    <test-case outer="114.47" rec="87.71" tree="26.05"/>
+    <test-case outer="1.48" rec="0.99" tree="0.23"/>
+    <test-case outer="30119.01" rec="19729.05" tree="10386.11"/>
+    <test-case outer="805.15" rec="448.04" tree="355.87"/>
+    <test-case outer="21345.7" rec="15023.0" tree="6318.37"/>
+    <test-case outer="71.15" rec="40.37" tree="29.99"/>
+    <test-case outer="32919.45" rec="20164.86" tree="12749.61"/>
+    <test-case outer="46.41" rec="27.12" tree="18.32"/>
+    <test-case outer="7603799.24" rec="5141775.43" tree="2461927.9"/>
+    <test-case outer="242.17" rec="241.02" tree="0"/>
+    <test-case outer="232.18" rec="172.28" tree="59.23"/>
+    <test-case outer="2.29" rec="2.02" tree="0"/>
+    <test-case outer="277.36" rec="208.06" tree="68.65"/>
+    <test-case outer="1.41" rec="0.82" tree="0.33"/>
+    <test-case outer="389.11" rec="271.34" tree="116.93"/>
+    <test-case outer="1.87" rec="1.66" tree="0"/>
+    <test-case outer="7971.16" rec="4274.57" tree="3693.75"/>
+    <test-case outer="64.87" rec="46.56" tree="17.64"/>
+    <test-case outer="69373.15" rec="38934.64" tree="30431.69"/>
+    <test-case outer="313.46" rec="309.93" tree="0"/>
+  </test-set>
+
+  <test-set name="zeroes" total="1104074.33">
+    <test-case outer="437.45" rec="325.4" tree="103.64"/>
+    <test-case outer="1.66" rec="0.93" tree="0.41"/>
+    <test-case outer="2.43" rec="1.35" tree="0.65"/>
+    <test-case outer="125.99" rec="98.69" tree="26.75"/>
+    <test-case outer="0.77" rec="0.49" tree="0"/>
+    <test-case outer="1.87" rec="1.05" tree="0.5"/>
+    <test-case outer="2.14" rec="1.2" tree="0.62"/>
+    <test-case outer="3.69" rec="2.34" tree="0.98"/>
+    <test-case outer="14.67" rec="9.02" tree="5.04"/>
+    <test-case outer="203.75" rec="156.33" tree="46.79"/>
+    <test-case outer="0.72" rec="0.54" tree="0"/>
+    <test-case outer="1.83" rec="1.05" tree="0.52"/>
+    <test-case outer="2.56" rec="1.42" tree="0.74"/>
+    <test-case outer="5.93" rec="2.87" tree="2.48"/>
+    <test-case outer="22.13" rec="10.47" tree="10.75"/>
+    <test-case outer="241.44" rec="190.54" tree="50.37"/>
+    <test-case outer="0.68" rec="0.51" tree="0"/>
+    <test-case outer="1.46" rec="0.94" tree="0.3"/>
+    <test-case outer="2.22" rec="1.38" tree="0.56"/>
+    <test-case outer="3.89" rec="2.34" tree="1.18"/>
+    <test-case outer="17.82" rec="9.27" tree="7.9"/>
+    <test-case outer="207.86" rec="163.75" tree="43.58"/>
+    <test-case outer="0.68" rec="0.51" tree="0"/>
+
+    <test-case outer="1.58" rec="1.01" tree="0.33"/>
+    <test-case outer="3.09" rec="1.71" tree="0.79"/>
+    <test-case outer="28.59" rec="3.98" tree="24.17"/>
+    <test-case outer="495700.71" rec="12.03" tree="495688.14"/>
+    <test-case outer="236.65" rec="182.07" tree="53.98"/>
+    <test-case outer="0.71" rec="0.52" tree="0"/>
+    <test-case outer="1.75" rec="1.13" tree="0.35"/>
+    <test-case outer="2.63" rec="1.58" tree="0.76"/>
+    <test-case outer="54.93" rec="7.15" tree="47.29"/>
+    <test-case outer="497258.13" rec="11.88" tree="497245.8"/>
+    <test-case outer="2264.18" rec="1635.1" tree="628.03"/>
+    <test-case outer="0.63" rec="0.47" tree="0"/>
+    <test-case outer="1.88" rec="1.21" tree="0.44"/>
+    <test-case outer="3.66" rec="2.15" tree="1.2"/>
+    <test-case outer="2072.48" rec="6.4" tree="2065.57"/>
+    <test-case outer="68976.12" rec="8.89" tree="68966.78"/>
+    <test-case outer="1871.99" rec="1337.44" tree="533.4"/>
+    <test-case outer="0.66" rec="0.49" tree="0"/>
+    <test-case outer="1.88" rec="1.2" tree="0.45"/>
+    <test-case outer="3.07" rec="1.95" tree="0.83"/>
+    <test-case outer="20.26" rec="4.88" tree="14.98"/>
+    <test-case outer="28617.33" rec="10.95" tree="28605.94"/>
+    <test-case outer="2187.13" rec="1611.09" tree="574.81"/>
+    <test-case outer="0.9" rec="0.53" tree="0"/>
+    <test-case outer="2.22" rec="1.48" tree="0.49"/>
+    <test-case outer="4.0" rec="2.58" tree="1.14"/>
+    <test-case outer="2583.61" rec="8.07" tree="2574.79"/>
+  </test-set>
+  
+  <test-set name="ixml-corr" total="7237192.42">
+    <test-case rec="44847.29" tree="25203.78" outer="70057.23"/>
+    <test-case rec="81.96" tree="37.34" outer="120.34"/>
+    <test-case rec="1353.1" tree="562.73" outer="1917.11"/>
+    <test-case rec="1.63" tree="0.74" outer="2.78"/>
+    <test-case rec="143.55" tree="47.66" outer="192.22"/>
+    <test-case rec="1.74" tree="0.48" outer="2.52"/>
+    <test-case rec="9336.44" tree="5245.32" outer="14585.19"/>
+    <test-case rec="175.47" tree="134.23" outer="311.85"/>
+    <test-case rec="8742.41" tree="4904.85" outer="13650.77"/>
+    <test-case rec="184.66" tree="187.34" outer="373.4"/>
+    <test-case rec="6451.86" tree="3383.18" outer="9838.79"/>
+    <test-case rec="79.52" tree="82.56" outer="164.27"/>
+    <test-case rec="2172.76" tree="1006.87" outer="3181.32"/>
+    <test-case rec="41.37" tree="23.29" outer="65.25"/>
+    <test-case rec="8125.97" tree="4031.61" outer="12161.21"/>
+    <test-case rec="17.64" tree="7.8" outer="25.92"/>
+    <test-case rec="5564.89" tree="2797.3" outer="8364.68"/> <!--<test-case rec="14.01" tree="5.93"/>-->
+    <test-case rec="5102.77" tree="2463.16" outer="7568.32"/>
+    <test-case rec="31.34" tree="9.61" outer="41.5"/>
+    <test-case rec="5921.41" tree="2874.31" outer="8798.31"/>
+    <test-case rec="32.67" tree="9.48" outer="42.9"/>
+    <test-case rec="3155.52" tree="1481.09" outer="4638.5"/>
+    <test-case rec="14.65" tree="5.47" outer="20.6"/>
+    <test-case rec="7257.33" tree="3654.08" outer="10914.25"/>
+    <test-case rec="6.28" tree="2.0" outer="8.78"/>
+    <test-case rec="8871.08" tree="4629.97" outer="13504.13"/>
+    <test-case rec="22.29" tree="7.8" outer="30.6"/>
+    <test-case rec="935.3" tree="372.6" outer="1309.18"/>
+    <test-case rec="16.41" tree="11.26" outer="28.25"/>
+    <test-case rec="104.86" tree="28.64" outer="134.07"/>
+    <test-case rec="0.95" tree="0.24" outer="1.41"/>
+    <test-case rec="95.05" tree="24.37" outer="119.98"/>
+    <test-case rec="0.86" tree="0.3" outer="1.41"/>
+    <test-case rec="115.11" tree="32.63" outer="148.3"/>
+    <test-case rec="37809.63" tree="19840.0" outer="57657.02"/>
+    <test-case rec="26216.46" tree="15558.56" outer="41780.23"/>
+    <test-case rec="28.24" tree="12.74" outer="41.66"/>
+    <test-case rec="266.72" tree="75.65" outer="343.18"/>
+    <test-case rec="27.11" tree="6.66" outer="34.29"/>
+    <test-case rec="202.34" tree="62.18" outer="265.37"/>
+    <test-case rec="0.92" tree="0.29" outer="1.45"/>
+    <test-case rec="246.1" tree="88.92" outer="336.2"/>
+    <test-case rec="0.87" tree="0.49" outer="1.69"/>
+    <test-case rec="520.38" tree="166.34" outer="687.74"/>
+    <test-case rec="6.41" outer="6.84"/>
+    <test-case rec="3055.32" tree="1456.91" outer="4515.08"/>
+    <test-case rec="17.85" tree="5.1" outer="23.5"/>
+    <test-case rec="25836.29" tree="14637.9" outer="40479.29"/>
+    <test-case rec="16.75" tree="8.19" outer="25.47"/>
+    <test-case rec="442.83" tree="146.67" outer="590.35"/>
+    <test-case rec="1002.81" tree="369.75" outer="1373.76"/>
+    <test-case rec="2.24" tree="1.13" outer="3.77"/>
+    <test-case rec="316.7" tree="99.36" outer="416.9"/>
+    <test-case rec="1.9" tree="0.43" outer="2.59"/>
+    <test-case rec="236.92" tree="74.26" outer="311.85"/>
+    <test-case rec="0.85" tree="0.5" outer="1.69"/>
+    <test-case rec="75.38" tree="25.77" outer="101.77"/>
+    <test-case rec="1.91" tree="0.82" outer="3.11"/>
+    <test-case rec="73.86" tree="27.15" outer="101.85"/>
+    <test-case rec="105.71" tree="23.88" outer="130.43"/>
+    <test-case rec="1.13" tree="0.35" outer="1.77"/>
+    <test-case rec="6819.53" tree="3502.07" outer="10324.23"/>
+    <test-case rec="383.89" tree="233.85" outer="618.89"/>
+    <test-case rec="6009.22" tree="2987.72" outer="8999.62"/>
+    <test-case rec="35.84" tree="24.75" outer="61.41"/>
+    <test-case rec="6376.06" tree="3235.83" outer="9614.52"/>
+    <test-case rec="25.83" tree="16.53" outer="43.05"/>
+    <test-case rec="4315612.03" tree="2504462.13" outer="6820117.79"/>
+    <test-case rec="208.4" outer="214.55"/>
+    <test-case rec="166.4" tree="55.14" outer="222.25"/>
+    <test-case rec="1.71" outer="1.92"/>
+    <test-case rec="189.3" tree="52.84" outer="242.77"/>
+    <test-case rec="0.86" tree="0.32" outer="1.43"/>
+    <test-case rec="264.31" tree="98.32" outer="363.47"/>
+    <test-case rec="1.6" outer="1.81"/>
+    <test-case rec="2462.68" tree="1392.29" outer="3857.32"/>
+    <test-case rec="46.8" tree="18.43" outer="66.1"/>
+    <test-case rec="19686.11" tree="11413.71" outer="31104.93"/>
+    <test-case rec="260.16" outer="263.42"/>
+  </test-set>
+  
+</timing-data>

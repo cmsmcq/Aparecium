@@ -1,0 +1,119 @@
+<tc:test-catalog xmlns:tc="https://github.com/cmsmcq/ixml-tests"
+		 name="Miscellany"
+		 release-date="2022-02-17"
+		 >
+  <tc:description>
+    <tc:p>Contains tests accumulated bit by bit from discussions
+    in the community group and other sources.</tc:p>
+  </tc:description>
+
+  <tc:test-set name="bibtex">
+    <tc:created by="CMSMcQ" on="2022-02-17"/>
+    <tc:description>
+      <tc:p>From Norm Walsh, in mail to public-ixml on 16 Feb 2022:
+      https://lists.w3.org/Archives/Public/public-ixml/2022Feb/0161.html
+      </tc:p>
+    </tc:description>
+    
+    <tc:ixml-grammar>
+bibtex: item+itemsep, s* .
+itemsep: s+ .
+
+-item: comment ; entry .
+
+comment: -"%", cchar* .
+
+entry: -"@", @type, s*, -'{', s*, @citekey, fields?, s* -'}' .
+
+type: -name .
+citekey: -name .
+
+-fields: -',', field+fsep .
+
+field: s*, name, s*, -'=', s*, value .
+value: quotedvalue; bracedvalue; atomicvalue .
+
+-quotedvalue: -'"', qvalue, -'"' .
+-bracedvalue: -'{', bvalue, -'}' .
+-atomicvalue: ["0"-"9"]+ .
+
+qvalue: qchar* .
+bvalue: bchar* .
+
+-fsep: s*, -',', s* .
+
+name: namestart, namefollower* .
+
+-cchar: ~[#a] .
+-qchar: ~['"'] .
+-bchar: ~['}'] .
+-namestart: ["_"; L] .
+-namefollower: namestart; ["-.·‿⁀"; Nd; Mn] .
+
+-s: (-[Zs]; -#9; -#d; -#a) .
+    </tc:ixml-grammar>
+
+    <tc:test-case name="t1">
+      <tc:description>
+	<tc:p>Norm reports that this input should succeed.</tc:p>
+      </tc:description>
+      
+      <tc:test-string>%C
+@Book{K,
+  t = "a"
+}
+
+@Book{K,
+  t = "a"
+}
+</tc:test-string>    
+    
+      <tc:result>
+	<tc:assert-xml>
+	  <bibtex
+            ><comment>C</comment
+            ><itemsep
+            /><entry type="Book" citekey="K"
+              ><field
+                ><name>t</name
+                ><value
+                  ><qvalue>a</qvalue
+                ></value
+              ></field
+            ></entry
+            ><itemsep
+            /><entry type="Book" citekey="K"
+              ><field
+                ><name>t</name
+                ><value
+                  ><qvalue>a</qvalue
+                ></value
+              ></field
+            ></entry
+          ></bibtex
+	></tc:assert-xml
+      ></tc:result
+    ></tc:test-case>
+
+    <tc:test-case name="t2">
+      <tc:description>
+	<tc:p>Norm reports that this input is failing.</tc:p>
+      </tc:description>
+      
+      <tc:test-string>%C
+@Book{K,
+  t = "a"
+}
+@Book{K,
+  t = "a"
+}
+</tc:test-string>    
+    
+      <tc:result>
+	<tc:assert-not-a-sentence/>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+
+  
+</tc:test-catalog>

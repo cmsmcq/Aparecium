@@ -30,6 +30,7 @@ let $invdir := "../../ixml/tests/",
       <catalog n="test1" path="{$apadir}test1.xml"/>
       <catalog n="test2" path="{$apadir}test2.xml"/>
       <catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/>
+      <catalog n="misc" path="{$apadir}misc-tests.xml"/>
 
       <!-- syntax error tests in ixml repo -->
       <catalog n="syntax-cagt"

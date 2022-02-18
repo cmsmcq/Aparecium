@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '12 February 2022' >
+<!ENTITY date.last.touched '17 February 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
@@ -56,6 +56,7 @@ lost in a disk crash</item>
 <versionList>
 <version id="qd">Quick and dirty first cut</version>
 <version id="alt">Alternative formulations of some constructs</version>
+<version id="v2" fallback="qd">Version 2, with time monitoring</version>
 </versionList>
 
 <divGen type="toc"/>
@@ -303,6 +304,7 @@ indexing into the list.  It's easy to change the index.
       &lt;catalog n="test1" path="{$apadir}test1.xml"/>
       &lt;catalog n="test2" path="{$apadir}test2.xml"/>
       &lt;catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/>
+      &lt;catalog n="misc" path="{$apadir}misc-tests.xml"/>
 
       &lt;!-- syntax error tests in ixml repo -->
       &lt;catalog n="syntax-cagt"
@@ -491,9 +493,13 @@ A simpler version of this might be:
 </scrap>
 Note the trailing <code>else</code> here.
 </p>
-<p>At the top of the test report we should put some metadata:
+<p>At the top of the test report we should put some metadata.
+(I confess that the main motive for putting the test harness
+version into an attribute is to force the namespace declaration
+for the test-harness namespace onto the root element.)
 <scrap id="lib-rt-metadata" name="Supply basic metadata for the test report">
 
+    attribute t:creator { "Aparecium test harness v2" },
     element tc:metadata {
       element tc:name {
         'Test results for ' || $catalog/@name
@@ -682,8 +688,9 @@ variables which may be combined in different ways in different output.
 </p>
 
 <p>If a grammar is specified, we get it into XML form as the value
-of <ident>$new-xml-grammar</ident>. 
-<scrap id="lib-rts-g-new"
+of <ident>$new-xml-grammar</ident>. The basic form of this is
+straightforward:
+<scrap id="lib-rts-g-new" 
        name="Set $new-xml-grammar">
 
       let $new-xml-grammar := if ($test-set/tc:ixml-grammar)
@@ -695,6 +702,25 @@ of <ident>$new-xml-grammar</ident>.
           else if ($test-set/tc:vxml-grammar-ref)
           then <ptr target="lib-rts-ld-vxml-ref"/>
           else ()
+</scrap></p>
+<p>In version 2 of the test harness, we ask BaseX to keep track
+of the time taken, so we can record that in the test report.
+<scrap corresp="lib-rts-g-new" version="v2"
+       name="Set $new-xml-grammar">
+
+      let $nxg-plus := prof:track(
+          if ($test-set/tc:ixml-grammar)
+          then <ptr target="lib-rts-ld-ixml"/>
+          else if ($test-set/tc:vxml-grammar)
+          then <ptr target="lib-rts-ld-vxml"/>
+          else if ($test-set/tc:ixml-grammar-ref)
+          then <ptr target="lib-rts-ld-ixml-ref"/> 
+          else if ($test-set/tc:vxml-grammar-ref)
+          then <ptr target="lib-rts-ld-vxml-ref"/>
+          else ()
+          ),
+          $new-xml-grammar := $nxg-plus?value
+          
 </scrap>
 </p>
 <p>Each of these needs to be done cautiously.  First is
@@ -847,7 +873,8 @@ and the attributes, strip the children.</hi>
        name="Record grammar test result">
 
         if (($options/@details = 'by-case')
-           and exists($grammar-test-result))
+           and exists($grammar-test-result
+                      /self::tc:grammar-result))
         then (element tc:grammar-result {
                 $grammar-test-result/@*
              }, 
@@ -938,7 +965,8 @@ they should be inserted here.</p>
 <head>Running the <gi>grammar-test</gi></head>
 <p>If a grammar is given, a <gi>grammar-test</gi> may also be
 specified.  If so, we delegate the handling of the test to the
-<ident>t:test-grammar()</ident> function.
+<ident>t:test-grammar()</ident> function.  The basic form of
+this is as follows:
 <scrap id="lib-rts-grammar-test"
        name="Set $grammar-test-result">
 
@@ -949,6 +977,37 @@ specified.  If so, we delegate the handling of the test to the
                             $checked-xml-grammar, 
                             $options)
         else ()
+</scrap>
+In order to record the time taken to parse the
+grammar, we need to inject some information into
+the grammar test result, which we do using the
+update facility.  And if there is no grammar test,
+we stick a <ident>tc:description</ident> into the
+variable to record the information.
+<scrap corresp="lib-rts-grammar-test"
+       version="v2"
+       name="Set $grammar-test-result">
+
+    let $gt := $test-set/tc:grammar-test,
+        $parsetime := attribute t:parsetime {
+                        $nxg-plus?time
+                      }
+    let $grammar-test-result := 
+        if (exists($gt))
+        then (copy $gtr := t:test-grammar($gt, 
+                            $checked-xml-grammar, 
+                            $options)
+             modify insert node $parsetime 
+                           into $gtr
+             return $gtr
+             )
+        else element tc:description {
+               $parsetime,
+               element tc:p {
+                 "Grammar parse time: ",
+                 $nxg-plus?time
+               }              
+             }
 </scrap>
 </p>
 
@@ -1075,7 +1134,9 @@ then we pass the test.
              and
              ($xml-grammar/self::tc:error[@id = 
              ("t:tbd04", "t:tbd06")]
-             or $xml-grammar/self::no-parse)
+             or $xml-grammar/self::no-parse
+             or $xml-grammar/child::no-parse
+             )
             )
     then (
            (: grammar did not parse :)
@@ -1222,6 +1283,7 @@ declare function t:run-test-case(
   return (element tc:test-result {
     $test-case/@*,
     attribute result { $result },
+    <ptr target="lib-rtc-report-time"/>,
     <ptr target="lib-rtc-report-error"/>,
     if ($options/@details eq 'inline')
     then $details
@@ -1315,7 +1377,21 @@ We need to be careful to ensure that the value of
 </p>
 <p>We have input string and expectations ready,
 or else we are holding error markers in their place.
-Time to run the test.
+Time to run the test.</p>
+<p>The code for running the test has gone through
+several iterations, perhaps best understood in
+roughly chronological order.</p>
+<p>The initial version of the parser call was straightforward:
+<scrap corresp="lib-rtc-parse-with-timeout"
+       version="alt"
+       name="Direct invocation of parse for test case">
+          ap:parse-string-with-compiled-grammar(
+            $input-string,
+            $G
+          )
+</scrap>
+But that has some drawbacks, including occasional
+uncaught exceptions.  So we wrap it in a try/catch.
 <scrap id="lib-rtc-parse"
        name="Set $parse-tree by parsing the test input string">
 
@@ -1341,19 +1417,10 @@ Time to run the test.
               $err:column-number, ")"
           }
         }
-</scrap></p>
-
-<p>The initial version of the parser call was straightforward:
-<scrap corresp="lib-rtc-parse-with-timeout"
-       version="alt"
-       name="Direct invocation of parse for test case">
-          ap:parse-string-with-compiled-grammar(
-            $input-string,
-            $G
-          )
 </scrap>
-But that has some drawbacks.  Wrapping it in a try/catch expression
-helps with some of them, but not all.  It is embarrassing to admit it,
+</p>
+<p>Wrapping the call to the parse function in a try/catch expression
+helps with some problems, but not all.  It is embarrassing to admit it,
 but at the moment, there are some tests in the test suites that
 Aparecium currently executes very slowly.  Indeed, there are some for
 which I don't have timings because I have always run out of patience
@@ -1364,6 +1431,8 @@ loop of some kind.  I don't know.</p>
 certain test cases, I would like to have the tests time out after some
 user-specified point number of seconds.  We can do this with the third
 parameter to the BaseX <ident>xquery:eval()</ident> function.
+So we wrap the parse request in a call to <ident>xquery:eval()</ident>,
+specifying a maximum amount of time.
 <scrap id="lib-rtc-parse-with-timeout"
        name="Parse the input, with a time limit">
 
@@ -1388,6 +1457,47 @@ get around to trying to run the test harness in Saxon, a different
 formulation will be necessary.  (If push comes to shove, we can
 generate different modules for BaseX and Saxon, but it would be nicer
 to have them co-exist.)</p>
+<p>In version 2, we modify the code for setting the variable
+<ident>$parse-tree</ident> to gather timing information as well.
+<scrap corresp="lib-rtc-parse"
+       version="v2"
+       name="Set $parse-tree by parsing the test input string">
+
+    let $pt-plus := prof:track(
+        <ptr target="lib-rtc-parse-precheck"/>
+        else try {
+          <ptr target="lib-rtc-parse-with-timeout"/>
+        } catch xquery:timeout {
+          element tc:error {
+              attribute id { "t:tbd19" },
+              "Parse function timed out at ",
+              ($options/@timeout/number(), 600)[1],
+	      " seconds."
+          }
+        } catch * {
+          element tc:error {
+              attribute id { "t:tbd16" },
+              "Parse function blew up. ",
+              $err:code, $err:value, 
+              " module: ",
+              $err:module, 
+              "(", $err:line-number, ",", 
+              $err:column-number, ")"
+          }
+        }
+        )
+    let $parse-tree := $pt-plus?value 
+</scrap>
+</p>
+<p>The variable <ident>$pt-plus</ident> also has timing
+information, which we report as needed.
+<scrap id="lib-rtc-report-time"
+       name="Report parse time if available">
+  if (exists($pt-plus))
+  then attribute t:parsetime { $pt-plus?time }
+  else ()
+</scrap>
+</p>
 <p>The mechanism for setting options has not yet been described,
 but it will be no surprise that it involves an XML document.  We can
 set the <ident>timeout</ident> option this way:
@@ -1396,6 +1506,7 @@ set the <ident>timeout</ident> option this way:
 
       attribute timeout { 600 }
 </scrap>
+
 </p>
 <p>The preliminary checks before parsing are for failures in fetching
 the input string or the expectations, or for a bad grammar.

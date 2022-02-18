@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '9 February 2022' >
+<!ENTITY date.last.touched '17 February 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
 
+<!ENTITY mdash  "&#x2014;" ><!--=em dash-->
+<!ENTITY prime  "&#x2032;" ><!--/prime =prime or minute-->
+
 <!ENTITY c '<ident>c</ident>' >
+<!ENTITY C '<ident>C</ident>' >
 <!ENTITY e '<ident>e</ident>' >
 <!ENTITY E '<ident>E</ident>' >
 <!ENTITY E.. '<ident>$E</ident>' >
+<!ENTITY f '<ident>f</ident>' >
 <!ENTITY F '<ident>F</ident>' >
 <!ENTITY G '<ident>G</ident>' >
 <!ENTITY I '<ident>I</ident>' >
@@ -18,18 +23,26 @@
 <!ENTITY L.G '<ident>L(G)</ident>' >
 <!ENTITY L.q '<ident>L(q)</ident>' >
 <!ENTITY M '<ident>M</ident>' >
-<!ENTITY M_E '&M; <hi rend="subscript">&E;</hi>' >
+<!ENTITY N '<ident>N</ident>' >
+<!ENTITY N.. '<ident>N&prime;</ident>' >
+<!ENTITY N.x.y '&N;·&x;·&y;' >
+<!ENTITY M_E '&M; <hi rend="sub">&E;</hi>' >
 <!ENTITY ME '&M_E;' >
+<!ENTITY O0 '<ident>O</ident><hi rend="sub">0</hi>' >
 <!ENTITY p '<ident>p</ident>' >
 <!ENTITY q '<ident>q</ident>' >
-<!ENTITY q0 '<ident>q</ident><hi rend="subscript">0</hi>' >
+<!ENTITY q0 '<ident>q</ident><hi rend="sub">0</hi>' >
+<!ENTITY qf '<ident>q</ident><hi rend="sub">&f;</hi>' >
+<!ENTITY T '<ident>T</ident>' >
+<!ENTITY x '<ident>x</ident>' >
+<!ENTITY y '<ident>y</ident>' >
 
-<!ENTITY mdash  "&#x2014;" ><!--=em dash-->
 
 <!--* Reminder:
       (progn
         (make-variable-buffer-local 'nxml-child-indent)
-        (setq 'nxml-child-indent 0))
+        (setq nxml-child-indent 0)
+      )
 
       For now, do this manually.  I don't know how to
       make Aquamacs do it using eval-last-sexp or eval-expression.
@@ -54,6 +67,7 @@
 </fileDesc>
 <revisionDesc>
 <list>
+<item>2022-02-16 : CMSMcQ : trying to clean up a bit</item>
 <item>2022-02-16 : CMSMcQ : insert timing requests in earley-closure.
 Conjecture:  4/5 of the time will be in the call to leiPCSrel(),
 very little in deduping etc.</item>
@@ -101,56 +115,35 @@ and the Chamber of Secrets</title>
 </bibl>
 </epigraph>
 
-<p>This document is the source code for Aparecium, an
-invisible-XML processor written in XSLT and XQuery, as a library
-for use in those languages.  Aparecium is a <soCalled>literate
-program</soCalled>, in the sense defined by Donald Knuth: this
-document contains descriptions of the program in English prose
-and in XQuery and XSLT source code.  Processed in one way, the
-document produces XQuery and XSLT programs; processed another
-way, it produces a (rather dry) technical exposition of their
-structure and coding.  Readers in search of user-level
+<p>This document is the source code for Aparecium, an invisible-XML
+processor written in XSLT and XQuery, as a library for use in those
+languages.  Aparecium is a <soCalled>literate program</soCalled>, in
+the sense defined by Donald Knuth: this document contains descriptions
+of the program in English prose and in XQuery and XSLT source code.
+Processed in one way, the document produces XQuery and XSLT programs;
+processed another way, it produces a (rather dry) technical exposition
+of their structure and coding.  Readers in search of user-level
 introductions to invisible XML or the use of Aparecium to build
 applications will not find here what they seek.</p>
 
 <p>The specific literate programming system used here is SWeb; a
-description of its notation is given 
-in <ptr target="msm-1996"/>.
+description of its notation is given in <ptr target="msm-1996"/>.
 <!-- <ref target="notation">in an appendix</ref>. -->
 </p>
 
-<p>In its current form, the program is incomplete.  A running
-version of Aparecium exists, implemented in XQuery; this
-document is my attempt to update and upgrade it.  The work plan
-is:
-<list>
-<item><p>Draft overview of program, top-level structure, in
-XQuery.</p></item>
-
-<item><p>Create three simple cases to use in initial
-development, showing input and output for each stage of
-processing.</p></item>
-
-<item><p>Write XSLT stylesheet to translate from test suite
-catalog (as in ixml-texts repo) to XSpec.</p></item>
-
-<item><p>Implement grammar normalization (EBNF to
-BNF).</p></item>
-<item><p>Implement generation of Earley set.</p></item>
-<item><p>Implement creation of parse forest grammar from
-Earley set.</p></item>
-<item><p>Implement extraction of parse tree(s) from parse
-forest grammar.</p></item>
-
-<item><p>When XQuery version is running on the three toy
-cases, run on larger ixml test suite.</p></item>
-
-<item><p>Upgrade the SWeb infrastructure to support
-XSLT.</p></item>
-<item><p>Create XSLT version of Aparecium.</p></item>
-
-</list>
-</p>
+<p>In its current form, the document is incomplete and not well
+organized.  It was created by making a skeletal overview of the
+document as it should be and then breaking the source code of a
+running version of Aparecium up into chunks and inserting them into
+that skeleton.  Not everything landed where it ought in principle to
+have landed; the organization of the document suffered somewhat from
+that.  As time permits, I hope to revise the document to make it
+easier to read and better organized.</p>
+<p>At this revision (&date.last.touched;), Aparecium works and passes
+the large majority of the tests available.  (A list of test-case
+failures as of today is given <ref target="known-bugs">in an
+appendix</ref>.)  The current plans for further work are 
+given <ref target="to-do">in a different appendix</ref>.</p>
 
 <div id="intro">
 <head>Introduction</head>
@@ -232,25 +225,22 @@ empty string, which vary both in depth and in width.</p>
 <p>For this reason, Aparecium divides this step further.	   
 <list>
 <item>
-<p>Instead of extracting a single parse tree from the
-Earley set, Aparecium extracts a parse-forest grammar
-representing all parse trees for the sentence. [Or rather,
-it will do so real soon now.  The current version
-does extract a tree.]</p>
-<p>Parse-forest grammars have the convenient property
-that they can concisely describe more than one parse
-tree over the given input, even infinite trees.  It is
-relatively straightforward to tell by examing the
-parse-forest grammar whether it describes a single
-parse tree or multiple parse trees, and whether the
-number of parse trees is finite or infinite.</p>
+<p>Instead of extracting a single parse tree from the Earley set,
+Aparecium extracts a parse-forest grammar representing all parse trees
+for the sentence. [Or rather, it will do so real soon now.  The
+current version does extract a tree.]</p>
+<p>Parse-forest grammars have the convenient property that they can
+concisely describe more than one parse tree over the given input, even
+infinite trees.  It is relatively straightforward to tell by examing
+the parse-forest grammar whether it describes a single parse tree or
+multiple parse trees, and whether the number of parse trees is finite
+or infinite.</p>
 </item>
 <item>
 <p>A separate function extracts [er, will extract] a single parse tree
-from the parse-forest grammar and returns a pair
-consisting of (a) the tree extracted and (b) a
-function which can be called to extract another parse
-tree, if there is another.</p>
+from the parse-forest grammar and returns a pair consisting of (a) the
+tree extracted and (b) a function which can be called to extract
+another parse tree, if there is another.</p>
 </item>
 </list>
 </p>
@@ -907,12 +897,278 @@ go here.  For now, see <ptr target="epi-ast-from-raw"/>.</hi></p>
 </div>
 
 </div>
+
 <div id="hi-pfg">
 <head>Generating the parse-forest grammar</head>
-<p>Watch this space.</p>
-<p>Note that each non-terminal in the parse-forest grammar
-carries an explicit annotation, to simplify later construction
-of the abstract syntax tree.</p>
+
+<p>Another way to describe a set of derivations is to use a
+parse-forest grammar.  It may be helpful to begin with a
+brief description.</p>
+
+<div id="hi-pfg-intro">
+<head>Short description of parse-forest grammars</head>
+
+<p>A parse-forest grammar is a way of describing the parse trees for
+exactly one sentence in some language defined by another grammar (what
+we may call its <soCalled>base grammar</soCalled>.</p>
+
+<p>It is perhaps best explained by example. Consider the sentence
+<q><code>7-4+2</code></q> parsed against the folllowing simple and
+ambiguous grammar:
+<eg>S = expr.
+expr = num; expr, addop, expr.
+num = ["0" - "9"]+.
+addop = "+"; "-".
+</eg></p>
+<p>One parse tree for the sentence is<eg><![CDATA[  <S>
+    <expr>
+      <expr>
+        <expr><num>7</num></expr>
+        <addop>-</addop>
+        <expr><num>4</num></expr>
+      </expr>    
+      <addop>+</addop>
+      <expr><num>2</num></expr>
+    </expr>
+  </S>]]></eg>
+Another is:
+<eg><![CDATA[  <S>
+    <expr>
+      <expr><num>7</num></expr>
+      <addop>-</addop>
+      <expr>     
+        <expr><num>4</num></expr>
+        <addop>+</addop>
+        <expr><num>2</num></expr>
+      </expr>
+    </expr>
+  </S>]]></eg>
+</p>
+<p>Each parse tree can be described in a parse-tree grammar which has
+a structure similar to that of the original grammar.  For every
+nonterminal &N; in the parse tree which dominates some substring from
+position &x; to position &y; in the sentence, the parse-tree grammar
+will have a nonterminal with a name constructed from &N;, &x;, and &y;
+with a rule showing how &N; produces that segment.  The first parse tree, for example,
+can be written as a parse-tree grammar thus:<eg>
+S·0·5 = expr·0·5.
+expr·0·5 = expr·0·3, addop·3·4, expr·4·5.
+expr·0·3 = expr·0·1, addop·1·2, expr·2·3.
+expr·0·1 = num·0·1.
+expr·2·3 = num·2·3.
+expr·4·5 = num·4·5.
+num·0·1 = "7".
+num·2·3 = "4".
+num·4·5 = "2".
+addop·1·2 = "-".
+addop·3·4 = "+".
+</eg></p>
+<p>The second tree can likewise be described in a grammar, which
+shares a great many of the rules from the first parse-tree grammar.
+It may be obvious to the reader that both trees can be described in
+the same grammar, thus:<eg>
+S·0·5 = expr·0·5.
+expr·0·5 = expr·0·3, addop·3·4, expr·4·5
+         | expr·0·1, addop·1·2, expr·2·5.
+expr·0·3 = expr·0·1, addop·1·2, expr·2·3.
+expr·2·5 = expr·2·3, addop·3·4, expr·4·5.
+expr·0·1 = num·0·1.
+expr·2·3 = num·2·3.
+expr·4·5 = num·4·5.
+num·0·1 = "7".
+num·2·3 = "4".
+num·4·5 = "2".
+addop·1·2 = "-".
+addop·3·4 = "+".
+</eg></p>
+
+<p>Note that in the grammar describing a single tree, every rule has
+exactly one right-hand side; in the grammar describing multiple trees,
+<ident>expr·0·5</ident> has two right-hand sides, reflecting the fact
+that it can produce the string in two different ways.</p>
+</div>
+
+<div>
+<head>Constructing a parse-forest grammar</head>
+<p>Our overarching task here can be described thus:  Given
+<list>
+<item>an Earley set closed under the <ident>scan</ident>,
+<ident>pred</ident>, and <ident>comp</ident> relations, and</item>
+<item>a completion item in that set</item>
+</list>
+we are to construct a parse-forest grammar describing the set of parse
+trees whose existence is implied by the completion item.</p>
+<p>A brute-force approach would simply construct a grammar rule for
+every possible realization of every completion item in the Earley set,
+but that would produce rules for matches that never made it into a
+successful parse.  (Since those rules would be a potentially
+informative description of the garden paths followed by the parser
+before they reached a dead end, they might be useful as a
+grammar-debugging measure.  But for now we are interested only in
+completions that actually play a role in a successful derivation of
+the input.)</p>
+
+<p>Since we are given a completion item of the form (&x; &y; &N;
+&qf;)<note place="foot"><p>Here &qf; is any final state in the
+definition of &N;.</p></note> a simple way to handle the task is:
+<list>
+<item>
+<p>Construct the production rule for &N;·&x;·&y;.</p>
+</item>
+<item>
+<p>For each nonterminal in the right-hand side of the rule just
+constructed, construct the production rule for that nonterminal.</p>
+</item>
+</list>
+</p>
+
+<p>The first step will entail finding a sequence of completion items
+that correspond to a walk through the right-hand side of the
+production rule for &N; in the base grammar and which collectively
+cover the input segment from &x; to &y;, constructing appropriate new
+nonterminals for them, and writing those nonterminals into the
+right-hand side in an appropriate sequence.  If there is more than
+one such walk through the rule for &N;, then &N; is ambiguous,
+and we want all of those walks.<note place="foot"><p>At the moment,
+there are some infinitely ambiguous sentences for which we
+will not in fact get all of the walks.  That appears to be a
+disadvantage of working directly with EBNF instead of rewriting
+the grammar to BNF.</p></note></p>
+
+<p>The second step can be handled by calling the same function we
+called to handle the completion we started with.  Since in cases of
+ambiguity the same nonterminal may appear in more than one walk
+through &N; and thus in more than one right-hand side for &N.x.y;, we
+should keep track of what nonterminals we have already constructed or
+already placed in the queue.</p>
+
+<p>The top-level function for making the parse-forest grammar will
+thus place the initial completion item in a work queue and delegate
+responsibility for generating the appropriate production rules to a
+separate recursive function, wrapping the result in an <gi>ixml</gi>
+element or an <gi>error</gi> element.</p>
+
+<p>
+<scrap id="epi-parse-forest-grammar"
+       name="Define parse-forest-grammar()">
+declare function epi:parse-forest-grammar(
+  $leiCompletions as map(*)*,
+  $leiClosure as map(*)*,
+  $I as xs:string
+) as element() {
+  let $rules := epi:make-pfg-rules(
+                    $leiCompletions,
+                    $leiClosures,
+		    $I, 
+                    ())
+  return if ($rules/self::ap:error)
+    then element ap:error {
+           element comment {
+             "Failure generating PFG. ",
+             "Sorry!" 
+           },
+           $rules                
+         }
+    then element ixml {
+           element comment {
+             "Parse-forest grammar generated ",
+             current-dateTime()
+           },
+           $rules                
+         }
+};
+<ptr target="epi-make-pfg-rules"/>
+</scrap>
+</p>
+
+<p>The <ident>epi:make-pfg-rules()</ident> function has a familiar
+basic structure: if there is work in the queue, we do it, we check to
+see whether it has generated further work, and we recur to handle the
+remaining items in the queue.  If the queue is empty, we are done and
+can return the accumulated intermediate results.
+<scrap id="epi-make-pfg-rules"
+       name="Define function epi:make-pfg-rules()">
+declare function epi:make-pfg-rules(
+  $leiQueue as map(*)*,
+  $leiClosure as map(*)*,
+  $I as xs:string,
+  $leAcc as element()*
+) as element()* {
+  <ptr target="epi-mpr-stop"/>
+  else 
+  let $ei := head($leiQueue)
+  <ptr target="epi-mpr-find-walk"/>
+  <ptr target="epi-mpr-make-rule"/>
+  <ptr target="epi-mpr-update-queue"/>
+  <ptr target="epi-mpr-recur"/>
+
+};
+</scrap></p>
+<p>The base case is unsurprising:
+<scrap id="epi-mpr-stop"
+       name="If PFG queue is empty, return accumulator">
+  if (empty($leiQueue))
+  then $leiAcc
+</scrap></p>
+
+<p>The core task of making the parse-forest grammar seems to be
+finding the sequences of completion items which represent the
+parse-tree children of the node represented by the current completion
+item.  It's complicated by several factors:
+<list>
+
+<item><p>We must move back and forth continually between the parent
+level, moving forward state by state in the FSA for the parent
+nonterminal &N;, and the child level, identifying completion items for
+each child &C;.  The information we want is never where we are at any
+time, figuratively speaking.</p></item>
+
+<item><p>We need to find all the walks, not just one.  The ixml spec
+wants us to report ambiguity, and that means we need to know whether
+more than one walk exists.</p>
+
+<p>Each walk is (notionally at least) a sequence of completion items
+describing parse-tree children.  But we can't return a sequence of
+sequences, so we need to use an array, or a map with a tree structure
+to share prefixes.</p></item>
+
+<item><p>We need to be alert for cycles in the walk.  These will
+always be edge cases: they can arise only if repeatable sequences of
+children can and do produce the empty string.  But they can
+occur.</p></item>
+</list>
+
+<scrap id="epi-mpr-find-walk"
+       name="Set $walks to possible child sequences for $ei">
+</scrap>
+</p>
+
+<p>Given a completion item (&x; &y; &N; &qf;) and a set of walks
+through the rule for &N;, make a production rule for &N.x.y; with an
+appropriate expression on the right-hand side.
+
+<scrap id="epi-mpr-make-rule"
+       name="Set $rule to production rule for $ei">
+</scrap>
+</p>
+
+<p>Given a queue, an accumulator, and a new production rule (or the
+set of walks that produced it), identify which completion items need
+to be added to the queue.  That would be: all the completion items in
+the walks, unless they are already in the queue or already handled in
+the accumulator.
+<scrap id="epi-mpr-update-queue"
+       name="Set $new-queue to include new completions">
+</scrap>
+</p>
+<p>Given a production rule and and an updated queue, call
+<ident>make-pfg-rules()</ident> recursively.
+<scrap id="epi-mpr-recur"
+       name="Call epi:make-pfg-rules() with new queue and accumulator">
+</scrap>
+</p>
+
+</div>
 </div>
 
 <div id="hi-rpt-ex-pfg">
@@ -1375,7 +1631,9 @@ prediction must also check for completions of its predicted
 non-terminals, which increases the number of times we must scan
 through the accumulator and offers a low-hanging target for improving
 speed. <hi>TO DO: pluck that low-hanging fruit.</hi></p>
-<p>The function has two cases:  either we are done, or we are done.
+
+<p>The function has two cases: either we are done, or we are not yet
+done.
 <scrap prev="eri-items-closure"
        name="Define earley-closure($pending, $accumulator, $I, $G)">
 
@@ -2984,7 +3242,7 @@ it finds and a function to call for the next tree (and the next
 function); this involves wrapping up continuations and passing them
 around.  (It may be helpfl to do a five-finger exercise fetching the
 items of a sequence one at a time.)</p></item>
-<item><p>ep:parseforest($I, $G) will return a parse forest grammar for
+<item><p>ep:parseforest($I, $G) will return a parse-forest grammar for
 the trees.  It can and should include the looped parse trees.  It may
 have clean/dirty variants that do or don't bother to clean the grammar
 up (tbd; dunno yet).</p></item>
@@ -3336,23 +3594,6 @@ declare function epi:parse-forest-map(
   $I as xs:string
 ) as map(*) {
   map { 'Result' : &lt;parse-forest-map-not-implemented-yet/> }
-};
-</scrap></p>
-</div>
-<div id="epi-trf-pfg">
-<head>The <ident>parse-forest-grammar()</ident> function</head>
-<p>Another parse-forest interface will return a parse-forest
-grammar.  (As this is written, I think this is the key:  from
-the Earley set, generate a parse-forest grammar, and generate
-all other forms of result from the parse-forest grammar.)
-<scrap id="epi-parse-forest-grammar"
-       name="Define parse-forest-grammar()">
-declare function epi:parse-forest-grammar(
-  $leiCompletions as map(*)*,
-  $leiClosure as map(*)*,
-  $I as xs:string
-) as element() {
-  &lt;parse-forest-grammar-not-implemented-yet/>
 };
 </scrap></p>
 </div>
@@ -5078,6 +5319,10 @@ The Markup Conference 2017.</title>
 vol. 19 (2017)</title>.
 <xref>https://doi.org/10.4242/BalisageVol19.Sperberg-McQueen01</xref>.
 </bibl>
+
+<bibl id="msm-2022" n="Sperberg-McQueen 2022">
+<author>Sperberg-McQueen, C. M.</author> <title level="u">Test harness
+for Aparecium</title>.  Unpublished technical report, 2022.</bibl>
 </listBibl>
 </div>
 
@@ -5090,10 +5335,141 @@ vol. 19 (2017)</title>.
 <head>To do</head>
 <p>As the reader will have noticed, in its current state this
 program is not finished. Hence the following to-do lists.</p>
+
+<div id="to-do-large">
+<head>Overall plans</head>
+
+<p>At the moment (&date.last.touched;), the primary concerns are to
+improve performance and robustness.</p>
+<list>
+<item><p>Improve tree constructor. Or, rather, replace
+it. Concretely:</p>
+<list>
+<item><p>Define a function to generate a parse-forest grammar
+from the Earley set, rather than a parse tree.</p></item>
+<item><p>Define a function to extract one or more parse trees
+from a parse-forest grammar.</p>
+</item>
+</list>
+<p>The parse-tree constructor currently suffers from dismal
+performance on some tests; see in particular the zeroes test catalog.
+It performs its work without backtracking but also without memoization
+or a work queue or any mechanism to avoid doing the same task multiple
+times.  The result can be a combinatorial explosion, with the same
+subtrees being constructed hundreds and thousands of times even for
+input of only ten characters.</p>
+<p>Since I want to write a parse-forest grammar constructor in any
+case, I have not attempted to instrument the current tree constructor;
+my plan is just to construct a parse-forest grammar and then extract
+the tree from that, if the user wishes.</p>
+
+<p>My current expectation is that in most cases this will result in a
+modest improvement in performance.  Performance should improve because
+useless work will be avoided and necessary work will be performend
+only once.  But the improvement will be modest, because not all
+grammars cause much unnecessary or repeated work.</p>
+<p>To be concrete: at the moment tree construction normally takes
+between 15% and 50% of the running time, except in a few pathological
+cases.  (Some timing data are in the A subdirectory of this project.)
+A ten to twenty per cent improvement in the performance of tree
+construction will thus provide a one to ten per cent overall
+improvement.  In the pathological cases, the improvement should be
+greater.
+</p>
+</item>
+<item><p>Allow invoker to specify options, so they can choose whether
+to get back one parse tree, several, a parse-forest grammar, a raw
+parse tree, or the entire Earley set.</p>
+<p>The current organization based on higher-level functions should be
+scrapped, in order that Aparecium can run under Saxon.</p>
+<p>Eventually the current direct-construction code may be
+retired completely.</p>
+</item>
+<item><p>Improve tokenization.</p>
+<p>Since ixml grammars don't have a distinct token level, either
+analysis by the processor or manual annotation, or both, may be
+required.  The goal is to identify nonterminals which can be
+recognized with a single greedy regular-expression match, and
+recognize them in that way.  I believe a nonterminal &N;
+qualifies for this treatment if and only if:
+<list>
+<item>&N; defines a regular language.  (Sufficient but not necessary
+condition: no center embedding for them or any descendant.  A stronger
+and easier condition: no self-embedding at all.)</item>
+<item>Every nonterminal descendant of &N; is marked hidden.</item>
+<item>Every terminal descendant of &N; is marked visible.</item>
+<item>&N; is what we might call <term>end-stopped</term>, by analogy
+with the metrical phenomenon in which syntactic and verse boundaries
+fall together, thus clearly marking the boundary.  Concretely, &N; is
+end-stopped if it is clear without lookahead where the end of an
+occurrence of &N; falls: any legal character is either a continuation
+of the &N; or the beginning of the next symbol, and no symbol can be
+read in both ways.<note place="foot">
+
+<p>Operationally, I think end-stopping can be detected as follows.
+<list>
+
+<item>Construct the FSA for the &O0; regular superset approximation of
+&L.G;, in the usual way.  For each nonterminal, keep track of the set
+of states that recognize that nonterminal.  (Including states in
+descendant nonterminals, if they have been retained; in practice, I
+expect it will make sense to rewrite the rules for &N; as a regular
+expression over characters.)</item>
+
+<item>For every nonterminal &N; and every state which can reach the
+final state of &N; via epsilon transitions, mark that state as a
+member of <ident>last</ident>(&N;).  The terminal subset of this set
+we can call <ident>last</ident><hi rend="sub">&T;</hi>(&N;).</item>
+
+<item>Remove epsilon transitions.</item>
+
+<item>For each state &q; in <ident>last</ident><hi
+rend="sub">&T;</hi>(&N;), classify the outgoing arcs: either they lead
+to a state in the recognizer for &N;, or they lead to one of the
+initial states in a recognizer for some nonterminal in
+<ident>follow(N)</ident>.  We can call these <term>endotelic</term>
+and <term>exotelic</term> arcs: they have goals inside, or outside,
+the recognizer for &N;.</item>
+
+<item>If no symbol occurs on both an endotelic and an exotelic arc,
+then &N; is end-stopped: if an occurrence of &N; can be extended by
+including the next character in the input, then in any correct parse
+that character is included in the &N;.  If any symbol occurs on both
+kinds of arc, then it is not clear without further information
+whether it belongs in the &N; or outside it.</item>
+</list>
+</p>
+
+</note></item>
+<item></item>
+</list></p>
+</item>
+
+
+<item><p>Improve diagnostics in case of failure.</p></item>
+<item><p>Improve robustness.</p></item>
+
+<item><p>Upgrade the SWeb infrastructure to support
+XSLT.</p></item>
+<item><p>Create XSLT version of Aparecium.</p></item>
+
+<item><p>Consider shifting to using BNF rather than EBNF
+internally. (This will make it simpler to handle various forms of
+infinite ambiguity satisfactorily, but will have little effect in
+ordinary grammars.)</p></item>
+
+</list>
+</div>
+
 <div id="to-do-code">
 <head>Code changes</head>
 <p>Fixes / shorter-term changes to be made:</p>
 <list>
+<item>16 Feb 22:  make compilation place a <att>follow:info</att> attribute
+or something on the <gi>ixml</gi> element, to de-clutter the
+compiled grammar.</item>
+<item>16 Feb 22: Weed these to-do lists!</item>
+
 <item>Make a common-utilities module for global project-level
 variables (e.g. version number, tracing level) and tracing / debugging
 routines.</item>
@@ -5127,6 +5503,81 @@ decent display / translation into XHTML), move to github.</item>
 tangle processor</item>
 </list>
 </div>
+</div>
+
+<div id="known-bugs">
+<head>Known bugs and test failures</head>
+<p>Known bugs and shortcomings:
+<list>
+<item>On inputs over a few tens of characters, Aparecium is
+currently unreasonably slow.</item>
+<item></item>
+</list>
+</p>
+
+<p>Test-case failures (as of 17 Feb 22):
+<list>
+<item>In test catalog test2:
+<list>
+<item>grammar-test failure on test-set a</item>
+<item>test set ambiguity-1, test vowels-ok1</item>
+<item>test set ambiguity-1, test vowels-ok2</item>
+<item>test set ambiguity-1, test vowels-ok3</item>
+<item>test set ambiguity-1, test vowels-ok4</item>
+<item>test set ambiguity-1, test vowels-ok5</item>
+</list>
+</item>
+<item>In test catalog zeroes:<list>
+<item>zeroes-gone-bad / t-4x0 (test-catalog error, I guess:
+should expect an ambiguity label)</item>
+</list></item>
+<item>In test set syntax-cagt (catalog as grammar tests):
+<list>
+<item>elem1 (duplicate attributes)</item>
+<item>illegal-class.ixml</item>
+<item>rule2 (more than one rule for a nonterminal)</item>
+<item>unused-rule (unreachable and undefined nonterminals)</item>
+<item>unused-rules (ditto)</item>
+</list></item>
+<item>In test set ixml-corr:
+<list>
+<item>expr1:  exception in parsing XQDY0025</item>
+<item>hex3:  grammar compilation failed</item>
+<item>json:  grammar compilation failed</item>
+<item>range:  grammar compilation failed</item>
+<item>unicode-range1:  grammar compilation failed</item>
+<item>element-content</item>
+<item>range-comments</item>
+<item>ranges1</item>
+</list></item>
+<item>In test set ixml-ambi:
+<list>
+<item>date</item>
+</list></item>
+<item>In test set ixml-ixml:
+<list>
+<item>bnf times out at 600 seconds</item>
+</list></item>
+<item>In test set gxxx:
+<list>
+<item>G022-neg-049</item>
+<item>G022-neg-068</item>
+<item>grammar test G101-positive (and thus did not run any of the test cases for it)</item>
+<item>G112-external / S1</item>
+</list></item>
+</list>
+</p>
+<p>And to make myself feel better, here is a list of test sets
+with no failures:
+<list>
+<item>test0</item>
+<item>test1</item>
+<item>misc (as of 17 Feb 22)</item>
+<item>syntax-caii (catalog as instances in ixml)</item>
+<item>syntax-caix (catalog as instances in XML)</item>
+</list></p>
+<p>The test harness used is described in a separate document
+(<ptr target="test-harness"/>).</p>
 </div>
 
 <div id="change-logs">

@@ -26,6 +26,7 @@ declare function t:run-tests(
 
   return element tc:test-report {
     
+    attribute t:creator { "Aparecium test harness v2" },
     element tc:metadata {
       element tc:name {
         'Test results for ' || $catalog/@name
@@ -114,7 +115,8 @@ declare function t:run-test-set(
   else 
     let $test-set-name := $test-set/@name/string()
           
-      let $new-xml-grammar := if ($test-set/tc:ixml-grammar)
+      let $nxg-plus := prof:track(
+          if ($test-set/tc:ixml-grammar)
           then 
           try {
                 ap:parse-grammar-from-string(
@@ -179,6 +181,9 @@ declare function t:run-test-set(
           
 
           else ()
+          ),
+          $new-xml-grammar := $nxg-plus?value
+          
 
       
       let $checked-xml-grammar := 
@@ -209,19 +214,33 @@ declare function t:run-test-set(
 
 
     
-    let $gt := $test-set/tc:grammar-test
+    let $gt := $test-set/tc:grammar-test,
+        $parsetime := attribute t:parsetime {
+                        $nxg-plus?time
+                      }
     let $grammar-test-result := 
         if (exists($gt))
-        then t:test-grammar($gt, 
+        then (copy $gtr := t:test-grammar($gt, 
                             $checked-xml-grammar, 
                             $options)
-        else ()
+             modify insert node $parsetime 
+                           into $gtr
+             return $gtr
+             )
+        else element tc:description {
+               $parsetime,
+               element tc:p {
+                 "Grammar parse time: ",
+                 $nxg-plus?time
+               }              
+             }
 
     return element tc:test-set-results {
           $test-set/@*, 
           
         if (($options/@details = 'by-case')
-           and exists($grammar-test-result))
+           and exists($grammar-test-result
+                      /self::tc:grammar-result))
         then (element tc:grammar-result {
                 $grammar-test-result/@*
              }, 
@@ -356,7 +375,9 @@ declare function t:test-grammar(
              and
              ($xml-grammar/self::tc:error[@id = 
              ("t:tbd04", "t:tbd06")]
-             or $xml-grammar/self::no-parse)
+             or $xml-grammar/self::no-parse
+             or $xml-grammar/child::no-parse
+             )
             )
     then (
            (: grammar did not parse :)
@@ -495,7 +516,7 @@ declare function t:run-test-case(
                  }
 
   
-    let $parse-tree := 
+    let $pt-plus := prof:track(
         
         if ($input-string eq $failure-string)
         then ()
@@ -546,6 +567,8 @@ declare function t:run-test-case(
               $err:column-number, ")"
           }
         }
+        )
+    let $parse-tree := $pt-plus?value 
 
   
     let $result :=
@@ -753,6 +776,10 @@ declare function t:run-test-case(
   return (element tc:test-result {
     $test-case/@*,
     attribute result { $result },
+      if (exists($pt-plus))
+  then attribute t:parsetime { $pt-plus?time }
+  else ()
+,
     
     if (exists($error-details))
     then element tc:app-info {
