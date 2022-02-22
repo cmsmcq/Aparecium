@@ -10,7 +10,7 @@ declare namespace db =
 
 declare option db:chop "false";
 
-let $catalog-index := 'test0' (: which catalog to run? short name :)
+let $catalog-index := 'wisp-A' (: which catalog to run? short name :)
 
 let $invdir := "../../ixml/tests/",
     $apadir := "../../Aparecium/tests/",
@@ -114,6 +114,17 @@ let $invdir := "../../ixml/tests/",
 	       path="{$ixtdir}ixml/ixml.test-catalog.pos.xml"/>
 
       <!--  wisps test set (currently in progress) -->
+      <catalog n="wisp-A"
+	       path="{$ixtdir}wisps/wisps-001-020-catalog.xml"/>
+      <catalog n="wisp-B"
+	       path="{$ixtdir}wisps/wisps-021-040-catalog.xml"/>
+      <catalog n="wisp-C"
+	       path="{$ixtdir}wisps/wisps-041-060-catalog.xml"/>
+      <catalog n="wisp-D"
+	       path="{$ixtdir}wisps/wisps-061-080-catalog.xml"/>
+      <catalog n="wisp-E"
+	       path="{$ixtdir}wisps/wisps-081-102-catalog.xml"/>
+
       <catalog n="wisps"
 	       path="{$ixtdir}wisps/wisp-catalog.xml"/>
          

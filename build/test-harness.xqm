@@ -341,7 +341,9 @@ declare function t:test-grammar(
                       $uri2,
                       text { " not found." }
                     }
-        else $e0
+        else if ($e0/self::tc:assert-xml/ixml)
+        then $e0/ixml
+        else $e0 (: assert-not-a-{grammar,sentence} :)
 
   
   return element tc:grammar-result {

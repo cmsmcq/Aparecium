@@ -526,6 +526,17 @@ List of available test-catalog files [continues</a> <a href=
                path="{$ixtdir}ixml/ixml.test-catalog.pos.xml"/&gt;
 
       &lt;!--  wisps test set (currently in progress) --&gt;
+      &lt;catalog n="wisp-A"
+               path="{$ixtdir}wisps/wisps-001-020.xml"/&gt;
+      &lt;catalog n="wisp-B"
+               path="{$ixtdir}wisps/wisps-021-040.xml"/&gt;
+      &lt;catalog n="wisp-C"
+               path="{$ixtdir}wisps/wisps-041-060.xml"/&gt;
+      &lt;catalog n="wisp-D"
+               path="{$ixtdir}wisps/wisps-061-080.xml"/&gt;
+      &lt;catalog n="wisp-E"
+               path="{$ixtdir}wisps/wisps-081-102.xml"/&gt;
+
       &lt;catalog n="wisps"
                path="{$ixtdir}wisps/wisp-catalog.xml"/&gt;
          
@@ -1310,7 +1321,9 @@ result for a grammar.
                       $uri2,
                       text { " not found." }
                     }
-        else $e0
+        else if ($e0/self::tc:assert-xml/ixml)
+        then $e0/ixml
+        else $e0 (: assert-not-a-{grammar,sentence} :)
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#lib-test-grammar">The test-grammar() function 34</a>
