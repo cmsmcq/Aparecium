@@ -138,7 +138,7 @@
 
 <h3>C. M. Sperberg-McQueen</h3>
 <h3>Begun 16 August 2021
-<br>Last rev. 17 February 2022</h3>
+<br>Last rev. 23 February 2022</h3>
 
 <hr><a name="toc"></a>
 <ul><!-- and a 1! -->
@@ -154,7 +154,7 @@
 <li>3.6. <a href="#hi-ptc">Direct generation of parse tree</a><ul><!-- and a 3! -->
 <li>3.6.1. <a href="#hi-ptc-raw">Raw parse trees</a></li><li>3.6.2. <a href="#hi-ptc-ast">Abstract syntax trees</a></li></ul></li>
 <li>3.7. <a href="#hi-pfg">Generating the parse-forest grammar</a><ul><!-- and a 3! -->
-<li>3.7.1. <a href="#hi-pfg-intro">Short description of parse-forest grammars</a></li><li>3.7.2. <a href="#d3e768">Constructing a parse-forest grammar</a></li></ul></li>
+<li>3.7.1. <a href="#hi-pfg-intro">Short description of parse-forest grammars</a></li><li>3.7.2. <a href="#hi-pfg-const">Constructing a parse-forest grammar</a></li></ul></li>
 <li>3.8. <a href="#hi-rpt-ex-pfg">Extracting a raw parse tree from the parse-forest grammar</a></li>
 <li>3.9. <a href="#hi-ast-ex-rpt">Extracting an abstract syntax tree from the raw parse tree</a></li>
 </ul></li><li>4. <a href="#lowlevel">Low-level utility routines</a><ul>
@@ -224,7 +224,7 @@ that skeleton.  Not everything landed where it ought in principle to
 have landed; the organization of the document suffered somewhat from
 that.  As time permits, I hope to revise the document to make it
 easier to read and better organized.</div>
-<div class="Real-P">At this revision (17 February 2022), Aparecium works and passes
+<div class="Real-P">At this revision (23 February 2022), Aparecium works and passes
 the large majority of the tests available.  (A list of test-case
 failures as of today is given <a href="#known-bugs">in an
 appendix</a>.)  The current plans for further work are 
@@ -652,9 +652,9 @@ specifies a start symbol (analogous to phrase/2 in Prolog).</div></li>
 for the recognizer itself (why?), and also some low-level
 things.
 <div class="scrap"><span><a name="eri-imports">&#x3008; 7 Imports for recognizer internals &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: **************************************************************** 
+<pre class="scrapbody">(: ****************************************************** 
    * Imports and setup
-   **************************************************************** :)
+   ****************************************************** :)
 
 import module namespace ix =
 "http://blackmesatech.com/2019/iXML/Earley-recognizer"
@@ -667,7 +667,8 @@ at "d2x.xqm";
 declare namespace follow = 
 "http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
 
-(: $ixi:combinedups:  convenience variable for calls to map:merge. :)
+(: $ixi:combinedups:  convenience variable for calls to 
+   map:merge. :)
 declare variable $ixi:combinedups as map(*)
    := map:entry('duplicates','combine');
 </pre>
@@ -699,11 +700,12 @@ document representing the resulting parse tree.</div>
 
 <div class="Real-P">
 <div class="scrap"><span><a name="d3e531">&#x3008; 8 Define parse-resource() [continues <a href="#aparecium-main">65 Main interfaces for Aparecium</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
+<pre class="scrapbody">(: ......................................................
    parse-resource($Input, $Grammar)
-   ................................................................
-   Given URIs for the input and an ixml grammar describing it,
-   returns the XML representation of the resource.
+   ......................................................
+   Given URIs for the input and an ixml grammar 
+   describing it, returns the XML representation of 
+   the resource.
 :)
 
 declare function aparecium:parse-resource(
@@ -750,12 +752,12 @@ declare function aparecium:parse-resource(
 <h4><a name="hies-scan" id="hies-scan">3.5.1. </a>The scanner</h4>
 <div class="Real-P">
 <div class="scrap"><span><a name="er-scan">&#x3008; 9 Define scan() &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: **************************************************************** 
+<pre class="scrapbody">(: ****************************************************** 
    * ix:scan($E, $I)
-   **************************************************************** :)
-(: If $E expects any terminals which occur as expected, return
-   the advance of E over those terminals.  There may be more than
-   one. :)
+   ****************************************************** :)
+(: If $E expects any terminals which occur as expected, 
+   return the advance of E over those terminals.  There 
+   may be more than one. :)
    
 declare function ix:scan(
   $E as item() (: ITEM :),
@@ -789,11 +791,12 @@ declare function ix:scan(
 
 <div class="Real-P">
 <div class="scrap"><span><a name="er-pred">&#x3008; 10 Define pred() &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: **************************************************************** 
+<pre class="scrapbody">(: ****************************************************** 
    * ix:pred($E, $G)
-   **************************************************************** :)
-(: If $E predicts any non-terminals, return items which expect
-   those non-terminals at the appropriate location. :)
+   ****************************************************** :)
+(: If $E predicts any non-terminals, return items which 
+   expect those non-terminals at the appropriate location. 
+   :)
    
 declare function ix:pred(
   $E as item() (: ITEM :),
@@ -838,16 +841,17 @@ declare function ix:pred(
 
 <div class="Real-P">
 <div class="scrap"><span><a name="er-comp">&#x3008; 11 Define comp() &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: **************************************************************** 
+<pre class="scrapbody">(: ****************************************************** 
    * ix:comp($Ec, $Ep)
-   **************************************************************** :)
-(: If $Ec and $Ep are a prediction/completion pair, return the
-   advance of $Ep over the non-terminal predicted by $Ec. :)
+   ****************************************************** :)
+(: If $Ec and $Ep are a prediction/completion pair, return
+   the advance of $Ep over the non-terminal predicted by 
+   $Ec. :)
    
 (: comp($Ec, $Ep): if $Ec is a completion item, 
    and $Ep a prediction item,
    and $Ep predicts a nonterminal $n at position $pPTo,
-   and $Ec completes nonterminal $n starting at $pCFrom=$pPTo,
+   and $Ec completes $n starting at $pCFrom=$pPTo,
    then advance $Ep over $n and place the new to-position
    at the to-position of $Ec.
    
@@ -944,14 +948,19 @@ recognizer, if you will)
         &lt;nonterminal name="{$symStart2}"/&gt;, 
         $G2)[1],
       $riInitial := ixi:lriStartstatesXR($rInitial)[1],
-      $eiInitial := ixi:eiMakePPRRi(0, 0, $rInitial, $riInitial),
+      $eiInitial := ixi:eiMakePPRRi(0, 0, 
+                                    $rInitial, 
+                                    $riInitial),
       $len := ixi:inputlength($I),
       
-      $meiClosure := ixi:earley-closure($eiInitial, $I, $G2),
+      $meiClosure := 
+          ixi:earley-closure($eiInitial, $I, $G2),
       (: $leiCompletions := $meiClosure
          [ixi:fFinalEiPPN(.,0,$len,$symStart2)], :)
       $leiCompletions := $meiClosure('from')(0)
-                         [ixi:fFinalEiPPN(.,0,$len,$symStart2)],
+                         [ixi:fFinalEiPPN(., 0,
+                                          $len,
+                                          $symStart2)],
       $result := exists($leiCompletions)
       (:
       ,
@@ -1151,7 +1160,7 @@ that it can produce the string in two different ways.</div>
 
 <div class="div">
 
-<h4><a name="d3e768" id="d3e768">3.7.2. </a>Constructing a parse-forest grammar</h4>
+<h4><a name="hi-pfg-const" id="hi-pfg-const">3.7.2. </a>Constructing a parse-forest grammar</h4>
 <div class="Real-P">Our overarching task here can be described thus:  Given
 <ul><li>an Earley set closed under the <i>scan</i>,
 <i>pred</i>, and <i>comp</i> relations, and</li>
@@ -1186,9 +1195,10 @@ that correspond to a walk through the right-hand side of the
 production rule for <i>N</i> in the base grammar and which collectively
 cover the input segment from <i>x</i> to <i>y</i>, constructing appropriate new
 nonterminals for them, and writing those nonterminals into the
-right-hand side in an appropriate sequence.  If there is more than
-one such walk through the rule for <i>N</i>, then <i>N</i> is ambiguous,
-and we want all of those walks.[<a name="ref-to-d3e842" href="#d3e842" title="At the moment,&#xA;there are some infinitely ambiguous sentences for which we&#xA;will not in fact get all of the walks.  That appears to be a&#xA;disadvantage of working d">3</a>]</div>
+right-hand side in an appropriate sequence.[<a name="ref-to-d3e837" href="#d3e837" title="&#xA;I often slip and refer to these as paths through&#xA;the right-hand side, but in graph theory a path&#xA;denotes a walk in which no vertex appears more than once.  If&#xA;">3</a>]
+If there is more than one
+such walk through the rule for <i>N</i>, then <i>N</i> is ambiguous, and we want
+all of those walks.[<a name="ref-to-d3e852" href="#d3e852" title="At the moment, there are some&#xA;infinitely ambiguous sentences for which we will not in fact get all&#xA;of the walks (informally, those involving infinite&#xA;horizontal">4</a>]</div>
 
 <div class="Real-P">The second step can be handled by calling the same function we
 called to handle the completion we started with.  Since in cases of
@@ -1197,6 +1207,10 @@ through <i>N</i> and thus in more than one right-hand side for <i>N</i>&#xb7;<i>
 should keep track of what nonterminals we have already constructed or
 already placed in the queue.</div>
 
+
+<div class="div">
+
+<h5><a name="hi-pfgc-top" id="hi-pfgc-top">3.7.2.1. </a>Overall organization of parse-forest-grammar() function</h5>
 <div class="Real-P">The top-level function for making the parse-forest grammar will
 thus place the initial completion item in a work queue and delegate
 responsibility for generating the appropriate production rules to a
@@ -1257,7 +1271,7 @@ can return the accumulated intermediate results.
   <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#epi-mpr-find-walk">Set $walks to possible child sequences for $ei 17</a></em> &#x3009;</span>
   <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#epi-mpr-make-rule">Set $rule to production rule for $ei 18</a></em> &#x3009;</span>
   <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#epi-mpr-update-queue">Set $new-queue to include new completions 19</a></em> &#x3009;</span>
-  <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#epi-mpr-recur">Call epi:make-pfg-rules() with new queue and accumulator 20</a></em> &#x3009;</span>
+  <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#epi-mpr-recur">Recursive call with new queue and accumulator 20</a></em> &#x3009;</span>
 
 };
 </pre>
@@ -1266,6 +1280,7 @@ can return the accumulated intermediate results.
 <span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#epi-parse-forest-grammar">Define parse-forest-grammar() 14</a> &#x3009; <br></span>
 </div>
 </div>
+
 <div class="Real-P">The base case is unsurprising:
 <div class="scrap"><span><a name="epi-mpr-stop">&#x3008; 16 If PFG queue is empty, return accumulator &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">  if (empty($leiQueue))
@@ -1276,7 +1291,15 @@ can return the accumulated intermediate results.
 <span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#epi-make-pfg-rules">Define function epi:make-pfg-rules() 15</a> &#x3009; <br></span>
 </div>
 </div>
+<div class="Real-P">When there is work to be done, of course, the case is more
+complex.  The following subsections describe it.</div>
 
+</div>
+
+
+<div class="div">
+
+<h5><a name="hi-pfgc-walks" id="hi-pfgc-walks">3.7.2.2. </a>Finding walks through a rules right-hand-side</h5>
 <div class="Real-P">The core task of making the parse-forest grammar seems to be
 finding the sequences of completion items which represent the
 parse-tree children of the node represented by the current completion
@@ -1286,20 +1309,50 @@ level, moving forward state by state in the FSA for the parent
 nonterminal <i>N</i>, and the child level, identifying completion items for
 each child <i>C</i>.  The information we want is never where we are at any
 time, figuratively speaking.</div></li>
-<li><div class="Real-P">We need to find all the walks, not just one.  The ixml spec
-wants us to report ambiguity, and that means we need to know whether
-more than one walk exists.</div>
+<li><div class="Real-P">We would like to find all the walks, not just one.  The ixml
+spec wants us to report ambiguity, and that means we must at least
+know whether more than one walk exists.</div>
 
 <div class="Real-P">Each walk is (notionally at least) a sequence of completion items
-describing parse-tree children.  But we can't return a sequence of
-sequences, so we need to use an array, or a map with a tree structure
-to share prefixes.</div></li>
+describing parse-tree children.  But we can't return a set of walks by
+returning a sequence of sequences, so we need to some other representation.
+Candidates include:
+<ul><li>walks as sequences of completion items, sets of walks as arrays
+of sequences</li>
+<li>a set of walks as a map representing a prefix tree, each walk
+then a path from the root of the tree to a leaf</li>
+<li>walks as sequences of strings of the form
+&#x201c;<i>x</i>&#xb7;<i>y</i>&#xb7;<i>N</i>&#x201d;, sets of walks as arrays of such
+sequences</li>
+<li>walks as strings made by joining strings of the form
+&#x201c;<i>x</i>&#xb7;<i>y</i>&#xb7;<i>N</i>&#x201d; together with &#x201c;<tt>/</tt>&#x201d; or
+&#x201c;<tt>+</tt>&#x201d; or &#x201c;<tt>,&amp;#x20;</tt>&#x201d; or some other
+concatenation mark, sets of walks as sequences of such string</li>
+</ul>
+</div></li>
 <li><div class="Real-P">We need to be alert for cycles in the walk.  These will
 always be edge cases: they can arise only if repeatable sequences of
 children can and do produce the empty string.  But they can
 occur.</div></li>
 </ul>
-
+</div>
+<div class="Real-P">The basic plan is an iterative function which performs a
+breadth-first search and assembles the result.  We have an accumulator
+of some sort that holds a set of walks found so far, each of which is
+either complete (it goes all the way to a final state in the
+right-hand side of <i>N</i>) or not, and either extensible or not.[<a name="ref-to-d3e980" href="#d3e980" title="&#xA;&#xA;In principle, a walk can be extended if the last state reached by&#xA;the walk has follow states.  But since right-hand sides in an EBNF can&#xA;have cycles, we cut o">5</a>] The result is complete when no walks can be extended.
+<ul><li><div class="Real-P">If the result is complete, return all of the complete walks
+found so far.</div></li>
+<li><div class="Real-P">Otherwise, for each walk <i>w</i> that can be extended:
+<ul><li><div class="Real-P">Find all possible extensions to <i>w</i>.</div></li>
+<li><div class="Real-P">For each possible extension <i>e</i>, make a new walk <i>w&#x2032;</i> by
+adding <i>e</i> to the end of <i>w</i>.</div></li>
+<li><div class="Real-P">For each new walk <i>w&#x2032;</i>, see if <i>w&#x2032;</i> is complete and mark it
+appropriately so it can be found again.</div></li>
+</ul></div></li>
+</ul>
+</div>
+<div class="Real-P">
 <div class="scrap"><span><a name="epi-mpr-find-walk">&#x3008; 17 Set $walks to possible child sequences for $ei &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody"></pre>
 <span class="scrapcontinuations"></span>
@@ -1308,6 +1361,13 @@ occur.</div></li>
 </div>
 
 </div>
+
+</div>
+
+
+<div class="div">
+
+<h5><a name="hi-pfgc-makerule" id="hi-pfgc-makerule">3.7.2.3. </a>Making a production rule for a given walk</h5>
 
 <div class="Real-P">Given a completion item (<i>x</i> <i>y</i> <i>N</i> <i>q</i><sub><i>f</i></sub>) and a set of walks
 through the rule for <i>N</i>, make a production rule for <i>N</i>&#xb7;<i>x</i>&#xb7;<i>y</i> with an
@@ -1321,6 +1381,13 @@ appropriate expression on the right-hand side.
 </div>
 
 </div>
+
+</div>
+
+
+<div class="div">
+
+<h5><a name="hi-pfgc-recur" id="hi-pfgc-recur">3.7.2.4. </a>Preparing for the next iteration</h5>
 
 <div class="Real-P">Given a queue, an accumulator, and a new production rule (or the
 set of walks that produced it), identify which completion items need
@@ -1337,11 +1404,13 @@ the accumulator.
 </div>
 <div class="Real-P">Given a production rule and and an updated queue, call
 <i>make-pfg-rules()</i> recursively.
-<div class="scrap"><span><a name="epi-mpr-recur">&#x3008; 20 Call epi:make-pfg-rules() with new queue and accumulator &#x3009;  &#x2261;</a></span>
+<div class="scrap"><span><a name="epi-mpr-recur">&#x3008; 20 Recursive call with new queue and accumulator &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody"></pre>
 <span class="scrapcontinuations"></span>
 
 <span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#epi-make-pfg-rules">Define function epi:make-pfg-rules() 15</a> &#x3009; <br></span>
+</div>
+
 </div>
 
 </div>
@@ -1379,23 +1448,23 @@ the accumulator.
 <h4><a name="ll-items-con" id="ll-items-con">4.1.1. </a>Earley items - constructors</h4>
 <div class="Real-P">
 <div class="scrap"><span><a name="eri-items">&#x3008; 21 Earley items (constructors, extractors, etc.) &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: **************************************************************** 
+<pre class="scrapbody">(: ****************************************************** 
    * Earley items
-   **************************************************************** :)
-(: We represent an Earley item as a map with keys 'from', 'to',
-   'rule', and 'ri' (rule index).  For any item $ei, $ei('from') 
-   and $ei('to') are integers, $ei('rule') is element(rule), and
-   $ei('ri') is a string (an NCName, in fact, but typed only as 
-   a string).
+   ****************************************************** :)
+(: We represent an Earley item as a map with keys 'from', 
+   'to', 'rule', and 'ri' (rule index).  For any item $ei, 
+   $ei('from') and $ei('to') are integers, $ei('rule') is 
+   element(rule), and $ei('ri') is a string (an NCName, 
+   in fact, but typed only as a string).
 :)
 
-(: ****************************************************************
+(: ******************************************************
    * Earley items:  constructors
   :)
 
 <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#eri-make-p-p-r-ri">Define eiMakePPRRi() 22</a></em> &#x3009;</span>
 <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#eri-lei-advance-ei-sym-p">Define leiAdvanceEiSymP() 23</a></em> &#x3009;</span></pre>
-<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e1021">Extractors for Earley items 24</a>&#x3009;, &#x3008;<a href="#d3e1027">Extractors for Earley items 25</a>&#x3009;, &#x3008;<a href="#d3e1074">Predicates for Earley items 26</a>&#x3009;, &#x3008;<a href="#d3e1079">Define fExpectsN-Ei() 27</a>&#x3009;, &#x3008;<a href="#d3e1097">Define fScanrelEE() 28</a>&#x3009;, &#x3008;<a href="#d3e1104">Define fAdvanceNrelEE() 29</a>&#x3009;, &#x3008;<a href="#eri-items-closure">Calculating the closure of an Earley set 30</a>&#x3009;<br></span>
+<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e1153">Extractors for Earley items 24</a>&#x3009;, &#x3008;<a href="#d3e1159">Extractors for Earley items 25</a>&#x3009;, &#x3008;<a href="#d3e1206">Predicates for Earley items 26</a>&#x3009;, &#x3008;<a href="#d3e1211">Define fExpectsN-Ei() 27</a>&#x3009;, &#x3008;<a href="#d3e1229">Define fScanrelEE() 28</a>&#x3009;, &#x3008;<a href="#d3e1236">Define fAdvanceNrelEE() 29</a>&#x3009;, &#x3008;<a href="#eri-items-closure">Calculating the closure of an Earley set 30</a>&#x3009;<br></span>
 
 <span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e444">[File Earley-rec-internals.xqm] 6</a> &#x3009; <br></span>
 </div>
@@ -1404,9 +1473,9 @@ the accumulator.
 <div class="Real-P">To construct an Earley function from known values, we call
 <i>eiMakePPRRi</i>:
 <div class="scrap"><span><a name="eri-make-p-p-r-ri">&#x3008; 22 Define eiMakePPRRi() &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   ei Make P P R Ri: make an Earley item from two positions, a rule,
-   and a rule index
+<pre class="scrapbody">(: ......................................................
+   ei Make P P R Ri: make an Earley item from two 
+   positions, a rule, and a rule index
   :)
 declare function ixi:eiMakePPRRi(
   $From as xs:integer,
@@ -1433,10 +1502,11 @@ takes (as its name signals) an Earley item, a symbol,
 and a position, and returns the list of Earley items
 which are advances from that position on that symbol.
 <div class="scrap"><span><a name="eri-lei-advance-ei-sym-p">&#x3008; 23 Define leiAdvanceEiSymP() &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   ixi:lei Advance Ei Sym P($E, $sym, $p): return the set of Earley
-   items (lei) that arise if you advance $E over $sym, or over any
-   equivalent symbol, to reach position $p.
+<pre class="scrapbody">(: ......................................................
+   ixi:lei Advance Ei Sym P($E, $sym, $p): return the 
+   set of Earley items (lei) that arise if you advance 
+   $E over $sym, or over any equivalent symbol, to reach 
+   position $p.
 :)
 declare function ixi:leiAdvanceEiSymP(
   $E as map(xs:string, item()),
@@ -1474,14 +1544,14 @@ declare function ixi:leiAdvanceEiSymP(
 <div class="Real-P">For the <em>to</em> and <em>from</em> pointers,
 the rule, and the rule's nonterminal, the extractor
 functions are very straightforward.
-<div class="scrap"><span><a name="d3e1021">&#x3008; 24 Extractors for Earley items [continues <a href="#eri-items">21 Earley items (constructors, extractors, etc.)</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ****************************************************************
+<div class="scrap"><span><a name="d3e1153">&#x3008; 24 Extractors for Earley items [continues <a href="#eri-items">21 Earley items (constructors, extractors, etc.)</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ******************************************************
    * Earley items:  extractors
    :)
 
 (: See also sXei() below under Utilities :)
 
-(: ................................................................
+(: ......................................................
    pTo X Ei($E): extract 'to' position from item
    :)
 declare function ixi:pToXEi(
@@ -1490,7 +1560,7 @@ declare function ixi:pToXEi(
   $E('to')
 };
 
-(: ................................................................
+(: ......................................................
    pFrom X Ei($E): extract 'from' position from item
    :)
 declare function ixi:pFromXEi(
@@ -1499,7 +1569,7 @@ declare function ixi:pFromXEi(
   $E('from')
 };
 
-(: ................................................................
+(: ......................................................
    r X Ei($E): extract rule from item
    :)
 declare function ixi:rXEi(
@@ -1508,8 +1578,9 @@ declare function ixi:rXEi(
   $E('rule')
 };
 
-(: ................................................................
-   nLhs X Ei($E): extract nonterminal on lhs of rule from item
+(: ......................................................
+   nLhs X Ei($E): extract nonterminal on lhs of rule 
+   from item
    :)
 declare function ixi:nLhsXEi(
   $E as map(xs:string, item())
@@ -1526,9 +1597,10 @@ declare function ixi:nLhsXEi(
 
 </div>
 <div class="Real-P">To get the list of expected symbols, more work is needed.
-<div class="scrap"><span><a name="d3e1027">&#x3008; 25 Extractors for Earley items [continues <a href="#eri-items">21 Earley items (constructors, extractors, etc.)</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody"> (: ................................................................
-   lsymExpected X Ei($E): extract list of expected symbols from item
+<div class="scrap"><span><a name="d3e1159">&#x3008; 25 Extractors for Earley items [continues <a href="#eri-items">21 Earley items (constructors, extractors, etc.)</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody"> (: ......................................................
+   lsymExpected X Ei($E): extract list of expected 
+   symbols from item
    :)
 declare function ixi:lsymExpectedXEi(
   $E as map(xs:string, item())
@@ -1587,15 +1659,16 @@ Earley items?</li>
 </div>
 <div class="Real-P">There are several functions for asking whether an item is
 a completion.
-<div class="scrap"><span><a name="d3e1074">&#x3008; 26 Predicates for Earley items [continues <a href="#eri-items">21 Earley items (constructors, extractors, etc.)</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ****************************************************************
+<div class="scrap"><span><a name="d3e1206">&#x3008; 26 Predicates for Earley items [continues <a href="#eri-items">21 Earley items (constructors, extractors, etc.)</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ******************************************************
    * Earley items:  predicates
    :)
-(: ................................................................
-   fFinal Ei P P N($E, $pFr, $pTo, $N): is $E a completion item
-   for symbol N, running between the two positions?
-   (Used just once, in recognizeX, to check for completions of
-   the start symbol that cover the entire input string.)
+(: ......................................................
+   fFinal Ei P P N($E, $pFr, $pTo, $N): is $E a
+   completion item for symbol N, running between the 
+   two positions? (Used just once, in recognizeX, to 
+   check for completions of the start symbol that cover 
+   the entire input string.)
    :)
 declare function ixi:fFinalEiPPN(
   $E as map(xs:string, item()),
@@ -1609,9 +1682,10 @@ declare function ixi:fFinalEiPPN(
   and ($E('ri') = ixi:lriFinalstatesXR($E('rule')))
 };
 
-(: ................................................................
-   ixi:fFinalEiPN($E, $pTo, $sym):  true iff $E is a completion 
-   item ending at position $P for nonterminal $N 
+(: ......................................................
+   ixi:fFinalEiPN($E, $pTo, $sym):  true iff $E is a 
+   completion item ending at position $P for nonterminal 
+   $N 
    :)
 declare function ixi:fFinalEiPN(
   $E as map(xs:string, item()),
@@ -1653,9 +1727,9 @@ declare function ixi:fFinalEiPN(
   return $f
 };
 
-(: ................................................................
-   fFinal Ei($E): is $E a completion item?  I.e. is its rule index
-   in a final location?
+(: ......................................................
+   fFinal Ei($E): is $E a completion item?  I.e. is its 
+   rule index in a final location?
    :)
 declare function ixi:fFinalEi(
   $E as map(xs:string, item())
@@ -1669,8 +1743,8 @@ declare function ixi:fFinalEi(
 </div>
 
 </div>
-<div class="Real-P"><div class="scrap"><span><a name="d3e1079">&#x3008; 27 Define fExpectsN-Ei() [continues <a href="#eri-items">21 Earley items (constructors, extractors, etc.)</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
+<div class="Real-P"><div class="scrap"><span><a name="d3e1211">&#x3008; 27 Define fExpectsN-Ei() [continues <a href="#eri-items">21 Earley items (constructors, extractors, etc.)</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ......................................................
    fExpectsN - Ei($E):  does $E expect any nonterminals?
    :)
 declare function ixi:fExpectsN-Ei(
@@ -1698,13 +1772,15 @@ And E2 = advance(E1, T) iff
 <li>else advance(E1, T) = empty set.</li>
 </ul>
 So:
-<div class="scrap"><span><a name="d3e1097">&#x3008; 28 Define fScanrelEE() [continues <a href="#eri-items">21 Earley items (constructors, extractors, etc.)</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   fScanrel E E($E1, $E2):  does the scan relation hold for E1, E2?
-   (Used once, in Earley parser internals, to find related items.)
+<div class="scrap"><span><a name="d3e1229">&#x3008; 28 Define fScanrelEE() [continues <a href="#eri-items">21 Earley items (constructors, extractors, etc.)</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ......................................................
+   fScanrel E E($E1, $E2):  does the scan relation hold 
+   for E1, E2?
+   (Used once, in Earley parser internals, to find 
+   related items.)
    :)
-   (: N.B. does not test that the symbol in question is a terminal.
-      Does it matter?
+   (: N.B. does not test that the symbol in question 
+      is a terminal. Does it matter?
    :)   
 declare function ixi:fScanrelEE(
   $E1 as map(xs:string, item()),
@@ -1741,11 +1817,12 @@ declare function ixi:fScanrelEE(
 
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e1104">&#x3008; 29 Define fAdvanceNrelEE() [continues <a href="#eri-items">21 Earley items (constructors, extractors, etc.)</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   fAdvanceNrel E E ($E1, $E2):  does the advance-over-symbol-N
-   relation hold for E1, E2?
-   (Used once, in Earley parser internals, to find related items.)
+<div class="scrap"><span><a name="d3e1236">&#x3008; 29 Define fAdvanceNrelEE() [continues <a href="#eri-items">21 Earley items (constructors, extractors, etc.)</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ......................................................
+   fAdvanceNrel E E ($E1, $E2):  does the 
+   advance-over-symbol-N relation hold for E1, E2?
+   (Used once, in Earley parser internals, to find 
+   related items.)
 
    By definition (see paper) E2 = advance(E1, T) iff
       * from(E1) = from(E2)
@@ -1754,9 +1831,10 @@ declare function ixi:fScanrelEE(
       * and E1 wins on T
       * else advance(E1, T) = empty set.
 
-   Note that for the "E1 wins" clause we rely on the truth of
-   all items in the closure.  E1 must be winning, because otherwise
-   an E2 that satisfies the other tests would not be in the closure.
+   Note that for the "E1 wins" clause we rely on the 
+   truth of all items in the closure.  E1 must be  
+   winning, because otherwise an E2 that satisfies 
+   the other tests would not be in the closure.
    :)
 declare function ixi:fAdvanceNrelEE(
   $E1 as map(xs:string, item()),
@@ -1764,7 +1842,8 @@ declare function ixi:fAdvanceNrelEE(
 ) as xs:boolean {
   let $fFrom := ($E1('from') eq $E2('from')),
       $lsymFollow := ixi:lsymExpectedXEi($E1),
-      $lSsymFollow := for $e in $lsymFollow return $e/@xml:id,
+      $lSsymFollow := for $e in $lsymFollow 
+                      return $e/@xml:id,
       $fStates1 := ($E2('ri') = $lSsymFollow),
       $fRules := deep-equal($E1('rule'), $E2('rule')),
       $f := ($fFrom and $fStates1 and $fRules),
@@ -1796,11 +1875,11 @@ declare function ixi:fAdvanceNrelEE(
 <div class="Real-P">The heart of the Earley algorithm is the calculating the
 closure of the Earley set.
 <div class="scrap"><span><a name="eri-items-closure">&#x3008; 30 Calculating the closure of an Earley set [continues <a href="#eri-items">21 Earley items (constructors, extractors, etc.)</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ****************************************************************
+<pre class="scrapbody">(: *******************************************************
    * Earley items:  closure (the big kahuna)
    :)
 </pre>
-<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e1123">Define earley-closure($lei, $I, $G) 31</a>&#x3009;, &#x3008;<a href="#d3e1142">Define earley-closure($pending, $accumulator, $I, $G) 32</a>&#x3009;, &#x3008;<a href="#d3e1252">Define earley-closure($pending, $accumulator, $I, $G) 36</a>&#x3009;<br></span>
+<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e1255">Define earley-closure($lei, $I, $G) 31</a>&#x3009;, &#x3008;<a href="#d3e1274">Define earley-closure($pending, $accumulator, $I, $G) 32</a>&#x3009;, &#x3008;<a href="#d3e1385">Define earley-closure($pending, $accumulator, $I, $G) 36</a>&#x3009;<br></span>
 
 <span class="scrapinbound"></span><span class="scrapinbound"></span>
 </div>
@@ -1810,11 +1889,11 @@ closure of the Earley set.
 user's call to <i>earley-closure</i> merely
 initializes an accumulator and calls another function to
 do the work.
-<div class="scrap"><span><a name="d3e1123">&#x3008; 31 Define earley-closure($lei, $I, $G) [continues <a href="#eri-items-closure">30 Calculating the closure of an Earley set</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody"> (: ................................................................
+<div class="scrap"><span><a name="d3e1255">&#x3008; 31 Define earley-closure($lei, $I, $G) [continues <a href="#eri-items-closure">30 Calculating the closure of an Earley set</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody"> (: ......................................................
    ixi:earley-closure($lei, $I, $G2): 
-   Calculate closure of $lei over the relations scan(), pred(),
-   and comp().
+   Calculate closure of $lei over the relations scan(), 
+   pred(), and comp().
 :)
 declare function ixi:earley-closure(
   $leiPending as map(xs:string, item())* (: ITEM* :), 
@@ -1824,16 +1903,17 @@ declare function ixi:earley-closure(
          map(xs:integer,
              map(xs:string,
                  item())*)) (:MEI:) {
-  let $meiAcc := map { 'from' : map:merge(
-                         for $ei in $leiPending
-			 return map:entry($ei('from'), $ei),
-                         $ixi:combinedups
-                       ),
-                       'to' : map:merge(
-                         for $ei in $leiPending
-			 return map:entry($ei('to'), $ei),
-                         $ixi:combinedups
-		       ) }
+  let $meiAcc := map { 
+                   'from' : map:merge(
+                     for $ei in $leiPending
+		     return map:entry($ei('from'), $ei),
+                     $ixi:combinedups
+                   ),
+                   'to' : map:merge(
+                     for $ei in $leiPending
+		     return map:entry($ei('to'), $ei),
+                     $ixi:combinedups
+		   ) }
 		       
   return ixi:earley-closure($leiPending, $meiAcc, $I, $G)
 };
@@ -1866,8 +1946,8 @@ speed. <i>TO DO: pluck that low-hanging fruit.</i></div>
 
 <div class="Real-P">The function has two cases: either we are done, or we are not yet
 done.
-<div class="scrap"><span><a name="d3e1142">&#x3008; 32 Define earley-closure($pending, $accumulator, $I, $G) [continues <a href="#eri-items-closure">30 Calculating the closure of an Earley set</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
+<div class="scrap"><span><a name="d3e1274">&#x3008; 32 Define earley-closure($pending, $accumulator, $I, $G) [continues <a href="#eri-items-closure">30 Calculating the closure of an Earley set</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ......................................................
    ixi:earley-closure($pending, $accumulator, $I, $G2):
 :)
 declare function ixi:earley-closure(
@@ -1877,7 +1957,7 @@ declare function ixi:earley-closure(
   $I as xs:string,
   $G as element(ixml)
 ) as map(xs:string, map(xs:integer, map(xs:string, item())*)) (:MEI:) {
-  <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#eri-items-closure-termination">Terminal case for Earley closure 33</a></em> &#x3009;</span>
+  <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#eri-items-closure-termination">Terminating case for Earley closure 33</a></em> &#x3009;</span>
   else <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#eri-items-closure-normal">Normal case for Earley closure 34</a></em> &#x3009;</span>};
 </pre>
 <span class="scrapcontinuations"></span>
@@ -1888,13 +1968,13 @@ declare function ixi:earley-closure(
 </div>
 <div class="Real-P">The base case arises when the pending list is done.  If nothing
 remains to be done, then we are done and can return the accumulator.
-<div class="scrap"><span><a name="eri-items-closure-termination">&#x3008; 33 Terminal case for Earley closure &#x3009;  &#x2261;</a></span>
+<div class="scrap"><span><a name="eri-items-closure-termination">&#x3008; 33 Terminating case for Earley closure &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">  if (empty($leiPending))
   then $meiAccum
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e1142">Define earley-closure($pending, $accumulator, $I, $G) 32</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e1274">Define earley-closure($pending, $accumulator, $I, $G) 32</a> &#x3009; <br></span>
 </div>
 
 </div>
@@ -1934,12 +2014,13 @@ Then ^x^e to evaluate the Lisp expression.)
 </div>
 <div class="Real-P">On a longer test set (test2), which ran for 1215 seconds,
 the results were:
-<ul><li>1782.91 ms checking PCS results against accumulator</li>
+<ul><li>1,782.91 ms checking PCS results against accumulator</li>
 <li>357.39 ms deduping PCS results</li>
-<li>19967.69 ms running PCS function</li>
+<li>19,967.69 ms running PCS function</li>
 </ul>
-As the accumulator gets larger, searching it for items
-already present appears to become more expensive.
+As the accumulator gets larger, searching it for items already present
+appears to become more expensive.  But running PCS is still taking 90%
+of the measured time.
 </div>
 <div class="Real-P">Further testing seems unnecessary.</div>
 
@@ -1984,7 +2065,7 @@ already present appears to become more expensive.
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e1142">Define earley-closure($pending, $accumulator, $I, $G) 32</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e1274">Define earley-closure($pending, $accumulator, $I, $G) 32</a> &#x3009; <br></span>
 </div>
 
 </div>
@@ -1992,13 +2073,17 @@ already present appears to become more expensive.
 <div class="Real-P">When debugging this, it is helpful to have trace messages showing
 each step in this process.
 <div class="scrap"><span><a name="eri-itcl-traces">&#x3008; 35 Issue trace messages for earley-closure() &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">      $dummy := ixi:notrace(count($leiPending), 'e-c() has pending items: '), 
+<pre class="scrapbody">      $dummy := ixi:notrace(count($leiPending), 
+                            'e-c() has pending items: '), 
       $dummy := ixi:notrace(
                     ixi:sXei($E),
-                    'ixi:earley-closure running on pending item: '), 
-      $dummy := ixi:notrace(count($leiCs0), 'e-c() initial closure has items: '), 
-      $dummy := ixi:notrace(count($leiCs), 'e-c() deduped closure has items: '), 
-      $dummy := ixi:notrace(count($leiNew), 'e-c() New items: '), 
+                    'ixi:earley-closure running on item: '), 
+      $dummy := ixi:notrace(count($leiCs0), 
+                    'e-c() initial closure has items: '), 
+      $dummy := ixi:notrace(count($leiCs), 
+                     'e-c() deduped closure has items: '), 
+      $dummy := ixi:notrace(count($leiNew), 
+                     'e-c() New items: '), 
 </pre>
 <span class="scrapcontinuations"></span>
 
@@ -2027,10 +2112,11 @@ That's only 27 seconds out of 1675 - where did that time all
 go?!
 
 </div>
-<div class="scrap"><span><a name="d3e1252">&#x3008; 36 Define earley-closure($pending, $accumulator, $I, $G) [continues <a href="#eri-items-closure">30 Calculating the closure of an Earley set</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   leiPCSrel($E, $leiA, $I, $G): return all items $E2 such 
-   that $E2 = scan($E, $I)
+<div class="scrap"><span><a name="d3e1385">&#x3008; 36 Define earley-closure($pending, $accumulator, $I, $G) [continues <a href="#eri-items-closure">30 Calculating the closure of an Earley set</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ......................................................
+   leiPCSrel($E, $leiA, $I, $G): return all items $E2 
+   such that 
+   $E2 = scan($E, $I)
    or $E2 = pred($E, $G)
    or comp($E1, $E3) for some $E3 in $leiA
    or comp($E3, $E1) for some $E3 in $leiA
@@ -2051,8 +2137,8 @@ declare function ixi:leiPCSrel(
   ix:pred($E,$G), 
   
   
-  (: If $E expects a nonterminal, look for a completion $Ec and 
-     perform comp($Ec,$E) :)
+  (: If $E expects a nonterminal, look for a 
+     completion $Ec and perform comp($Ec,$E) :)
   
   if (ixi:fExpectsN-Ei($E))
   then for $Ec in $meiAccum('from')($E('to'))
@@ -2061,8 +2147,8 @@ declare function ixi:leiPCSrel(
   else (), 
   
     
-  (: If $E is a completion, look for a prediction $Ep and 
-     perform comp($E,$Ep) :)
+  (: If $E is a completion, look for a prediction $Ep 
+     and perform comp($E,$Ep) :)
   
   if (ixi:fFinalEi($E)) 
   then for $Ep in $meiAccum('to')($E('from'))
@@ -2071,10 +2157,10 @@ declare function ixi:leiPCSrel(
   else ()
   
     
-  (: N.B. In BNF, $E can only expect one symbol, so either scan
-     or pred applies, but not both.  But we are expecting EBNF
-     and $E can predict several things at the same time as being
-     a completion. :)
+  (: N.B. In BNF, $E can only expect one symbol, so 
+     either scan or pred applies, but not both.  But 
+     we are expecting EBNF and $E can predict several 
+     things at the same time as being a completion. :)
 };
 </pre>
 <span class="scrapcontinuations"></span>
@@ -2093,9 +2179,9 @@ declare function ixi:leiPCSrel(
 
 <div class="Real-P">
 <div class="scrap"><span><a name="eri-grammars">&#x3008; 37 Grammars (constructors, extractors, etc.) &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: **************************************************************** 
+<pre class="scrapbody">(: ****************************************************** 
    * Grammars
-   **************************************************************** :)
+   ****************************************************** :)
 (: A grammar is an ixml element with no namespace. :)
 
 <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#eri-grammars-constructors">Functions that construct or return grammars 38</a></em> &#x3009;</span>
@@ -2116,13 +2202,13 @@ start-symbol as a parameter.]</div>
 <div class="Real-P">This is the same in v0.1 and v0.2 except that we use a different
 element name to wrap the right-hand side of the rule.
 <div class="scrap"><span><a name="eri-grammars-constructors">&#x3008; 38 Functions that construct or return grammars &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody"> (: ****************************************************************
+<pre class="scrapbody"> (: ******************************************************
    * Grammars: constructors
    :)
    
-(: ................................................................
-   augment-grammar($G):  given grammar, augment it as Earley
-   prescribes.
+(: ......................................................
+   augment-grammar($G):  given grammar, augment it as 
+   Earley prescribes.
    :)
 declare function ixi:augment-grammar(
   $G as element(ixml)
@@ -2137,13 +2223,15 @@ declare function ixi:augment-grammar(
       attribute nullable { false() },
       attribute first {$symStart || '_0'},
       attribute last {$symStart || '_0'},
-      attribute { xs:QName('follow:'||$symStart||'_0') } {()},        
+      attribute { xs:QName('follow:'||$symStart||'_0') } 
+                {()},        
       element <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#gl-alts-gi">GI for alts element 132</a></em> &#x3009;</span> {
         attribute xml:id {$symGoal || '_def_0'},
         attribute nullable { false() },
         attribute first {$symStart || '_0'},
         attribute last {$symStart || '_0'},
-        attribute { xs:QName('follow:'||$symStart||'_0') } {()},        
+        attribute { xs:QName('follow:'||$symStart||'_0') } 
+                  {()},
         element alt {
           attribute xml:id {$symGoal || '_alt_0'},
           attribute nullable { false() },
@@ -2163,7 +2251,7 @@ declare function ixi:augment-grammar(
   } (: end ixml :)
 };
 </pre>
-<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e1289">Goal-symbol construction 39</a>&#x3009;, &#x3008;<a href="#d3e1296">Goal-symbol construction 40</a>&#x3009;<br></span>
+<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e1422">Goal-symbol construction 39</a>&#x3009;, &#x3008;<a href="#d3e1429">Goal-symbol construction 40</a>&#x3009;<br></span>
 
 <span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#eri-grammars">Grammars (constructors, extractors, etc.) 37</a> &#x3009; <br></span>
 </div>
@@ -2171,10 +2259,11 @@ declare function ixi:augment-grammar(
 </div>
 <div class="Real-P">We have a small utility function for making a new
 goal symbol that differs from all existing symbols.
-<div class="scrap"><span><a name="d3e1289">&#x3008; 39 Goal-symbol construction [continues <a href="#eri-grammars-constructors">38 Functions that construct or return grammars</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody"> (: ................................................................
-   makeGoalsymbolG($G):  make a new goal symbol for grammar G,
-   ensuring that it's not the same as any existing symbol.
+<div class="scrap"><span><a name="d3e1422">&#x3008; 39 Goal-symbol construction [continues <a href="#eri-grammars-constructors">38 Functions that construct or return grammars</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody"> (: ......................................................
+   makeGoalsymbolG($G):  make a new goal symbol for 
+   grammar G, ensuring that it's not the same as any 
+   existing symbol.
    :)
 declare function ixi:makeGoalsymbolG(
   $G as element(ixml)
@@ -2194,11 +2283,12 @@ declare function ixi:makeGoalsymbolG(
 
 </div>
 <div class="Real-P">And another utility for munging a given symbol.
-<div class="scrap"><span><a name="d3e1296">&#x3008; 40 Goal-symbol construction [continues <a href="#eri-grammars-constructors">38 Functions that construct or return grammars</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   mungesymbol:  given a symbol, munge it (by adding _ fore and aft)
-   until it is no longer in the list of symbols $ln (which is the
-   symbols already in the grammar).
+<div class="scrap"><span><a name="d3e1429">&#x3008; 40 Goal-symbol construction [continues <a href="#eri-grammars-constructors">38 Functions that construct or return grammars</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ......................................................
+   mungesymbol:  given a symbol, munge it (by adding _ 
+   fore and aft) until it is no longer in the list of 
+   symbols $ln (which is the symbols already in the 
+   grammar).
    :)
 declare function ixi:mungesymbol(
   $n as xs:string,
@@ -2218,11 +2308,11 @@ declare function ixi:mungesymbol(
 </div>
 <div class="Real-P">
 <div class="scrap"><span><a name="eri-grammars-extractors">&#x3008; 41 Functions that extract information from grammars &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ****************************************************************
+<pre class="scrapbody">(: ******************************************************
    * Grammars: extractors
    :)
    
-(: ................................................................
+(: ......................................................
    symStart G():  return start symbol(s) of G
    :)
 declare function ixi:symStartG(
@@ -2239,16 +2329,18 @@ declare function ixi:symStartG(
 </div>
 <div class="Real-P">
 <div class="scrap"><span><a name="eri-grammars-predicates">&#x3008; 42 Functions that check grammar properties &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ****************************************************************
+<pre class="scrapbody">(: ******************************************************
    * Grammars:  predicates
    *
-   * Note that predicates relating to symbols in context are
-   * here, not under symbol.  (Test:  is $G a parameter?)
+   * Note that predicates relating to symbols in context 
+   * are here, not under symbol.  (Test:  is $G a 
+   * parameter?)
    :)
-(: ixi:fNullableNG($n, $G):  is nonterminal n nullable in G? 
+(: ixi:fNullableNG($n, $G):  is nonterminal n nullable 
+   in G? 
 
-   For non-terminal N, fNullableNG(N,G) means an N element
-   in the result tree may be empty.
+   For non-terminal N, fNullableNG(N,G) means an N 
+   element in the result tree may be empty.
 
    Here 'nullable' means it has a right-hand side whose
    regex matches the empty string, which means in turn
@@ -2266,13 +2358,14 @@ declare function  ixi:fNullableNG(
 };
 
 
-(: ixi:fGesNG($n, $G):  does nonterminal n generate the empty string 
-   in G? 
+(: ixi:fGesNG($n, $G):  does nonterminal n generate the 
+   empty string in G? 
    
    N.B. this is not the same as fNullable.
    
-   Discussions of parsing often use 'nullable' for nonterminals
-   that generate the empty string, but in the grammar 
+   Discussions of parsing often use 'nullable' for 
+   nonterminals that generate the empty string, but in 
+   the grammar 
      S: X. X: .
    X is nullable and GES, S is GES but not nullable.
    
@@ -2314,7 +2407,7 @@ declare function ixi:lrulesXNG(
 };
 
 
-(: ****************************************************************
+(: ******************************************************
    * Grammars: predicates
    :)
 
@@ -2334,23 +2427,23 @@ declare function ixi:lrulesXNG(
 
 <div class="Real-P">
 <div class="scrap"><span><a name="eri-rules">&#x3008; 43 Rules (constructors, extractors, etc.) &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: **************************************************************** 
+<pre class="scrapbody">(: ****************************************************** 
    * Rules and rule indexes
-   **************************************************************** :)
+   ****************************************************** :)
 (: A rule is a rule element as defined in the ixml DTD, but 
    augmented with glushkov attributes.
    
-   Note that functions relating to rules in context are not 
-   here but under Grammars above.  (Test: is $G a parameter?)
-   Functions here relate solely to the rule in isolation.
-   That may be why there are so few of them.
+   Note that functions relating to rules in context are 
+   not here but under Grammars above.  (Test: is $G a 
+   parameter?) Functions here relate solely to the rule 
+   in isolation. That may be why there are so few of them.
 :)
 
-(: ****************************************************************
+(: ******************************************************
    * Rules and rule indexes: constructors
    :)
    
-(: ****************************************************************
+(: ******************************************************
    * Rules and rule indexes: extractors
    :)
 
@@ -2366,8 +2459,8 @@ declare function ixi:lriFinalstatesXR(
 
 };
 
-(: ixi:lriStartstatesXR($Rule):  return list of start-position
-   identifiers.
+(: ixi:lriStartstatesXR($Rule):  return list of 
+   start-position identifiers.
  :)
 declare function ixi:lriStartstatesXR(
   $r as element(rule)
@@ -2391,7 +2484,7 @@ declare function ixi:initial-stateR(
 };
 :)
 
-(: ****************************************************************
+(: ******************************************************
    * Rules and rule indexes: predicates
    :)
 </pre>
@@ -2421,21 +2514,21 @@ are so few of them.</div>
 <div class="Real-P">Similarly any function that involves the input string is not here
 but under Input, below.
 <div class="scrap"><span><a name="eri-symbols">&#x3008; 44 Symbols (constructors, extractors, etc.) &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: **************************************************************** 
+<pre class="scrapbody">(: ****************************************************** 
    * Symbols
-   **************************************************************** :)
+   ****************************************************** :)
 
-(: ****************************************************************
+(: ******************************************************
    * Symbols: constructors
    :)
    
-(: ****************************************************************
+(: ******************************************************
    * Symbols: extractors
    :)
 <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#eri-sym-match-length">Define match-length() 45</a></em> &#x3009;</span>
 <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#eri-sym-reXTerminal">Define reXTerminal(), regex from terminal 46</a></em> &#x3009;</span>
  
-(: ****************************************************************
+(: ******************************************************
    * Symbols: predicates
    :)
 <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#eri-sym-fTerminal">Define fTerminal() 47</a></em> &#x3009;</span>
@@ -2452,9 +2545,9 @@ don't have access to $I.  If terminals ever become variable-length,
 this will break.</div>
 <div class="Real-P">See also match-length#3 below under Input.
 <div class="scrap"><span><a name="eri-sym-match-length">&#x3008; 45 Define match-length() &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   match-length($t):  return length of any string that matches the
-   specified terminal.  
+<pre class="scrapbody">(: ......................................................
+   match-length($t):  return length of any string that 
+   matches the specified terminal.  
    :)
 declare function ixi:match-length(
   $t as element()
@@ -2482,9 +2575,9 @@ but I've added code to handle literals as well, just in case.
 also calculate regexes for terminals, so that we're not
 doing it again and again.
 <div class="scrap"><span><a name="eri-sym-reXTerminal">&#x3008; 46 Define reXTerminal(), regex from terminal &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   re X Terminal($t): return a regular expression, given a
-   character-set terminal element.
+<pre class="scrapbody">(: ......................................................
+   re X Terminal($t): return a regular expression, given 
+   a character-set terminal element.
    :)
 declare function ixi:reXTerminal(
   $t as element() (: incl, excl, literal :)
@@ -2521,7 +2614,7 @@ argument is a terminal symbol.  This version supports both my
 interpretation of the 2016 syntax (with element type 'terminal') and
 the 2019 syntax (literal, inclusion, exclusion).
 <div class="scrap"><span><a name="eri-sym-fTerminal">&#x3008; 47 Define fTerminal() &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
+<pre class="scrapbody">(: ......................................................
    f Terminal($sym):  is $sym a terminal symbol?
    :)
 declare function ixi:fTerminal(
@@ -2543,7 +2636,7 @@ declare function ixi:fTerminal(
 <div class="Real-P">The function <i>fNonterminal()</i> performs
 a similar function for nonterminals.
 <div class="scrap"><span><a name="eri-sym-fNonterminal">&#x3008; 48 Define fNonterminal() &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
+<pre class="scrapbody">(: ......................................................
    f Nonterminal($sym):  is $sym a nonterminal symbol?
    :)
 declare function ixi:fNonterminal(
@@ -2592,9 +2685,9 @@ as it were, always checking from the end of the arc, not the start.)</div>
 To do: adjust to 2019 syntax, which no longer has a single 'terminal' 
 element type but has 'quoted', 'inclusion', and 'exclusion'.
 <div class="scrap"><span><a name="eri-sym-fSymbolmatchRRiSym">&#x3008; 49 Define fSymbolmatchRRiSym() &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   fSymbolmatch R Ri Sym($r, $ri, $sym): does symbol element $sym 
-   match rule index $ri in rule $r?  
+<pre class="scrapbody">(: ......................................................
+   fSymbolmatch R Ri Sym($r, $ri, $sym): does symbol 
+   element $sym match rule index $ri in rule $r?  
    
    :)
 declare function ixi:fSymbolmatchRRiSym(
@@ -2646,23 +2739,23 @@ declare function ixi:fSymbolmatchRRiSym(
 
 <div class="Real-P">
 <div class="scrap"><span><a name="eri-input">&#x3008; 50 Input (constructors, extractors, etc.) &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: **************************************************************** 
+<pre class="scrapbody">(: ****************************************************** 
    * Input
-   **************************************************************** :)
+   ****************************************************** :)
 (: For now, the input is always a string. :)
 
-(: ****************************************************************
+(: ******************************************************
    * Input: constructors
    :)
 
-(: ****************************************************************
+(: ******************************************************
    * Input: extractors
    :)
-(: ................................................................
+(: ......................................................
    inputlength(): how long is the input?
    
-   Used (once) for construction of an Earley item signaling
-   completion
+   Used (once) for construction of an Earley item 
+   signaling completion
    :)
 declare function ixi:inputlength(
   $I as xs:string
@@ -2670,22 +2763,23 @@ declare function ixi:inputlength(
   string-length($I)
 };
 
-(: ****************************************************************
+(: ******************************************************
    * Input: predicates
    :)
 
-(: ................................................................
-   fMatches I P T($I, $P, $T): does input $I match terminal $T
-   at position $P?
+(: ......................................................
+   fMatches I P T($I, $P, $T): does input $I match 
+   terminal $T at position $P?
 
    The terminals are elements in a rule's right-hand side (not
    strings).  Possible forms:
-   In 2016 syntax:  terminal[quoted/@dstring], terminal[quoted/@sstring],
-   terminal[quoted/text()], charset, exclude.
+   In 2016 syntax:  terminal[quoted/@dstring], 
+     terminal[quoted/@sstring],
+     terminal[quoted/text()], charset, exclude.
    In 2019 syntax:  literal[@dstring], literal[@sstring],
-   literal[@hex], inclusion, exclusion.
+     literal[@hex], inclusion, exclusion.
    In 2022 syntax:  literal[@string], literal[@hex], 
-   inclusion, exclusion.
+     inclusion, exclusion.
    
    Note that position is 0-based, not 1-based, so we add 1 to it
    for XQuery substring calls.
@@ -2720,7 +2814,8 @@ declare function ixi:fMatchesIPT(
   (: :)
   (: 
   $cMatchlength := if ($t/self::literal)
-  let $s := substring($I,$p + 1), (: Earley is 0-based, XPath 1-based :)
+  let $s := substring($I,$p + 1), 
+            (: Earley is 0-based, XPath 1-based :)
       $f := if ($t/self::literal) 
             then starts-with($s,ixi:string-value($t/quoted))
             else if ($t/self::inclusion or $t/self::exclusion)
@@ -2746,19 +2841,21 @@ al($t)
   :)
 };
 
-(: ................................................................
-   match-length($I,$p,$t): return length of the match in input $I at
-   position $p of terminal $t.
+(: ......................................................
+   match-length($I,$p,$t): return length of the match in
+   input $I at position $p of terminal $t.
 
-   In practice, this is called only when we know there is a match,
-   but because of the name, and the theoretical possibility of 
-   input-dependent answers (if we were to allow repetition operators
-   inside terminals), we also support cases where there is no match
-   and the answer is 0.
+   In practice, this is called only when we know there
+   is a match, but because of the name, and the
+   theoretical possibility of input-dependent answers
+   (if we were to allow repetition operators inside
+   terminals), we also support cases where there is no
+   match and the answer is 0.
 
-   If we later allow repetition operators inside terminals, this will
-   become more complex, but for now, the value is always 1 if there is
-   a match at all for charset and exclude non-terminals, and
+   If we later allow repetition operators inside
+   terminals, this will become more complex, but for
+   now, the value is always 1 if there is a match at all
+   for charset and exclude non-terminals, and
    string-length of the literal for quoted strings.
 
    To do: adjust for 2019 syntax.
@@ -2789,17 +2886,17 @@ declare function ixi:match-length(
 
 <div class="Real-P">
 <div class="scrap"><span><a name="eri-utils-and-misc">&#x3008; 51 Utilities for recognizer internals module &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: **************************************************************** 
+<pre class="scrapbody">(: ****************************************************** 
    * Utilities
-   **************************************************************** :)
+   ****************************************************** :)
 (: Things with no other obvious home. :)
 
-(: ****************************************************************
-   * Utilities: string to regex conversion, string-length, 
-   * string-value, ...
+(: ******************************************************
+   * Utilities: string to regex conversion, 
+   * string-length, string-value, ...
    :)
 </pre>
-<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e1453">Define sceXS() to read range ends 52</a>&#x3009;, &#x3008;<a href="#d3e1459">Define catescXS() to build category escape 53</a>&#x3009;, &#x3008;<a href="#d3e1465">Define charXhex() to get character given hex expression 54</a>&#x3009;, &#x3008;<a href="#d3e1471">Define string-length() 55</a>&#x3009;, &#x3008;<a href="#d3e1478">Define string-value() 56</a>&#x3009;, &#x3008;<a href="#d3e1491">Define s X ei() to build string form of Earley item 57</a>&#x3009;, &#x3008;<a href="#d3e1497">Define eXei() to build 'item' element for Earley item 58</a>&#x3009;, &#x3008;<a href="#d3e1503">Define trace() function for debugging 59</a>&#x3009;<br></span>
+<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e1586">Define sceXS() to read range ends 52</a>&#x3009;, &#x3008;<a href="#d3e1592">Define catescXS() to build category escape 53</a>&#x3009;, &#x3008;<a href="#d3e1598">Define charXhex() to get character given hex expression 54</a>&#x3009;, &#x3008;<a href="#d3e1604">Define string-length() 55</a>&#x3009;, &#x3008;<a href="#d3e1611">Define string-value() 56</a>&#x3009;, &#x3008;<a href="#d3e1624">Define s X ei() to build string form of Earley item 57</a>&#x3009;, &#x3008;<a href="#d3e1630">Define eXei() to build 'item' element for Earley item 58</a>&#x3009;, &#x3008;<a href="#d3e1636">Define trace() function for debugging 59</a>&#x3009;<br></span>
 
 <span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e444">[File Earley-rec-internals.xqm] 6</a> &#x3009; <br></span>
 </div>
@@ -2810,19 +2907,22 @@ declare function ixi:match-length(
 
 <h4><a name="ll-utils-strings" id="ll-utils-strings">4.6.1. </a>Routines for strings and characters</h4>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e1453">&#x3008; 52 Define sceXS() to read range ends [continues <a href="#eri-utils-and-misc">51 Utilities for recognizer internals module</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   sce X S($s) : given a one-character string or hex expression $s 
-   (e.g. from a character terminal), check to see if it's a hex
-   expression (in which case expand and recur) or a magic character 
-   (in which case escape it) or is best represented for purposes of 
-   regex mapping) with a single-character escape (in which case
-   escape it).
+<div class="scrap"><span><a name="d3e1586">&#x3008; 52 Define sceXS() to read range ends [continues <a href="#eri-utils-and-misc">51 Utilities for recognizer internals module</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ......................................................
+   sce X S($s) : given a one-character string or hex
+   expression $s (e.g. from a character terminal), check
+   to see if it's a hex expression (in which case expand
+   and recur) or a magic character (in which case escape
+   it) or is best represented for purposes of regex
+   mapping) with a single-character escape (in which
+   case escape it).
    
-   N.B. this is more than strictly necessary for character class
-   escapes, but it seems better to be more general.
+   N.B. this is more than strictly necessary for
+   character class escapes, but it seems better to be
+   more general.
 
-   To do:  adjust to new representation of terminals.
+   To do: adjust to new representation of terminals.
+   
 :)
 declare function ixi:sceXS(
   $s as xs:string
@@ -2839,7 +2939,7 @@ declare function ixi:sceXS(
   else if (not(contains("&amp;#xA;&amp;#xD;&amp;#x9;\|.-^?$*+{}()[]",$s))) 
   then $s
   else if (contains("\|.-^?$*+{}()[]",$s)) 
-  then concat("\" (:":), $s)   (: commented dq to help de-confuse emacs :) 
+  then concat("\" (:":), $s)   (: commented dq helps emacs :) 
   else if ($s eq '&amp;#xA;')
   then "\n"
   else if ($s eq '&amp;#xD;')
@@ -2874,19 +2974,21 @@ declare function ixi:escapedstringXS(
 
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e1459">&#x3008; 53 Define catescXS() to build category escape [continues <a href="#eri-utils-and-misc">51 Utilities for recognizer internals module</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   catesc X S($s): given a one- or two-character string from a 
-   class element, return the appropriate category escape in 
-   XSD/XPath notation.
+<div class="scrap"><span><a name="d3e1592">&#x3008; 53 Define catescXS() to build category escape [continues <a href="#eri-utils-and-misc">51 Utilities for recognizer internals module</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ......................................................
+   catesc X S($s): given a one- or two-character string
+   from a class element, return the appropriate category
+   escape in XSD/XPath notation.
 
-   I should do some sanity checking here, but at the moment I'm
-   impatient, so I just wrap it in braces with \p in front.
+   I should do some sanity checking here, but at the
+   moment I'm impatient, so I just wrap it in braces
+   with \p in front.
 
-   The 2019 spec says "it is an error if there is no such class", so
-   probably I should raise an error if the category given does not 
-   match the list.  But for now, I'll just ignore it and return '.' 
-   to match one character, on the theory of "carry on irregardless."   
+   The 2019 spec says "it is an error if there is no
+   such class", so probably I should raise an error if
+   the category given does not match the list.  But for
+   now, I'll just ignore it and return '.'  to match one
+   character, on the theory of "carry on irregardless."
 
    To do:  figure out how Aparecium should handle errors.
 :)
@@ -2920,9 +3022,10 @@ declare function ixi:catescXS(
 
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e1465">&#x3008; 54 Define charXhex() to get character given hex expression [continues <a href="#eri-utils-and-misc">51 Utilities for recognizer internals module</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   char X hex ($s):  accept a hex expression, return the character.
+<div class="scrap"><span><a name="d3e1598">&#x3008; 54 Define charXhex() to get character given hex expression [continues <a href="#eri-utils-and-misc">51 Utilities for recognizer internals module</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ......................................................
+   char X hex ($s): accept a hex expression, return the
+   character.
 :)
 declare function ixi:charXhex(
   $s0 as xs:string
@@ -2944,15 +3047,16 @@ declare function ixi:charXhex(
 
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e1471">&#x3008; 55 Define string-length() [continues <a href="#eri-utils-and-misc">51 Utilities for recognizer internals module</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
+<div class="scrap"><span><a name="d3e1604">&#x3008; 55 Define string-length() [continues <a href="#eri-utils-and-misc">51 Utilities for recognizer internals module</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ......................................................
    string-length:  calculate 'real' length of string.
 
-   We use this to hide possible variation in the form of 'quoted' 
-   strings.  (Q. Does that mean we are expecting quote doubling
-   to show up in the XML form of the literal?  It shouldn't.)
+   We use this to hide possible variation in the form of
+   'quoted' strings.  (Q. Does that mean we are
+   expecting quote doubling to show up in the XML form
+   of the literal?  It shouldn't.)
 
-   To do:  sanity check this, and delete if unnecessary.
+   To do: sanity check this, and delete if unnecessary.
    :)
 declare function ixi:string-length(
   $q as element(literal)
@@ -2967,13 +3071,14 @@ declare function ixi:string-length(
 
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e1478">&#x3008; 56 Define string-value() [continues <a href="#eri-utils-and-misc">51 Utilities for recognizer internals module</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
+<div class="scrap"><span><a name="d3e1611">&#x3008; 56 Define string-value() [continues <a href="#eri-utils-and-misc">51 Utilities for recognizer internals module</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ......................................................
    string-value:  calculate 'real' value of string.
 
-   We use this to hide possible variation in the form of quoted 
-   strings.  (Q. Does that mean we are expecting quote doubling
-   to show up in the XML form of the literal?  It shouldn't.)
+   We use this to hide possible variation in the form of
+   quoted strings.  (Q. Does that mean we are expecting
+   quote doubling to show up in the XML form of the
+   literal?  It shouldn't.)
 
    To do:  sanity check this, and delete if unnecessary.
    :)
@@ -3009,11 +3114,14 @@ declare function ixi:string-value(
 <h4><a name="ll-utils-tracing" id="ll-utils-tracing">4.6.2. </a>Trace routines</h4>
 <div class="Real-P">For debugging, it's helpful to make traces a little easier.</div>
 <div class="Real-P">First, a function to display an Earley item as a string.
-<div class="scrap"><span><a name="d3e1491">&#x3008; 57 Define s X ei() to build string form of Earley item [continues <a href="#eri-utils-and-misc">51 Utilities for recognizer internals module</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   s X ei($E):  a utility function to help make traces more legible.
+<div class="scrap"><span><a name="d3e1624">&#x3008; 57 Define s X ei() to build string form of Earley item [continues <a href="#eri-utils-and-misc">51 Utilities for recognizer internals module</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ......................................................
+   s X ei($E): a utility function to help make traces
+   more legible.
    :)
-declare function ixi:sXei($E as map(xs:string, item())) as xs:string {
+declare function ixi:sXei(
+  $E as map(xs:string, item())
+) as xs:string {
   'item('
   || $E('from') || ' ' 
   || $E('to') || ' '
@@ -3029,10 +3137,10 @@ declare function ixi:sXei($E as map(xs:string, item())) as xs:string {
 </div>
 <div class="Real-P">Next, a function to build an XML element representing an Earley
 item.  This is used less tracing than in returning verbose results.
-<div class="scrap"><span><a name="d3e1497">&#x3008; 58 Define eXei() to build 'item' element for Earley item [continues <a href="#eri-utils-and-misc">51 Utilities for recognizer internals module</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   e X ei($E):  a utility function to help make traces and dumps
-   more legible.
+<div class="scrap"><span><a name="d3e1630">&#x3008; 58 Define eXei() to build 'item' element for Earley item [continues <a href="#eri-utils-and-misc">51 Utilities for recognizer internals module</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ......................................................
+   e X ei($E):  a utility function to help make traces 
+   and dumps more legible.
    :)
 declare function ixi:eXei(
   $E as map(xs:string, item())
@@ -3056,7 +3164,7 @@ declare function ixi:eXei(
 we want debugging and tracing turned on, and one for when
 we want to turn it off globally.  There probably should be
 better ways of turning tracing on and off. 
-<div class="scrap"><span><a name="d3e1503">&#x3008; 59 Define trace() function for debugging [continues <a href="#eri-utils-and-misc">51 Utilities for recognizer internals module</a>]  &#x3009;  &#x2261;</a></span>
+<div class="scrap"><span><a name="d3e1636">&#x3008; 59 Define trace() function for debugging [continues <a href="#eri-utils-and-misc">51 Utilities for recognizer internals module</a>]  &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody"><span class="scrapref">&#x3008; <em class="scrapptr"><a href="#eri-trace-function">Define trace() function 60</a></em> &#x3009;</span>
 <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#eri-notrace-function">Define notrace() function for debugging 62</a></em> &#x3009;</span></pre>
 <span class="scrapcontinuations"></span>
@@ -3067,9 +3175,9 @@ better ways of turning tracing on and off.
 <div class="Real-P">The <i>ixi:trace()</i> function is just a wrapper around
 the built-in trace function which inserts newlines. 
 <div class="scrap"><span><a name="eri-trace-function">&#x3008; 60 Define trace() function &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   trace($i, $s):  a utility function to help make code being
-   traced stay more legible.
+<pre class="scrapbody">(: ......................................................
+   trace($i, $s):  a utility function to help make code 
+   being traced stay more legible.
    :)
 declare function ixi:trace(
   $x as item()?,
@@ -3080,14 +3188,18 @@ declare function ixi:trace(
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e1503">Define trace() function for debugging 59</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e1636">Define trace() function for debugging 59</a> &#x3009; <br></span>
 </div>
 
 An alternative form also inserts asterisks, but in general that proves
 a little too busy.
-<div class="scrap"><span><a name="d3e1518">&#x3008; 61 Starry trace() function &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">declare function ixi:trace($x as item()?, $s as xs:string) as item()? {
-trace(($x,'')[1], '&amp;#xA;&amp;#xA;********&amp;#xA;' || $s || '&amp;#xA;')
+<div class="scrap"><span><a name="d3e1651">&#x3008; 61 Starry trace() function &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">declare function ixi:trace(
+  $x as item()?, 
+  $s as xs:string
+) as item()? {
+  trace(($x,'')[1], 
+    '&amp;#xA;&amp;#xA;********&amp;#xA;' || $s || '&amp;#xA;')
 };
 </pre>
 <span class="scrapcontinuations"></span>
@@ -3102,9 +3214,9 @@ discards the string and returns the first argument. The dummy form
 just throws away the string and returns the item in the first
 argument.
 <div class="scrap"><span><a name="eri-notrace-function">&#x3008; 62 Define notrace() function for debugging &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   notrace($i, $s):  a utility function to help make code being
-   traced stay more legible.
+<pre class="scrapbody">(: ......................................................
+   notrace($i, $s):  a utility function to help make 
+   code being traced stay more legible.
    :)
 declare function ixi:notrace(
   $x as item()?,
@@ -3115,16 +3227,16 @@ declare function ixi:notrace(
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e1503">Define trace() function for debugging 59</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e1636">Define trace() function for debugging 59</a> &#x3009; <br></span>
 </div>
 
 </div>
 <div class="Real-P">The dummy form of <i>trace()</i> does the same thing
 as <i>notrace()</i>
 <div class="scrap"><span><a name="eri-trace-dummy">&#x3008; 63 Define trace() function for debugging &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   trace($i, $s):  a utility function to help make code being
-   traced stay more legible.
+<pre class="scrapbody">(: ......................................................
+   trace($i, $s):  a utility function to help make code 
+   being traced stay more legible.
    :)
 declare function ixi:trace(
   $x as item()?,
@@ -3142,9 +3254,9 @@ declare function ixi:trace(
 <div class="Real-P">We also want these available in other modules, like the
 Gluschkov module.
 <div class="scrap"><span><a name="gl-trace">&#x3008; 64 Define trace() function for debugging &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
-   trace($i, $s):  a utility function to help make code being
-   traced stay more legible.
+<pre class="scrapbody">(: ......................................................
+   trace($i, $s):  a utility function to help make code 
+   being traced stay more legible.
    :)
 declare function gl:trace(
   $x as item()?,
@@ -3166,7 +3278,7 @@ declare function gl:trace($x as item()?, $s as xs:string) as item() {
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e2559">[File Gluschkov.xqm] 105</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e2694">[File Gluschkov.xqm] 105</a> &#x3009; <br></span>
 </div>
 
 </div>
@@ -3200,22 +3312,23 @@ giving character offsets of the construct?</li>
 as possible to the <i>fn:doc()</i> function.  It is not yet
 implemented, because it requires a bit more infrastructure.
 <div class="scrap"><span><a name="aparecium-main">&#x3008; 65 Main interfaces for Aparecium &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ****************************************************************
+<pre class="scrapbody">(: ******************************************************
    * Main interfaces (and the simplest) 
-   ****************************************************************
+   ******************************************************
    :)
   
-(: ................................................................
+(: ......................................................
    doc($InputURI)
-   ................................................................
-   Given the URI of the input, fetch the ixml grammar describing it
-   and return the XML representation of the resource.
+   ......................................................
+   Given the URI of the input, fetch the ixml grammar 
+   describing it and return the XML representation of 
+   the resource.
 :)
 
-(: TO BE IMPLEMENTED:  use html fetch to get both HTTP header
-and payload.  If MIME type is ixml, fetch grammar and call
-parse-string.  Otherwise, if XML and 200 return payload, 
-otherwise return header and payload.
+(: TO BE IMPLEMENTED: use html fetch to get both HTTP
+header and payload.  If MIME type is ixml, fetch grammar
+and call parse-string.  Otherwise, if XML and 200 return
+payload, otherwise return header and payload.
 
 declare function aparecium:doc(
   $uriI as xs:string
@@ -3227,7 +3340,7 @@ declare function aparecium:doc(
 :)
 
 </pre>
-<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e531">Define parse-resource() 8</a>&#x3009;, &#x3008;<a href="#d3e1649">Define parse-string() 66</a>&#x3009;, &#x3008;<a href="#d3e1661">Define parse-string-with-compiled-grammar() 67</a>&#x3009;<br></span>
+<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e531">Define parse-resource() 8</a>&#x3009;, &#x3008;<a href="#d3e1782">Define parse-string() 66</a>&#x3009;, &#x3008;<a href="#d3e1794">Define parse-string-with-compiled-grammar() 67</a>&#x3009;<br></span>
 
 <span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e283">[File Aparecium.xqm] 1</a> &#x3009; <br></span>
 </div>
@@ -3299,12 +3412,13 @@ to be parsed is embedded in an XML document, the user needs to be
 able to specify the input to be parsed, and the grammar, either
 as a resource (using a URI) or as a string.
 The <i>parse-string()</i> takes both as strings.
-<div class="scrap"><span><a name="d3e1649">&#x3008; 66 Define parse-string() [continues <a href="#aparecium-main">65 Main interfaces for Aparecium</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
+<div class="scrap"><span><a name="d3e1782">&#x3008; 66 Define parse-string() [continues <a href="#aparecium-main">65 Main interfaces for Aparecium</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ......................................................
    parse-string($Input, $Grammar)
-   ................................................................
-   Given strings with the input and an ixml grammar describing it,
-   returns the XML representation of the resource.
+   ......................................................
+   Given strings with the input and an ixml grammar
+   describing it, returns the XML representation of the
+   resource.
 :)
 
 declare function aparecium:parse-string(
@@ -3312,7 +3426,8 @@ declare function aparecium:parse-string(
   $sG as xs:string
 ) as element() {
   let $cG := aparecium:compile-grammar-from-string($sG)
-  return aparecium:parse-string-with-compiled-grammar($sI, $cG)
+  return 
+    aparecium:parse-string-with-compiled-grammar($sI, $cG)
 };
    
 </pre>
@@ -3328,17 +3443,18 @@ grammar describing it, the function
 representation of the string's parse tree.</div>
 <div class="Real-P">This is the workhorse of the library, called by many other
 functions.
-<div class="scrap"><span><a name="d3e1661">&#x3008; 67 Define parse-string-with-compiled-grammar() [continues <a href="#aparecium-main">65 Main interfaces for Aparecium</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ................................................................
+<div class="scrap"><span><a name="d3e1794">&#x3008; 67 Define parse-string-with-compiled-grammar() [continues <a href="#aparecium-main">65 Main interfaces for Aparecium</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ......................................................
    parse-string-with-compiled-grammar($Input, $Grammar)
-   ................................................................
+   ......................................................
 :)
 declare function aparecium:parse-string-with-compiled-grammar(
   $sI as xs:string,
   $cG as element(ixml)
 ) as element() {
   (: let $trace := trace((),'
-parse-string-with-compiled-grammar()
+parse-string-'
+                   || ' with-compiled-grammar()
 ') :)
   let $result := prof:time(
                  earley:all-trees($sI, $cG) 
@@ -3364,14 +3480,14 @@ parse-string-with-compiled-grammar()
 <h3><a name="alt-calls-secondary" id="alt-calls-secondary">5.2. </a>Secondary user-facing calls</h3>
 <div class="Real-P">Text here ...
 <div class="scrap"><span><a name="aparecium-secondary">&#x3008; 68 Secondary interfaces (a bit specialized) &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ****************************************************************
+<pre class="scrapbody">(: ******************************************************
    * Secondary interfaces (a bit more specialized) 
-   ****************************************************************
+   ******************************************************
    :)
    
-(: ................................................................
+(: ......................................................
    parse-grammar-from-uri($ixmlGrammar)
-   ................................................................
+   ......................................................
    Given the URI of an ixml grammar, returns the XML 
    representation of the grammar.  
    
@@ -3385,15 +3501,15 @@ declare function aparecium:parse-grammar-from-uri(
   return aparecium:parse-grammar-from-string($sG)
 };
    
-(: ................................................................
+(: ......................................................
    parse-grammar-from-string($ixmlGrammar)
-   ................................................................
-   Given the string form of an ixml grammar, returns the XML 
-   representation of the grammar.  
+   ......................................................
+   Given the string form of an ixml grammar, returns the
+   XML representation of the grammar.
    
    Retrieves the grammar and parses it by calling
-   parse-string-with-compiled-grammar with the ixml grammar
-   for ixml grammars.
+   parse-string-with-compiled-grammar with the ixml
+   grammar for ixml grammars.
 :)
 
 declare function aparecium:parse-grammar-from-string(
@@ -3416,11 +3532,11 @@ declare function aparecium:parse-grammar-from-string(
       &lt;/ixml&gt;
 };   
       
-(: ................................................................
+(: ......................................................
    compile-grammar-from-uri($ixmlGrammar)
-   ................................................................
-   Given the URI of an ixml grammar, returns the compiled XML 
-   representation of the grammar. 
+   ......................................................
+   Given the URI of an ixml grammar, returns the
+   compiled XML representation of the grammar.
 :)  
 
 declare function aparecium:compile-grammar-from-uri(
@@ -3430,9 +3546,9 @@ declare function aparecium:compile-grammar-from-uri(
   return gluschkov:ME($xmlG)
 };
       
-(: ................................................................
+(: ......................................................
    compile-grammar-from-string($ixmlGrammar)
-   ................................................................
+   ......................................................
    Given the URI of an ixml grammar, returns the XML 
    representation of the grammar.  
 :)  
@@ -3444,12 +3560,12 @@ declare function aparecium:compile-grammar-from-string(
   return gluschkov:ME($xmlG)
 };
 
-(: ................................................................
+(: ......................................................
    compile-grammar-from-xml($ixmlGrammar)
-   ................................................................
-   Given the XML representation of an ixml grammar, returns an 
-   annotated representation of the grammar that makes it usable
-   by the Earley parser. 
+   ......................................................
+   Given the XML representation of an ixml grammar,
+   returns an annotated representation of the grammar
+   that makes it usable by the Earley parser.
 :)   
 
 declare function aparecium:compile-grammar-from-xml(
@@ -3475,29 +3591,40 @@ they have to be, even though they are of no interest
 to library users.</div>
 <div class="Real-P">
 <div class="scrap"><span><a name="aparecium-tertiary">&#x3008; 69 Tertiary interfaces (of interest only for maintainer) &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ****************************************************************
+<pre class="scrapbody">(: ******************************************************
    * Tertiary interfaces (of interest only for maintainer) 
-   ****************************************************************
+   ******************************************************
    :)
 
 (: This is bootstrapping code (for building the Gluschkov
    automaton of the ixml grammar for ixml grammars.  It 
-   should be run once whenever the grammar changes -- that is,
-   almost never.  But for now, it's here. 
+   should be run once whenever the grammar changes -- that 
+   is, almost never.  But for now, it's here. 
    :)
   
-(: Note that these don't save the result to disk; that's not
-   automated yet.
+(: Note that these don't save the result to disk; that's
+   not automated yet.
    :)
-(: reparse-ixml-grammar():  produce fresh XML version :)
-(: The path starting from Goal on all these is a temporary hack. :)
-declare function aparecium:reparse-ixml-grammar() as element(ixml) {
-  aparecium:parse-grammar-from-uri($aparecium:ixml.ixml)/Goal/ixml
+
+   (: reparse-ixml-grammar(): produce fresh XML version :)
+   
+   (: The path starting from Goal on all these is a 
+      temporary hack. :)
+   
+declare function aparecium:reparse-ixml-grammar(
+) as element(ixml) {
+  aparecium:parse-grammar-from-uri(
+      $aparecium:ixml.ixml
+  )/Goal/ixml
 };
  
-(: recompile-ixml-grammar():  produce fresh annotated XML :)
-declare function aparecium:recompile-ixml-grammar() as element(ixml) {
-  aparecium:compile-grammar-from-uri($aparecium:ixml.ixml)/Goal/ixml
+(: recompile-ixml-grammar(): produce fresh annotated XML
+:)
+declare function aparecium:recompile-ixml-grammar(
+) as element(ixml) {
+  aparecium:compile-grammar-from-uri(
+      $aparecium:ixml.ixml
+  )/Goal/ixml
 };
 </pre>
 <span class="scrapcontinuations"></span>
@@ -3509,12 +3636,12 @@ declare function aparecium:recompile-ixml-grammar() as element(ixml) {
 <div class="Real-P">Where are these things? They really should be in a collection, 
 but collections are more complicated.  Maybe later.
 <div class="scrap"><span><a name="aparecium-variables">&#x3008; 70 Variables (of interest only for maintainer) &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ****************************************************************
+<pre class="scrapbody">(: ******************************************************
    * Variables (of interest only for maintainer) 
-   ****************************************************************
+   ******************************************************
    :)
 </pre>
-<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e1697">Location of library 71</a>&#x3009;, &#x3008;<a href="#d3e1710">Location of ixml grammar 72</a>&#x3009;<br></span>
+<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e1830">Location of library 71</a>&#x3009;, &#x3008;<a href="#d3e1843">Location of ixml grammar 72</a>&#x3009;<br></span>
 
 <span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e283">[File Aparecium.xqm] 1</a> &#x3009; <br></span>
 </div>
@@ -3523,7 +3650,7 @@ but collections are more complicated.  Maybe later.
 <div class="Real-P">It is embarrassing to move things around by changing these
 strings, but ... that's what currently happens.
 First, what directory are these things in?
-<div class="scrap"><span><a name="d3e1697">&#x3008; 71 Location of library [continues <a href="#aparecium-variables">70 Variables (of interest only for maintainer)</a>]  &#x3009;  &#x2261;</a></span>
+<div class="scrap"><span><a name="d3e1830">&#x3008; 71 Location of library [continues <a href="#aparecium-variables">70 Variables (of interest only for maintainer)</a>]  &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">declare variable $aparecium:libloc as xs:string
   := '../lib';
 </pre>
@@ -3543,7 +3670,7 @@ the &#x2018;visible XML&#x2019; representation of
 the grammar, and the &#x2018;compiled&#x2019;
 representation, with annotations describing each RHS as
 an FSA.
-<div class="scrap"><span><a name="d3e1710">&#x3008; 72 Location of ixml grammar [continues <a href="#aparecium-variables">70 Variables (of interest only for maintainer)</a>]  &#x3009;  &#x2261;</a></span>
+<div class="scrap"><span><a name="d3e1843">&#x3008; 72 Location of ixml grammar [continues <a href="#aparecium-variables">70 Variables (of interest only for maintainer)</a>]  &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">declare variable $aparecium:ixml.ixml as xs:string
   := $aparecium:libloc || '/ixml.2022-01-25.ixml';
 
@@ -3644,7 +3771,7 @@ up (tbd; dunno yet).</div></li>
 <div class="Real-P">These are all intended to be user-facing; there will be
 corresponding functions internal to the module not intended to be
 called by the user.
-<div class="scrap"><span><a name="d3e1782">&#x3008; 73  [File Earley-parser.xqm]  &#x3009;  &#x2261;</a></span>
+<div class="scrap"><span><a name="d3e1915">&#x3008; 73  [File Earley-parser.xqm]  &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">(: Goal:  to return the set of parse trees recorded implicitly in the
    Earley closure.
    :)
@@ -3744,7 +3871,7 @@ Saxon HE does not provide that support, it should be revised
 so that the standard interfaces don't require higher-level
 functions.
 <div class="scrap"><span><a name="epi-earley-parse">&#x3008; 74 Define earley-parse() &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ****************************************************************
+<pre class="scrapbody">(: ******************************************************
    earley-parse($I, $G, $f);  run Earley recognizer on 
    input $I and grammar $G, return results using 
    $f($leiClosure, $Ec, $I, $G)
@@ -3768,12 +3895,14 @@ declare function epi:earley-parse(
       $leiCompletions := $mapResult('Completions')
   return if ($mapResult('Result'))
     then (: if we have a result, return each parse tree :)
-        let $dummy := eri:notrace((), 'epi:earley-parse() has result') 
+        let $dummy := eri:notrace((), 
+                      'epi:earley-parse() has result') 
         let $lpt := prof:time(
                     $f($leiCompletions, $meiClosure, $I (: , $G :) )
                     , '0b making trees: ')
         for $pt at $npt in $lpt
-        let $dummy := eri:notrace((), 'epi:earley-parse() returning a result') 
+        let $dummy := eri:notrace((), 
+                      'epi:earley-parse() returning a result') 
         (: return if (('raw','ast')[2] eq 'raw') 
 	       then $pt  
                else epi:astXparsetree($pt, count($lpt)) :)
@@ -3851,14 +3980,15 @@ nonterminal $n in $Ec's left-hand side, as documented by $Closure
 looping on infinite sets of trees with unbounded vertical depth)
 and calls an auxiliary function to do the work.
 <div class="scrap"><span><a name="epi-all-trees">&#x3008; 75 Define all-trees() &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ****************************************************************
+<pre class="scrapbody">(: ******************************************************
    all-trees($Closure, $Ec, $I, $G):  
 :)
 declare function epi:all-trees(
   $leiCompletions as map(*)*,
   $meiClosure as map(xs:string,
                      map(xs:integer,
-                         map(xs:string, item())*)) (:MEI:),
+                         map(xs:string, item())*)) 
+                 (:MEI:),
   $I as xs:string
   (: $G as element(ixml) :)
 ) as element()* {
@@ -3867,7 +3997,7 @@ declare function epi:all-trees(
   epi:all-trees($leiCompletions, $meiClosure, $I, ())
 };
 </pre>
-<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e1840">Define auxiliary function for all-trees() 76</a>&#x3009;<br></span>
+<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e1973">Define auxiliary function for all-trees() 76</a>&#x3009;<br></span>
 
 <span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e329">[File Earley-parser-internals.xqm] 4</a> &#x3009; <br></span>
 </div>
@@ -3875,9 +4005,10 @@ declare function epi:all-trees(
 <div class="Real-P">The auxiliary function for generating all trees is initially called
 for the item (0 $n Goal $q_final), but it's called again recursively,
 once for every completion relevant to the tree(s) we are constructing.
-<div class="scrap"><span><a name="d3e1840">&#x3008; 76 Define auxiliary function for all-trees() [continues <a href="#epi-all-trees">75 Define all-trees()</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ****************************************************************
-   all-trees#5:  auxiliary function (more args, does the work) 
+<div class="scrap"><span><a name="d3e1973">&#x3008; 76 Define auxiliary function for all-trees() [continues <a href="#epi-all-trees">75 Define all-trees()</a>]  &#x3009;  &#x2261;</a></span>
+<pre class="scrapbody">(: ******************************************************
+   all-trees#5:  auxiliary function (more args, does the 
+   work) 
 :)
    
 declare function epi:all-trees(
@@ -3917,7 +4048,7 @@ return parse trees for its nonterminal.
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e1840">Define auxiliary function for all-trees() 76</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e1973">Define auxiliary function for all-trees() 76</a> &#x3009; <br></span>
 </div>
 </div>
 <div class="Real-P">Here, <tt>$Ec</tt> is the completion item for
@@ -3954,7 +4085,7 @@ do is return them.
   )</pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e1840">Define auxiliary function for all-trees() 76</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e1973">Define auxiliary function for all-trees() 76</a> &#x3009; <br></span>
 </div>
 </div>
 <div class="Real-P">Once we get the trees, we just return them.
@@ -3966,7 +4097,7 @@ do is return them.
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e1840">Define auxiliary function for all-trees() 76</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e1973">Define auxiliary function for all-trees() 76</a> &#x3009; <br></span>
 </div>
 </div>
 </div>
@@ -4055,8 +4186,13 @@ the right-hand side of a given rule.</div>
 is Maarten van Emden's solution to the Eight Queens problem at 
 <a href="https://vanemden.wordpress.com/2008/04/27/programming-language-x/">https://vanemden.wordpress.com/2008/04/27/programming-language-x/</a>.
 There is no code for stopping when you get a solution, no
-backtracking,
+overt backtracking,
 just full speed ahead over all possibilities.</div>
+<div class="Real-P">The result is a depth-first search which turns out in hindsight to
+have some very unfortunate properties.  It's harder to understand than
+I would like, and it has no form of memoization so given appropriate
+input it may solve some subproblems many many times, with horrifying
+effects on run time.</div>
 <div class="Real-P">To perform this task, we define a function
 <i>epi:all-node-sequences</i>(<tt>$item</tt>,
 <tt>$closure</tt>, <tt>$acc</tt>, <tt>$from</tt>,
@@ -4133,12 +4269,17 @@ input substring <tt>$from</tt> .. <tt>$to</tt>, and whose
 children are the concatenation of (a) the children found by the
 recursive call, with (b) those in the accumulator.
 <div class="scrap"><span><a name="epi-all-node-sequences">&#x3008; 83 Define all-node-sequences() &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">(: ****************************************************************
-   epi:all-node-sequences($item, $closure, $acc, $from, $to, $I)
+<pre class="scrapbody">(: ******************************************************
+   epi:all-node-sequences($item, $closure, 
+                          $acc, 
+                          $from, $to, $I)
 :)
 declare function epi:all-node-sequences(
   $Ecur as map(*),
-  $meiClosure as map(xs:string, map(xs:integer, map(xs:string, item())*)),
+  $meiClosure as map(xs:string, 
+                     map(xs:integer, 
+                         map(xs:string, 
+                             item())*)),
   $lnAcc as item()*,
   $pFrom as xs:integer,
   $pTo as xs:integer,
@@ -4196,7 +4337,7 @@ the AST from the raw parse tree.
       and $Ecur('from') eq $Ecur('to')
       and $Ecur('from') eq $pFrom)
 </pre>
-<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e2187">Construct an element holding the node sequence 86</a>&#x3009;<br></span>
+<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e2322">Construct an element holding the node sequence 86</a>&#x3009;<br></span>
 
 <span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#epi-all-node-sequences">Define all-node-sequences() 83</a> &#x3009; <br></span>
 </div>
@@ -4217,7 +4358,7 @@ the vertical stack <tt>$leiVStack</tt>,
 the horizontal stack <tt>$leiHStack</tt>,
 and the node list <tt>$lnAcc</tt>.
 Let's examine the tops of those stacks.</i>
-<div class="scrap"><span><a name="d3e2187">&#x3008; 86 Construct an element holding the node sequence [continues <a href="#epi-ans-basecase">85 Handle base case:  current item is initial</a>]  &#x3009;  &#x2261;</a></span>
+<div class="scrap"><span><a name="d3e2322">&#x3008; 86 Construct an element holding the node sequence [continues <a href="#epi-ans-basecase">85 Handle base case:  current item is initial</a>]  &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">  then 
     let $e := element nt {
                  $Ecur('rule')/@name,
@@ -4247,7 +4388,7 @@ Let's examine the tops of those stacks.</i>
 It used the nonterminal name as the GI for the element,
 and it tried to handle attributes first.  Both of those
 should now be handled by the AST constructor.
-<div class="scrap"><span><a name="d3e2193">&#x3008; 87 Construct an element holding the node sequence [continues <a href="#epi-ans-basecase-2016"></a>]  &#x3009;  &#x2261;</a></span>
+<div class="scrap"><span><a name="d3e2328">&#x3008; 87 Construct an element holding the node sequence [continues <a href="#epi-ans-basecase-2016"></a>]  &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">  then 
     let $e := element {$Ecur('rule')/@name} {
                  attribute _from { $pFrom },
@@ -4841,7 +4982,9 @@ element and expected to be marked &#x201c;<tt>^</tt>&#x201d;.</div>
       let $dummy := for $chunk in $n return
           if ($chunk instance of text())
           then eri:notrace(concat('/',
-	  string-join(string-to-codepoints($chunk),' '), '/'), 'eXpt got text node') 
+	       string-join(string-to-codepoints($chunk),' '), 
+               '/'), 
+               'eXpt got text node') 
           else if ($chunk instance of element())
 	  then eri:notrace($chunk/name(), 'eXpt gets element:') 
 	  else eri:notrace($chunk, 'eXpt gets unknown item:') 
@@ -4975,7 +5118,7 @@ a grammar with attributes that allow the right-hand
 sides to be interpreted as Gluschkov automata:  that is,
 finite state automata whose states are the basic symbols
 of the regular expression.
-<div class="scrap"><span><a name="d3e2559">&#x3008; 105  [File Gluschkov.xqm]  &#x3009;  &#x2261;</a></span>
+<div class="scrap"><span><a name="d3e2694">&#x3008; 105  [File Gluschkov.xqm]  &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">module namespace gl =
 "http://blackmesatech.com/2019/iXML/Gluschkov";
 
@@ -5022,7 +5165,7 @@ declare variable $gl:follow-ns :=
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e2559">[File Gluschkov.xqm] 105</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e2694">[File Gluschkov.xqm] 105</a> &#x3009; <br></span>
 </div>
 
 </div>
@@ -5131,7 +5274,7 @@ for <i>e</i> itself.
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e2559">[File Gluschkov.xqm] 105</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e2694">[File Gluschkov.xqm] 105</a> &#x3009; <br></span>
 </div>
 </div>
 
@@ -5188,7 +5331,7 @@ a utility function to do it.
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e2559">[File Gluschkov.xqm] 105</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e2694">[File Gluschkov.xqm] 105</a> &#x3009; <br></span>
 </div>
 
 </div>
@@ -5209,7 +5352,7 @@ then
       $E/child::node()
    }
 </pre>
-<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e2788">Handle character-class expressions 111</a>&#x3009;<br></span>
+<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e2923">Handle character-class expressions 111</a>&#x3009;<br></span>
 
 <span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#gl-ME">Define function gl:ME() 107</a> &#x3009; <br></span>
 </div>
@@ -5218,7 +5361,7 @@ then
 <div class="Real-P">For character-class expressions, the regular expression we need is
 also very simple: just the class code wrapped in &#x201c;<tt>\p{
 ... }</tt>&#x201d;.
-<div class="scrap"><span><a name="d3e2788">&#x3008; 111 Handle character-class expressions [continues <a href="#gl-ME-identity">110 Handle leaf nodes</a>]  &#x3009;  &#x2261;</a></span>
+<div class="scrap"><span><a name="d3e2923">&#x3008; 111 Handle character-class expressions [continues <a href="#gl-ME-identity">110 Handle leaf nodes</a>]  &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">else if ($E/self::class)
 then 
    element { name($E) } {
@@ -5468,7 +5611,7 @@ with no additions.</li>
              }
            else $a
 </pre>
-<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e2958">Calculate follow-set for repetition with separator 119</a>&#x3009;<br></span>
+<span class="scrapcontinuations">Continued in &#x3008;<a href="#d3e3093">Calculate follow-set for repetition with separator 119</a>&#x3009;<br></span>
 
 <span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#gl-ME-repeats-2013">Handle repetitions (v0.1) 116</a> &#x3009; &#x3008; <a href="#gl-ME-repeats">Handle repetitions 117</a> &#x3009; <br></span>
 </div>
@@ -5492,7 +5635,7 @@ The overall pattern is as follows.  We pre-calculate
 <li>for each position in <i>F</i> or <i>G</i>, its local
 name and its follow-set within <i>F</i> or <i>G</i>.</li>
 </ul>
-<div class="scrap"><span><a name="d3e2958">&#x3008; 119 Calculate follow-set for repetition with separator [continues <a href="#gl-ME-rep-follow">118 Calculate follow:* attributes for repetitions</a>]  &#x3009;  &#x2261;</a></span>
+<div class="scrap"><span><a name="d3e3093">&#x3008; 119 Calculate follow-set for repetition with separator [continues <a href="#gl-ME-rep-follow">118 Calculate follow:* attributes for repetitions</a>]  &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">       else (: count($children) eq 2 :)
          let $lastF := tokenize($F/@last,'\s+'),
              $lastG := tokenize($G/@last,'\s+'),
@@ -5532,7 +5675,7 @@ its follow-set within <i>F</i>:
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e2958">Calculate follow-set for repetition with separator 119</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e3093">Calculate follow-set for repetition with separator 119</a> &#x3009; <br></span>
 </div>
 </div>
 <div class="Real-P">If <i>p</i> is final in <i>F</i> and <i>G</i> is <em>not</em> nullable, 
@@ -5543,7 +5686,7 @@ then its follow-set omits the first sets of <i>F</i>.
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e2958">Calculate follow-set for repetition with separator 119</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e3093">Calculate follow-set for repetition with separator 119</a> &#x3009; <br></span>
 </div>
 </div>
 <div class="Real-P">If <i>p</i> is final in <i>G</i> and <i>F</i> is nullable, 
@@ -5557,7 +5700,7 @@ the first-set of <i>G</i>.
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e2958">Calculate follow-set for repetition with separator 119</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e3093">Calculate follow-set for repetition with separator 119</a> &#x3009; <br></span>
 </div>
 </div>
 <div class="Real-P">If <i>p</i> is final in <i>G</i> and <i>F</i> is <em>not</em> nullable, 
@@ -5569,7 +5712,7 @@ of <i>p</i>.
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e2958">Calculate follow-set for repetition with separator 119</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e3093">Calculate follow-set for repetition with separator 119</a> &#x3009; <br></span>
 </div>
 </div>
 <div class="Real-P">Finally, if none of the above are true, then <i>p</i>
@@ -5581,7 +5724,7 @@ out again.
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e2958">Calculate follow-set for repetition with separator 119</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e3093">Calculate follow-set for repetition with separator 119</a> &#x3009; <br></span>
 </div>
 </div>
 
@@ -5597,7 +5740,7 @@ to <i>distinct-values()</i>.
 </pre>
 <span class="scrapcontinuations"></span>
 
-<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e2559">[File Gluschkov.xqm] 105</a> &#x3009; <br></span>
+<span class="scrapinbound"></span><span class="scrapinbound">This code is used in &#x3008; <a href="#d3e2694">[File Gluschkov.xqm] 105</a> &#x3009; <br></span>
 </div>
 
 </div>
@@ -5999,7 +6142,7 @@ program is not finished. Hence the following to-do lists.</div>
 
 <h3><a name="to-do-large" id="to-do-large"></a>Overall plans</h3>
 
-<div class="Real-P">At the moment (17 February 2022), the primary concerns are to
+<div class="Real-P">At the moment (23 February 2022), the primary concerns are to
 improve performance and robustness.</div>
 <ul><li><div class="Real-P">Improve tree constructor. Or, rather, replace
 it. Concretely:</div>
@@ -6061,7 +6204,7 @@ fall together, thus clearly marking the boundary.  Concretely, <i>N</i> is
 end-stopped if it is clear without lookahead where the end of an
 occurrence of <i>N</i> falls: any legal character is either a continuation
 of the <i>N</i> or the beginning of the next symbol, and no symbol can be
-read in both ways.[<a name="ref-to-d3e3409" href="#d3e3409" title="&#xA;&#xA;Operationally, I think end-stopping can be detected as follows.&#xA;Construct the FSA for the O0 regular superset approximation of&#xA;L(G), in the usual way.  For ea">4</a>]</li>
+read in both ways.[<a name="ref-to-d3e3544" href="#d3e3544" title="&#xA;&#xA;Operationally, I think end-stopping can be detected as follows.&#xA;Construct the FSA for the O0 regular superset approximation of&#xA;L(G), in the usual way.  For ea">6</a>]</li>
 <li></li>
 </ul></div>
 </li>
@@ -6172,6 +6315,10 @@ should expect an ambiguity label)</li>
 <li>G022-neg-068</li>
 <li>grammar test G101-positive (and thus did not run any of the test cases for it)</li>
 <li>G112-external / S1</li>
+</ul></li>
+<li>In test set wisps:
+<ul><li>grammar tests on grammars 02b, 02c, 02d (non-structural
+nonconformance of grammars)</li>
 </ul></li>
 </ul>
 </div>
@@ -6304,11 +6451,37 @@ node, two <i>S</i> nodes, three, ...).
 which provides an infinite number of parses for the
 empty string, which vary both in depth and in width.</div>
 </div><div class="note">[<a name="d3e800" id="d3e800" href="#ref-to-d3e800">2</a>] Here <i>q</i><sub><i>f</i></sub> is any final state in the
-definition of <i>N</i>.</div><div class="note">[<a name="d3e842" id="d3e842" href="#ref-to-d3e842">3</a>] At the moment,
-there are some infinitely ambiguous sentences for which we
-will not in fact get all of the walks.  That appears to be a
-disadvantage of working directly with EBNF instead of rewriting
-the grammar to BNF.</div><div class="note">[<a name="d3e3409" id="d3e3409" href="#ref-to-d3e3409">4</a>] 
+definition of <i>N</i>.</div><div class="note">[<a name="d3e837" id="d3e837" href="#ref-to-d3e837">3</a>] 
+I often slip and refer to these as <em>paths</em> through
+the right-hand side, but in graph theory a <em>path</em>
+denotes a walk in which no vertex appears more than once.  If
+the input grammar is BNF, any walk through any right-hand side
+will be a path.  But we are working with EBNF.
+</div><div class="note">[<a name="d3e852" id="d3e852" href="#ref-to-d3e852">4</a>] At the moment, there are some
+infinitely ambiguous sentences for which we will not in fact get all
+of the walks (informally, those involving infinite
+&#x2018;horizontal&#x2019; ambiguity, as in &#x201c;<tt>S = A*,
+'a'. A = .</tt>&#x201d;).  Our inability to capture horizontal
+ambiguities completely appears to be a disadvantage of working
+directly with EBNF instead of rewriting the grammar to BNF.  (An
+equivalent BNF like &#x201c;<tt>S = _star_A, 'a'. _star_A = {}; A,
+_star_A.  A = {}.</tt>&#x201d; does not present the problem.)<div class="Real-P">The
+key appears to be that in an EBNF grammar there may be an infinite
+number of walks through a right-hand side, whereas in a BNF grammar
+that can never be so, because BNF lacks repetition
+operators.</div></div><div class="note">[<a name="d3e980" id="d3e980" href="#ref-to-d3e980">5</a>] 
+
+In principle, a walk can be extended if the last state reached by
+the walk has follow states.  But since right-hand sides in an EBNF can
+have cycles, we cut off any walk if its last state has already been
+visited more than <i>n</i> times.
+
+<div class="Real-P">If we set <i>n</i> to 0, then we eliminate all loops; that's sufficient
+for all normal grammars.  If we set <i>n</i> higher, then we traverse each
+loop at most <i>n</i> times; this may be interesting for people fascinated
+by ambiguity.</div>
+
+</div><div class="note">[<a name="d3e3544" id="d3e3544" href="#ref-to-d3e3544">6</a>] 
 
 Operationally, I think end-stopping can be detected as follows.
 <ul><li>Construct the FSA for the <i>O</i><sub>0</sub> regular superset approximation of
