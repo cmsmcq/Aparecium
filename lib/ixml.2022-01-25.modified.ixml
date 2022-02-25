@@ -1,11 +1,14 @@
 { Modified 2022-02-24 for tokenization. 
   Changed definitions of whitespace, cchar, name.
 }
+{|xmlns:ap http://blackmesatech.com/2019/iXML/Aparecium|}
+
          ixml: s, rule+s, s.
 
            -s: (whitespace; comment)*.
 
-  -whitespace: {|tokenize (\p{Zs}|[\t\n\r])+|}
+  -whitespace: {|@ap:is-token yes|}
+               {|@ap:regex ((\p{Zs}|[\t\n\r])+)|}
                -[Zs; #9; #a; #d]+.
 {
   -whitespace: -[Zs]; tab; lf; cr.
@@ -14,7 +17,8 @@
           -cr: -#d.
 }
       comment: -"{", (cchar; comment)*, -"}".
-       -cchar: {|tokenize ([^\&#x7B;\&#x7D;])+ |}
+       -cchar: {|ap:is-token yes|}
+               {|ap:regex (([^\&#x7B;\&#x7D;])+) |}
                ~["{}"]+.
 {      -cchar: ~[#7B; #7D]. }
 
@@ -41,7 +45,9 @@
                encoded.
       -quoted: (tmark, s)?, string.
 
-        @name: {|tokenize ((_|\p{L})([_\-.·‿⁀]|\p{L}|\p{Nd}|\p{Mn})*) |}
+        @name: {|ap:is-token yes|}
+               {|ap:regex
+               ((_|\p{L})([_\-.·‿⁀]|\p{L}|\p{Nd}|\p{Mn})*) |}
                ["_"; L], ["_"; L; "-.·‿⁀"; Nd; Mn]*.
 {
         @name: namestart, namefollower*.
