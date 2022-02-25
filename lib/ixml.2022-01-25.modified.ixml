@@ -1,0 +1,79 @@
+{ Modified 2022-02-24 for tokenization. 
+  Changed definitions of whitespace, cchar, name.
+}
+         ixml: s, rule+s, s.
+
+           -s: (whitespace; comment)*.
+
+  -whitespace: {|tokenize (\p{Zs}|[\t\n\r])+|}
+               -[Zs; #9; #a; #d]+.
+{
+  -whitespace: -[Zs]; tab; lf; cr.
+         -tab: -#9.
+          -lf: -#a.
+          -cr: -#d.
+}
+      comment: -"{", (cchar; comment)*, -"}".
+       -cchar: {|tokenize ([^\&#x7B;\&#x7D;])+ |}
+               ~["{}"]+.
+{      -cchar: ~[#7B; #7D]. }
+
+         rule: (mark, s)?, name, s, -["=:"], s, -alts, -".".
+        @mark: ["@^-"].
+         alts: alt+(-[";|"], s).
+          alt: term*(-",", s).
+        -term: factor;
+               option;
+               repeat0;
+               repeat1.
+      -factor: terminal;
+               nonterminal;
+               -"(", s, alts, -")", s.
+      repeat0: factor, -"*", s, sep?.
+      repeat1: factor, -"+", s, sep?.
+       option: factor, -"?", s.
+          sep: factor.
+  nonterminal: (mark, s)?, name, s.
+
+    -terminal: literal; 
+               charset.
+      literal: quoted;
+               encoded.
+      -quoted: (tmark, s)?, string.
+
+        @name: {|tokenize ((_|\p{L})([_\-.·‿⁀]|\p{L}|\p{Nd}|\p{Mn})*) |}
+               ["_"; L], ["_"; L; "-.·‿⁀"; Nd; Mn]*.
+{
+        @name: namestart, namefollower*.
+   -namestart: ["_"; L].
+-namefollower: namestart; ["-.·‿⁀"; Nd; Mn].
+}
+
+       @tmark: ["^-"].
+      @string: -'"', dchar+, -'"', s;
+               -"'", schar+, -"'", s.
+        dchar: ~['"'; #a; #d];
+               '"', -'"'. {all characters except line breaks; quotes must be doubled}
+        schar: ~["'"; #a; #d];
+               "'", -"'". {all characters except line breaks; quotes must be doubled}
+     -encoded: (tmark, s)?, -"#", @hex, s.
+          hex: ["0"-"9"; "a"-"f"; "A"-"F"]+.
+
+     -charset: inclusion; 
+               exclusion.
+    inclusion: (tmark, s)?,          set.
+    exclusion: (tmark, s)?, -"~", s, set.
+         -set: -"[", s,  member*(-[";|"], s), -"]", s.
+      -member: literal;
+               range;
+               class.
+        range: from, s, -"-", s, to, s.
+        @from: character.
+          @to: character.
+   -character: -'"', dchar, -'"';
+               -"'", schar, -"'";
+               "#", hex.
+        class: code, s.
+        @code: capital, letter?.
+     -capital: ["A"-"Z"].
+      -letter: ["a"-"z"].
