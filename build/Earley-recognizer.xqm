@@ -7,12 +7,12 @@ import module namespace ixi =
 "http://blackmesatech.com/2019/iXML/Earley-rec-internals"
 at "Earley-rec-internals.xqm";
 
-(: **************************************************************** 
+(: ****************************************************** 
    * ix:scan($E, $I)
-   **************************************************************** :)
-(: If $E expects any terminals which occur as expected, return
-   the advance of E over those terminals.  There may be more than
-   one. :)
+   ****************************************************** :)
+(: If $E expects any terminals which occur as expected, 
+   return the advance of E over those terminals.  There 
+   may be more than one. :)
    
 declare function ix:scan(
   $E as item() (: ITEM :),
@@ -32,11 +32,12 @@ declare function ix:scan(
 };
 
 
-(: **************************************************************** 
+(: ****************************************************** 
    * ix:pred($E, $G)
-   **************************************************************** :)
-(: If $E predicts any non-terminals, return items which expect
-   those non-terminals at the appropriate location. :)
+   ****************************************************** :)
+(: If $E predicts any non-terminals, return items which 
+   expect those non-terminals at the appropriate location. 
+   :)
    
 declare function ix:pred(
   $E as item() (: ITEM :),
@@ -67,16 +68,17 @@ declare function ix:pred(
    )
 };
 
-(: **************************************************************** 
+(: ****************************************************** 
    * ix:comp($Ec, $Ep)
-   **************************************************************** :)
-(: If $Ec and $Ep are a prediction/completion pair, return the
-   advance of $Ep over the non-terminal predicted by $Ec. :)
+   ****************************************************** :)
+(: If $Ec and $Ep are a prediction/completion pair, return
+   the advance of $Ep over the non-terminal predicted by 
+   $Ec. :)
    
 (: comp($Ec, $Ep): if $Ec is a completion item, 
    and $Ep a prediction item,
    and $Ep predicts a nonterminal $n at position $pPTo,
-   and $Ec completes nonterminal $n starting at $pCFrom=$pPTo,
+   and $Ec completes $n starting at $pCFrom=$pPTo,
    then advance $Ep over $n and place the new to-position
    at the to-position of $Ec.
    
@@ -140,14 +142,19 @@ declare function ix:recognizeX(
         <nonterminal name="{$symStart2}"/>, 
         $G2)[1],
       $riInitial := ixi:lriStartstatesXR($rInitial)[1],
-      $eiInitial := ixi:eiMakePPRRi(0, 0, $rInitial, $riInitial),
+      $eiInitial := ixi:eiMakePPRRi(0, 0, 
+                                    $rInitial, 
+                                    $riInitial),
       $len := ixi:inputlength($I),
       
-      $meiClosure := ixi:earley-closure($eiInitial, $I, $G2),
+      $meiClosure := 
+          ixi:earley-closure($eiInitial, $I, $G2),
       (: $leiCompletions := $meiClosure
          [ixi:fFinalEiPPN(.,0,$len,$symStart2)], :)
       $leiCompletions := $meiClosure('from')(0)
-                         [ixi:fFinalEiPPN(.,0,$len,$symStart2)],
+                         [ixi:fFinalEiPPN(., 0,
+                                          $len,
+                                          $symStart2)],
       $result := exists($leiCompletions)
       (:
       ,

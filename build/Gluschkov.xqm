@@ -356,9 +356,9 @@ declare function gl:read-one-char-spec(
   else ""
 };
 
-(: ................................................................
-   trace($i, $s):  a utility function to help make code being
-   traced stay more legible.
+(: ......................................................
+   trace($i, $s):  a utility function to help make code 
+   being traced stay more legible.
    :)
 declare function gl:trace(
   $x as item()?,

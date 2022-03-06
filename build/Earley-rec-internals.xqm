@@ -6,9 +6,9 @@ module namespace ixi =
 declare namespace map =
 "http://www.w3.org/2005/xpath-functions/map";
 
-(: **************************************************************** 
+(: ****************************************************** 
    * Imports and setup
-   **************************************************************** :)
+   ****************************************************** :)
 
 import module namespace ix =
 "http://blackmesatech.com/2019/iXML/Earley-recognizer"
@@ -21,27 +21,28 @@ at "d2x.xqm";
 declare namespace follow = 
 "http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
 
-(: $ixi:combinedups:  convenience variable for calls to map:merge. :)
+(: $ixi:combinedups:  convenience variable for calls to 
+   map:merge. :)
 declare variable $ixi:combinedups as map(*)
    := map:entry('duplicates','combine');
    
-(: **************************************************************** 
+(: ****************************************************** 
    * Earley items
-   **************************************************************** :)
-(: We represent an Earley item as a map with keys 'from', 'to',
-   'rule', and 'ri' (rule index).  For any item $ei, $ei('from') 
-   and $ei('to') are integers, $ei('rule') is element(rule), and
-   $ei('ri') is a string (an NCName, in fact, but typed only as 
-   a string).
+   ****************************************************** :)
+(: We represent an Earley item as a map with keys 'from', 
+   'to', 'rule', and 'ri' (rule index).  For any item $ei, 
+   $ei('from') and $ei('to') are integers, $ei('rule') is 
+   element(rule), and $ei('ri') is a string (an NCName, 
+   in fact, but typed only as a string).
 :)
 
-(: ****************************************************************
+(: ******************************************************
    * Earley items:  constructors
   :)
 
-(: ................................................................
-   ei Make P P R Ri: make an Earley item from two positions, a rule,
-   and a rule index
+(: ......................................................
+   ei Make P P R Ri: make an Earley item from two 
+   positions, a rule, and a rule index
   :)
 declare function ixi:eiMakePPRRi(
   $From as xs:integer,
@@ -56,11 +57,28 @@ declare function ixi:eiMakePPRRi(
     'ri' : $ri
   }
 };
+(: ......................................................
+   ei Make P P T: make an Earley item from two 
+   positions and a terminal.
+  :)
+declare function ixi:eiMakePPT(
+  $From as xs:integer,
+  $To as xs:integer,
+  $t as element()
+) as map(xs:string, item()) {  
+  map {
+    'from' : $From,
+    'to' : $To,
+    'rule' : $t,
+    'ri' : "#terminal"
+  }
+};
 
-(: ................................................................
-   ixi:lei Advance Ei Sym P($E, $sym, $p): return the set of Earley
-   items (lei) that arise if you advance $E over $sym, or over any
-   equivalent symbol, to reach position $p.
+(: ......................................................
+   ixi:lei Advance Ei Sym P($E, $sym, $p): return the 
+   set of Earley items (lei) that arise if you advance 
+   $E over $sym, or over any equivalent symbol, to reach 
+   position $p.
 :)
 declare function ixi:leiAdvanceEiSymP(
   $E as map(xs:string, item()),
@@ -84,13 +102,13 @@ declare function ixi:leiAdvanceEiSymP(
   return ixi:eiMakePPRRi($pFr, $pNew, $r, $ri) 
 };
 
-(: ****************************************************************
+(: ******************************************************
    * Earley items:  extractors
    :)
 
 (: See also sXei() below under Utilities :)
 
-(: ................................................................
+(: ......................................................
    pTo X Ei($E): extract 'to' position from item
    :)
 declare function ixi:pToXEi(
@@ -99,7 +117,7 @@ declare function ixi:pToXEi(
   $E('to')
 };
 
-(: ................................................................
+(: ......................................................
    pFrom X Ei($E): extract 'from' position from item
    :)
 declare function ixi:pFromXEi(
@@ -108,7 +126,7 @@ declare function ixi:pFromXEi(
   $E('from')
 };
 
-(: ................................................................
+(: ......................................................
    r X Ei($E): extract rule from item
    :)
 declare function ixi:rXEi(
@@ -117,8 +135,9 @@ declare function ixi:rXEi(
   $E('rule')
 };
 
-(: ................................................................
-   nLhs X Ei($E): extract nonterminal on lhs of rule from item
+(: ......................................................
+   nLhs X Ei($E): extract nonterminal on lhs of rule 
+   from item
    :)
 declare function ixi:nLhsXEi(
   $E as map(xs:string, item())
@@ -127,8 +146,9 @@ declare function ixi:nLhsXEi(
     attribute name { $E('rule')/@name }
   }
 };
- (: ................................................................
-   lsymExpected X Ei($E): extract list of expected symbols from item
+ (: ......................................................
+   lsymExpected X Ei($E): extract list of expected 
+   symbols from item
    :)
 declare function ixi:lsymExpectedXEi(
   $E as map(xs:string, item())
@@ -144,14 +164,15 @@ declare function ixi:lsymExpectedXEi(
   let $e := $r//*[@xml:id = $sym]
   return $e
 };
-(: ****************************************************************
+(: ******************************************************
    * Earley items:  predicates
    :)
-(: ................................................................
-   fFinal Ei P P N($E, $pFr, $pTo, $N): is $E a completion item
-   for symbol N, running between the two positions?
-   (Used just once, in recognizeX, to check for completions of
-   the start symbol that cover the entire input string.)
+(: ......................................................
+   fFinal Ei P P N($E, $pFr, $pTo, $N): is $E a
+   completion item for symbol N, running between the 
+   two positions? (Used just once, in recognizeX, to 
+   check for completions of the start symbol that cover 
+   the entire input string.)
    :)
 declare function ixi:fFinalEiPPN(
   $E as map(xs:string, item()),
@@ -165,9 +186,10 @@ declare function ixi:fFinalEiPPN(
   and ($E('ri') = ixi:lriFinalstatesXR($E('rule')))
 };
 
-(: ................................................................
-   ixi:fFinalEiPN($E, $pTo, $sym):  true iff $E is a completion 
-   item ending at position $P for nonterminal $N 
+(: ......................................................
+   ixi:fFinalEiPN($E, $pTo, $sym):  true iff $E is a 
+   completion item ending at position $P for nonterminal 
+   $N 
    :)
 declare function ixi:fFinalEiPN(
   $E as map(xs:string, item()),
@@ -209,16 +231,16 @@ declare function ixi:fFinalEiPN(
   return $f
 };
 
-(: ................................................................
-   fFinal Ei($E): is $E a completion item?  I.e. is its rule index
-   in a final location?
+(: ......................................................
+   fFinal Ei($E): is $E a completion item?  I.e. is its 
+   rule index in a final location?
    :)
 declare function ixi:fFinalEi(
   $E as map(xs:string, item())
 ) as xs:boolean {
   $E('ri') = ixi:lriFinalstatesXR($E('rule'))
 };
-(: ................................................................
+(: ......................................................
    fExpectsN - Ei($E):  does $E expect any nonterminals?
    :)
 declare function ixi:fExpectsN-Ei(
@@ -226,12 +248,14 @@ declare function ixi:fExpectsN-Ei(
 ) as xs:boolean {
   exists(ixi:lsymExpectedXEi($E)[ixi:fNonterminal(.)])
 };
-(: ................................................................
-   fScanrel E E($E1, $E2):  does the scan relation hold for E1, E2?
-   (Used once, in Earley parser internals, to find related items.)
+(: ......................................................
+   fScanrel E E($E1, $E2):  does the scan relation hold 
+   for E1, E2?
+   (Used once, in Earley parser internals, to find 
+   related items.)
    :)
-   (: N.B. does not test that the symbol in question is a terminal.
-      Does it matter?
+   (: N.B. does not test that the symbol in question 
+      is a terminal. Does it matter?
    :)   
 declare function ixi:fScanrelEE(
   $E1 as map(xs:string, item()),
@@ -260,10 +284,11 @@ declare function ixi:fScanrelEE(
       :)
 };
 
-(: ................................................................
-   fAdvanceNrel E E ($E1, $E2):  does the advance-over-symbol-N
-   relation hold for E1, E2?
-   (Used once, in Earley parser internals, to find related items.)
+(: ......................................................
+   fAdvanceNrel E E ($E1, $E2):  does the 
+   advance-over-symbol-N relation hold for E1, E2?
+   (Used once, in Earley parser internals, to find 
+   related items.)
 
    By definition (see paper) E2 = advance(E1, T) iff
       * from(E1) = from(E2)
@@ -272,9 +297,10 @@ declare function ixi:fScanrelEE(
       * and E1 wins on T
       * else advance(E1, T) = empty set.
 
-   Note that for the "E1 wins" clause we rely on the truth of
-   all items in the closure.  E1 must be winning, because otherwise
-   an E2 that satisfies the other tests would not be in the closure.
+   Note that for the "E1 wins" clause we rely on the 
+   truth of all items in the closure.  E1 must be  
+   winning, because otherwise an E2 that satisfies 
+   the other tests would not be in the closure.
    :)
 declare function ixi:fAdvanceNrelEE(
   $E1 as map(xs:string, item()),
@@ -282,7 +308,8 @@ declare function ixi:fAdvanceNrelEE(
 ) as xs:boolean {
   let $fFrom := ($E1('from') eq $E2('from')),
       $lsymFollow := ixi:lsymExpectedXEi($E1),
-      $lSsymFollow := for $e in $lsymFollow return $e/@xml:id,
+      $lSsymFollow := for $e in $lsymFollow 
+                      return $e/@xml:id,
       $fStates1 := ($E2('ri') = $lSsymFollow),
       $fRules := deep-equal($E1('rule'), $E2('rule')),
       $f := ($fFrom and $fStates1 and $fRules),
@@ -299,13 +326,13 @@ declare function ixi:fAdvanceNrelEE(
                and deep-equal(./rule, $Ecur/rule)
       :)
 };
-(: ****************************************************************
+(: *******************************************************
    * Earley items:  closure (the big kahuna)
    :)
- (: ................................................................
+ (: ......................................................
    ixi:earley-closure($lei, $I, $G2): 
-   Calculate closure of $lei over the relations scan(), pred(),
-   and comp().
+   Calculate closure of $lei over the relations scan(), 
+   pred(), and comp().
 :)
 declare function ixi:earley-closure(
   $leiPending as map(xs:string, item())* (: ITEM* :), 
@@ -315,21 +342,22 @@ declare function ixi:earley-closure(
          map(xs:integer,
              map(xs:string,
                  item())*)) (:MEI:) {
-  let $meiAcc := map { 'from' : map:merge(
-                         for $ei in $leiPending
-			 return map:entry($ei('from'), $ei),
-                         $ixi:combinedups
-                       ),
-                       'to' : map:merge(
-                         for $ei in $leiPending
-			 return map:entry($ei('to'), $ei),
-                         $ixi:combinedups
-		       ) }
+  let $meiAcc := map { 
+                   'from' : map:merge(
+                     for $ei in $leiPending
+		     return map:entry($ei('from'), $ei),
+                     $ixi:combinedups
+                   ),
+                   'to' : map:merge(
+                     for $ei in $leiPending
+		     return map:entry($ei('to'), $ei),
+                     $ixi:combinedups
+		   ) }
 		       
   return ixi:earley-closure($leiPending, $meiAcc, $I, $G)
 };
 
-(: ................................................................
+(: ......................................................
    ixi:earley-closure($pending, $accumulator, $I, $G2):
 :)
 declare function ixi:earley-closure(
@@ -363,13 +391,17 @@ declare function ixi:earley-closure(
 		 return $ei,
 
       
-      $dummy := ixi:notrace(count($leiPending), 'e-c() has pending items: '), 
+      $dummy := ixi:notrace(count($leiPending), 
+                            'e-c() has pending items: '), 
       $dummy := ixi:notrace(
                     ixi:sXei($E),
-                    'ixi:earley-closure running on pending item: '), 
-      $dummy := ixi:notrace(count($leiCs0), 'e-c() initial closure has items: '), 
-      $dummy := ixi:notrace(count($leiCs), 'e-c() deduped closure has items: '), 
-      $dummy := ixi:notrace(count($leiNew), 'e-c() New items: '), 
+                    'ixi:earley-closure running on item: '), 
+      $dummy := ixi:notrace(count($leiCs0), 
+                    'e-c() initial closure has items: '), 
+      $dummy := ixi:notrace(count($leiCs), 
+                     'e-c() deduped closure has items: '), 
+      $dummy := ixi:notrace(count($leiNew), 
+                     'e-c() New items: '), 
 
 		 
       $meiNewaccum := map {
@@ -389,9 +421,10 @@ declare function ixi:earley-closure(
     $G)
 };
 
-(: ................................................................
-   leiPCSrel($E, $leiA, $I, $G): return all items $E2 such 
-   that $E2 = scan($E, $I)
+(: ......................................................
+   leiPCSrel($E, $leiA, $I, $G): return all items $E2 
+   such that 
+   $E2 = scan($E, $I)
    or $E2 = pred($E, $G)
    or comp($E1, $E3) for some $E3 in $leiA
    or comp($E3, $E1) for some $E3 in $leiA
@@ -412,8 +445,8 @@ declare function ixi:leiPCSrel(
   ix:pred($E,$G), 
   
   
-  (: If $E expects a nonterminal, look for a completion $Ec and 
-     perform comp($Ec,$E) :)
+  (: If $E expects a nonterminal, look for a 
+     completion $Ec and perform comp($Ec,$E) :)
   
   if (ixi:fExpectsN-Ei($E))
   then for $Ec in $meiAccum('from')($E('to'))
@@ -422,8 +455,8 @@ declare function ixi:leiPCSrel(
   else (), 
   
     
-  (: If $E is a completion, look for a prediction $Ep and 
-     perform comp($E,$Ep) :)
+  (: If $E is a completion, look for a prediction $Ep 
+     and perform comp($E,$Ep) :)
   
   if (ixi:fFinalEi($E)) 
   then for $Ep in $meiAccum('to')($E('from'))
@@ -432,24 +465,24 @@ declare function ixi:leiPCSrel(
   else ()
   
     
-  (: N.B. In BNF, $E can only expect one symbol, so either scan
-     or pred applies, but not both.  But we are expecting EBNF
-     and $E can predict several things at the same time as being
-     a completion. :)
+  (: N.B. In BNF, $E can only expect one symbol, so 
+     either scan or pred applies, but not both.  But 
+     we are expecting EBNF and $E can predict several 
+     things at the same time as being a completion. :)
 };
    
-(: **************************************************************** 
+(: ****************************************************** 
    * Grammars
-   **************************************************************** :)
+   ****************************************************** :)
 (: A grammar is an ixml element with no namespace. :)
 
- (: ****************************************************************
+ (: ******************************************************
    * Grammars: constructors
    :)
    
-(: ................................................................
-   augment-grammar($G):  given grammar, augment it as Earley
-   prescribes.
+(: ......................................................
+   augment-grammar($G):  given grammar, augment it as 
+   Earley prescribes.
    :)
 declare function ixi:augment-grammar(
   $G as element(ixml)
@@ -464,13 +497,15 @@ declare function ixi:augment-grammar(
       attribute nullable { false() },
       attribute first {$symStart || '_0'},
       attribute last {$symStart || '_0'},
-      attribute { xs:QName('follow:'||$symStart||'_0') } {()},        
+      attribute { xs:QName('follow:'||$symStart||'_0') } 
+                {()},        
       element alts {
         attribute xml:id {$symGoal || '_def_0'},
         attribute nullable { false() },
         attribute first {$symStart || '_0'},
         attribute last {$symStart || '_0'},
-        attribute { xs:QName('follow:'||$symStart||'_0') } {()},        
+        attribute { xs:QName('follow:'||$symStart||'_0') } 
+                  {()},
         element alt {
           attribute xml:id {$symGoal || '_alt_0'},
           attribute nullable { false() },
@@ -489,9 +524,10 @@ declare function ixi:augment-grammar(
     $G/rule
   } (: end ixml :)
 };
- (: ................................................................
-   makeGoalsymbolG($G):  make a new goal symbol for grammar G,
-   ensuring that it's not the same as any existing symbol.
+ (: ......................................................
+   makeGoalsymbolG($G):  make a new goal symbol for 
+   grammar G, ensuring that it's not the same as any 
+   existing symbol.
    :)
 declare function ixi:makeGoalsymbolG(
   $G as element(ixml)
@@ -503,10 +539,11 @@ declare function ixi:makeGoalsymbolG(
     then $n 
     else ixi:mungesymbol(ixi:symStartG($G), $ln)
 };
-(: ................................................................
-   mungesymbol:  given a symbol, munge it (by adding _ fore and aft)
-   until it is no longer in the list of symbols $ln (which is the
-   symbols already in the grammar).
+(: ......................................................
+   mungesymbol:  given a symbol, munge it (by adding _ 
+   fore and aft) until it is no longer in the list of 
+   symbols $ln (which is the symbols already in the 
+   grammar).
    :)
 declare function ixi:mungesymbol(
   $n as xs:string,
@@ -518,11 +555,11 @@ declare function ixi:mungesymbol(
 };
 
 
-(: ****************************************************************
+(: ******************************************************
    * Grammars: extractors
    :)
    
-(: ................................................................
+(: ......................................................
    symStart G():  return start symbol(s) of G
    :)
 declare function ixi:symStartG(
@@ -531,16 +568,18 @@ declare function ixi:symStartG(
   $G/rule[1]/@name/normalize-space()
 };
 
-(: ****************************************************************
+(: ******************************************************
    * Grammars:  predicates
    *
-   * Note that predicates relating to symbols in context are
-   * here, not under symbol.  (Test:  is $G a parameter?)
+   * Note that predicates relating to symbols in context 
+   * are here, not under symbol.  (Test:  is $G a 
+   * parameter?)
    :)
-(: ixi:fNullableNG($n, $G):  is nonterminal n nullable in G? 
+(: ixi:fNullableNG($n, $G):  is nonterminal n nullable 
+   in G? 
 
-   For non-terminal N, fNullableNG(N,G) means an N element
-   in the result tree may be empty.
+   For non-terminal N, fNullableNG(N,G) means an N 
+   element in the result tree may be empty.
 
    Here 'nullable' means it has a right-hand side whose
    regex matches the empty string, which means in turn
@@ -558,13 +597,14 @@ declare function  ixi:fNullableNG(
 };
 
 
-(: ixi:fGesNG($n, $G):  does nonterminal n generate the empty string 
-   in G? 
+(: ixi:fGesNG($n, $G):  does nonterminal n generate the 
+   empty string in G? 
    
    N.B. this is not the same as fNullable.
    
-   Discussions of parsing often use 'nullable' for nonterminals
-   that generate the empty string, but in the grammar 
+   Discussions of parsing often use 'nullable' for 
+   nonterminals that generate the empty string, but in 
+   the grammar 
      S: X. X: .
    X is nullable and GES, S is GES but not nullable.
    
@@ -606,29 +646,29 @@ declare function ixi:lrulesXNG(
 };
 
 
-(: ****************************************************************
+(: ******************************************************
    * Grammars: predicates
    :)
 
 
    
-(: **************************************************************** 
+(: ****************************************************** 
    * Rules and rule indexes
-   **************************************************************** :)
+   ****************************************************** :)
 (: A rule is a rule element as defined in the ixml DTD, but 
    augmented with glushkov attributes.
    
-   Note that functions relating to rules in context are not 
-   here but under Grammars above.  (Test: is $G a parameter?)
-   Functions here relate solely to the rule in isolation.
-   That may be why there are so few of them.
+   Note that functions relating to rules in context are 
+   not here but under Grammars above.  (Test: is $G a 
+   parameter?) Functions here relate solely to the rule 
+   in isolation. That may be why there are so few of them.
 :)
 
-(: ****************************************************************
+(: ******************************************************
    * Rules and rule indexes: constructors
    :)
    
-(: ****************************************************************
+(: ******************************************************
    * Rules and rule indexes: extractors
    :)
 
@@ -644,8 +684,8 @@ declare function ixi:lriFinalstatesXR(
 
 };
 
-(: ixi:lriStartstatesXR($Rule):  return list of start-position
-   identifiers.
+(: ixi:lriStartstatesXR($Rule):  return list of 
+   start-position identifiers.
  :)
 declare function ixi:lriStartstatesXR(
   $r as element(rule)
@@ -669,24 +709,24 @@ declare function ixi:initial-stateR(
 };
 :)
 
-(: ****************************************************************
+(: ******************************************************
    * Rules and rule indexes: predicates
    :)
    
-(: **************************************************************** 
+(: ****************************************************** 
    * Symbols
-   **************************************************************** :)
+   ****************************************************** :)
 
-(: ****************************************************************
+(: ******************************************************
    * Symbols: constructors
    :)
    
-(: ****************************************************************
+(: ******************************************************
    * Symbols: extractors
    :)
-(: ................................................................
-   match-length($t):  return length of any string that matches the
-   specified terminal.  
+(: ......................................................
+   match-length($t):  return length of any string that 
+   matches the specified terminal.  
    :)
 declare function ixi:match-length(
   $t as element()
@@ -695,9 +735,9 @@ declare function ixi:match-length(
   else 1
 };
 
-(: ................................................................
-   re X Terminal($t): return a regular expression, given a
-   character-set terminal element.
+(: ......................................................
+   re X Terminal($t): return a regular expression, given 
+   a character-set terminal element.
    :)
 declare function ixi:reXTerminal(
   $t as element() (: incl, excl, literal :)
@@ -724,10 +764,10 @@ declare function ixi:reXTerminal(
 };
 
  
-(: ****************************************************************
+(: ******************************************************
    * Symbols: predicates
    :)
-(: ................................................................
+(: ......................................................
    f Terminal($sym):  is $sym a terminal symbol?
    :)
 declare function ixi:fTerminal(
@@ -740,7 +780,7 @@ declare function ixi:fTerminal(
   ])
 };
 
-(: ................................................................
+(: ......................................................
    f Nonterminal($sym):  is $sym a nonterminal symbol?
    :)
 declare function ixi:fNonterminal(
@@ -749,9 +789,9 @@ declare function ixi:fNonterminal(
   exists($sym/self::element()/self::nonterminal)
 };
 
-(: ................................................................
-   fSymbolmatch R Ri Sym($r, $ri, $sym): does symbol element $sym 
-   match rule index $ri in rule $r?  
+(: ......................................................
+   fSymbolmatch R Ri Sym($r, $ri, $sym): does symbol 
+   element $sym match rule index $ri in rule $r?  
    
    :)
 declare function ixi:fSymbolmatchRRiSym(
@@ -790,23 +830,23 @@ declare function ixi:fSymbolmatchRRiSym(
 
    
 
-(: **************************************************************** 
+(: ****************************************************** 
    * Input
-   **************************************************************** :)
+   ****************************************************** :)
 (: For now, the input is always a string. :)
 
-(: ****************************************************************
+(: ******************************************************
    * Input: constructors
    :)
 
-(: ****************************************************************
+(: ******************************************************
    * Input: extractors
    :)
-(: ................................................................
+(: ......................................................
    inputlength(): how long is the input?
    
-   Used (once) for construction of an Earley item signaling
-   completion
+   Used (once) for construction of an Earley item 
+   signaling completion
    :)
 declare function ixi:inputlength(
   $I as xs:string
@@ -814,22 +854,23 @@ declare function ixi:inputlength(
   string-length($I)
 };
 
-(: ****************************************************************
+(: ******************************************************
    * Input: predicates
    :)
 
-(: ................................................................
-   fMatches I P T($I, $P, $T): does input $I match terminal $T
-   at position $P?
+(: ......................................................
+   fMatches I P T($I, $P, $T): does input $I match 
+   terminal $T at position $P?
 
    The terminals are elements in a rule's right-hand side (not
    strings).  Possible forms:
-   In 2016 syntax:  terminal[quoted/@dstring], terminal[quoted/@sstring],
-   terminal[quoted/text()], charset, exclude.
+   In 2016 syntax:  terminal[quoted/@dstring], 
+     terminal[quoted/@sstring],
+     terminal[quoted/text()], charset, exclude.
    In 2019 syntax:  literal[@dstring], literal[@sstring],
-   literal[@hex], inclusion, exclusion.
+     literal[@hex], inclusion, exclusion.
    In 2022 syntax:  literal[@string], literal[@hex], 
-   inclusion, exclusion.
+     inclusion, exclusion.
    
    Note that position is 0-based, not 1-based, so we add 1 to it
    for XQuery substring calls.
@@ -864,7 +905,8 @@ declare function ixi:fMatchesIPT(
   (: :)
   (: 
   $cMatchlength := if ($t/self::literal)
-  let $s := substring($I,$p + 1), (: Earley is 0-based, XPath 1-based :)
+  let $s := substring($I,$p + 1), 
+            (: Earley is 0-based, XPath 1-based :)
       $f := if ($t/self::literal) 
             then starts-with($s,ixi:string-value($t/quoted))
             else if ($t/self::inclusion or $t/self::exclusion)
@@ -890,19 +932,21 @@ al($t)
   :)
 };
 
-(: ................................................................
-   match-length($I,$p,$t): return length of the match in input $I at
-   position $p of terminal $t.
+(: ......................................................
+   match-length($I,$p,$t): return length of the match in
+   input $I at position $p of terminal $t.
 
-   In practice, this is called only when we know there is a match,
-   but because of the name, and the theoretical possibility of 
-   input-dependent answers (if we were to allow repetition operators
-   inside terminals), we also support cases where there is no match
-   and the answer is 0.
+   In practice, this is called only when we know there
+   is a match, but because of the name, and the
+   theoretical possibility of input-dependent answers
+   (if we were to allow repetition operators inside
+   terminals), we also support cases where there is no
+   match and the answer is 0.
 
-   If we later allow repetition operators inside terminals, this will
-   become more complex, but for now, the value is always 1 if there is
-   a match at all for charset and exclude non-terminals, and
+   If we later allow repetition operators inside
+   terminals, this will become more complex, but for
+   now, the value is always 1 if there is a match at all
+   for charset and exclude non-terminals, and
    string-length of the literal for quoted strings.
 
    To do: adjust for 2019 syntax.
@@ -919,27 +963,30 @@ declare function ixi:match-length(
 
 (: See also match-length#1 above under Symbols. :)
    
-(: **************************************************************** 
+(: ****************************************************** 
    * Utilities
-   **************************************************************** :)
+   ****************************************************** :)
 (: Things with no other obvious home. :)
 
-(: ****************************************************************
-   * Utilities: string to regex conversion, string-length, 
-   * string-value, ...
+(: ******************************************************
+   * Utilities: string to regex conversion, 
+   * string-length, string-value, ...
    :)
-(: ................................................................
-   sce X S($s) : given a one-character string or hex expression $s 
-   (e.g. from a character terminal), check to see if it's a hex
-   expression (in which case expand and recur) or a magic character 
-   (in which case escape it) or is best represented for purposes of 
-   regex mapping) with a single-character escape (in which case
-   escape it).
+(: ......................................................
+   sce X S($s) : given a one-character string or hex
+   expression $s (e.g. from a character terminal), check
+   to see if it's a hex expression (in which case expand
+   and recur) or a magic character (in which case escape
+   it) or is best represented for purposes of regex
+   mapping) with a single-character escape (in which
+   case escape it).
    
-   N.B. this is more than strictly necessary for character class
-   escapes, but it seems better to be more general.
+   N.B. this is more than strictly necessary for
+   character class escapes, but it seems better to be
+   more general.
 
-   To do:  adjust to new representation of terminals.
+   To do: adjust to new representation of terminals.
+   
 :)
 declare function ixi:sceXS(
   $s as xs:string
@@ -956,7 +1003,7 @@ declare function ixi:sceXS(
   else if (not(contains("&#xA;&#xD;&#x9;\|.-^?$*+{}()[]",$s))) 
   then $s
   else if (contains("\|.-^?$*+{}()[]",$s)) 
-  then concat("\" (:":), $s)   (: commented dq to help de-confuse emacs :) 
+  then concat("\" (:":), $s)   (: commented dq helps emacs :) 
   else if ($s eq '&#xA;')
   then "\n"
   else if ($s eq '&#xD;')
@@ -983,18 +1030,20 @@ declare function ixi:escapedstringXS(
   else $s
 };
 
-(: ................................................................
-   catesc X S($s): given a one- or two-character string from a 
-   class element, return the appropriate category escape in 
-   XSD/XPath notation.
+(: ......................................................
+   catesc X S($s): given a one- or two-character string
+   from a class element, return the appropriate category
+   escape in XSD/XPath notation.
 
-   I should do some sanity checking here, but at the moment I'm
-   impatient, so I just wrap it in braces with \p in front.
+   I should do some sanity checking here, but at the
+   moment I'm impatient, so I just wrap it in braces
+   with \p in front.
 
-   The 2019 spec says "it is an error if there is no such class", so
-   probably I should raise an error if the category given does not 
-   match the list.  But for now, I'll just ignore it and return '.' 
-   to match one character, on the theory of "carry on irregardless."   
+   The 2019 spec says "it is an error if there is no
+   such class", so probably I should raise an error if
+   the category given does not match the list.  But for
+   now, I'll just ignore it and return '.'  to match one
+   character, on the theory of "carry on irregardless."
 
    To do:  figure out how Aparecium should handle errors.
 :)
@@ -1020,8 +1069,9 @@ declare function ixi:catescXS(
      C other: c[ontrol] f[ormat] o[=private  use] n[ot assigned]
   :)
 };
-(: ................................................................
-   char X hex ($s):  accept a hex expression, return the character.
+(: ......................................................
+   char X hex ($s): accept a hex expression, return the
+   character.
 :)
 declare function ixi:charXhex(
   $s0 as xs:string
@@ -1035,26 +1085,28 @@ declare function ixi:charXhex(
          then '---error in charXhex---'
          else codepoints-to-string(d2x:x2d($s))
 };
-(: ................................................................
+(: ......................................................
    string-length:  calculate 'real' length of string.
 
-   We use this to hide possible variation in the form of 'quoted' 
-   strings.  (Q. Does that mean we are expecting quote doubling
-   to show up in the XML form of the literal?  It shouldn't.)
+   We use this to hide possible variation in the form of
+   'quoted' strings.  (Q. Does that mean we are
+   expecting quote doubling to show up in the XML form
+   of the literal?  It shouldn't.)
 
-   To do:  sanity check this, and delete if unnecessary.
+   To do: sanity check this, and delete if unnecessary.
    :)
 declare function ixi:string-length(
   $q as element(literal)
 ) as xs:integer {
   string-length(ixi:string-value($q))
 };
-(: ................................................................
+(: ......................................................
    string-value:  calculate 'real' value of string.
 
-   We use this to hide possible variation in the form of quoted 
-   strings.  (Q. Does that mean we are expecting quote doubling
-   to show up in the XML form of the literal?  It shouldn't.)
+   We use this to hide possible variation in the form of
+   quoted strings.  (Q. Does that mean we are expecting
+   quote doubling to show up in the XML form of the
+   literal?  It shouldn't.)
 
    To do:  sanity check this, and delete if unnecessary.
    :)
@@ -1076,19 +1128,22 @@ declare function ixi:string-value(
              )
          else $s
 };
-(: ................................................................
-   s X ei($E):  a utility function to help make traces more legible.
+(: ......................................................
+   s X ei($E): a utility function to help make traces
+   more legible.
    :)
-declare function ixi:sXei($E as map(xs:string, item())) as xs:string {
+declare function ixi:sXei(
+  $E as map(xs:string, item())
+) as xs:string {
   'item('
   || $E('from') || ' ' 
   || $E('to') || ' '
   || $E('rule')/@name || '/' || $E('ri')
   || ')'
 };
-(: ................................................................
-   e X ei($E):  a utility function to help make traces and dumps
-   more legible.
+(: ......................................................
+   e X ei($E):  a utility function to help make traces 
+   and dumps more legible.
    :)
 declare function ixi:eXei(
   $E as map(xs:string, item())
@@ -1101,9 +1156,9 @@ declare function ixi:eXei(
     attribute ri { $E('ri') }
     }
 };
-(: ................................................................
-   trace($i, $s):  a utility function to help make code being
-   traced stay more legible.
+(: ......................................................
+   trace($i, $s):  a utility function to help make code 
+   being traced stay more legible.
    :)
 declare function ixi:trace(
   $x as item()?,
@@ -1112,9 +1167,9 @@ declare function ixi:trace(
   trace($x, '&#xA;' || $s || '&#xA;')
 };
 
-(: ................................................................
-   notrace($i, $s):  a utility function to help make code being
-   traced stay more legible.
+(: ......................................................
+   notrace($i, $s):  a utility function to help make 
+   code being traced stay more legible.
    :)
 declare function ixi:notrace(
   $x as item()?,

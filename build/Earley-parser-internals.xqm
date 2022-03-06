@@ -18,6 +18,8 @@ declare namespace follow =
 declare namespace ixml = 
 "http://invisiblexml.org/NS";
 
+declare namespace ap = "http://blackmesatech.com/2019/iXML/Aparecium";
+
 (: We rely on the EXPath file module, and we use maps. :)
 declare namespace file =
 "http://expath.org/ns/file";
@@ -27,7 +29,7 @@ declare namespace map =
 
 
 
-(: ****************************************************************
+(: ******************************************************
    earley-parse($I, $G, $f);  run Earley recognizer on 
    input $I and grammar $G, return results using 
    $f($leiClosure, $Ec, $I, $G)
@@ -51,12 +53,14 @@ declare function epi:earley-parse(
       $leiCompletions := $mapResult('Completions')
   return if ($mapResult('Result'))
     then (: if we have a result, return each parse tree :)
-        let $dummy := eri:notrace((), 'epi:earley-parse() has result') 
+        let $dummy := eri:notrace((), 
+                      'epi:earley-parse() has result') 
         let $lpt := prof:time(
                     $f($leiCompletions, $meiClosure, $I (: , $G :) )
                     , '0b making trees: ')
         for $pt at $npt in $lpt
-        let $dummy := eri:notrace((), 'epi:earley-parse() returning a result') 
+        let $dummy := eri:notrace((), 
+                      'epi:earley-parse() returning a result') 
         (: return if (('raw','ast')[2] eq 'raw') 
 	       then $pt  
                else epi:astXparsetree($pt, count($lpt)) :)
@@ -104,14 +108,15 @@ declare function epi:earley-parse(
    :)
 };
 
-(: ****************************************************************
+(: ******************************************************
    all-trees($Closure, $Ec, $I, $G):  
 :)
 declare function epi:all-trees(
   $leiCompletions as map(*)*,
   $meiClosure as map(xs:string,
                      map(xs:integer,
-                         map(xs:string, item())*)) (:MEI:),
+                         map(xs:string, item())*)) 
+                 (:MEI:),
   $I as xs:string
   (: $G as element(ixml) :)
 ) as element()* {
@@ -119,8 +124,9 @@ declare function epi:all-trees(
      loop prevention. :)
   epi:all-trees($leiCompletions, $meiClosure, $I, ())
 };
-(: ****************************************************************
-   all-trees#5:  auxiliary function (more args, does the work) 
+(: ******************************************************
+   all-trees#5:  auxiliary function (more args, does the 
+   work) 
 :)
    
 declare function epi:all-trees(
@@ -187,18 +193,70 @@ declare function epi:parse-forest-map(
 
 declare function epi:parse-forest-grammar(
   $leiCompletions as map(*)*,
-  $leiClosure as map(*)*,
+  $leiClosure as map(xs:string,
+    map(xs:integer,
+        map(xs:string, item())*)) ,
   $I as xs:string
 ) as element() {
-  <parse-forest-grammar-not-implemented-yet/>
+  let $rules := epi:make-pfg-rules(
+                    $leiCompletions,
+                    $leiClosure,
+		    $I, 
+                    ())
+		    
+  return 
+    (: if we got an error back, pass it along :)
+    if ($rules/self::ap:error)
+    then element ap:error {
+           element comment {
+             "Failure generating PFG. ",
+             "Sorry!" 
+           },
+           $rules                
+           }
+
+    (: if we are error-free, wrap it in ixml :)
+    else element ixml {
+           element comment {
+             "Parse-forest grammar generated ",
+             current-dateTime()
+           },
+           $rules                
+         }
+};
+declare function epi:make-pfg-rules(
+  $leiQueue as map(*)*,
+  $leiClosure as map(xs:string,
+    map(xs:integer,
+        map(xs:string, item())*)) ,
+  $I as xs:string,
+  $leRules as element()*
+    (: accumulator, element(rule|error)* :)
+) as element()* {
+    if (empty($leiQueue))
+  then $leRules
+
+  else 
+  let $ei := head($leiQueue)
+  
+  
+  return ()
+  
+
 };
 
-(: ****************************************************************
-   epi:all-node-sequences($item, $closure, $acc, $from, $to, $I)
+
+(: ******************************************************
+   epi:all-node-sequences($item, $closure, 
+                          $acc, 
+                          $from, $to, $I)
 :)
 declare function epi:all-node-sequences(
   $Ecur as map(*),
-  $meiClosure as map(xs:string, map(xs:integer, map(xs:string, item())*)),
+  $meiClosure as map(xs:string, 
+                     map(xs:integer, 
+                         map(xs:string, 
+                             item())*)),
   $lnAcc as item()*,
   $pFrom as xs:integer,
   $pTo as xs:integer,
@@ -479,7 +537,9 @@ declare function epi:elementXpt(
       let $dummy := for $chunk in $n return
           if ($chunk instance of text())
           then eri:notrace(concat('/',
-	  string-join(string-to-codepoints($chunk),' '), '/'), 'eXpt got text node') 
+	       string-join(string-to-codepoints($chunk),' '), 
+               '/'), 
+               'eXpt got text node') 
           else if ($chunk instance of element())
 	  then eri:notrace($chunk/name(), 'eXpt gets element:') 
 	  else eri:notrace($chunk, 'eXpt gets unknown item:') 
