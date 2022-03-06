@@ -12,7 +12,6 @@
 # build directory only if it has changed.
 
 BINDIR=/home/cmsmcq/bin
-XSLTDIR=/home/cmsmcq/blackmesatech.com/lib
 
 ### BINDIR=../../../bin
 ### XSLTDIR=../../../blackmesatech.com/lib
@@ -62,7 +61,7 @@ tangled: build/Aparecium.xqm
 # Don't use --archive, it causes updates even when the file has not
 # changed.
 build/Aparecium.xqm: src/Aparecium.xml
-	(cd tmp; $(XSLT) ../$< tangle.xsl zzz.tangle.out)
+	(cd tmp; $(XSLT) ../$< tangle.xsl zzz.tangle.out version='pfg')
 	rsync --checksum tmp/*.xqm build
 
 
@@ -87,3 +86,12 @@ doc/test-harness.xhtml: doc/test-harness.html
 doc/test-harness.html: src/test-harness.xml
 	$(XSLT) $< $(WEAVEHTML) $@
 
+
+## swebtohtml.xsl is shared
+lib: lib/swebtohtml.xsl lib/tltohtml.xsl
+
+lib/swebtohtml.xsl: /home/cmsmcq/blackmesatech.com/lib/swebtohtml.xsl
+	cp -p $< $@
+
+lib/tltohtml.xsl: /home/cmsmcq/blackmesatech.com/lib/tltohtml.xsl
+	cp -p $< $@
