@@ -68,6 +68,7 @@ declare function aparecium:parse-resource(
   return aparecium:parse-string($sI, $sG)
 };
    
+
 (: ......................................................
    parse-string($Input, $Grammar)
    ......................................................
@@ -85,6 +86,7 @@ declare function aparecium:parse-string(
     aparecium:parse-string-with-compiled-grammar($sI, $cG)
 };
    
+
 (: ......................................................
    parse-string-with-compiled-grammar($Input, $Grammar)
    ......................................................
@@ -93,12 +95,9 @@ declare function aparecium:parse-string-with-compiled-grammar(
   $sI as xs:string,
   $cG as element(ixml)
 ) as element() {
-  (: let $trace := trace((),'
-parse-string-'
-                   || ' with-compiled-grammar()
-') :)
+
   let $result := prof:time(
-                 earley:all-trees($sI, $cG) 
+                 earley:parse-forest-grammar($sI, $cG) 
                  , '0 Outer call: ')
 
   return if (count($result) eq 1)
@@ -108,19 +107,15 @@ parse-string-'
 	      >{$result}</forest>
 };
 
+
 (: ******************************************************
    * Secondary interfaces (a bit more specialized) 
    ******************************************************
    :)
-   
+
 (: ......................................................
    parse-grammar-from-uri($ixmlGrammar)
    ......................................................
-   Given the URI of an ixml grammar, returns the XML 
-   representation of the grammar.  
-   
-   Retrieves the grammar and parses it by calling
-   parse-grammar-from-string().
 :)
 declare function aparecium:parse-grammar-from-uri(
   $uriG as xs:string
@@ -128,16 +123,11 @@ declare function aparecium:parse-grammar-from-uri(
   let $sG := unparsed-text($uriG)
   return aparecium:parse-grammar-from-string($sG)
 };
-   
+
+
 (: ......................................................
    parse-grammar-from-string($ixmlGrammar)
    ......................................................
-   Given the string form of an ixml grammar, returns the
-   XML representation of the grammar.
-   
-   Retrieves the grammar and parses it by calling
-   parse-string-with-compiled-grammar with the ixml
-   grammar for ixml grammars.
 :)
 
 declare function aparecium:parse-grammar-from-string(
@@ -159,12 +149,11 @@ declare function aparecium:parse-grammar-from-string(
         { $PG }
       </ixml>
 };   
-      
+
+
 (: ......................................................
    compile-grammar-from-uri($ixmlGrammar)
    ......................................................
-   Given the URI of an ixml grammar, returns the
-   compiled XML representation of the grammar.
 :)  
 
 declare function aparecium:compile-grammar-from-uri(
@@ -173,12 +162,11 @@ declare function aparecium:compile-grammar-from-uri(
   let $xmlG := aparecium:parse-grammar-from-uri($uriG)
   return gluschkov:ME($xmlG)
 };
-      
+
+
 (: ......................................................
    compile-grammar-from-string($ixmlGrammar)
    ......................................................
-   Given the URI of an ixml grammar, returns the XML 
-   representation of the grammar.  
 :)  
  
 declare function aparecium:compile-grammar-from-string(
@@ -187,6 +175,7 @@ declare function aparecium:compile-grammar-from-string(
   let $xmlG := aparecium:parse-grammar-from-string($sG)
   return gluschkov:ME($xmlG)
 };
+
 
 (: ......................................................
    compile-grammar-from-xml($ixmlGrammar)
@@ -201,6 +190,7 @@ declare function aparecium:compile-grammar-from-xml(
 ) as element(ixml) {
   gluschkov:ME($xmlG)
 };
+
 
 
 

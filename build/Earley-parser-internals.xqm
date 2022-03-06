@@ -18,7 +18,8 @@ declare namespace follow =
 declare namespace ixml = 
 "http://invisiblexml.org/NS";
 
-declare namespace ap = "http://blackmesatech.com/2019/iXML/Aparecium";
+declare namespace ap = 
+"http://blackmesatech.com/2019/iXML/Aparecium";
 
 (: We rely on the EXPath file module, and we use maps. :)
 declare namespace file =
@@ -205,8 +206,9 @@ declare function epi:parse-forest-grammar(
                     ())
 		    
   return 
+    
     (: if we got an error back, pass it along :)
-    if ($rules/self::ap:error)
+        if ($rules/self::ap:error)
     then element ap:error {
            element comment {
              "Failure generating PFG. ",
@@ -214,6 +216,7 @@ declare function epi:parse-forest-grammar(
            },
            $rules                
            }
+
 
     (: if we are error-free, wrap it in ixml :)
     else element ixml {
@@ -223,6 +226,7 @@ declare function epi:parse-forest-grammar(
            },
            $rules                
          }
+
 };
 declare function epi:make-pfg-rules(
   $leiQueue as map(*)*,
@@ -239,10 +243,202 @@ declare function epi:make-pfg-rules(
   else 
   let $ei := head($leiQueue)
   
-  
-  return ()
-  
+  let $r0 := $ei('rule')
+  let $w  := map { 'item': $ei, 
+                   'state': 'q0',
+                   'follow-states': 
+                       tokenize($r0/@first),
+                   'final': 
+                       xs:boolean($r0/@nullable)
+             }
 
+  let $walks := epi:find-walks(
+                  $ei       (: completion for parent :),
+                  $leiClosure, 
+                  $I, 
+                  $w                        (: queue :),
+                  if (xs:boolean($r0/@nullable)
+                      and ($ei('from') eq $ei('to'))) 
+                  then $w 
+                  else ()             (: accumulator :),
+                  map { 'tree-count': 2 } (: options :)
+                )
+
+    let $rule := element rule {
+                   for $w in $walks
+                   return element alt { 
+                       epi:rhs-from-walk($w, $I, ())
+                   }
+               }
+
+    let $lei0 := for $w in $walks
+               return epi:lei-from-walk($w), 
+               (: all completion items in $walks :)
+	       
+      $lei1 := $lei0[
+                 not(some $i in 1 to (position() - 1)
+                     satisfies deep-equal(., $lei0[$i])
+               ],
+               (: list of distinct completion items :)
+
+      $lei2 := $lei1[
+                 not(some $i in 2 to (count($leiQueue))
+                     satisfies deep-equal(., $leiQueue[$i])
+               ]
+               (: completion items not in the queue :)
+
+
+  let $ls-defined := ($leRules, $rule)//nonterminal
+                     /@name/string()),
+      $lei3 := for $ei in $lei2
+               let $s := $ei('rule')/@name/string()
+                         || '·'
+                         || $ei('from')
+                         || '·'
+                         || $ei('to')
+               where not($s := $lnt)
+               return $ei
+               (: new completion items, 
+                  not in queue and not already done :)
+			     
+  let $new-queue := (tail($leiQueue), $lei3)
+
+    return epi:make-pfg-rules(
+           $new-queue,
+           $leiClosure,
+           $I,
+           ($leRules, $rule)
+         )
+
+
+};
+
+declare function epi:find-walks(
+  $eiParent as map(*),
+  $mei as map(xs:string,
+    map(xs:integer,
+        map(xs:string, item())*)) ,
+  $I as xs:string,
+  $queue as map(xs:string)*
+,
+  $acc as map(xs:string)*
+,
+  $options as map(*)
+) as map(xs:string)*
+ {
+    if (($options('tree-count') ne 'all')
+      and 
+      (count($acc) ge $options('tree-count')))
+  then $acc
+  else if (empty($queue))
+  then $acc
+
+  else 
+    let $new-queue := 
+      for $w in $queue
+      let $x := $w('item')('from'),
+          $qqNext := tokenize($w('follow-states')
+      for $qNext in $qqNext
+      let $symbol := $eiParent('rule')//*[@id=$qNext],
+          $N := $symbol/self::nonterminal/@name/string(),
+          $T := $symbol[eri:fTerminal(.)]/@id/string()
+
+      group by $x, $qNext, $N, $T
+
+      let $items := $mei('from')($x)
+                    [(.?rule/@name eq $N)
+                     or (.?rule eq $T)]
+                    [eri:fFinalEi(.) 
+                     or (.?ri eq '#terminal')]
+                    [.?to le $eiParent('to')]
+
+      for $i in $items
+      let $qqNextfollow := $eiParent('rule')
+                           /attribute::follow:*
+                           [local-name eq $qNext]
+                           /tokenize(),
+          $f-qnext-final := ($qNext = 
+                           eri:lriFinalstates(
+                               $eiParent('rule')
+                           ))
+      return map {
+                 'item' : $i,
+                 'state' : $qNext,
+                 'follow-states' : $qqNextfollow,
+                 'final' : $f-qnext-final,
+                 'pred'  : $w[1]
+             }
+
+    let $new-acc := ($acc, $new-queue[ .?final ])
+
+  return epi:find-walks(
+      $eiParent, 
+      $mei,
+      $I,
+      $new-queue,
+      $new-acc,
+      $options
+  )
+};
+
+declare function epi:rhs-from-walk(
+  $w as map(xs:string)
+?,
+  $I as xs:string,
+  $acc as element()*
+) as element()* {
+    if (empty($w)) 
+  then $acc
+
+  else   if $w('item')('ri') eq '#terminal'
+  then let $ei := $w('item')
+       let $x := $ei('from'),
+           $y := $ei('to'),
+           $symbol := element literal {
+               attribute string {
+                   substring($I, $x, ($y - $x))              
+               }
+           },
+           $new-acc := ($symbol, $acc),
+	   $next-step := $w('pred')
+       return epi:rhs-from-walk($next-step, $I, $new-acc)
+
+  else   else if (exists($ei('rule')/self::rule[@name]))
+  then let $ei := $w('item'),
+           $symbol := element nonterminal {
+               attribute name {
+                   $ei('rule')/@name/string()
+                   || '·'
+                   $ei('from')/string()
+                   || '·'
+                   $ei('to')/string()
+               }
+           },
+           $new-acc := ($symbol, $acc),
+           $next-step := $w('pred')
+       return epi:rhs-from-walk($next-step, $I, $new-acc)
+
+  else element ap:error {
+           element p { 'Unexpected failure 83' },
+           $acc,
+           $w
+       }
+
+};
+
+declare function epi:lei-from-walk(
+  $w as map(xs:string)
+?,
+  $acc as element()*
+) as map(*)* {
+  if (empty($w)) 
+  then $acc
+  else if ($w('state') eq 'q0'
+  then $acc
+  else if ($w('item')('ri') eq '#terminal'
+  then epi:lei-from-walk($w('pred'), $acc)
+  else epi:lei-from-walk($w('pred'),
+                         ($w('item'), $acc))
 };
 
 

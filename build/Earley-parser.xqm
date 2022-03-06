@@ -24,6 +24,7 @@ declare function ep:all-trees(
         || 'and ep:all-trees is about to do so.') :)
 };
 
+
 (: ep:anytree($I,$G):  return one (loopless) parse tree, 
    whichever is found first 
 :)
@@ -34,17 +35,8 @@ declare function ep:any-tree(
   epi:earley-parse($I, $G, epi:any-tree#3)
 };
 
-(: ep:tree-cursor($I,$G):  return pair consisting of 
-   1 a parse tree, and
-   2 a function to return the next parsetree/function pair, or
-     when trees are exhausted to return a 'no-more-trees' signal.
-     
-   The name is intended to recall the cursor notion of SQL results.
-   
-   If you keep track of the number of trees delivered, the
-   no-more-trees signal can distinguish there-were-no-trees
-   from all-done-now signals.
-:)
+
+
 declare function ep:tree-cursor(
   $I as item() (: INPUT :),
   $G as item() (: GRAMMAR :)
@@ -62,6 +54,7 @@ declare function ep:parse-forest-map(
   epi:earley-parse($I, $G, epi:parse-forest-map#3)
 };
 
+
 (: ep:parseforestgrammar($I,$G):  return a BNF (not EBNF[?]) grammar
    describing the set of all parses of $I against $G.
 :)
@@ -72,10 +65,3 @@ declare function ep:parse-forest-grammar(
   epi:earley-parse($I, $G, epi:parse-forest-grammar#3)
 };
 
-(:
-
-
-
-:)
-(: Given a final item, build a tree for it.
-:)

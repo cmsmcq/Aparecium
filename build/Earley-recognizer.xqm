@@ -26,8 +26,10 @@ declare function ix:scan(
       $dummy := ixi:notrace(ixi:fMatchesIPT($I, $p, $t), 
                           'ix:scan() matches? ') 
   return
-    if (ixi:fMatchesIPT($I, $p, $t))
-    then ixi:leiAdvanceEiSymP($E,$t,$p + ixi:match-length($I,$p,$t))
+    let $c := ixi:cMatchesIPT($I, $p, $t)
+    if ($c ge 0)
+    then (ixi:leiAdvanceEiSymP($E, $t, $p + $c),
+         ixi:eiMakePPT($p, $p + $c, $t))
     else ()
 };
 

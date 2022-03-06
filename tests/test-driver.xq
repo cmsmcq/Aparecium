@@ -10,7 +10,7 @@ declare namespace db =
 
 declare option db:chop "false";
 
-let $catalog-index := 'wisp-A' (: which catalog to run? short name :)
+let $catalog-index := 'test0' (: which catalog to run? short name :)
 
 let $invdir := "../../ixml/tests/",
     $apadir := "../../Aparecium/tests/",

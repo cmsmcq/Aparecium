@@ -859,40 +859,25 @@ declare function ixi:inputlength(
    :)
 
 (: ......................................................
-   fMatches I P T($I, $P, $T): does input $I match 
-   terminal $T at position $P?
-
-   The terminals are elements in a rule's right-hand side (not
-   strings).  Possible forms:
-   In 2016 syntax:  terminal[quoted/@dstring], 
-     terminal[quoted/@sstring],
-     terminal[quoted/text()], charset, exclude.
-   In 2019 syntax:  literal[@dstring], literal[@sstring],
-     literal[@hex], inclusion, exclusion.
-   In 2022 syntax:  literal[@string], literal[@hex], 
-     inclusion, exclusion.
+   cMatches I P T($I, $P, $T): does input $I match 
+   terminal $T at position $P?  For how many characters?
    
    Note that position is 0-based, not 1-based, so we add 1 to it
    for XQuery substring calls.
    :)
-declare function ixi:fMatchesIPT( 
+declare function ixi:cMatchesIPT( 
   $I as xs:string, 
   $p as xs:integer,
   $t as element()
-) as xs:boolean {
+) as xs:integer {
   if ($t/self::literal) then
-     if (1 eq 0) then (: tracing code :)
      let $sProbe := ixi:string-value($t),
          $cPrLen := string-length($sProbe),
          $sInseg := substring($I,$p+1,$cPrLen),
          $fYesno := ($sProbe eq $sInseg)
-     return $fYesno
-     else (: normal code :)
-     let $sProbe := ixi:string-value($t),
-         $cPrLen := string-length($sProbe),
-         $sInseg := substring($I,$p+1,$cPrLen),
-         $fYesno := ($sProbe eq $sInseg)
-     return $fYesno
+     return if ($fYesno) 
+            then $cPrLen 
+            else -1
   else if ($t/self::inclusion or $t/self::exclusion) then
      let $sProbe := ixi:notrace(ixi:reXTerminal($t), 
                               'regex for char set:'), 
@@ -900,68 +885,11 @@ declare function ixi:fMatchesIPT(
                               'substring (1 char):'),
          $fYesno := ixi:notrace(matches($sInseg,'^'||$sProbe||'$'),
 	                      'matches?')
-     return $fYesno
-  else (: error :) false()
-  (: :)
-  (: 
-  $cMatchlength := if ($t/self::literal)
-  let $s := substring($I,$p + 1), 
-            (: Earley is 0-based, XPath 1-based :)
-      $f := if ($t/self::literal) 
-            then starts-with($s,ixi:string-value($t/quoted))
-            else if ($t/self::inclusion or $t/self::exclusion)
-            then let $re := ixi:reXTerminal($t)
-                 return matches($s,$re)
-            else (: error :) false(),
-       $trace := ixi:notrace($f,
-       concat(
-         '&#xA;### fMatchesIPT: &#xA;',
-         '  Input = ', $I, '&#xA;',
-         '  p =', $p, '&#xA;',
-         '  quoted = ', if ($t/self::literal) 
-                      then ixi:string-value($t) 
-                      else '(SEE RE)', '&#xA;',
-         '  re = ', if ($t/self::inclusion or $t/self::exclusion)
-           then ixi:reXTermin
-al($t)
-           else '(SEE LITERAL)',
-         '&#xA;Result: '
-       )
-       )
-  return $f
-  :)
+     return if ($fYesno)
+            then 1
+            else -1
+  else (: error :) -1
 };
-
-(: ......................................................
-   match-length($I,$p,$t): return length of the match in
-   input $I at position $p of terminal $t.
-
-   In practice, this is called only when we know there
-   is a match, but because of the name, and the
-   theoretical possibility of input-dependent answers
-   (if we were to allow repetition operators inside
-   terminals), we also support cases where there is no
-   match and the answer is 0.
-
-   If we later allow repetition operators inside
-   terminals, this will become more complex, but for
-   now, the value is always 1 if there is a match at all
-   for charset and exclude non-terminals, and
-   string-length of the literal for quoted strings.
-
-   To do: adjust for 2019 syntax.
- :)
-declare function ixi:match-length(
-  $I as xs:string,
-  $p as xs:integer,
-  $t as element()
-) as xs:integer {
-  if (not(ixi:fMatchesIPT($I, $p, $t))) then 0
-  else if ($t/self::literal) then ixi:string-length($t)
-  else 1
-};
-
-(: See also match-length#1 above under Symbols. :)
    
 (: ****************************************************** 
    * Utilities

@@ -6,18 +6,26 @@
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
 
+<!ENTITY darr   "&#x2193;" ><!--/downarrow A: =downward arrow-->
+<!ENTITY isin   "&#x2208;" ><!--/in R: =set membership-->
+<!ENTITY larr   "&#x2190;" ><!--/leftarrow /gets A: =leftward arrow-->
 <!ENTITY mdash  "&#x2014;" ><!--=em dash-->
 <!ENTITY prime  "&#x2032;" ><!--/prime =prime or minute-->
+<!ENTITY rarr   "&#x2192;" ><!--/rightarrow /to A: =rightward arrow-->
+<!ENTITY rArr   "&#x21D2;" ><!--/Rightarrow A: =implies-->
+<!ENTITY uarr   "&#x2191;" ><!--/uparrow A: =upward arrow-->
 
 <!ENTITY c '<ident>c</ident>' >
 <!ENTITY C '<ident>C</ident>' >
 <!ENTITY e '<ident>e</ident>' >
+<!ENTITY ei '<ident>ei</ident>' >
 <!ENTITY E '<ident>E</ident>' >
 <!ENTITY E.. '<ident>$E</ident>' >
 <!ENTITY f '<ident>f</ident>' >
 <!ENTITY F '<ident>F</ident>' >
 <!ENTITY G '<ident>G</ident>' >
 <!ENTITY I '<ident>I</ident>' >
+<!ENTITY i '<ident>i</ident>' >
 <!ENTITY L.E '<ident>L(E)</ident>' >
 <!ENTITY L..E '<ident>L($E)</ident>' >
 <!ENTITY L.G '<ident>L(G)</ident>' >
@@ -102,6 +110,14 @@ correct ns name</item>
 <docDate>Begun 16 August 2021
 <lb/>Last rev. &date.last.touched;</docDate>
 </titlePage>
+<versionList>
+<version id="v0.2">Version presented at Balisage in 2020
+and at Declarative Amsterdam in 2021</version>
+<version id="pfg" fallback="v0.2">Modifications to support
+production of parse-forest grammars</version>
+<version id="tok0" fallback="v0.2">Modifications to support
+faster tokenization in user-annotated grammars</version>
+</versionList>
 <divGen type="toc"/>
 </front>
 <body>
@@ -234,7 +250,7 @@ for the sentence. [Or rather, it will do so real soon now.  The
 current version does extract a tree.]</p>
 <p>Parse-forest grammars have the convenient property that they can
 concisely describe more than one parse tree over the given input, even
-infinite trees.  It is relatively straightforward to tell by examing
+infinite trees.  It is relatively straightforward to tell by examining
 the parse-forest grammar whether it describes a single parse tree or
 multiple parse trees, and whether the number of parse trees is finite
 or infinite.</p>
@@ -394,6 +410,9 @@ declare namespace follow =
 declare namespace ixml = 
 "http://invisiblexml.org/NS";
 
+declare namespace ap = 
+"http://blackmesatech.com/2019/iXML/Aparecium";
+
 (: We rely on the EXPath file module, and we use maps. :)
 declare namespace file =
 "http://expath.org/ns/file";
@@ -445,102 +464,6 @@ at "Earley-rec-internals.xqm";
 by consumers) is in Earley-recognizer.xqm; this module contains
 details that are subject to change and intended to be
 <soCalled>private</soCalled>.</p>
-<p>It is in this module that I first experienced a
-pressing need to clarify some naming conventions.
-Naming is sort of Hungarian, at least some of the time.
-<list>
-<item><term>ei</term>: Earley item (aka ITEM, map(xs:string, item())</item>
-<item><term>e</term>:  Earley item</item>
-<item><term>f</term>:  Boolean (flag)</item>
-<item><term>G</term>:  the grammar</item>
-<item><term>I</term>:  the input</item>
-<item><term>mei</term>:  map of Earley items (= map(xs:integer, map(xs:string, ITEM*))
-       = map(xs:integer, map(xs:string, map(xs:string, item())*))</item>
-<item><term>n</term>:  non-terminal symbol (may sometimes be nt)</item>
-<item><term>p</term>:  position in input (to, from)</item>
-<item><term>pt</term>:  raw parse tree (or subtree)</item>
-<item><term>r</term>:  rule in grammar</item>
-<item><term>ri</term>:  rule index (position in rule)  </item>
-<item><term>s</term>:  string</item>
-<item><term>sym</term>:  symbol from grammar</item>
-<item><term>t</term>:  terminal symbol   </item>
-</list>
-</p>
-<p>Functions:
-<list>
-<item><term>aXb</term>: return thing A from thing B</item>
-</list>
-<scrap file="Earley-rec-internals.xqm">
-module namespace ixi =
-"http://blackmesatech.com/2019/iXML/Earley-rec-internals";
-
-(: Earley recognizer internals :)
-
-declare namespace map =
-"http://www.w3.org/2005/xpath-functions/map";
-
-<ptr target="eri-imports"/>   
-<ptr target="eri-items"/>   
-<ptr target="eri-grammars"/>   
-<ptr target="eri-rules"/>   
-<ptr target="eri-symbols"/>   
-<ptr target="eri-input"/>   
-<ptr target="eri-utils-and-misc"/>   
-</scrap></p>
-<p>This module has a complicated enough to-do list of its own that
-I'll give it here for the moment instead of inserting these into the
-general to-do list at the bottom of this document.</p>
-<list>
-<item><p>establish coherent Hungarian type policy to distinguish 
-     element and string representations of symbols.  We need
-     shorthands for both.</p></item>
-<item><p>fix symbol/position issue in leiAdvanceEiSymP()</p></item>
-<item><p>finish minimal version</p></item>
-<item><p>add support for #xxxx characters</p></item>
-<item><p>clarify XML representation of terminals and other questions
-with SP:
-<list>
-<item>grammar says -quoted, I say quoted </item>
-<item>grammar says quoted/@dstring, quoted/@sstring, 
-       I think I prefer quoted with PCDATA (code
-       currently handles all three)</item>
-<item>grammar defines -character, I want character element
-       as child of terminal (-character is fine for 
-       @dstring and @sstring)</item>
-<item>grammar and papers don't say what ^ means</item>
-<item>how is start symbol determined?  For now I
-       take LHS of first rule, like yacc.</item>
-<item>if a rule reads "-foo: @bar, baz.", what happens?
-       does @bar percolate up to parent element? (Do you
-       know how to do this?)</item>
-<item>Is a grammar specifying an @ mark on a repeatable 
-       non-terminal ill-formed?  Or is the @ just ignored
-       in that case?  (Tentative answer: both.)</item>
-<item>True or false? 
-       On a nonterminal, the mark "-" means "do not tag as element",
-       but do promote the children.  On a terminal, it means
-       "omit the entire thing".
-</item>
-</list></p>
-</item>
-<item><p>do some sanity checking in reXTerminal to avoid having
-     matches() blow up.</p></item>
-<item><p>fix confusion over two senses of nullable:
-<list>
-<item>locally nullable = nullable within the RHS (decorated 
-       with ? or *, inside optional group, etc.)</item>
-       <item>generates null string in sentence</item>
-</list>
-</p>
-<p>N.B. a required non-terminal, not nullable in first
-sense, can generate empty string and thus make its
-parent nullable in the second sense.</p>
-<p>Use fNullable for the first sense (already establisted)
-and fGES (to be renamed for the second.</p>
-</item>
-<item><p>For testing purposes, provide a recognize function that
-specifies a start symbol (analogous to phrase/2 in Prolog).</p></item>
-</list>
 
 <p>The Earley-rec-internals module has a (cyclic) import
 for the recognizer itself (why?), and also some low-level
@@ -568,6 +491,26 @@ declare variable $ixi:combinedups as map(*)
    := map:entry('duplicates','combine');
 </scrap>
 </p>
+<p>
+The overall structure of the internals file:
+<scrap file="Earley-rec-internals.xqm">
+module namespace ixi =
+"http://blackmesatech.com/2019/iXML/Earley-rec-internals";
+
+(: Earley recognizer internals :)
+
+declare namespace map =
+"http://www.w3.org/2005/xpath-functions/map";
+
+<ptr target="eri-imports"/>   
+<ptr target="eri-items"/>   
+<ptr target="eri-grammars"/>   
+<ptr target="eri-rules"/>   
+<ptr target="eri-symbols"/>   
+<ptr target="eri-input"/>   
+<ptr target="eri-utils-and-misc"/>   
+</scrap>
+</p>
 </div>
 </div>
 <div id="hi-calling">
@@ -587,7 +530,8 @@ to parse the CSS, and return the document node of an XML
 document representing the resulting parse tree.</p>
 
 <p>
-<scrap prev="aparecium-main"
+<!-- scrap prev="aparecium-main" -->
+<scrap id="ap-pr"
        name="Define parse-resource()">
 (: ......................................................
    parse-resource($Input, $Grammar)
@@ -624,9 +568,14 @@ declare function aparecium:parse-resource(
 <div id="hi-earley-set">
 <head>Generating the Earley set</head>
 <p>Watch this space.</p>
+
 <div id="hies-scan">
 <head>The scanner</head>
-<p>
+
+<p>There are two versions of the scanner.  The basic version
+consults <ident>ixi:fMatchesIPT()</ident> to see whether we have a
+match; if so, we get the match length and return the advance over
+the terminal.
 <scrap id="er-scan"
        name="Define scan()">
 (: ****************************************************** 
@@ -650,6 +599,47 @@ declare function ix:scan(
   return
     if (ixi:fMatchesIPT($I, $p, $t))
     then ixi:leiAdvanceEiSymP($E,$t,$p + ixi:match-length($I,$p,$t))
+    else ()
+};
+
+</scrap>
+The double call seems wasteful; it seems simpler to ask the matching
+function to tell us how many characters of the input the terminal
+consumed.</p>
+
+<p>The <ident>pfg</ident> version of the code uses a single call
+<ident>ixi:cMatchesIPT()</ident> to see whether we have a match and
+how long it is.  If we have a match, we return both the advance over
+the terminal and a new form of item, with a terminal rather than a
+nonterminal in the rule position, and <q><code>#terminal</code></q>
+as the rule index.
+
+<scrap corresp="er-scan" id="er-scan-pfg"
+       version="pfg"
+       name="Define scan()">
+(: ****************************************************** 
+   * ix:scan($E, $I)
+   ****************************************************** :)
+(: If $E expects any terminals which occur as expected, 
+   return the advance of E over those terminals.  There 
+   may be more than one. :)
+   
+declare function ix:scan(
+  $E as item() (: ITEM :),
+  $I as item() (: INPUT :)
+) as item()* (: ITEM? :) {
+  let $p := ixi:pToXEi($E),
+      $lt := ixi:lsymExpectedXEi($E)[ixi:fTerminal(.)],
+      $dummy := ixi:notrace(ixi:sXei($E), 'ix:scan() on item:') 
+  for $t in $lt
+  let $dummy := ixi:notrace($t, 'ix:scan() expects terminal:'),
+      $dummy := ixi:notrace(ixi:fMatchesIPT($I, $p, $t), 
+                          'ix:scan() matches? ') 
+  return
+    let $c := ixi:cMatchesIPT($I, $p, $t)
+    if ($c ge 0)
+    then (ixi:leiAdvanceEiSymP($E, $t, $p + $c),
+         ixi:eiMakePPT($p, $p + $c, $t))
     else ()
 };
 
@@ -925,7 +915,7 @@ exactly one sentence in some language defined by another grammar (what
 we may call its <soCalled>base grammar</soCalled>.</p>
 
 <p>It is perhaps best explained by example. Consider the sentence
-<q><code>7-4+2</code></q> parsed against the folllowing simple and
+<q><code>7-4+2</code></q> parsed against the following simple and
 ambiguous grammar:
 <eg>S = expr.
 expr = num; expr, addop, expr.
@@ -1002,23 +992,27 @@ that it can produce the string in two different ways.</p>
 
 <div id="hi-pfg-const">
 <head>Constructing a parse-forest grammar</head>
-<p>Our overarching task here can be described thus:  Given
+
+<p>Our overarching task here can be described thus:  We are given
 <list>
 <item>an Earley set closed under the <ident>scan</ident>,
 <ident>pred</ident>, and <ident>comp</ident> relations, and</item>
-<item>a completion item in that set</item>
+<item>a completion item in that set.</item>
 </list>
-we are to construct a parse-forest grammar describing the set of parse
-trees whose existence is implied by the completion item.</p>
+From these, we are to construct a parse-forest grammar
+describing the set of parse trees whose existence is
+implied by the completion item.</p>
+
 <p>A brute-force approach would simply construct a grammar rule for
 every possible realization of every completion item in the Earley set,
 but that would produce rules for matches that never made it into a
-successful parse.  (Since those rules would be a potentially
+successful parse.<note place="foot">
+<p>Since those rules would be a potentially
 informative description of the garden paths followed by the parser
 before they reached a dead end, they might be useful as a
 grammar-debugging measure.  But for now we are interested only in
 completions that actually play a role in a successful derivation of
-the input.)</p>
+the input.</p></note></p>
 
 <p>Since we are given a completion item of the form (&x; &y; &N;
 &qf;)<note place="foot"><p>Here &qf; is any final state in the
@@ -1035,32 +1029,47 @@ constructed, construct the production rule for that nonterminal.</p>
 </p>
 
 <p>The first step will entail finding a sequence of completion items
-that correspond to a walk through the right-hand side of the
-production rule for &N; in the base grammar and which collectively
-cover the input segment from &x; to &y;, constructing appropriate new
-nonterminals for them, and writing those nonterminals into the
-right-hand side in an appropriate sequence.<note place="foot">
+that correspond to a <term>satisfactory walk</term> through the
+right-hand side of the production rule for &N; in the base
+grammar.<note place="foot"> <p>I call it a
+<mentioned>satisfactory</mentioned> walk because (a) the sequence of
+nonterminals satisfies the constraints of the right-hand side, and
+(b) the walk is acceptable to the needs of further processing.  And
+I need a short way to refer to the class of walks I'm looking
+for.</p>
 <p>I often slip and refer to these as <term>paths</term> through
 the right-hand side, but in graph theory a <term>path</term>
 denotes a walk in which no vertex appears more than once.  If
 the input grammar is BNF, any walk through any right-hand side
 will be a path.  But we are working with EBNF.</p>
-</note>
-If there is more than one
-such walk through the rule for &N;, then &N; is ambiguous, and we want
-all of those walks.<note place="foot"><p>At the moment, there are some
-infinitely ambiguous sentences for which we will not in fact get all
-of the walks (informally, those involving infinite
+</note> That is a walk through the RHS
+<list>
+<item>beginning in the start state &q0;,</item>
+<item>ending in some final state &qf;, and</item>
+<item>in which the steps collectively cover the input segment from
+&x; to &y;.</item>
+</list>
+For each item in the walk an appropriate new nonterminal can be
+constructed, and those nonterminals will be written into into the
+right-hand side of the production rule, in the appropriate sequence.
+If there is more than one such walk through the rule for &N;, then
+&N; is ambiguous, and we want all of those walks.<note
+place="foot"><p>At the moment, there are some infinitely ambiguous
+sentences for which we will not in fact get all of the walks
+(informally, those involving infinite
 <soCalled>horizontal</soCalled> ambiguity, as in <q><code>S = A*,
 'a'. A = .</code></q>).  Our inability to capture horizontal
 ambiguities completely appears to be a disadvantage of working
 directly with EBNF instead of rewriting the grammar to BNF.  (An
 equivalent BNF like <q><code>S = _star_A, 'a'. _star_A = {}; A,
-_star_A.  A = {}.</code></q> does not present the problem.)</p><p>The
-key appears to be that in an EBNF grammar there may be an infinite
-number of walks through a right-hand side, whereas in a BNF grammar
-that can never be so, because BNF lacks repetition
-operators.</p></note></p>
+_star_A.  A = {}.</code></q> does not present the
+problem.)</p><p>The key appears to be that in an EBNF grammar there
+may be an infinite number of walks through a right-hand side,
+whereas in a BNF grammar that can never be so, because BNF lacks
+repetition operators.</p> <p>Note also that the user does
+<emph>not</emph> in fact always want all the walks.  Sometimes any
+one will do, with or without the knowledge that the sentence is
+ambiguous.</p></note></p>
 
 <p>The second step can be handled by calling the same function we
 called to handle the completion we started with.  Since in cases of
@@ -1069,46 +1078,78 @@ through &N; and thus in more than one right-hand side for &N.x.y;, we
 should keep track of what nonterminals we have already constructed or
 already placed in the queue.</p>
 
+</div>
+
 <div id="hi-pfgc-top">
-<head>Overall organization of parse-forest-grammar() function</head>
+<head>The parse-forest-grammar() function</head>
 <p>The top-level function for making the parse-forest grammar will
 thus place the initial completion item in a work queue and delegate
 responsibility for generating the appropriate production rules to a
 separate recursive function, wrapping the result in an <gi>ixml</gi>
 element or an <gi>error</gi> element.</p>
+<p>To simplify later operations, </p>
 
 <p>
 <scrap id="epi-parse-forest-grammar"
        name="Define parse-forest-grammar()">
 declare function epi:parse-forest-grammar(
-  $leiCompletions as map(*)*,
-  $leiClosure as map(*)*,
-  $I as xs:string
+  $leiCompletions as <ptr target="adt-list-ei"/>,
+  $leiClosure as <ptr target="adt-eiclosure"/>,
+  $I as <ptr target="adt-input"/>
 ) as element() {
   let $rules := epi:make-pfg-rules(
                     $leiCompletions,
-                    $leiClosures,
+                    $leiClosure,
 		    $I, 
                     ())
-  return if ($rules/self::ap:error)
-    then element ap:error {
-           element comment {
-             "Failure generating PFG. ",
-             "Sorry!" 
-           },
-           $rules                
-         }
-    then element ixml {
+		    
+  return 
+    <ptr target="epi-pfg-return"/>
+};
+<ptr target="epi-make-pfg-rules"/>
+<ptr target="epi-find-walks"/>
+<ptr target="epi-rhs-from-walk"/>
+<ptr target="epi-lei-from-walk"/>
+</scrap>
+</p>
+
+<p>After the work has been done, the <ident>parse-forest-grammar()</ident>
+function returns the result:  either an error element or the
+desired ixml element.
+<scrap id="epi-pfg-return"
+       name="Return parse-forest grammar containing $rules">
+
+    (: if we got an error back, pass it along :)
+    <ptr target="epi-pfg-error-return"/>
+
+    (: if we are error-free, wrap it in ixml :)
+    else element ixml {
            element comment {
              "Parse-forest grammar generated ",
              current-dateTime()
            },
            $rules                
          }
-};
-<ptr target="epi-make-pfg-rules"/>
 </scrap>
 </p>
+<p>The error checking is currently very simple:  if there is an
+error element among the rules, we wrap the entire set of rules in
+an enclosing error element.
+<scrap id="epi-pfg-error-return"
+       name="If there is an error, return an error element">
+    if ($rules/self::ap:error)
+    then element ap:error {
+           element comment {
+             "Failure generating PFG. ",
+             "Sorry!" 
+           },
+           $rules                
+           }
+</scrap></p>
+</div>
+
+<div id="hi-pfgc-make-rules">
+<head>The <ident>make-pfg-rules()</ident> function</head>
 
 <p>The <ident>epi:make-pfg-rules()</ident> function has a familiar
 basic structure: if there is work in the queue, we do it, we check to
@@ -1118,10 +1159,11 @@ can return the accumulated intermediate results.
 <scrap id="epi-make-pfg-rules"
        name="Define function epi:make-pfg-rules()">
 declare function epi:make-pfg-rules(
-  $leiQueue as map(*)*,
-  $leiClosure as map(*)*,
-  $I as xs:string,
-  $leAcc as element()*
+  $leiQueue as <ptr target="adt-list-ei"/>,
+  $leiClosure as <ptr target="adt-eiclosure"/>,
+  $I as <ptr target="adt-input"/>,
+  $leRules as element()*
+    (: accumulator, element(rule|error)* :)
 ) as element()* {
   <ptr target="epi-mpr-stop"/>
   else 
@@ -1138,7 +1180,7 @@ declare function epi:make-pfg-rules(
 <scrap id="epi-mpr-stop"
        name="If PFG queue is empty, return accumulator">
   if (empty($leiQueue))
-  then $leiAcc
+  then $leRules
 </scrap></p>
 <p>When there is work to be done, of course, the case is more
 complex.  The following subsections describe it.</p>
@@ -1146,7 +1188,7 @@ complex.  The following subsections describe it.</p>
 </div>
 
 <div id="hi-pfgc-walks">
-<head>Finding walks through a rules right-hand-side</head>
+<head>Finding walks through a rule's right-hand-side</head>
 <p>The core task of making the parse-forest grammar seems to be
 finding the sequences of completion items which represent the
 parse-tree children of the node represented by the current completion
@@ -1155,45 +1197,117 @@ item.  It's complicated by several factors:
 
 <item><p>We must move back and forth continually between the parent
 level, moving forward state by state in the FSA for the parent
-nonterminal &N;, and the child level, identifying completion items for
-each child &C;.  The information we want is never where we are at any
-time, figuratively speaking.</p></item>
+nonterminal &N;, and the child level, identifying completion items
+for each child &C;.  The information we want is never where we are
+at any time, figuratively speaking.</p>
 
-<item><p>We would like to find all the walks, not just one.  The ixml
-spec wants us to report ambiguity, and that means we must at least
-know whether more than one walk exists.</p>
-
-<p>Each walk is (notionally at least) a sequence of completion items
-describing parse-tree children.  But we can't return a set of walks by
-returning a sequence of sequences, so we need to some other representation.
-Candidates include:
+<p>Concretely: at any given point, the state of our effort to find
+walks depends on the set of walks we have accumulated, and for each
+walk &w; some relevant properties are given by the most recent
+completion item &i; and others by the state &q; in the FSA reached
+by the walk:
 <list>
-<item>walks as sequences of completion items, sets of walks as arrays
-of sequences</item>
-<item>a set of walks as a map representing a prefix tree, each walk
-then a path from the root of the tree to a leaf</item>
-<item>walks as sequences of strings of the form
-<q>&x;&#xB7;&y;&#xB7;&N;</q>, sets of walks as arrays of such
-sequences</item>
-<item>walks as strings made by joining strings of the form
-<q>&x;&#xB7;&y;&#xB7;&N;</q> together with <q><code>/</code></q> or
-<q><code>+</code></q> or <q><code>,&amp;#x20;</code></q> or some other
-concatenation mark, sets of walks as sequences of such string</item>
-</list>
-</p></item>
+<item>Does &w; end in a final state of the FSA? (i.e. is &q; &isin;
+&F; for this FSA?)</item>
+<item>Does &w; cover the required range of input? (i.e. is
+&ei;('to') = &ei;('to'), where &ei; is the completion item
+represented by the left-hand side of the rule?)</item>
+<item>Can &w; be extended? (i.e. is <ident>follow(&q;)</ident>
+empty?)</item>
+</list></p></item>
+
+<item><p>We would like to be able to find all the walks, not just
+one.  The ixml spec wants us to report ambiguity, and that means we
+must at least know whether more than one walk exists.</p>
+</item>
 
 <item><p>We need to be alert for cycles in the walk.  These will
 always be edge cases: they can arise only if repeatable sequences of
 children can and do produce the empty string.  But they can
 occur.</p></item>
+
+<item><p>Each walk is (notionally at least) a sequence of completion
+items describing parse-tree children.  But we can't return a set of
+walks by returning a sequence of sequences, so we need to some other
+representation.</p>
+
+<p>Candidates include:
+<list>
+
+<item><label>arrays of sequences</label>:<list>
+<item><label>sequences of Earley items</label>: walks as sequences
+of completion items, sets of walks as arrays of sequences</item>
+<item><label>sequences of pairs</label>: walks as sequences of pairs
+consisting of a completion item and a state, sets of walks as arrays
+of such sequences</item>
+<item><label>sequences of strings</label>: walks as sequences of
+strings of the form <q>&x;&#xB7;&y;&#xB7;&N;</q> (or
+<q>&N;&#xB7;&x;&#xB7;&y;</q>, or
+<q>&x;&#xB7;&y;&#xB7;&N;&rArr;&q;</q>, or
+<q>&N;&#xB7;&x;&#xB7;&y;&rArr;&q;</q>), sets of walks as arrays of
+such sequences</item>
+</list>
+</item>
+
+<item><label>sequences of strings</label>:<list>
+<item><label>long strings</label>: walks as strings made by joining
+strings of the form <q>&x;&#xB7;&y;&#xB7;&N;</q> together with
+<q><code>/</code></q> or <q><code>+</code></q> or
+<q><code>,&amp;#x20;</code></q> or some other concatenation mark,
+sets of walks as sequences of such string</item>
+</list></item>
+
+<item><label>maps</label>:<list>
+<item><label>prefix trees</label>: a set of walks as a map
+representing a prefix tree, each walk then a path from the root of
+the tree to a leaf; the trees will contain either just completion
+items or a mix of completion items and state in the FSA we are
+walking through</item>
+<item><label>step lists with shared tails</label>: each walk as a
+map representing one step in the walk, with keys
+<q><kw>state</kw></q> (= &q;), <q><kw>item</kw></q> (=&i;),
+<q><kw>pred</kw></q> (a pointer to the map for the preceding step in
+the walk, empty for the first step); a set of walks is just a set of
+such maps.  Walks which share a prefix will use the same map to
+represent that shared prefix, so this is effectively just an
+upside-down tree, which we hold by its leaves and not its
+root.</item></list>
+</item>
+
+<item><label>elements</label>:<list>
+<item><label><gi>walks</gi> and <gi>step</gi> elements</label>: a
+set of walks as a <gi>walks</gi> element, contain a set of
+<gi>step</gi> elements, which in turn may each contain a
+<gi>walks</gi> element.  Each <gi>walks</gi> element specifies a
+starting state and position, each step a destination state and
+position.  If a step has no successors, it has no <gi>walks</gi>
+element.  If a step's destination state is final in the FSA and its
+destination position is the desired ending position, the path from
+the root to that step is a complete walk through the FSA and
+represents a right-hand side of a rule in the PFG.</item>
+</list></item>
+
+</list>
+The current implementation uses step lists with shared
+tails.</p></item>
 </list>
 </p>
-<p>The basic plan is an iterative function which performs a
-breadth-first search and assembles the result.  We have an accumulator
-of some sort that holds a set of walks found so far, each of which is
-either complete (it goes all the way to a final state in the
-right-hand side of &N;) or not, and either extensible or not.<note
-place="foot">
+
+<p>The basic plan is an iterative function<note place="foot">
+<p>By <mentioned>iterative function</mentioned> I mean a recursive
+function where recursion serves only to provide a looping
+construct.</p>
+</note> which performs a breadth-first search and assembles the
+result.<note place="foot">
+<p>If we are not trying to return all walks but only a finite number
+of walks, a depth-first search might be better.  But at the moment I
+am reacting, and possibly over-reacting, against the problems in the
+depth-first implementation of the
+<ident>all-node-sequences()</ident> function.</p>
+</note> We have an accumulator of some sort that holds a set of
+walks found so far, each of which is either complete (it goes all
+the way to a final state in the right-hand side of &N;) or not, and
+either extensible or not.<note place="foot">
 
 <p>In principle, a walk can be extended if the last state reached by
 the walk has follow states.  But since right-hand sides in an EBNF can
@@ -1205,7 +1319,8 @@ for all normal grammars.  If we set &n; higher, then we traverse each
 loop at most &n; times; this may be interesting for people fascinated
 by ambiguity.</p>
 
-</note> The result is complete when no walks can be extended.
+</note> The result is complete when no walks can be extended,
+or when we have found enough walks to go on with.
 <list>
 <item><p>If the result is complete, return all of the complete walks
 found so far.</p></item>
@@ -1218,12 +1333,61 @@ adding &e; to the end of &w;.</p></item>
 appropriately so it can be found again.</p></item>
 </list></p></item>
 </list>
-</p>
-<p>
-<scrap id="epi-mpr-find-walk"
-       name="Set $walks to possible child sequences for $ei">
+When a complete walk is extended, the original walk needs to be
+kept around unchanged so it can be returned in the result.
+When incomplete walks are extended, the original walks can be
+discarded.</p>
+
+<p>Each walk is a step list, and each step is represented
+by a map:
+<scrap id="pfg-adt-walk" name="Type: walk in a RHS">
+map(xs:string)
+</scrap>
+A collection of walks is just a sequence of walks:
+<scrap id="pfg-adt-walks" name="Type: collection of walks">
+map(xs:string)*
 </scrap>
 </p>
+
+<p>Since we will need recursion to iterate over the steps in the
+walks we are constructing, the task of generating child sequences
+for &ei; will just be delegated to a separate function,
+<ident>epi:find-walks()</ident>.  We prime the pump by creating a
+walk with a single step.  And if the parent FSA is nullable, we add that walk to the 
+
+<scrap id="epi-mpr-find-walk"
+       name="Set $walks to possible child sequences for $ei">
+
+  let $r0 := $ei('rule')
+  let $w  := map { 'item': $ei, 
+                   'state': 'q0',
+                   'follow-states': 
+                       tokenize($r0/@first),
+                   'final': 
+                       xs:boolean($r0/@nullable)
+             }
+
+  let $walks := epi:find-walks(
+                  $ei       (: completion for parent :),
+                  $leiClosure, 
+                  $I, 
+                  $w                        (: queue :),
+                  if (xs:boolean($r0/@nullable)
+                      and ($ei('from') eq $ei('to'))) 
+                  then $w 
+                  else ()             (: accumulator :),
+                  map { 'tree-count': 2 } (: options :)
+                )
+</scrap>
+The <q><kw>follow-states</kw></q> and <q><kw>final</kw></q>
+values are redundant; we store them in the map to avoid
+calculating them repeatedly.
+The last argument (a map of options) should be replaced
+in due course with options supplied by the user.
+</p>
+<p></p>
+<p>The <ident>epi:find-walks()</ident> function will be defined <ref
+target="hi-pfgc-find-walks">below</ref>.</p>
 
 </div>
 
@@ -1231,13 +1395,21 @@ appropriately so it can be found again.</p></item>
 <head>Making a production rule for a given walk</head>
 
 <p>Given a completion item (&x; &y; &N; &qf;) and a set of walks
-through the rule for &N;, make a production rule for &N.x.y; with an
+through the rule for &N;, we now make a production rule for &N.x.y; with an
 appropriate expression on the right-hand side.
 
 <scrap id="epi-mpr-make-rule"
        name="Set $rule to production rule for $ei">
+  let $rule := element rule {
+                   for $w in $walks
+                   return element alt { 
+                       epi:rhs-from-walk($w, $I, ())
+                   }
+               }
 </scrap>
 </p>
+<p>The <ident>epi:rhs-from-walk()</ident> function will be defined
+<ref target="hi-pfgc-make-rhs">below</ref>.</p>
 
 </div>
 
@@ -1248,20 +1420,314 @@ appropriate expression on the right-hand side.
 set of walks that produced it), identify which completion items need
 to be added to the queue.  That would be: all the completion items in
 the walks, unless they are already in the queue or already handled in
-the accumulator.
+the accumulator.  First we extract them all, and dedup them, then
+we filter them against the items already in the queue, and finally
+against the items we already have rules for.
 <scrap id="epi-mpr-update-queue"
        name="Set $new-queue to include new completions">
+  let $lei0 := for $w in $walks
+               return epi:lei-from-walk($w), 
+               (: all completion items in $walks :)
+	       
+      $lei1 := $lei0[
+                 not(some $i in 1 to (position() - 1)
+                     satisfies deep-equal(., $lei0[$i])
+               ],
+               (: list of distinct completion items :)
+
+      $lei2 := $lei1[
+                 not(some $i in 2 to (count($leiQueue))
+                     satisfies deep-equal(., $leiQueue[$i])
+               ]
+               (: completion items not in the queue :)
+
+
+  let $ls-defined := ($leRules, $rule)//nonterminal
+                     /@name/string()),
+      $lei3 := for $ei in $lei2
+               let $s := $ei('rule')/@name/string()
+                         || '&#xB7;'
+                         || $ei('from')
+                         || '&#xB7;'
+                         || $ei('to')
+               where not($s := $lnt)
+               return $ei
+               (: new completion items, 
+                  not in queue and not already done :)
+			     
+  let $new-queue := (tail($leiQueue), $lei3)
 </scrap>
 </p>
-<p>Given a production rule and and an updated queue, call
+<p>Given a production rule <ident>$rule</ident> and and the updated
+queue <ident>$new-queue</ident>, call
 <ident>make-pfg-rules()</ident> recursively.
 <scrap id="epi-mpr-recur"
        name="Recursive call with new queue and accumulator">
+  return epi:make-pfg-rules(
+           $new-queue,
+           $leiClosure,
+           $I,
+           ($leRules, $rule)
+         )
 </scrap>
 </p>
 
 </div>
+<div id="hi-pfgc-find-walks">
+<head>The <ident>find-walks()</ident> function</head>
+<p>This bit is, frankly, the part of parse-forest extraction
+I have had the most trouble thinking through clearly.</p>
+<p>We are given:
+<list>
+<item>an Earley item, which should be a completion (i.e.
+<ident>ri</ident> &isin; &F; for the FSA)</item>
+<item>an Earley closure</item>
+<item>an input string</item>
+<item>a queue of walks which begin at the
+start state and are attested by appropriate completion
+items, which may or may not be satisfactory</item>
+<item>an accumulator of acceptable walks</item>
+<item>a map of options, in particular the <q><kw>tree-count</kw></q>
+option</item>
+</list>
+From these we are to generate a set of walks, represent as step
+lists.  The accumulator is needed because we extend everything in
+the queue if we can, and that may cause a satisfactory walk to be
+lost.
+<scrap id="epi-find-walks"
+       name="The find-walks() function">
+declare function epi:find-walks(
+  $eiParent as <ptr target="adt-ei"/>,
+  $mei as <ptr target="adt-eiclosure"/>,
+  $I as <ptr target="adt-input"/>,
+  $queue as <ptr target="pfg-adt-walks"/>,
+  $acc as <ptr target="pfg-adt-walks"/>,
+  $options as map(*)
+) as <ptr target="pfg-adt-walks"/> {
+  <ptr target="pfg-fw-if-done"/>
+  else 
+  <ptr target="pfg-fw-set-new-queue"/>
+  <ptr target="pfg-fw-set-new-acc"/>
+  return epi:find-walks(
+      $eiParent, 
+      $mei,
+      $I,
+      $new-queue,
+      $new-acc,
+      $options
+  )
+};
+</scrap>
+</p>
 
+<p>We stop when we have as many walks as are specified in the
+<q><kw>tree-count</kw></q> option, or when the queue is empty.<note
+place="foot">
+<p>If this is the only source of ambiguity in the parse, returning
+&n; walks will give us &n; trees.  If there are multiple sources of
+ambiguity, the parse-forest grammar will generate more than &n;
+trees, but the cost of returning a richer parse-forest grammar than
+needed is lower than the cost of keeping track of how many trees we
+could generate from the walks we have so far.  It's worth
+remembering that ambiguities are not necessarily independent: having
+two two-way ambiguities does not guarantee four trees.</p>
+</note>
+<scrap id="pfg-fw-if-done"
+       name="If we have all our walks, return">
+  if (($options('tree-count') ne 'all')
+      and 
+      (count($acc) ge $options('tree-count')))
+  then $acc
+  else if (empty($queue))
+  then $acc
+</scrap>
+</p>
+
+<p>Otherwise, we attempt to extend each walk in the queue.  To
+reduce the number of times we have to do a search in the Earley
+closure, we group the walks by their current position (here &x;),
+their follow state (here <ident>qNext</ident>), and the nonterminal
+(or terminal) we are seeking to match (here &N; and &T;<note
+place="foot"><p>Note that &N; and &T; are uniquely determined
+by <ident>qNext</ident> and thus redundant,
+but including them as grouping keys allows them to be referred
+to without subscripts.</p></note>
+<scrap id="pfg-fw-set-new-queue"
+       name="Set new queue by extending all walks in the queue">
+  let $new-queue := 
+      for $w in $queue
+      let $x := $w('item')('from'),
+          $qqNext := tokenize($w('follow-states')
+      for $qNext in $qqNext
+      let $symbol := $eiParent('rule')//*[@id=$qNext],
+          $N := $symbol/self::nonterminal/@name/string(),
+          $T := $symbol[eri:fTerminal(.)]/@id/string()
+
+      group by $x, $qNext, $N, $T
+</scrap>
+We can now do a single search that will work for every
+walk that is expecting a given symbol at a given location.
+We look for items in the closure which:
+<list>
+<item>start at &x;,</item>
+<item>relate to the given terminal or nonterminal,</item>
+<item>are final, and</item>
+<item>advance no further than the endpoint of the
+parent completion item.</item>
+</list>
+<scrap prev="pfg-fw-set-new-queue"
+       name="Find follow-on completion items">
+
+      let $items := $mei('from')($x)
+                    [(.?rule/@name eq $N)
+                     or (.?rule eq $T)]
+                    [eri:fFinalEi(.) 
+                     or (.?ri eq '#terminal')]
+                    [.?to le $eiParent('to')]
+</scrap>
+For each such item, we extend the walk we started with:
+<scrap prev="pfg-fw-set-new-queue"
+       name="Extend the walk">
+
+      for $i in $items
+      let $qqNextfollow := $eiParent('rule')
+                           /attribute::follow:*
+                           [local-name eq $qNext]
+                           /tokenize(),
+          $f-qnext-final := ($qNext = 
+                           eri:lriFinalstates(
+                               $eiParent('rule')
+                           ))
+      return map {
+                 'item' : $i,
+                 'state' : $qNext,
+                 'follow-states' : $qqNextfollow,
+                 'final' : $f-qnext-final,
+                 'pred'  : $w[1]
+             }
+</scrap></p>
+<p>Some of the extensions we just made may be satisfactory walks;
+if so, we add them to the accumulator:
+<scrap id="pfg-fw-set-new-acc"
+       name="Add satisfactory walks to the accumulator">
+  let $new-acc := ($acc, $new-queue[ .?final ])
+</scrap>
+</p>
+</div>
+<div id="hi-pfgc-make-rhs">
+<head>The <ident>rhs-from-walk()</ident> function</head>
+<p>We are given a walk &w; represented as a map describing one
+step and pointing to its predecessor; we are to return an ixml
+right-hand side for the sequence.</p>
+<p>We do this by walking through the list step by step, pushing the
+appropriate symbol onto the front of the accumulator.
+<scrap id="epi-rhs-from-walk"
+       name="The rhs-from-walk() function">
+declare function epi:rhs-from-walk(
+  $w as <ptr target="pfg-adt-walk"/>?,
+  $I as <ptr target="adt-input"/>,
+  $acc as element()*
+) as element()* {
+  <ptr target="epi-rfw-stop"/>
+  else <ptr target="epi-rfw-terminal"/>
+  else <ptr target="epi-rfw-nonterminal"/>
+};
+</scrap>
+</p>
+<p>The termination condition is evident:  if we are
+out of steps, then we are done.
+<scrap id="epi-rfw-stop"
+       name="If we're done, return">
+  if (empty($w)) 
+  then $acc
+</scrap>
+</p>
+<p>If the walk includes a completion item for a terminal,
+of the form (&x; &y; _t_&n; '#terminal'), then we
+construct a <gi>literal</gi> element and recur.
+<scrap id="epi-rfw-terminal"
+       name="If this step is a terminal, return a literal">
+  if $w('item')('ri') eq '#terminal'
+  then let $ei := $w('item')
+       let $x := $ei('from'),
+           $y := $ei('to'),
+           $symbol := element literal {
+               attribute string {
+                   substring($I, $x, ($y - $x))              
+               }
+           },
+           $new-acc := ($symbol, $acc),
+	   $next-step := $w('pred')
+       return epi:rhs-from-walk($next-step, $I, $new-acc)
+</scrap>
+</p>
+<p>Otherwise, we extract the nonterminal symbol from
+the rule in the item, append start and end positions,
+construct an ixml <gi>nonterminal</gi> element for the
+newly constructed nonterminal name, and recur.
+<scrap id="epi-rfw-nonterminal"
+       name="If this step is a nonterminal, return a nonterminal">
+  else if (exists($ei('rule')/self::rule[@name]))
+  then let $ei := $w('item'),
+           $symbol := element nonterminal {
+               attribute name {
+                   $ei('rule')/@name/string()
+                   || '&#xB7;'
+                   $ei('from')/string()
+                   || '&#xB7;'
+                   $ei('to')/string()
+               }
+           },
+           $new-acc := ($symbol, $acc),
+           $next-step := $w('pred')
+       return epi:rhs-from-walk($next-step, $I, $new-acc)
+</scrap>
+And as a catch-all, if we have a step but cannot
+treat it as a terminal or as a nonterminal,
+then we return an error.
+<scrap prev="epi-rfw-nonterminal"
+       name="Otherwise, something has gone very wrong">
+
+  else element ap:error {
+           element p { 'Unexpected failure 83' },
+           $acc,
+           $w
+       }
+</scrap>
+</p>
+</div>
+<div id="hi-pfgc-make-lei">
+<head>The <ident>lei-from-walk()</ident> function</head>
+<p>We are given a walk &w; represented as a map describing one
+step and pointing to its predecessor; we are to return a sequence
+of the Earley items (they will all be completions) in that
+sequence, leaving out the one at the very end that represents
+the parent node.<note place="foot">
+<p>Might it be faster to do this at the same time we
+generate the right-hand side from the walk?</p></note></p>
+
+<p>We do this by walking through the list step by step, pushing each
+item onto the front of the accumulator.
+<scrap id="epi-lei-from-walk"
+       name="The lei-from-walk() function">
+declare function epi:lei-from-walk(
+  $w as <ptr target="pfg-adt-walk"/>?,
+  $acc as element()*
+) as <ptr target="adt-list-ei"/> {
+  if (empty($w)) 
+  then $acc
+  else if ($w('state') eq 'q0'
+  then $acc
+  else if ($w('item')('ri') eq '#terminal'
+  then epi:lei-from-walk($w('pred'), $acc)
+  else epi:lei-from-walk($w('pred'),
+                         ($w('item'), $acc))
+};
+</scrap>
+</p>
+<p><hi>To do:  move de-duping into lei-from-walk()?
+Every item we can avoid adding to the accumulator
+is an item we don't need to carry around.</hi></p>
 </div>
 </div>
 
@@ -1276,8 +1742,74 @@ the accumulator.
 </div>
 </div>
 
+
 <div id="lowlevel">
 <head>Low-level utility routines</head>
+
+<div id="ll-types">
+<head>Abstract types</head>
+<p>XQuery does not allow for user-defined types, so we cannot
+hide the details of our representations behind type names.
+But for purposes of exposition, we can perhaps hide them behind
+scrap names, to keep internal details out of the high-level
+code at least within this document.</p>
+<p><hi>N.B. At the moment none of the high-level scraps refer
+to these scraps.  That's to be done.  I'm starting by defining
+the scraps.</hi></p>
+
+<p>We sporadically use some type-related naming conventions, in
+a sort of Hungarian notation, at least some of the time.
+<list>
+<item><term>ei</term>: Earley item (aka ITEM, map(xs:string, item())</item>
+<item><term>e</term>:  Earley item</item>
+<item><term>f</term>:  Boolean (flag)</item>
+<item><term>G</term>:  the grammar</item>
+<item><term>I</term>:  the input</item>
+<item><term>mei</term>:  map of Earley items (= map(xs:integer, map(xs:string, ITEM*))
+       = map(xs:integer, map(xs:string, map(xs:string, item())*))</item>
+<item><term>n</term>:  non-terminal symbol (may sometimes be nt)</item>
+<item><term>p</term>:  position in input (to, from)</item>
+<item><term>pt</term>:  raw parse tree (or subtree)</item>
+<item><term>r</term>:  rule in grammar</item>
+<item><term>ri</term>:  rule index (position in rule)  </item>
+<item><term>s</term>:  string</item>
+<item><term>sym</term>:  symbol from grammar</item>
+<item><term>t</term>:  terminal symbol   </item>
+</list>
+</p>
+<p>Functions:
+<list>
+<item><term>aXb</term>: return thing A from thing B</item>
+</list></p>
+
+<p>An Earley item is represented as a map, with
+keys <q><code>from</code></q>, <q><code>to</code></q>,
+<q><code>rule</code></q>, and <q><code>ri</code></q>
+(<gloss>rule index</gloss>, or state).  
+<scrap id="adt-ei" name="Type: Earley item"
+       >map(*)</scrap>
+A sequence of them is the obvious:
+<scrap id="adt-list-ei" name="Type: list of Earley items"
+       >map(*)*</scrap>
+The first version of the code used elements, not maps;
+maps are slightly faster.
+</p>
+
+<p>The Earley set we are constructing is itself a map, of maps.
+At the moment the outer map has keys <q><code>from</code></q>
+and <q><code>to</code></q>, which denote maps indexed by integer,
+whose values are Earley items.  
+<scrap id="adt-eiclosure" name="Type:  Earley closure">
+map(xs:string,
+    map(xs:integer,
+        map(xs:string, item())*)) </scrap>
+</p>
+
+<p>The input we are parsing is just a string:
+<scrap id="adt-input" name="Type: input string"
+       >xs:string</scrap>
+</p>
+</div>
 
 <div id="ll-items">
 <head>Working with Earley items</head>
@@ -1323,6 +1855,27 @@ declare function ixi:eiMakePPRRi(
     'to' : $To,
     'rule' : $r,
     'ri' : $ri
+  }
+};
+</scrap>
+</p>
+<p>In special cases, we also make items for terminal symbols:
+<scrap prev="eri-make-p-p-r-ri"
+       name="Define eiMakePPT()">
+(: ......................................................
+   ei Make P P T: make an Earley item from two 
+   positions and a terminal.
+  :)
+declare function ixi:eiMakePPT(
+  $From as xs:integer,
+  $To as xs:integer,
+  $t as element()
+) as map(xs:string, item()) {  
+  map {
+    'from' : $From,
+    'to' : $To,
+    'rule' : $t,
+    'ri' : "#terminal"
   }
 };
 </scrap>
@@ -2469,7 +3022,7 @@ declare function ixi:fSymbolmatchRRiSym(
 <div id="ll-input">
 <head>Dealing with the input</head>
 
-<p>
+<p>There are no useful constructors for the input.
 <scrap id="eri-input"
        name="Input (constructors, extractors, etc.)">
 
@@ -2481,6 +3034,12 @@ declare function ixi:fSymbolmatchRRiSym(
 (: ******************************************************
    * Input: constructors
    :)
+</scrap>
+</p>
+<p>And not much by way of extractors.
+<scrap id="eri-input-ext"
+       prev="eri-input"
+       name="Extractors for input">
 
 (: ******************************************************
    * Input: extractors
@@ -2496,6 +3055,20 @@ declare function ixi:inputlength(
 ) as xs:integer {
   string-length($I)
 };
+</scrap>
+</p>
+
+<p>On the other hand, knowing whether the input at a
+particular position matches a given terminal symbol is
+central to parsing.  For this task, we have two versions
+of the function.  The original just returned a Boolean
+value, and matched either a literal string or matched a
+single character against a character-set expression.
+
+
+<scrap id="eri-input-pred"
+       prev="eri-input"
+       name="Predicates for input: fMatchesIPT()">
 
 (: ******************************************************
    * Input: predicates
@@ -2574,6 +3147,66 @@ al($t)
   return $f
   :)
 };
+</scrap></p>
+
+<p>It will however simplify the construction of the parse tree if
+the Earley set contains an item recording that this particular
+terminal symbol matched a particular substring of the input.  That
+will also simplify the <ident>match-length()</ident> functions, or
+more likely render them unnecessary.  So in version
+<ident>pfg</ident>, we return a match length, not a Boolean, and
+rename the function accordingly.  We use -1, not 0, as the failure
+signal, in case we ever end up using this for arbitrary regular
+expressions which might succeed and match zero characters.
+
+<scrap corresp="eri-input-pred" id="eri-inpred-pfg"
+       version="pfg"
+       name="Predicates for input: cMatchIPT()">
+
+(: ******************************************************
+   * Input: predicates
+   :)
+
+(: ......................................................
+   cMatches I P T($I, $P, $T): does input $I match 
+   terminal $T at position $P?  For how many characters?
+   
+   Note that position is 0-based, not 1-based, so we add 1 to it
+   for XQuery substring calls.
+   :)
+declare function ixi:cMatchesIPT( 
+  $I as xs:string, 
+  $p as xs:integer,
+  $t as element()
+) as xs:integer {
+  if ($t/self::literal) then
+     let $sProbe := ixi:string-value($t),
+         $cPrLen := string-length($sProbe),
+         $sInseg := substring($I,$p+1,$cPrLen),
+         $fYesno := ($sProbe eq $sInseg)
+     return if ($fYesno) 
+            then $cPrLen 
+            else -1
+  else if ($t/self::inclusion or $t/self::exclusion) then
+     let $sProbe := ixi:notrace(ixi:reXTerminal($t), 
+                              'regex for char set:'), 
+         $sInseg := ixi:notrace(substring($I,$p+1,1), 
+                              'substring (1 char):'),
+         $fYesno := ixi:notrace(matches($sInseg,'^'||$sProbe||'$'),
+	                      'matches?')
+     return if ($fYesno)
+            then 1
+            else -1
+  else (: error :) -1
+};
+</scrap>
+</p>
+
+<p>
+
+<scrap id="eri-input-pred-matchlength"
+       prev="eri-input-pred"
+       name="match-length(I,p,t)">
 
 (: ......................................................
    match-length($I,$p,$t): return length of the match in
@@ -3004,6 +3637,9 @@ declare function aparecium:doc(
 };
 :)
 
+<ptr target="ap-pr"/>
+<ptr target="ap-ps"/>
+<ptr target="ap-pswcg"/>
 </scrap>
 Before it can parse the resource, the <ident>doc()</ident> function
 will need to find a grammar for it.  There are two ways this
@@ -3072,14 +3708,14 @@ grammars.</p>
 </list>
 </p>
 <p>Although its surface simplicity is attractive, the
-<ident>aparedium:doc()</ident> function is not going to cover
+<ident>aparecium:doc()</ident> function is not going to cover
 all cases.  So we need interfaces that allow the user to specify
 both a resource and a grammar.  And for cases where the notation
 to be parsed is embedded in an XML document, the user needs to be
 able to specify the input to be parsed, and the grammar, either
 as a resource (using a URI) or as a string.
 The <ident>parse-string()</ident> takes both as strings.
-<scrap prev="aparecium-main"
+<scrap id="ap-ps"       
        name="Define parse-string()">
 (: ......................................................
    parse-string($Input, $Grammar)
@@ -3106,7 +3742,7 @@ grammar describing it, the function
 representation of the string's parse tree.</p>
 <p>This is the workhorse of the library, called by many other
 functions.
-<scrap prev="aparecium-main"
+<scrap id="ap-pswcg"
        name="Define parse-string-with-compiled-grammar()">
 (: ......................................................
    parse-string-with-compiled-grammar($Input, $Grammar)
@@ -3130,25 +3766,65 @@ declare function aparecium:parse-string-with-compiled-grammar(
 };
 </scrap>
 </p>
+<p>As a temporary hack, we override this in the
+<ident>pfg</ident> version, for testing purposes.
+
+<scrap corresp="ap-pswcg"
+       version="pfg"
+       name="Define parse-string-with-compiled-grammar()">
+(: ......................................................
+   parse-string-with-compiled-grammar($Input, $Grammar)
+   ......................................................
+:)
+declare function aparecium:parse-string-with-compiled-grammar(
+  $sI as xs:string,
+  $cG as element(ixml)
+) as element() {
+
+  let $result := prof:time(
+                 earley:parse-forest-grammar($sI, $cG) 
+                 , '0 Outer call: ')
+
+  return if (count($result) eq 1)
+         then $result
+         else &lt;forest 
+              xmlns:ixml="http://invisiblexml.org/NS"
+	      >{$result}&lt;/forest>
+};
+</scrap>
+</p>
 </div>
 <div id="alt-calls-secondary">
 <head>Secondary user-facing calls</head>
-<p>Text here ...
+
+<p>There are a number of high-level functions for parsing and
+compiling grammars; they are used by the primary interfaces and they
+may be useful for users in particular circumstances; they are
+defined here.
 <scrap id="aparecium-secondary"
        name="Secondary interfaces (a bit specialized)">
 (: ******************************************************
    * Secondary interfaces (a bit more specialized) 
    ******************************************************
    :)
-   
+<ptr target="ap2-pgfu"/>
+<ptr target="ap2-pgfs"/>
+<ptr target="ap2-cgfu"/>
+<ptr target="ap2-cgfs"/>
+<ptr target="ap2-cgfx"/>
+</scrap>
+</p>
+<p>The <ident>parse-grammar-from-uri()</ident> function
+is given the URI of an ixml grammar and returns the XML 
+representation of the grammar.  It   
+retrieves the grammar and parses it by calling
+<ident>parse-grammar-from-string()</ident>.
+<scrap id="ap2-pgfu"
+       name="Define parse-grammar-from-uri()">
+
 (: ......................................................
    parse-grammar-from-uri($ixmlGrammar)
    ......................................................
-   Given the URI of an ixml grammar, returns the XML 
-   representation of the grammar.  
-   
-   Retrieves the grammar and parses it by calling
-   parse-grammar-from-string().
 :)
 declare function aparecium:parse-grammar-from-uri(
   $uriG as xs:string
@@ -3156,16 +3832,20 @@ declare function aparecium:parse-grammar-from-uri(
   let $sG := unparsed-text($uriG)
   return aparecium:parse-grammar-from-string($sG)
 };
-   
+</scrap>
+</p>
+
+<p>The <ident>parse-grammar-from-string()</ident> function is given
+an ixml grammar as a string and returns the XML representation of
+the grammar.  It parses the input grammar by calling
+<ident>parse-string-with-compiled-grammar()</ident> with the ixml
+grammar for ixml grammars.
+<scrap id="ap2-pgfs"
+       name="Define parse-grammar-from-string()">
+
 (: ......................................................
    parse-grammar-from-string($ixmlGrammar)
    ......................................................
-   Given the string form of an ixml grammar, returns the
-   XML representation of the grammar.
-   
-   Retrieves the grammar and parses it by calling
-   parse-string-with-compiled-grammar with the ixml
-   grammar for ixml grammars.
 :)
 
 declare function aparecium:parse-grammar-from-string(
@@ -3187,12 +3867,17 @@ declare function aparecium:parse-grammar-from-string(
         { $PG }
       &lt;/ixml>
 };   
-      
+</scrap>
+</p>
+<p>The <ident>compile-grammar-from-uri()</ident> function
+is given the URI of an ixml grammar and returns the
+<soCalled>compiled</soCalled> form of the grammar.
+<scrap id="ap2-cgfu"
+       name="Define compile-grammar-from-uri()">
+
 (: ......................................................
    compile-grammar-from-uri($ixmlGrammar)
    ......................................................
-   Given the URI of an ixml grammar, returns the
-   compiled XML representation of the grammar.
 :)  
 
 declare function aparecium:compile-grammar-from-uri(
@@ -3201,12 +3886,17 @@ declare function aparecium:compile-grammar-from-uri(
   let $xmlG := aparecium:parse-grammar-from-uri($uriG)
   return gluschkov:ME($xmlG)
 };
-      
+</scrap>
+</p>
+<p>The <ident>compile-grammar-from-string()</ident>
+function takes an ixml grammar in string form and
+returns the compiled representation of the grammar.  
+<scrap id="ap2-cgfs"
+       name="Define compile-grammar-from-string()">
+
 (: ......................................................
    compile-grammar-from-string($ixmlGrammar)
    ......................................................
-   Given the URI of an ixml grammar, returns the XML 
-   representation of the grammar.  
 :)  
  
 declare function aparecium:compile-grammar-from-string(
@@ -3215,6 +3905,14 @@ declare function aparecium:compile-grammar-from-string(
   let $xmlG := aparecium:parse-grammar-from-string($sG)
   return gluschkov:ME($xmlG)
 };
+</scrap>
+</p>
+
+<p>The <ident>compile-grammar-from-xml()</ident> function takes an
+ixml grammar in XML form (a <soCalled>vxml grammar</soCalled>) and
+returns its compiled representation.
+<scrap id="ap2-cgfx"
+       name="Define compile-grammar-from-xml()">
 
 (: ......................................................
    compile-grammar-from-xml($ixmlGrammar)
@@ -3393,7 +4091,7 @@ stop</p></item>
 <item><p>ep:treecursor($I, $G) will return two items: the first tree
 it finds and a function to call for the next tree (and the next
 function); this involves wrapping up continuations and passing them
-around.  (It may be helpfl to do a five-finger exercise fetching the
+around.  (It may be helpful to do a five-finger exercise fetching the
 items of a sequence one at a time.)</p></item>
 <item><p>ep:parseforest($I, $G) will return a parse-forest grammar for
 the trees.  It can and should include the looped parse trees.  It may
@@ -3409,6 +4107,21 @@ called by the user.
 (: Goal:  to return the set of parse trees recorded implicitly in the
    Earley closure.
    :)
+<ptr target="ep-alltrees"/>
+<ptr target="ep-anytree"/>
+<ptr target="ep-tree-cursor"/>
+<ptr target="ep-parse-forest-map"/>
+<ptr target="ep-parse-forest-grammar"/>
+</scrap>
+</p>
+<p>The <ident>alltrees()</ident> function calls
+the internal <ident>earley-parse()</ident> function
+and passes the internal <ident>all-trees()</ident>
+function as an argument to signal what should be done
+with the Earley set.  <hi>To do:  just pass a keyword,
+for heaven's sake.</hi>
+<scrap id="ep-alltrees"
+       name="Declear ep:alltrees() function">
 (: ep:alltrees($I,$G):  return all loopless parse trees :)
 declare function ep:all-trees(
   $I as item() (: INPUT :),
@@ -3422,6 +4135,12 @@ declare function ep:all-trees(
         || 'and ep:all-trees is about to do so.') :)
 };
 
+</scrap></p>
+<p>The <ident>anytree()</ident> function similarly
+calls <ident>earley-parse()</ident> with a
+predefined internal function.
+<scrap id="ep-anytree"
+       name="Declear ep:anytree() function">
 (: ep:anytree($I,$G):  return one (loopless) parse tree, 
    whichever is found first 
 :)
@@ -3432,24 +4151,36 @@ declare function ep:any-tree(
   epi:earley-parse($I, $G, epi:any-tree#3)
 };
 
-(: ep:tree-cursor($I,$G):  return pair consisting of 
-   1 a parse tree, and
-   2 a function to return the next parsetree/function pair, or
-     when trees are exhausted to return a 'no-more-trees' signal.
-     
-   The name is intended to recall the cursor notion of SQL results.
-   
-   If you keep track of the number of trees delivered, the
-   no-more-trees signal can distinguish there-were-no-trees
-   from all-done-now signals.
-:)
+</scrap></p>
+<p>The <ident>tree-cursor()</ident> function (not yet
+implemented) is intended to return a pair consisting of
+(1) a parse tree, and (2) a function that will return
+another pair for the next parse tree.  When there are
+no more trees, a <q><kw>no-more-trees</kw></q> signal
+will be returned instead of a function.</p>
+<p>The name is intended to recall the cursor notion of SQL
+results.</p>
+<p>If you keep track of the number of trees delivered, the
+no-more-trees signal can distinguish there-were-no-trees
+from all-done-now signals.
+<scrap id="ep-tree-cursor"
+       name="Declear ep:tree-cursor() function">
+
 declare function ep:tree-cursor(
   $I as item() (: INPUT :),
   $G as item() (: GRAMMAR :)
 ) as item()* {
   epi:earley-parse($I, $G, epi:tree-cursor#3)
 };
-
+</scrap>
+</p>
+<p>The idea of the <ident>parse-forest-map()</ident>
+function is to return not a parse tree but a parse forest,
+in the form of a map.  It is currently not implemented,
+and may be unnecessary.  The <ident>parse-forest grammar()</ident>
+function may suffice.
+<scrap id="ep-parse-forest-map"
+       name="Declear ep:parse-forest-map() function">
 (: ep:parseforestmap($I,$G):  return a map containing an and/or tree
    representing the set of all parses.
 :)
@@ -3460,6 +4191,13 @@ declare function ep:parse-forest-map(
   epi:earley-parse($I, $G, epi:parse-forest-map#3)
 };
 
+</scrap>
+</p>
+<p>The <ident>parse-forest-grammar()</ident> function
+returns an ixml grammar describing a single sentence, from
+which parse trees can be constructed.
+<scrap id="ep-parse-forest-grammar"
+       name="Declear ep:alltrees() function">
 (: ep:parseforestgrammar($I,$G):  return a BNF (not EBNF[?]) grammar
    describing the set of all parses of $I against $G.
 :)
@@ -3469,14 +4207,7 @@ declare function ep:parse-forest-grammar(
 ) as element()* {
   epi:earley-parse($I, $G, epi:parse-forest-grammar#3)
 };
-
-(:
-
-
-
-:)
-(: Given a final item, build a tree for it.
-:)</scrap>
+</scrap>
 </p>
 </div>
 <div id="legacy-Earley-parser-internals.xqm">
@@ -4151,7 +4882,7 @@ final state of a rule for <code>$sym</code>.
 </p>
 <p>We're going to break this down into steps.
 First, just identify this case (and possibly issue
-a trace messsage).
+a trace message).
 <scrap id="epi-ans-rec-nonterminal"
        name="Handle recursion on nonterminal">
       (: 3.c current $sym is nonterminal :)
@@ -5534,7 +6265,7 @@ the tree from that, if the user wishes.</p>
 
 <p>My current expectation is that in most cases this will result in a
 modest improvement in performance.  Performance should improve because
-useless work will be avoided and necessary work will be performend
+useless work will be avoided and necessary work will be performed
 only once.  But the improvement will be modest, because not all
 grammars cause much unnecessary or repeated work.</p>
 <p>To be concrete: at the moment tree construction normally takes
@@ -5545,6 +6276,21 @@ construction will thus provide a one to ten per cent overall
 improvement.  In the pathological cases, the improvement should be
 greater.
 </p>
+</item>
+<item><p>Quick and dirty ad-hoc tokenization change for
+ixml grammar for ixml grammars.  (Hand-modify and
+hand-annotate the grammar, add support for the
+annotations.)</p></item>
+<item><p>Revise the document thoroughly, reorganizing as
+appropriate.  There are two audiences: those interested
+in understanding how the implementation works, and those
+maintaining the code.</p>
+<p>Begin by introducing scraps to represent the abstract
+data types <ident>Earley item</ident>, <ident>Earley
+set</ident>, etc., so that the high-level algorithm can
+be followed independently of the chosen
+representation.  Explain the high-level algorithm,
+then the internals.</p>
 </item>
 <item><p>Allow invoker to specify options, so they can choose whether
 to get back one parse tree, several, a parse-forest grammar, a raw
@@ -5670,6 +6416,63 @@ decent display / translation into XHTML), move to github.</item>
 <item>make RNC schema for TEI P5 + SWeb + XSLT</item>
 <item>upgrade this document, SWeb weave processor, SWeb
 tangle processor</item>
+</list>
+</div>
+<div>
+<head>To-do list from Earley recognizer internals module</head>
+<p>This module has a complicated enough to-do list of its own that
+I'll give it here for the moment instead of inserting these into the
+general to-do lists just given.</p>
+<list>
+<item><p>establish coherent Hungarian type policy to distinguish 
+     element and string representations of symbols.  We need
+     shorthands for both.</p></item>
+<item><p>fix symbol/position issue in leiAdvanceEiSymP()</p></item>
+<item><p>finish minimal version</p></item>
+<item><p>add support for #xxxx characters</p></item>
+<item><p>clarify XML representation of terminals and other questions
+with SP:
+<list>
+<item>grammar says -quoted, I say quoted </item>
+<item>grammar says quoted/@dstring, quoted/@sstring, 
+       I think I prefer quoted with PCDATA (code
+       currently handles all three)</item>
+<item>grammar defines -character, I want character element
+       as child of terminal (-character is fine for 
+       @dstring and @sstring)</item>
+<item>grammar and papers don't say what ^ means</item>
+<item>how is start symbol determined?  For now I
+       take LHS of first rule, like yacc.</item>
+<item>if a rule reads "-foo: @bar, baz.", what happens?
+       does @bar percolate up to parent element? (Do you
+       know how to do this?)</item>
+<item>Is a grammar specifying an @ mark on a repeatable 
+       non-terminal ill-formed?  Or is the @ just ignored
+       in that case?  (Tentative answer: both.)</item>
+<item>True or false? 
+       On a nonterminal, the mark "-" means "do not tag as element",
+       but do promote the children.  On a terminal, it means
+       "omit the entire thing".
+</item>
+</list></p>
+</item>
+<item><p>do some sanity checking in reXTerminal to avoid having
+     matches() blow up.</p></item>
+<item><p>fix confusion over two senses of nullable:
+<list>
+<item>locally nullable = nullable within the RHS (decorated 
+       with ? or *, inside optional group, etc.)</item>
+       <item>generates null string in sentence</item>
+</list>
+</p>
+<p>N.B. a required non-terminal, not nullable in first
+sense, can generate empty string and thus make its
+parent nullable in the second sense.</p>
+<p>Use fNullable for the first sense (already established)
+and fGES (to be renamed for the second.</p>
+</item>
+<item><p>For testing purposes, provide a recognize function that
+specifies a start symbol (analogous to phrase/2 in Prolog).</p></item>
 </list>
 </div>
 </div>
@@ -5860,6 +6663,13 @@ at the beginnings of the individual modules.</p>
 </p>
 </div>
 </div>
+
+<div id="indices">
+<head>Indices</head>
+<divGen type="index-filenames"/>
+<divGen type="index-scrapnames"/>
+</div>
+
 </back>
 </text>
 </TEI.2>
