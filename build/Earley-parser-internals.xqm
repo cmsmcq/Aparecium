@@ -38,75 +38,133 @@ declare namespace map =
 declare function epi:earley-parse(
   $I as xs:string,
   $G as element(ixml),
-  $f as function(
-    map(*)*  (: Ec :),
-    map(*)* (: Closure :),
-    xs:string (: Input :)
-    (: , element(ixml) (: Grammar :) :)
-  ) as item()* 
+  $options as map(xs:string, item()*)?
 ) as item()* {
   let $dummy := eri:notrace((), 'epi:earley-parse() ...') 
+
+  let $options := 
+      if (empty($options))
+      then map { 'return': 'any-tree',
+                 'tree-count': 2,
+                 'failure-dump': 'closure' }
+      else $options
+
   let $mapResult := prof:time(
                     er:recognizeX($I, $G), 
                     '0a recognize(): '),
 
       $meiClosure := $mapResult('Closure'),
       $leiCompletions := $mapResult('Completions')
-  return if ($mapResult('Result'))
-    then (: if we have a result, return each parse tree :)
-        let $dummy := eri:notrace((), 
+
+  return 
+    if ($mapResult('Result'))
+  then if ($options?return = 'all-trees')
+       then         let $dummy := eri:notrace((), 
                       'epi:earley-parse() has result') 
+
         let $lpt := prof:time(
-                    $f($leiCompletions, $meiClosure, $I (: , $G :) )
+                    epi:all-trees($leiCompletions, $meiClosure, $I)
                     , '0b making trees: ')
-        for $pt at $npt in $lpt
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
-        (: return if (('raw','ast')[2] eq 'raw') 
-	       then $pt  
-               else epi:astXparsetree($pt, count($lpt)) :)
-        (: What an ugly hack!  Clean this up! :)
-        (: let $logfn := '/Users/cmsmcq/'
-                      || '2021/Aparecium/tests/output/raw.'
-	              || translate(
-                           string(
-                             adjust-dateTime-to-timezone(
-                               current-dateTime(), 
-                               ())),
-                           ' :',
-                           '__')
-                      || $npt
-                      || '.xml'   
-        return (file:write($logfn, $pt), 
-                epi:astXparsetree($pt, count($lpt))) :)
-        return epi:astXparsetree($pt, count($lpt)) 
-        
-   else (: otherwise, send an apology and explanation :)
-   <no-parse>
-   <p>Sorry, no parse for this string and grammar.</p>
-   <p>The completions are:</p>
-   <completions>{$leiCompletions}</completions>
-   <p>The map is:</p>
+        for $rpt at $npt in $lpt
+        return if ($options?tree-form eq 'raw')
+        then $rpt
+        else if ($options?tree-form eq 'both')
+        then ($rpt, epi:astXparsetree($rpt, count($lpt)))
+        else epi:astXparsetree($rpt, count($lpt))
+
+       else if ($options?return = 'tree-cursor')
+       then   <tree-cursor-not-available/>
+
+       else if ($options?return = 'parse-forest-map')
+       then   <parse-forest-map-not-available/>
+
+       else if ($options?return = 'parse-forest-grammar')
+       then         let $dummy := eri:notrace((), 
+                      'epi:earley-parse() has result') 
+
+        let $pfg := prof:time(
+                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I)
+                    , '0b making pfg: ')
+        let $dummy := eri:notrace((), 
+                      'epi:earley-parse() returning a parse-forest grammart') 
+        return $pfg
+
+       else (: default to any-tree :)
+                    let $lpt := prof:time(
+                    epi:all-trees($leiCompletions, $meiClosure, $I)
+                    , '0b making trees: ')
+        let $dummy := eri:notrace((), 
+                      'epi:earley-parse() returning a result') 
+        for $rpt in $lpt[1]
+        return if ($options?tree-form eq 'raw')
+        then $rpt
+        else if ($options?tree-form eq 'both')
+        then ($rpt, epi:astXparsetree($rpt, count($lpt)))
+        else epi:astXparsetree($rpt, count($lpt))
+
+
+  else  (: otherwise, send an apology and explanation :)
+  let $closure := <Closure>{
+      let $mei := $mapResult('Closure')
+      for $n in map:keys($mei('to'))
+      order by $n descending
+      for $ei in $mei('to')($n)
+      return eri:eXei($ei)
+  }</Closure>
+
+  let $high-water := $closure/item[1]/@to/number()
+  let $start := max((1, ($high-water - 30))),
+      $end := min((string-length($I),
+                   ($high-water + 30))),
+      $cL := min(($high-water, 30)),
+      $cR := min(($end - $high-water, 30)),
+      $sL := concat(if ($high-water gt 30)
+                    then '...'
+                    else '',
+                    substring($I, $start, $cL)
+             ),
+      $sR := concat(substring($I, $high-water, $cR),
+                    if ($cR lt 30)
+                    then ''
+                    else '...'
+             )
+  return     
+  <no-parse xmlns:ixml="http://invisiblexml.org/NS" ixml:state="failed">
+    <p>Sorry, no parse for this string and grammar.</p>
+    <p>The parser gave up at character {$high-water}:
+        parsing succeed up through <q>{
+          replace($sL,'
+','&#xA;')
+        }</q>
+        but failed on <q>{
+          replace($sR, '
+', '&#xA;')
+        }</q></p>{
+    if ($options?failure-dump eq 'no')
+    then ()
+    else if ($options?failure-dump eq 'closure')
+    then $closure    
+    else if ($options?failure-dump eq 'yes')
+    then <dump>
+    <p>The map is:</p>
    
-   <Initial-Item>{eri:eXei($mapResult('Initial-Item'))}</Initial-Item>
-   <Input>{$mapResult('Input')}</Input>
-   <Input-Length>{$mapResult('Input-Length')}</Input-Length>
-   <Completions>{
-     for $ei in $mapResult('Completions')
-     return eri:eXei($ei)
-   }</Completions>
-   <Closure>{
-     let $mei := $mapResult('Closure')
-     for $n in map:keys($mei('to'))
-     order by $n descending
-     for $ei in $mei('to')($n)
-     return eri:eXei($ei)
-   }</Closure>
-   <Result>{$mapResult('Result')}</Result>
-   <grammar>{(: 'Omitted.' :) $mapResult('Grammar') }</grammar>
-   </no-parse>
-   (: we have to think about how to return that no-parse signal.
-   :)
+    <Initial-Item>{eri:eXei($mapResult('Initial-Item'))}</Initial-Item>
+    <Input>{$mapResult('Input')}</Input>
+    <Input-Length>{$mapResult('Input-Length')}</Input-Length>
+    <Completions>{
+       for $ei in $mapResult('Completions')
+       return eri:eXei($ei)
+    }</Completions>
+    <Result>{$mapResult('Result')}</Result>
+    <Closure>{$closure}</Closure>
+    <grammar>{(: 'Omitted.' :) $mapResult('Grammar') }</grammar>
+    </dump>
+    else ()
+  }</no-parse>
+
+        
 };
 
 (: ******************************************************
@@ -243,7 +301,8 @@ declare function epi:make-pfg-rules(
   else 
   let $ei := head($leiQueue)
   
-  let $r0 := $ei('rule')
+  let $r0 := $ei('rule'),
+      $dummy := eri:trace($r0, 'The rule through which we walk:')
   let $w  := map { 'item': $ei, 
                    'state': 'q0',
                    'follow-states': 
@@ -263,8 +322,17 @@ declare function epi:make-pfg-rules(
                   else ()             (: accumulator :),
                   map { 'tree-count': 2 } (: options :)
                 )
+  let $dummy := eri:trace(count($walks), 'find-walks found this many:')
 
     let $rule := element rule {
+                   attribute name {
+                       concat($r0/@name,
+                           '·',
+                           $ei('from'),
+                           '·',
+                           $ei('to')
+                       )
+                   },
                    for $w in $walks
                    return element alt { 
                        epi:rhs-from-walk($w, $I, ())
@@ -272,31 +340,32 @@ declare function epi:make-pfg-rules(
                }
 
     let $lei0 := for $w in $walks
-               return epi:lei-from-walk($w), 
+               return epi:lei-from-walk($w, ()), 
                (: all completion items in $walks :)
 	       
       $lei1 := $lei0[
                  not(some $i in 1 to (position() - 1)
-                     satisfies deep-equal(., $lei0[$i])
+                     satisfies deep-equal(., $lei0[$i]))
                ],
                (: list of distinct completion items :)
 
       $lei2 := $lei1[
                  not(some $i in 2 to (count($leiQueue))
-                     satisfies deep-equal(., $leiQueue[$i])
+                     satisfies deep-equal(., $leiQueue[$i]))
                ]
                (: completion items not in the queue :)
 
 
-  let $ls-defined := ($leRules, $rule)//nonterminal
-                     /@name/string()),
+  let $ls-defined := ($leRules, $rule)
+                     //nonterminal
+                     /@name/string(),
       $lei3 := for $ei in $lei2
                let $s := $ei('rule')/@name/string()
                          || '·'
                          || $ei('from')
                          || '·'
                          || $ei('to')
-               where not($s := $lnt)
+               where not($s = $ls-defined)
                return $ei
                (: new completion items, 
                   not in queue and not already done :)
@@ -319,14 +388,14 @@ declare function epi:find-walks(
     map(xs:integer,
         map(xs:string, item())*)) ,
   $I as xs:string,
-  $queue as map(xs:string)*
+  $queue as map(xs:string, item()*)*
 ,
-  $acc as map(xs:string)*
+  $acc as map(xs:string, item()*)*
 ,
   $options as map(*)
-) as map(xs:string)*
+) as map(xs:string, item()*)*
  {
-    if (($options('tree-count') ne 'all')
+    if (($options('tree-count') ne -1)
       and 
       (count($acc) ge $options('tree-count')))
   then $acc
@@ -334,14 +403,20 @@ declare function epi:find-walks(
   then $acc
 
   else 
-    let $new-queue := 
+    let $dummy := eri:trace(count($queue), 'find-walks queue has length: ')
+  let $new-queue := 
       for $w in $queue
       let $x := $w('item')('from'),
-          $qqNext := tokenize($w('follow-states')
+          $qqNext := $w('follow-states')
+      let $dummy := eri:trace(count($qqNext), 'find-walks walk has # follow-states: ')
+
       for $qNext in $qqNext
-      let $symbol := $eiParent('rule')//*[@id=$qNext],
+      let $symbol := $eiParent('rule')//*[@xml:id=$qNext],
+          $dummy := eri:trace($qNext, 'find-walks: qNext ='),
+          $dummy := eri:trace($symbol, 'find-walks: symbol ='),
           $N := $symbol/self::nonterminal/@name/string(),
-          $T := $symbol[eri:fTerminal(.)]/@id/string()
+          $T := $symbol[eri:fTerminal(.)]/@xml:id/string()
+      let $dummy := eri:trace(($N, $T), 'find-walks qNext, symbol name: ')
 
       group by $x, $qNext, $N, $T
 
@@ -352,16 +427,28 @@ declare function epi:find-walks(
                      or (.?ri eq '#terminal')]
                     [.?to le $eiParent('to')]
 
+      let $dummy := eri:trace(count($items), 'find-walks has # completions: ')
+
+
       for $i in $items
-      let $qqNextfollow := $eiParent('rule')
-                           /attribute::follow:*
-                           [local-name eq $qNext]
-                           /tokenize(),
+      let $fNull := ($i('to') eq $i('from')),
+          $leiDups := if ($fNull)
+                      then epi:dups-from-walk(
+                               $qNext, $i, $w[1], ()
+                           )
+                      else ()
+      let $qqNextfollow := tokenize(
+                               $eiParent('rule')
+                               /attribute::follow:*
+                               [local-name eq $qNext]
+                           ),
           $f-qnext-final := ($qNext = 
-                           eri:lriFinalstates(
+                           eri:lriFinalstatesXR(
                                $eiParent('rule')
                            ))
-      return map {
+      return if ($fNull and count($leiDups) gt 1)
+      then ()
+      else map {
                  'item' : $i,
                  'state' : $qNext,
                  'follow-states' : $qqNextfollow,
@@ -382,7 +469,7 @@ declare function epi:find-walks(
 };
 
 declare function epi:rhs-from-walk(
-  $w as map(xs:string)
+  $w as map(xs:string, item()*)
 ?,
   $I as xs:string,
   $acc as element()*
@@ -390,7 +477,7 @@ declare function epi:rhs-from-walk(
     if (empty($w)) 
   then $acc
 
-  else   if $w('item')('ri') eq '#terminal'
+  else   if ($w('item')('ri') eq '#terminal')
   then let $ei := $w('item')
        let $x := $ei('from'),
            $y := $ei('to'),
@@ -403,15 +490,15 @@ declare function epi:rhs-from-walk(
 	   $next-step := $w('pred')
        return epi:rhs-from-walk($next-step, $I, $new-acc)
 
-  else   else if (exists($ei('rule')/self::rule[@name]))
+  else   if (exists($w('item')('rule')/self::rule[@name]))
   then let $ei := $w('item'),
            $symbol := element nonterminal {
                attribute name {
                    $ei('rule')/@name/string()
                    || '·'
-                   $ei('from')/string()
+                   || $ei('from')
                    || '·'
-                   $ei('to')/string()
+                   || $ei('to')
                }
            },
            $new-acc := ($symbol, $acc),
@@ -427,18 +514,36 @@ declare function epi:rhs-from-walk(
 };
 
 declare function epi:lei-from-walk(
-  $w as map(xs:string)
+  $w as map(xs:string, item()*)
 ?,
-  $acc as element()*
+  $acc as map(*)*
 ) as map(*)* {
   if (empty($w)) 
   then $acc
-  else if ($w('state') eq 'q0'
+  else if ($w('state') eq 'q0')
   then $acc
-  else if ($w('item')('ri') eq '#terminal'
+  else if ($w('item')('ri') eq '#terminal')
   then epi:lei-from-walk($w('pred'), $acc)
   else epi:lei-from-walk($w('pred'),
                          ($w('item'), $acc))
+};
+
+declare function epi:dups-from-walk(
+  $q as xs:string,
+  $ei as map(*),
+  $w as map(xs:string, item()*)
+?,
+  $acc as item()*
+) as map(xs:string, item()*)*
+ {
+  if (empty($w)) 
+  then $acc
+  else if ($w('state') eq 'q0')
+  then $acc
+  else if (deep-equal($ei, $w('item'))
+          and $q eq $w('state'))
+  then epi:lei-from-walk($w('pred'), ($w, $acc))
+  else epi:lei-from-walk($w('pred'), $acc)
 };
 
 

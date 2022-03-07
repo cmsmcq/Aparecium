@@ -23,10 +23,11 @@ declare function ix:scan(
       $dummy := ixi:notrace(ixi:sXei($E), 'ix:scan() on item:') 
   for $t in $lt
   let $dummy := ixi:notrace($t, 'ix:scan() expects terminal:'),
-      $dummy := ixi:notrace(ixi:fMatchesIPT($I, $p, $t), 
+      $dummy := ixi:notrace(ixi:cMatchesIPT($I, $p, $t), 
                           'ix:scan() matches? ') 
   return
     let $c := ixi:cMatchesIPT($I, $p, $t)
+    return 
     if ($c ge 0)
     then (ixi:leiAdvanceEiSymP($E, $t, $p + $c),
          ixi:eiMakePPT($p, $p + $c, $t))

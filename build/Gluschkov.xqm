@@ -325,6 +325,9 @@ then let $gi := name($E)
 
   else if ($E/self::ixml) then 
     element ixml {
+      attribute follow:info { 
+        "auxiliary namespace for FSA description"
+      },
       $E/@*,
       $children
     }

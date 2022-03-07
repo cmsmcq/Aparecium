@@ -11,57 +11,77 @@ at "Earley-parser-internals.xqm";
 (: Goal:  to return the set of parse trees recorded implicitly in the
    Earley closure.
    :)
-(: ep:alltrees($I,$G):  return all loopless parse trees :)
+(: ep:all-trees($I,$G):  return all loopless parse trees :)
 declare function ep:all-trees(
   $I as item() (: INPUT :),
   $G as item() (: GRAMMAR :)
 ) as element()+ {
-  (: trace((), 'ep:all-trees calling epi:earley-parse'), :)
 
-  epi:earley-parse($I, $G, epi:all-trees#3)
+  epi:earley-parse($I, $G, 
+      map { 'return': 'all-trees',
+            'tree-count': -1,
+            'failure-dump': 'closure'
+      }
+  )
   
-  (: trace((), 'epi:earley-parse has returned '
-        || 'and ep:all-trees is about to do so.') :)
 };
 
 
-(: ep:anytree($I,$G):  return one (loopless) parse tree, 
+(: ep:any-tree($I,$G):  return one (loopless) parse tree, 
    whichever is found first 
 :)
 declare function ep:any-tree(
   $I as item() (: INPUT :),
   $G as item() (: GRAMMAR :)
 ) as element()? {
-  epi:earley-parse($I, $G, epi:any-tree#3)
+  epi:earley-parse($I, $G, 
+      map { 'return': 'any-tree',
+            'tree-count': 1,
+            'ambiguity-test': true(),
+            'failure-dump': 'closure'
+      }
+  )
 };
-
 
 
 declare function ep:tree-cursor(
   $I as item() (: INPUT :),
   $G as item() (: GRAMMAR :)
 ) as item()* {
-  epi:earley-parse($I, $G, epi:tree-cursor#3)
+  epi:earley-parse($I, $G,  
+      map { 'return': 'tree-cursor',
+            'failure-dump': 'closure' }
+  )
 };
 
-(: ep:parseforestmap($I,$G):  return a map containing an and/or tree
+
+(: ep:parse-forest-map($I,$G):  return a map containing an and/or tree
    representing the set of all parses.
 :)
 declare function ep:parse-forest-map(
   $I as item() (: INPUT :),
   $G as item() (: GRAMMAR :)
 ) as element()* {
-  epi:earley-parse($I, $G, epi:parse-forest-map#3)
+  epi:earley-parse($I, $G, 
+      map { 'return': 'parse-forest-map', 
+            'tree-count': -1,
+            'failure-dump': 'closure'
+      }
+  )
 };
 
-
-(: ep:parseforestgrammar($I,$G):  return a BNF (not EBNF[?]) grammar
+(: ep:parse-forest-grammar($I,$G):  return a BNF (not EBNF[?]) grammar
    describing the set of all parses of $I against $G.
 :)
 declare function ep:parse-forest-grammar(
   $I as item() (: INPUT :),
   $G as item() (: GRAMMAR :)
 ) as element()* {
-  epi:earley-parse($I, $G, epi:parse-forest-grammar#3)
+  epi:earley-parse($I, $G, 
+      map { 'return': 'parse-forest-grammar',
+            'tree-count': -1,
+            'failure-dump': 'closure'
+      }
+  )
 };
 

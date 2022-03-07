@@ -113,7 +113,7 @@ correct ns name</item>
 <versionList>
 <version id="v0.2">Version presented at Balisage in 2020
 and at Declarative Amsterdam in 2021</version>
-<version id="pfg" fallback="v0.2">Modifications to support
+<version id="pfg">Modifications to support
 production of parse-forest grammars</version>
 <version id="tok0" fallback="v0.2">Modifications to support
 faster tokenization in user-annotated grammars</version>
@@ -1111,6 +1111,7 @@ declare function epi:parse-forest-grammar(
 <ptr target="epi-find-walks"/>
 <ptr target="epi-rhs-from-walk"/>
 <ptr target="epi-lei-from-walk"/>
+<ptr target="epi-find-dups-in-walk"/>
 </scrap>
 </p>
 
@@ -1359,7 +1360,8 @@ walk with a single step.  And if the parent FSA is nullable, we add that walk to
 <scrap id="epi-mpr-find-walk"
        name="Set $walks to possible child sequences for $ei">
 
-  let $r0 := $ei('rule')
+  let $r0 := $ei('rule'),
+      $dummy := eri:trace($r0, 'The rule through which we walk:')
   let $w  := map { 'item': $ei, 
                    'state': 'q0',
                    'follow-states': 
@@ -1379,6 +1381,7 @@ walk with a single step.  And if the parent FSA is nullable, we add that walk to
                   else ()             (: accumulator :),
                   map { 'tree-count': 2 } (: options :)
                 )
+  let $dummy := eri:trace(count($walks), 'find-walks found this many:')
 </scrap>
 The <q><kw>follow-states</kw></q> and <q><kw>final</kw></q>
 values are redundant; we store them in the map to avoid
@@ -1402,6 +1405,14 @@ appropriate expression on the right-hand side.
 <scrap id="epi-mpr-make-rule"
        name="Set $rule to production rule for $ei">
   let $rule := element rule {
+                   attribute name {
+                       concat($r0/@name,
+                           '&#xB7;',
+                           $ei('from'),
+                           '&#xB7;',
+                           $ei('to')
+                       )
+                   },
                    for $w in $walks
                    return element alt { 
                        epi:rhs-from-walk($w, $I, ())
@@ -1427,7 +1438,7 @@ against the items we already have rules for.
 <scrap id="epi-mpr-update-queue"
        name="Set $new-queue to include new completions">
   let $lei0 := for $w in $walks
-               return epi:lei-from-walk($w), 
+               return epi:lei-from-walk($w, ()), 
                (: all completion items in $walks :)
 	       
       $lei1 := $lei0[
@@ -1496,6 +1507,7 @@ From these we are to generate a set of walks, represent as step
 lists.  The accumulator is needed because we extend everything in
 the queue if we can, and that may cause a satisfactory walk to be
 lost.
+<hi>To do: check for loops.</hi>
 <scrap id="epi-find-walks"
        name="The find-walks() function">
 declare function epi:find-walks(
@@ -1536,7 +1548,7 @@ two two-way ambiguities does not guarantee four trees.</p>
 </note>
 <scrap id="pfg-fw-if-done"
        name="If we have all our walks, return">
-  if (($options('tree-count') ne 'all')
+  if (($options('tree-count') ne -1)
       and 
       (count($acc) ge $options('tree-count')))
   then $acc
@@ -1556,14 +1568,20 @@ but including them as grouping keys allows them to be referred
 to without subscripts.</p></note>
 <scrap id="pfg-fw-set-new-queue"
        name="Set new queue by extending all walks in the queue">
+  let $dummy := eri:trace(count($queue), 'find-walks queue has length: ')
   let $new-queue := 
       for $w in $queue
       let $x := $w('item')('from'),
           $qqNext := $w('follow-states')
+      let $dummy := eri:trace(count($qqNext), 'find-walks walk has # follow-states: ')
+
       for $qNext in $qqNext
-      let $symbol := $eiParent('rule')//*[@id=$qNext],
+      let $symbol := $eiParent('rule')//*[@xml:id=$qNext],
+          $dummy := eri:trace($qNext, 'find-walks: qNext ='),
+          $dummy := eri:trace($symbol, 'find-walks: symbol ='),
           $N := $symbol/self::nonterminal/@name/string(),
-          $T := $symbol[eri:fTerminal(.)]/@id/string()
+          $T := $symbol[eri:fTerminal(.)]/@xml:id/string()
+      let $dummy := eri:trace(($N, $T), 'find-walks qNext, symbol name: ')
 
       group by $x, $qNext, $N, $T
 </scrap>
@@ -1586,12 +1604,21 @@ parent completion item.</item>
                     [eri:fFinalEi(.) 
                      or (.?ri eq '#terminal')]
                     [.?to le $eiParent('to')]
+
+      let $dummy := eri:trace(count($items), 'find-walks has # completions: ')
+
 </scrap>
 For each such item, we extend the walk we started with:
 <scrap prev="pfg-fw-set-new-queue"
        name="Extend the walk">
 
       for $i in $items
+      let $fNull := ($i('to') eq $i('from')),
+          $leiDups := if ($fNull)
+                      then epi:dups-from-walk(
+                               $qNext, $i, $w[1], ()
+                           )
+                      else ()
       let $qqNextfollow := tokenize(
                                $eiParent('rule')
                                /attribute::follow:*
@@ -1601,7 +1628,9 @@ For each such item, we extend the walk we started with:
                            eri:lriFinalstatesXR(
                                $eiParent('rule')
                            ))
-      return map {
+      return if ($fNull and count($leiDups) gt 1)
+      then ()
+      else map {
                  'item' : $i,
                  'state' : $qNext,
                  'follow-states' : $qqNextfollow,
@@ -1676,9 +1705,9 @@ newly constructed nonterminal name, and recur.
                attribute name {
                    $ei('rule')/@name/string()
                    || '&#xB7;'
-                   || $ei('from')/string()
+                   || $ei('from')
                    || '&#xB7;'
-                   || $ei('to')/string()
+                   || $ei('to')
                }
            },
            $new-acc := ($symbol, $acc),
@@ -1715,7 +1744,7 @@ item onto the front of the accumulator.
        name="The lei-from-walk() function">
 declare function epi:lei-from-walk(
   $w as <ptr target="pfg-adt-walk"/>?,
-  $acc as element()*
+  $acc as <ptr target="adt-list-ei"/>
 ) as <ptr target="adt-list-ei"/> {
   if (empty($w)) 
   then $acc
@@ -1731,6 +1760,38 @@ declare function epi:lei-from-walk(
 <p><hi>To do:  move de-duping into lei-from-walk()?
 Every item we can avoid adding to the accumulator
 is an item we don't need to carry around.</hi></p>
+</div>
+<div id="hi-pfgc-find-dups">
+<head>The <ident>dups-from-walk()</ident> function</head>
+<p>We are given a state &q;, an item &ei;, and a walk &w;;
+we are to return the steps in &w; that have the same
+state and item.  If there is more than one (or some
+threshold), the caller will detect a loop in the walk
+and cut the walk off to avoid going round the loop
+indefinitely.</p>
+
+<p>We do this by walking through the list step by step, pushing the
+duplicate steps onto the front of the accumulator.
+
+<scrap id="epi-find-dups-in-walk"
+       name="The dups-from-walk() function">
+declare function epi:dups-from-walk(
+  $q as xs:string,
+  $ei as <ptr target="adt-ei"/>,
+  $w as <ptr target="pfg-adt-walk"/>?,
+  $acc as item()*
+) as <ptr target="pfg-adt-walks"/> {
+  if (empty($w)) 
+  then $acc
+  else if ($w('state') eq 'q0')
+  then $acc
+  else if (deep-equal($ei, $w('item'))
+          and $q eq $w('state'))
+  then epi:lei-from-walk($w('pred'), ($w, $acc))
+  else epi:lei-from-walk($w('pred'), $acc)
+};
+</scrap>
+</p>
 </div>
 </div>
 
@@ -1827,8 +1888,9 @@ map(xs:string,
 (: We represent an Earley item as a map with keys 'from', 
    'to', 'rule', and 'ri' (rule index).  For any item $ei, 
    $ei('from') and $ei('to') are integers, $ei('rule') is 
-   element(rule), and $ei('ri') is a string (an NCName, 
-   in fact, but typed only as a string).
+   element() (either a rule or a terminal symbol), and 
+   $ei('ri') is a string (an NCName, in fact, but typed 
+   only as a string).
 :)
 
 (: ******************************************************
@@ -1955,7 +2017,7 @@ declare function ixi:pFromXEi(
    :)
 declare function ixi:rXEi(
   $E as map(xs:string, item())
-) as element(rule) {
+) as element() {
   $E('rule')
 };
 
@@ -2768,13 +2830,16 @@ declare function ixi:lrulesXNG(
 
 (: ixi:lriFinalstatesXR($r) :)
 declare function ixi:lriFinalstatesXR(
-  $r as element(rule)
+  $r as element()
 ) as xs:string* {
+  if ($r/self::rule)
+  then 
   (
     if ($r/@nullable = ('true', '1'))
     then 'q0' else (),
     tokenize($r/@last,'\s+')[normalize-space()]
   )
+  else ()
 
 };
 
@@ -2782,26 +2847,10 @@ declare function ixi:lriFinalstatesXR(
    start-position identifiers.
  :)
 declare function ixi:lriStartstatesXR(
-  $r as element(rule)
+  $r as element()
 ) as xs:string* {
   'q0'
-  (: NOT 
-  tokenize($r/@first,'\s+')[normalize-space()]
-  :)
 };
-
-(: duplicate, apparently :)
-(:
-declare function ixi:initial-stateR(
-  $Rule as element(rule)
-) as xs:string* {
-  'q0'
-  (: NOT
-  tokenize($Rule/@first,'\s+')[. ne '']
-  Those are the follow states of q0.  Whoops.
-  :)
-};
-:)
 
 (: ******************************************************
    * Rules and rule indexes: predicates
@@ -3769,33 +3818,6 @@ declare function aparecium:parse-string-with-compiled-grammar(
 };
 </scrap>
 </p>
-<p>As a temporary hack, we override this in the
-<ident>pfg</ident> version, for testing purposes.
-
-<scrap corresp="ap-pswcg"
-       version="pfg"
-       name="Define parse-string-with-compiled-grammar()">
-(: ......................................................
-   parse-string-with-compiled-grammar($Input, $Grammar)
-   ......................................................
-:)
-declare function aparecium:parse-string-with-compiled-grammar(
-  $sI as xs:string,
-  $cG as element(ixml)
-) as element() {
-
-  let $result := prof:time(
-                 earley:parse-forest-grammar($sI, $cG) 
-                 , '0 Outer call: ')
-
-  return if (count($result) eq 1)
-         then $result
-         else &lt;forest 
-              xmlns:ixml="http://invisiblexml.org/NS"
-	      >{$result}&lt;/forest>
-};
-</scrap>
-</p>
 </div>
 <div id="alt-calls-secondary">
 <head>Secondary user-facing calls</head>
@@ -4085,18 +4107,19 @@ tree with the option to fetch more.</p>
 </item>
 </list>
 </p>
-<p>We will offer four functions (names subject to change):
+<p><hi>Delete or revise this:  it's out of date.</hi>
+We will offer four functions (names subject to change):
 <list>
-<item><p>ep:alltrees($I,$G) will return all loopless parse
+<item><p>ep:all-trees($I,$G) will return all loopless parse
 trees</p></item>
-<item><p>ep:anytree($I, $G) will return the first tree it finds and
+<item><p>ep:any-tree($I, $G) will return the first tree it finds and
 stop</p></item>
-<item><p>ep:treecursor($I, $G) will return two items: the first tree
+<item><p>ep:tree-cursor($I, $G) will return two items: the first tree
 it finds and a function to call for the next tree (and the next
 function); this involves wrapping up continuations and passing them
 around.  (It may be helpful to do a five-finger exercise fetching the
 items of a sequence one at a time.)</p></item>
-<item><p>ep:parseforest($I, $G) will return a parse-forest grammar for
+<item><p>ep:parse-forest-grammar($I, $G) will return a parse-forest grammar for
 the trees.  It can and should include the looped parse trees.  It may
 have clean/dirty variants that do or don't bother to clean the grammar
 up (tbd; dunno yet).</p></item>
@@ -4119,42 +4142,49 @@ called by the user.
 </p>
 <p>The <ident>alltrees()</ident> function calls
 the internal <ident>earley-parse()</ident> function
-and passes the internal <ident>all-trees()</ident>
-function as an argument to signal what should be done
-with the Earley set.  <hi>To do:  just pass a keyword,
-for heaven's sake.</hi>
+and passes options to it to signal what should be done
+with the Earley set.
 <scrap id="ep-alltrees"
-       name="Declear ep:alltrees() function">
-(: ep:alltrees($I,$G):  return all loopless parse trees :)
+       name="Declare ep:all-trees() function">
+(: ep:all-trees($I,$G):  return all loopless parse trees :)
 declare function ep:all-trees(
   $I as item() (: INPUT :),
   $G as item() (: GRAMMAR :)
 ) as element()+ {
-  (: trace((), 'ep:all-trees calling epi:earley-parse'), :)
 
-  epi:earley-parse($I, $G, epi:all-trees#3)
+  epi:earley-parse($I, $G, 
+      map { 'return': 'all-trees',
+            'tree-count': -1,
+            'failure-dump': 'closure'
+      }
+  )
   
-  (: trace((), 'epi:earley-parse has returned '
-        || 'and ep:all-trees is about to do so.') :)
 };
 
 </scrap></p>
+
 <p>The <ident>anytree()</ident> function similarly
-calls <ident>earley-parse()</ident> with a
-predefined internal function.
+calls <ident>earley-parse()</ident> with a different
+option.
 <scrap id="ep-anytree"
-       name="Declear ep:anytree() function">
-(: ep:anytree($I,$G):  return one (loopless) parse tree, 
+       name="Declare ep:any-tree() function">
+(: ep:any-tree($I,$G):  return one (loopless) parse tree, 
    whichever is found first 
 :)
 declare function ep:any-tree(
   $I as item() (: INPUT :),
   $G as item() (: GRAMMAR :)
 ) as element()? {
-  epi:earley-parse($I, $G, epi:any-tree#3)
+  epi:earley-parse($I, $G, 
+      map { 'return': 'any-tree',
+            'tree-count': 1,
+            'ambiguity-test': true(),
+            'failure-dump': 'closure'
+      }
+  )
 };
-
 </scrap></p>
+
 <p>The <ident>tree-cursor()</ident> function (not yet
 implemented) is intended to return a pair consisting of
 (1) a parse tree, and (2) a function that will return
@@ -4167,13 +4197,16 @@ results.</p>
 no-more-trees signal can distinguish there-were-no-trees
 from all-done-now signals.
 <scrap id="ep-tree-cursor"
-       name="Declear ep:tree-cursor() function">
+       name="Declare ep:tree-cursor() function">
 
 declare function ep:tree-cursor(
   $I as item() (: INPUT :),
   $G as item() (: GRAMMAR :)
 ) as item()* {
-  epi:earley-parse($I, $G, epi:tree-cursor#3)
+  epi:earley-parse($I, $G,  
+      map { 'return': 'tree-cursor',
+            'failure-dump': 'closure' }
+  )
 };
 </scrap>
 </p>
@@ -4183,34 +4216,73 @@ in the form of a map.  It is currently not implemented,
 and may be unnecessary.  The <ident>parse-forest grammar()</ident>
 function may suffice.
 <scrap id="ep-parse-forest-map"
-       name="Declear ep:parse-forest-map() function">
-(: ep:parseforestmap($I,$G):  return a map containing an and/or tree
+       name="Declare ep:parse-forest-map() function">
+
+(: ep:parse-forest-map($I,$G):  return a map containing an and/or tree
    representing the set of all parses.
 :)
 declare function ep:parse-forest-map(
   $I as item() (: INPUT :),
   $G as item() (: GRAMMAR :)
 ) as element()* {
-  epi:earley-parse($I, $G, epi:parse-forest-map#3)
+  epi:earley-parse($I, $G, 
+      map { 'return': 'parse-forest-map', 
+            'tree-count': -1,
+            'failure-dump': 'closure'
+      }
+  )
 };
-
 </scrap>
 </p>
 <p>The <ident>parse-forest-grammar()</ident> function
 returns an ixml grammar describing a single sentence, from
 which parse trees can be constructed.
 <scrap id="ep-parse-forest-grammar"
-       name="Declear ep:alltrees() function">
-(: ep:parseforestgrammar($I,$G):  return a BNF (not EBNF[?]) grammar
+       name="Declare ep:parse-forest-grammar() function">
+(: ep:parse-forest-grammar($I,$G):  return a BNF (not EBNF[?]) grammar
    describing the set of all parses of $I against $G.
 :)
 declare function ep:parse-forest-grammar(
   $I as item() (: INPUT :),
   $G as item() (: GRAMMAR :)
 ) as element()* {
-  epi:earley-parse($I, $G, epi:parse-forest-grammar#3)
+  epi:earley-parse($I, $G, 
+      map { 'return': 'parse-forest-grammar',
+            'tree-count': -1,
+            'failure-dump': 'closure'
+      }
+  )
 };
 </scrap>
+</p>
+<p>Let us pause for a moment to summarize the options
+these functions are assuming.  Options and their values
+include:
+<list>
+<item><label><kw>return</kw></label>:  one of
+<q><kw>all-trees</kw></q>,
+<q><kw>any-tree</kw></q>,
+<q><kw>tree-cursor</kw></q>,
+<q><kw>parse-forest-map</kw></q>,
+<q><kw>parse-forest-grammar</kw></q>.</item>
+
+<item><label><kw>tree-count</kw></label>: an integer specifying a
+maximum number of trees to (find and) return.  The magic number -1
+is used to signal that all (or as many as possible) should be
+returned.</item>
+
+<item><label><kw>ambiguity-test</kw></label>: an boolean value used
+when the <q><kw>tree-count</kw></q> option is 1, to indicate whether
+a second tree should be searched for (though not returned), so as to
+correctly detect amgiguity.</item>
+
+<item><label><kw>failure-dump</kw></label>: one of
+<q><kw>yes</kw></q>, <q><kw>no</kw></q>, <q><kw>closure</kw></q>.
+Used in case of parse failures to indicate whether all data
+structures should be dumped; <q><kw>closure</kw></q> indicates that
+just the closure should be provided.</item>
+
+</list>
 </p>
 </div>
 <div id="legacy-Earley-parser-internals.xqm">
@@ -4224,11 +4296,7 @@ functions.</p>
 <head>The <ident>earley-parse()</ident> function</head>
 <p>The function <ident>earley-parse()</ident> runs the Earley
 recognizer on the input and returns results as specified
-by the user.  This version of earley-parse() requires
-that the processor support higher-level functions.  Since
-Saxon HE does not provide that support, it should be revised
-so that the standard interfaces don't require higher-level
-functions.
+by the user.  
 <scrap id="epi-earley-parse"
        name="Define earley-parse()">
 (: ******************************************************
@@ -4239,82 +4307,200 @@ functions.
 declare function epi:earley-parse(
   $I as xs:string,
   $G as element(ixml),
-  $f as function(
-    map(*)*  (: Ec :),
-    map(*)* (: Closure :),
-    xs:string (: Input :)
-    (: , element(ixml) (: Grammar :) :)
-  ) as item()* 
+  $options as map(xs:string, item()*)?
 ) as item()* {
   let $dummy := eri:notrace((), 'epi:earley-parse() ...') 
+
+  let $options := 
+      if (empty($options))
+      then map { 'return': 'any-tree',
+                 'tree-count': 2,
+                 'failure-dump': 'closure' }
+      else $options
+
   let $mapResult := prof:time(
                     er:recognizeX($I, $G), 
                     '0a recognize(): '),
 
       $meiClosure := $mapResult('Closure'),
       $leiCompletions := $mapResult('Completions')
-  return if ($mapResult('Result'))
-    then (: if we have a result, return each parse tree :)
-        let $dummy := eri:notrace((), 
-                      'epi:earley-parse() has result') 
-        let $lpt := prof:time(
-                    $f($leiCompletions, $meiClosure, $I (: , $G :) )
-                    , '0b making trees: ')
-        for $pt at $npt in $lpt
-        let $dummy := eri:notrace((), 
-                      'epi:earley-parse() returning a result') 
-        (: return if (('raw','ast')[2] eq 'raw') 
-	       then $pt  
-               else epi:astXparsetree($pt, count($lpt)) :)
-        (: What an ugly hack!  Clean this up! :)
-        (: let $logfn := '/Users/cmsmcq/'
-                      || '2021/Aparecium/tests/output/raw.'
-	              || translate(
-                           string(
-                             adjust-dateTime-to-timezone(
-                               current-dateTime(), 
-                               ())),
-                           ' :',
-                           '__')
-                      || $npt
-                      || '.xml'   
-        return (file:write($logfn, $pt), 
-                epi:astXparsetree($pt, count($lpt))) :)
-        return epi:astXparsetree($pt, count($lpt)) 
+
+  return 
+  <ptr target="epi-ep-success"/>
+  else <ptr target="epi-ep-failure"/>
         
-   else (: otherwise, send an apology and explanation :)
-   &lt;no-parse>
-   &lt;p>Sorry, no parse for this string and grammar.&lt;/p>
-   &lt;p>The completions are:&lt;/p>
-   &lt;completions>{$leiCompletions}&lt;/completions>
-   &lt;p>The map is:&lt;/p>
-   
-   &lt;Initial-Item>{eri:eXei($mapResult('Initial-Item'))}&lt;/Initial-Item>
-   &lt;Input>{$mapResult('Input')}&lt;/Input>
-   &lt;Input-Length>{$mapResult('Input-Length')}&lt;/Input-Length>
-   &lt;Completions>{
-     for $ei in $mapResult('Completions')
-     return eri:eXei($ei)
-   }&lt;/Completions>
-   &lt;Closure>{
-     let $mei := $mapResult('Closure')
-     for $n in map:keys($mei('to'))
-     order by $n descending
-     for $ei in $mei('to')($n)
-     return eri:eXei($ei)
-   }&lt;/Closure>
-   &lt;Result>{$mapResult('Result')}&lt;/Result>
-   &lt;grammar>{(: 'Omitted.' :) $mapResult('Grammar') }&lt;/grammar>
-   &lt;/no-parse>
-   (: we have to think about how to return that no-parse signal.
-   :)
 };
 </scrap>
-(Why do we produce parse trees in the recognizer?  We have
-the completion item or we don't; we don't need parse trees here.
-But since no one will ever actually want just a recognizer,
-I don't suppose it matters.)
+An earlier version of <ident>earley-parse()</ident> that used
+higher-level functions is reproduced in <ref target="obs-hlf" >an
+appendix</ref>.  In order to support engines that do not implement
+higher-level functions, the code has been revised so the standard
+interfaces don't use higher-level functions.</p>
+
+<p>In the case of parsing success, the <ident>mapResult</ident>
+will have a <q><code>Result</code></q> value.  How we return
+it depends on what option the user specified.
+<scrap id="epi-ep-success"
+       name="If we have a parse result, return it">
+  if ($mapResult('Result'))
+  then if ($options?return = 'all-trees')
+       then <ptr target="epi-ep-all-trees"/>
+       else if ($options?return = 'tree-cursor')
+       then <ptr target="epi-ep-tree-cursor"/>
+       else if ($options?return = 'parse-forest-map')
+       then <ptr target="epi-ep-parse-forest-map"/>
+       else if ($options?return = 'parse-forest-grammar')
+       then <ptr target="epi-ep-parse-forest-grammar"/>
+       else (: default to any-tree :)
+            <ptr target="epi-ep-any-tree"/>
+</scrap>
 </p>
+<p>But first, let's talk about the failure case.
+As P.J. Brown points out, in real life the failure case
+is much more common that the <soCalled>success</soCalled> case, so
+the primary job of a program like Aparecium is to report errors and
+help the user understand them; a secondary task is, occasionally, to
+produce the prescribed results for error-free input.</p>
+<p>At the moment, we just return a <gi>no-parse</gi> element, and if
+the user asks for a verbose dump we provide it.
+<scrap id="epi-ep-failure"
+       name="Return parse-failure result">
+ (: otherwise, send an apology and explanation :)
+  let $closure := &lt;Closure>{
+      let $mei := $mapResult('Closure')
+      for $n in map:keys($mei('to'))
+      order by $n descending
+      for $ei in $mei('to')($n)
+      return eri:eXei($ei)
+  }&lt;/Closure>
+
+  let $high-water := $closure/item[1]/@to/number()
+  let $start := max((1, ($high-water - 30))),
+      $end := min((string-length($I),
+                   ($high-water + 30))),
+      $cL := min(($high-water, 30)),
+      $cR := min(($end - $high-water, 30)),
+      $sL := concat(if ($high-water gt 30)
+                    then '...'
+                    else '',
+                    substring($I, $start, $cL)
+             ),
+      $sR := concat(substring($I, $high-water, $cR),
+                    if ($cR lt 30)
+                    then ''
+                    else '...'
+             )
+  return     
+  &lt;no-parse xmlns:ixml="http://invisiblexml.org/NS" ixml:state="failed">
+    &lt;p>Sorry, no parse for this string and grammar.&lt;/p>
+    &lt;p>The parser gave up at character {$high-water}:
+        parsing succeed up through &lt;q>{
+          replace($sL,'&#xA;','&amp;#xA;')
+        }&lt;/q>
+        but failed on &lt;q>{
+          replace($sR, '&#xA;', '&amp;#xA;')
+        }&lt;/q>&lt;/p>{
+    if ($options?failure-dump eq 'no')
+    then ()
+    else if ($options?failure-dump eq 'closure')
+    then $closure    
+    else if ($options?failure-dump eq 'yes')
+    then &lt;dump>
+    &lt;p>The map is:&lt;/p>
+   
+    &lt;Initial-Item>{eri:eXei($mapResult('Initial-Item'))}&lt;/Initial-Item>
+    &lt;Input>{$mapResult('Input')}&lt;/Input>
+    &lt;Input-Length>{$mapResult('Input-Length')}&lt;/Input-Length>
+    &lt;Completions>{
+       for $ei in $mapResult('Completions')
+       return eri:eXei($ei)
+    }&lt;/Completions>
+    &lt;Result>{$mapResult('Result')}&lt;/Result>
+    &lt;Closure>{$closure}&lt;/Closure>
+    &lt;grammar>{(: 'Omitted.' :) $mapResult('Grammar') }&lt;/grammar>
+    &lt;/dump>
+    else ()
+  }&lt;/no-parse>
+</scrap>
+Further work is needed here, I think (but this is
+better than it used to be).
+</p>
+<p>Now back to the success cases.
+</p>
+<p>If the user asks for <q><kw>all-trees</kw></q>,
+we call <ident>epi:all-trees()</ident> to make a
+list of (raw) parse trees, then turn them into
+the required XML.
+<scrap id="epi-ep-all-trees"
+       name="Return (approximately) all trees">
+        let $dummy := eri:notrace((), 
+                      'epi:earley-parse() has result') 
+
+        let $lpt := prof:time(
+                    epi:all-trees($leiCompletions, $meiClosure, $I)
+                    , '0b making trees: ')
+        let $dummy := eri:notrace((), 
+                      'epi:earley-parse() returning a result') 
+        for $rpt at $npt in $lpt
+        return if ($options?tree-form eq 'raw')
+        then $rpt
+        else if ($options?tree-form eq 'both')
+        then ($rpt, epi:astXparsetree($rpt, count($lpt)))
+        else epi:astXparsetree($rpt, count($lpt))
+</scrap>
+The current implementation of <ident>epi:all-trees()</ident> is
+sometimes very slow.  An alternative method would be: construct a
+parse-forest grammar, and from it construct the trees required.
+Another alternative would be to rewrite the direct construction of
+parse trees to be smarter and faster.</p>
+
+<p>The <q><kw>any-tree</kw></q> option has not been implemented
+separately. As a stop-gap we call <ident>all-trees()</ident> and
+throw all but the first away.  In pathological cases that will waste
+a lot of cycles, but not in most normal cases.
+<scrap id="epi-ep-any-tree"
+       name="Return any tree">
+        let $lpt := prof:time(
+                    epi:all-trees($leiCompletions, $meiClosure, $I)
+                    , '0b making trees: ')
+        let $dummy := eri:notrace((), 
+                      'epi:earley-parse() returning a result') 
+        for $rpt in $lpt[1]
+        return if ($options?tree-form eq 'raw')
+        then $rpt
+        else if ($options?tree-form eq 'both')
+        then ($rpt, epi:astXparsetree($rpt, count($lpt)))
+        else epi:astXparsetree($rpt, count($lpt))
+</scrap>
+</p>
+<p>Parse-forest grammars require no post-processing.
+<scrap id="epi-ep-parse-forest-grammar"
+       name="Return a tree cursor">
+        let $dummy := eri:notrace((), 
+                      'epi:earley-parse() has result') 
+
+        let $pfg := prof:time(
+                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I)
+                    , '0b making pfg: ')
+        let $dummy := eri:notrace((), 
+                      'epi:earley-parse() returning a parse-forest grammart') 
+        return $pfg
+</scrap>
+</p>
+<p>The tree cursor has not been implemented yet.
+<scrap id="epi-ep-tree-cursor"
+       name="Return a tree cursor">
+  &lt;tree-cursor-not-available/>
+</scrap>
+</p>
+<p>Parse-forest maps have not been implemented
+yet.
+<scrap id="epi-ep-parse-forest-map"
+       name="Return a parse-forest map">
+  &lt;parse-forest-map-not-available/>
+</scrap>
+</p>
+
 </div>
 <div id="epi-tree-returns">
 <head>Functions to return one or more trees</head>
@@ -5104,8 +5290,7 @@ serializable nonterminals.</p></item>
 wrapper and passes its one descendant to the document-element
 constructor.  It assigns the result to a variable, so it can check how
 many nodes came back: if more than one, a special wrapper is needed.
-It also rewrites the outer element if needed, adding an ambi</p>
-<p>guity
+It also rewrites the outer element if needed, adding an ambiguity
 flag.</p>
 <p>To handle the ambiguity flag, we accept a parameter showing how
 many parse trees the caller got back from the
@@ -6133,6 +6318,9 @@ annotation.
        name="Handle ixml elements (grammars)">
 if ($E/self::ixml) then 
     element ixml {
+      attribute follow:info { 
+        "auxiliary namespace for FSA description"
+      },
       $E/@*,
       $children
     }
@@ -6666,6 +6854,195 @@ at the beginnings of the individual modules.</p>
 </p>
 </div>
 </div>
+<div id="obsolete">
+<head>Older versions of some code</head>
+<p>Some portions of v0.2 have been made obsolete.
+In some cases, changes have been made directly in
+the code; in others, scraps have been replaced but
+the old scraps have been retained here for
+some kind of completeness, which may or may not
+make sense.</p>
+
+<div id="obs-hlf">
+<head>Code using higher-level functions</head>
+<p>The earlier versions of the high-level functions
+<ident>all-trees()</ident>, <ident>any-tree()</ident>, etc. used
+higher-level functions.  To work with engines that don't support
+higher-level functions, they have been rewritten.
+The code should be self-explanatory. </p>
+<p>At least, I hope it is, since I don't want to
+spend any time explaining it.
+<scrap corresp="ep-alltrees"
+       version="v0.2"
+       name="Declare ep:alltrees() function">
+(: ep:alltrees($I,$G):  return all loopless parse trees :)
+declare function ep:all-trees(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as element()+ {
+  (: trace((), 'ep:all-trees calling epi:earley-parse'), :)
+
+  epi:earley-parse($I, $G, epi:all-trees#3)
+  
+  (: trace((), 'epi:earley-parse has returned '
+        || 'and ep:all-trees is about to do so.') :)
+};
+
+</scrap></p>
+<p>
+<scrap corresp="ep-anytree"
+       version="v0.2"
+       name="Declare ep:anytree() function">
+(: ep:anytree($I,$G):  return one (loopless) parse tree, 
+   whichever is found first 
+:)
+declare function ep:any-tree(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as element()? {
+  epi:earley-parse($I, $G, epi:any-tree#3)
+};
+
+</scrap>
+</p>
+<p>
+<scrap corresp="ep-tree-cursor"
+       version="v0.2"
+       name="Declare ep:tree-cursor() function">
+
+declare function ep:tree-cursor(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as item()* {
+  epi:earley-parse($I, $G, epi:tree-cursor#3)
+};
+</scrap>
+</p>
+<p>
+<scrap corresp="ep-parse-forest-map"
+       version="v0.2"
+       name="Declare ep:parse-forest-map() function">
+(: ep:parseforestmap($I,$G):  return a map containing an and/or tree
+   representing the set of all parses.
+:)
+declare function ep:parse-forest-map(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as element()* {
+  epi:earley-parse($I, $G, epi:parse-forest-map#3)
+};
+
+</scrap>
+</p>
+<p>
+<scrap corresp="ep-parse-forest-grammar"
+       version="v0.2"
+       name="Declare ep:alltrees() function">
+(: ep:parseforestgrammar($I,$G):  return a BNF (not EBNF[?]) grammar
+   describing the set of all parses of $I against $G.
+:)
+declare function ep:parse-forest-grammar(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as element()* {
+  epi:earley-parse($I, $G, epi:parse-forest-grammar#3)
+};
+</scrap>
+</p>
+
+<p>All of the code just given requires <ident>earley-parse()</ident>
+to accept a higher-level function to do crucial parts of the work.
+It still doesn't seem like a bad idea, but when version <ident>pfg</ident>
+was being developed it turned out that the code embeds some false
+assumptions about what that function does.  Rather than unsnarl those
+assumptions, I rewrote things to use options, rather than higher-level
+functions, to control what gets returned (and other things).
+<scrap corresp="epi-earley-parse"
+       version="v0.2"
+       name="Define earley-parse()">
+(: ******************************************************
+   earley-parse($I, $G, $f);  run Earley recognizer on 
+   input $I and grammar $G, return results using 
+   $f($leiClosure, $Ec, $I, $G)
+:)
+declare function epi:earley-parse(
+  $I as xs:string,
+  $G as element(ixml),
+  $f as function(
+    map(*)*  (: Ec :),
+    map(*)* (: Closure :),
+    xs:string (: Input :)
+    (: , element(ixml) (: Grammar :) :)
+  ) as item()* 
+) as item()* {
+  let $dummy := eri:notrace((), 'epi:earley-parse() ...') 
+  let $mapResult := prof:time(
+                    er:recognizeX($I, $G), 
+                    '0a recognize(): '),
+
+      $meiClosure := $mapResult('Closure'),
+      $leiCompletions := $mapResult('Completions')
+  return if ($mapResult('Result'))
+    then (: if we have a result, return each parse tree :)
+        let $dummy := eri:notrace((), 
+                      'epi:earley-parse() has result') 
+        let $lpt := prof:time(
+                    $f($leiCompletions, $meiClosure, $I (: , $G :) )
+                    , '0b making trees: ')
+        for $pt at $npt in $lpt
+        let $dummy := eri:notrace((), 
+                      'epi:earley-parse() returning a result') 
+        (: return if (('raw','ast')[2] eq 'raw') 
+	       then $pt  
+               else epi:astXparsetree($pt, count($lpt)) :)
+        (: What an ugly hack!  Clean this up! :)
+        (: let $logfn := '/Users/cmsmcq/'
+                      || '2021/Aparecium/tests/output/raw.'
+	              || translate(
+                           string(
+                             adjust-dateTime-to-timezone(
+                               current-dateTime(), 
+                               ())),
+                           ' :',
+                           '__')
+                      || $npt
+                      || '.xml'   
+        return (file:write($logfn, $pt), 
+                epi:astXparsetree($pt, count($lpt))) :)
+        return epi:astXparsetree($pt, count($lpt)) 
+        
+   else (: otherwise, send an apology and explanation :)
+   &lt;no-parse>
+   &lt;p>Sorry, no parse for this string and grammar.&lt;/p>
+   &lt;p>The completions are:&lt;/p>
+   &lt;completions>{$leiCompletions}&lt;/completions>
+   &lt;p>The map is:&lt;/p>
+   
+   &lt;Initial-Item>{eri:eXei($mapResult('Initial-Item'))}&lt;/Initial-Item>
+   &lt;Input>{$mapResult('Input')}&lt;/Input>
+   &lt;Input-Length>{$mapResult('Input-Length')}&lt;/Input-Length>
+   &lt;Completions>{
+     for $ei in $mapResult('Completions')
+     return eri:eXei($ei)
+   }&lt;/Completions>
+   &lt;Closure>{
+     let $mei := $mapResult('Closure')
+     for $n in map:keys($mei('to'))
+     order by $n descending
+     for $ei in $mei('to')($n)
+     return eri:eXei($ei)
+   }&lt;/Closure>
+   &lt;Result>{$mapResult('Result')}&lt;/Result>
+   &lt;grammar>{(: 'Omitted.' :) $mapResult('Grammar') }&lt;/grammar>
+   &lt;/no-parse>
+   (: we have to think about how to return that no-parse signal.
+   :)
+};
+</scrap>
+</p>
+</div>
+</div>
+
 
 <div id="indices">
 <head>Indices</head>

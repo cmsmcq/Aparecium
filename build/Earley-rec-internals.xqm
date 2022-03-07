@@ -32,8 +32,9 @@ declare variable $ixi:combinedups as map(*)
 (: We represent an Earley item as a map with keys 'from', 
    'to', 'rule', and 'ri' (rule index).  For any item $ei, 
    $ei('from') and $ei('to') are integers, $ei('rule') is 
-   element(rule), and $ei('ri') is a string (an NCName, 
-   in fact, but typed only as a string).
+   element() (either a rule or a terminal symbol), and 
+   $ei('ri') is a string (an NCName, in fact, but typed 
+   only as a string).
 :)
 
 (: ******************************************************
@@ -131,7 +132,7 @@ declare function ixi:pFromXEi(
    :)
 declare function ixi:rXEi(
   $E as map(xs:string, item())
-) as element(rule) {
+) as element() {
   $E('rule')
 };
 
@@ -674,13 +675,16 @@ declare function ixi:lrulesXNG(
 
 (: ixi:lriFinalstatesXR($r) :)
 declare function ixi:lriFinalstatesXR(
-  $r as element(rule)
+  $r as element()
 ) as xs:string* {
+  if ($r/self::rule)
+  then 
   (
     if ($r/@nullable = ('true', '1'))
     then 'q0' else (),
     tokenize($r/@last,'\s+')[normalize-space()]
   )
+  else ()
 
 };
 
@@ -688,26 +692,10 @@ declare function ixi:lriFinalstatesXR(
    start-position identifiers.
  :)
 declare function ixi:lriStartstatesXR(
-  $r as element(rule)
+  $r as element()
 ) as xs:string* {
   'q0'
-  (: NOT 
-  tokenize($r/@first,'\s+')[normalize-space()]
-  :)
 };
-
-(: duplicate, apparently :)
-(:
-declare function ixi:initial-stateR(
-  $Rule as element(rule)
-) as xs:string* {
-  'q0'
-  (: NOT
-  tokenize($Rule/@first,'\s+')[. ne '']
-  Those are the follow states of q0.  Whoops.
-  :)
-};
-:)
 
 (: ******************************************************
    * Rules and rule indexes: predicates
