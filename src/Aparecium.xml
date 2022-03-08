@@ -241,13 +241,13 @@ node, two <ident>S</ident> nodes, three, ...).</p>
 which provides an infinite number of parses for the
 empty string, which vary both in depth and in width.</p>
 </note></p>
-<p>For this reason, Aparecium divides this step further.	   
+<p>For this reason, Aparecium can divide this step further.	   
 <list>
 <item>
-<p>Instead of extracting a single parse tree from the Earley set,
-Aparecium extracts a parse-forest grammar representing all parse trees
-for the sentence. [Or rather, it will do so real soon now.  The
-current version does extract a tree.]</p>
+<p>Aparecium can extract parse trees direct from the Earley set
+(though the current implementation is rather slow).  But it can also
+extract a parse-forest grammar representing all parse trees
+for the sentence.</p>
 <p>Parse-forest grammars have the convenient property that they can
 concisely describe more than one parse tree over the given input, even
 infinite trees.  It is relatively straightforward to tell by examining
@@ -428,6 +428,7 @@ declare namespace map =
 <ptr target="epi-tree-cursor"/>
 <ptr target="epi-parse-forest-map"/>
 <ptr target="epi-parse-forest-grammar"/>
+<ptr target="epi-tree-from-pfg"/>
 <ptr target="epi-all-node-sequences"/><!--
 <ptr target="epi-lnDepXCLeC"/> -->
 <ptr target="epi-astXparsetree"/>
@@ -1361,7 +1362,7 @@ walk with a single step.  And if the parent FSA is nullable, we add that walk to
        name="Set $walks to possible child sequences for $ei">
 
   let $r0 := $ei('rule'),
-      $dummy := eri:trace($r0, 'The rule through which we walk:')
+      $dummy := eri:notrace($r0, 'The rule through which we walk:')
   let $w  := map { 'item': $ei, 
                    'state': 'q0',
                    'follow-states': 
@@ -1381,7 +1382,14 @@ walk with a single step.  And if the parent FSA is nullable, we add that walk to
                   else ()             (: accumulator :),
                   map { 'tree-count': 2 } (: options :)
                 )
-  let $dummy := eri:trace(count($walks), 'find-walks found this many:')
+  let $dummy := if (count($walks) eq 0)
+                then (eri:trace($ei, 
+                      '!!! mpr: find-walks found no walks for '
+                      || 'this item?!!!'),
+		      eri:trace($w, 
+                      '!!! mpr: find-walks was called with '
+                      || 'this walk, and failed?!!!'))
+                else eri:notrace(count($walks), 'mpr: find-walks found how many walks?')
 </scrap>
 The <q><kw>follow-states</kw></q> and <q><kw>final</kw></q>
 values are redundant; we store them in the map to avoid
@@ -1413,7 +1421,17 @@ appropriate expression on the right-hand side.
                            $ei('to')
                        )
                    },
+                   $r0/@mark,
                    for $w in $walks
+                   let $dummy := eri:notrace(
+                       concat($r0/@name,
+                           '&#xB7;',
+                           $ei('from'),
+                           '&#xB7;',
+                           $ei('to')
+                       ), 
+                       'mpr: building rule for:')
+                   let $dummy := eri:notrace($w, 'mpr: calling rhs-from-walk with walk:')
                    return element alt { 
                        epi:rhs-from-walk($w, $I, ())
                    }
@@ -1437,26 +1455,35 @@ we filter them against the items already in the queue, and finally
 against the items we already have rules for.
 <scrap id="epi-mpr-update-queue"
        name="Set $new-queue to include new completions">
+  let $dummy := eri:notrace(count($walks),'make-pfg-rules is updating queue with # walks')
+
   let $lei0 := for $w in $walks
                return epi:lei-from-walk($w, ()), 
                (: all completion items in $walks :)
 	       
+      $dummy := eri:notrace(count($lei0),'make-pfg-rules: lei0 has # items'),
+
       $lei1 := $lei0[
                  not(some $i in 1 to (position() - 1)
                      satisfies deep-equal(., $lei0[$i]))
                ],
                (: list of distinct completion items :)
 
+      $dummy := eri:notrace(count($lei1),'make-pfg-rules: lei1 has # items'),
+	       
       $lei2 := $lei1[
                  not(some $i in 2 to (count($leiQueue))
                      satisfies deep-equal(., $leiQueue[$i]))
                ]
                (: completion items not in the queue :)
 
+  let $dummy := eri:notrace(count($lei2),'make-pfg-rules: lei2 has # items')
 
   let $ls-defined := ($leRules, $rule)
-                     //nonterminal
                      /@name/string(),
+
+      $dummy := eri:notrace(string-join($ls-defined,' '),'make-pfg-rules: ls-defined'),
+
       $lei3 := for $ei in $lei2
                let $s := $ei('rule')/@name/string()
                          || '&#xB7;'
@@ -1467,8 +1494,13 @@ against the items we already have rules for.
                return $ei
                (: new completion items, 
                   not in queue and not already done :)
-			     
+
+  let $dummy := eri:notrace(count($lei3),'make-pfg-rules: lei3 has # items')
+		  
   let $new-queue := (tail($leiQueue), $lei3)
+
+  let $dummy := eri:notrace(count($new-queue),'make-pfg-rules: new-queue has # items')
+
 </scrap>
 </p>
 <p>Given a production rule <ident>$rule</ident> and and the updated
@@ -1559,29 +1591,39 @@ two two-way ambiguities does not guarantee four trees.</p>
 
 <p>Otherwise, we attempt to extend each walk in the queue.  To
 reduce the number of times we have to do a search in the Earley
-closure, we group the walks by their current position (here &x;),
-their follow state (here <ident>qNext</ident>), and the nonterminal
-(or terminal) we are seeking to match (here &N; and &T;<note
-place="foot"><p>Note that &N; and &T; are uniquely determined
-by <ident>qNext</ident> and thus redundant,
-but including them as grouping keys allows them to be referred
-to without subscripts.</p></note>
+closure, we group the walks by their current position (here
+&x;),<note place="foot"><p>Note that the current position is the
+<q><kw>from</kw></q> value for the starter step (a completion for
+the parent) but the <q><kw>to</kw></q> value for any other
+step.</p></note> their follow state (here <ident>qNext</ident>), and
+the nonterminal (or terminal) we are seeking to match (here &N; and
+&T;<note place="foot"><p>Note that &N; and &T; are uniquely
+determined by <ident>qNext</ident> and thus redundant, but including
+them as grouping keys allows them to be referred to without
+subscripts.</p></note>
 <scrap id="pfg-fw-set-new-queue"
        name="Set new queue by extending all walks in the queue">
-  let $dummy := eri:trace(count($queue), 'find-walks queue has length: ')
+
   let $new-queue := 
       for $w in $queue
-      let $x := $w('item')('from'),
+      let $x := if ($w?state eq 'q0')
+                then $w('item')('from')
+                else $w('item')('to'),
           $qqNext := $w('follow-states')
-      let $dummy := eri:trace(count($qqNext), 'find-walks walk has # follow-states: ')
+      let $dummy := eri:notrace($w, 'find-walks: trying to extend walk: ')
 
       for $qNext in $qqNext
       let $symbol := $eiParent('rule')//*[@xml:id=$qNext],
-          $dummy := eri:trace($qNext, 'find-walks: qNext ='),
-          $dummy := eri:trace($symbol, 'find-walks: symbol ='),
           $N := $symbol/self::nonterminal/@name/string(),
-          $T := $symbol[eri:fTerminal(.)]/@xml:id/string()
-      let $dummy := eri:trace(($N, $T), 'find-walks qNext, symbol name: ')
+          $T := $symbol[eri:fTerminal(.)]/@xml:id/string(),
+	  $symbol-mark := $symbol/(@mark, @tmark)/string(),
+	  $rule-mark := $symbol/ancestor::ixml[1]
+                        /rule[@name eq $N]/@mark/string(),
+          $effective-mark := 
+              ($symbol-mark, $rule-mark, '^')[1]
+
+      let $dummy := eri:trace($T,
+          'find-walks: seeking completion items for this terminal:')
 
       group by $x, $qNext, $N, $T
 </scrap>
@@ -1600,12 +1642,10 @@ parent completion item.</item>
 
       let $items := $mei('from')($x)
                     [(.?rule/@name eq $N)
-                     or (.?rule eq $T)]
+                     or (.?rule/@xml:id eq $T)]
                     [eri:fFinalEi(.) 
                      or (.?ri eq '#terminal')]
                     [.?to le $eiParent('to')]
-
-      let $dummy := eri:trace(count($items), 'find-walks has # completions: ')
 
 </scrap>
 For each such item, we extend the walk we started with:
@@ -1619,15 +1659,24 @@ For each such item, we extend the walk we started with:
                                $qNext, $i, $w[1], ()
                            )
                       else ()
+ 
+      let $dummy := eri:notrace($qNext, 'fw: seeking followset of qNext ie of:'),
+          $dummy := eri:notrace($eiParent('rule'), 'fw: looking in this rule for followset:'),
+          $dummy := eri:notrace(($eiParent('rule')/attribute::follow:*)[1], 
+                    'fw: looking for @follow:*, this is the first:'),
+          $dummy := eri:notrace(($eiParent('rule')/attribute::follow:*[local-name() eq $qNext]), 
+                    'fw: this is the @follow:* we want:')
+
       let $qqNextfollow := tokenize(
                                $eiParent('rule')
                                /attribute::follow:*
-                               [local-name eq $qNext]
+                               [local-name() eq $qNext]
                            ),
           $f-qnext-final := ($qNext = 
                            eri:lriFinalstatesXR(
                                $eiParent('rule')
                            ))
+
       return if ($fNull and count($leiDups) gt 1)
       then ()
       else map {
@@ -1635,14 +1684,20 @@ For each such item, we extend the walk we started with:
                  'state' : $qNext,
                  'follow-states' : $qqNextfollow,
                  'final' : $f-qnext-final,
+                 'mark'  : $effective-mark,
                  'pred'  : $w[1]
              }
+
 </scrap></p>
 <p>Some of the extensions we just made may be satisfactory walks;
 if so, we add them to the accumulator:
 <scrap id="pfg-fw-set-new-acc"
        name="Add satisfactory walks to the accumulator">
-  let $new-acc := ($acc, $new-queue[ .?final ])
+
+  let $new-acc := ($acc, $new-queue
+                         [ .?final ]
+                         [ .?item?to eq $eiParent?to ])
+
 </scrap>
 </p>
 </div>
@@ -1660,17 +1715,20 @@ declare function epi:rhs-from-walk(
   $I as <ptr target="adt-input"/>,
   $acc as element()*
 ) as element()* {
+
   <ptr target="epi-rfw-stop"/>
   else <ptr target="epi-rfw-terminal"/>
   else <ptr target="epi-rfw-nonterminal"/>
 };
 </scrap>
 </p>
-<p>The termination condition is evident:  if we are
-out of steps, then we are done.
+
+<p>The termination condition is evident: if we are out of steps,
+then we are done.  We are out of steps when we are looking at state
+&q0; (and of course if somehow we have run off the edge).
 <scrap id="epi-rfw-stop"
        name="If we're done, return">
-  if (empty($w)) 
+  if (empty($w) or ($w('state') eq 'q0')) 
   then $acc
 </scrap>
 </p>
@@ -1681,13 +1739,18 @@ construct a <gi>literal</gi> element and recur.
        name="If this step is a terminal, return a literal">
   if ($w('item')('ri') eq '#terminal')
   then let $ei := $w('item')
+       let $dummy := eri:trace($ei, 'rhs-from-walk:  found a terminal item:')
        let $x := $ei('from'),
            $y := $ei('to'),
            $symbol := element literal {
+               attribute tmark { $w('mark') },
                attribute string {
-                   substring($I, $x, ($y - $x))              
+                   substring($I, $x+1, ($y - $x))              
                }
            },
+
+           $dummy := eri:trace($symbol, 'rhs-from-walk:  made a terminal symbol:'),
+
            $new-acc := ($symbol, $acc),
 	   $next-step := $w('pred')
        return epi:rhs-from-walk($next-step, $I, $new-acc)
@@ -1701,6 +1764,9 @@ newly constructed nonterminal name, and recur.
        name="If this step is a nonterminal, return a nonterminal">
   if (exists($w('item')('rule')/self::rule[@name]))
   then let $ei := $w('item'),
+
+           $dummy := eri:notrace($ei, 'rhs-from-walk:  found non-terminal item:'),
+  
            $symbol := element nonterminal {
                attribute name {
                    $ei('rule')/@name/string()
@@ -1708,7 +1774,8 @@ newly constructed nonterminal name, and recur.
                    || $ei('from')
                    || '&#xB7;'
                    || $ei('to')
-               }
+               },
+               attribute mark { $w('mark') }
            },
            $new-acc := ($symbol, $acc),
            $next-step := $w('pred')
@@ -1720,7 +1787,9 @@ then we return an error.
 <scrap prev="epi-rfw-nonterminal"
        name="Otherwise, something has gone very wrong">
 
-  else element ap:error {
+  else 
+let $dummy := eri:trace($w('item'), 'rhs-from-walk:  item fell through!') return
+       element ap:error {
            element p { 'Unexpected failure 83' },
            $acc,
            $w
@@ -1793,16 +1862,296 @@ declare function epi:dups-from-walk(
 </scrap>
 </p>
 </div>
+
 </div>
 
 <div id="hi-rpt-ex-pfg">
-<head>Extracting a raw parse tree from the parse-forest grammar</head>
-<p>Watch this space.</p>
+<head>Extracting a parse tree from the parse-forest grammar</head>
+
+<p>If the user asks for a parse-forest grammar instead of a parse
+tree, we can just return the grammar.  But if the user asks for a
+tree, or a forest, we need to turn the grammar into a parse tree.
+Since the current code for direct construction of the tree behaves
+very badly in some cases, constructing the grammar and then from it
+the tree is likely to be faster.  At least, I hope so.</p>
+<p>So we want a function to extract a tree.  For now, we extract
+just one tree, selected at random. <hi>To do: construct &n;
+trees; construct tree-cursor.</hi></p>
+<p>The initial call to <ident>epi:tree-from-pfg()</ident> function
+supplies a parse-forest grammar and returns a parse tree.  Recursive
+calls will supply elements from the parse-forest grammar and
+use a <ident>nodetype</ident> parameter to specify what they
+are interested in getting back; the nodetype value may be any of
+<q><kw>document</kw></q> (expected only on the initial call), 
+<q><kw>element</kw></q>, 
+<q><kw>attribute</kw></q>, 
+<q><kw>value</kw></q>, or
+<q><kw>content</kw></q>.
+<scrap id="epi-tree-from-pfg"
+       name="The epi:tree-from-pfg() function">
+
+declare function epi:tree-from-pfg(
+  $pfg as element() 
+      (: ixml, rule, alt, nonterminal, literal :),
+  $nodetype as xs:string,
+  $mark as xs:string?
+) as node()* {
+  if ($pfg/self::ixml)
+  then <ptr target="epi-tfg-ixml"/>
+  else if ($pfg/self::rule)
+  then <ptr target="epi-tfg-rule"/>
+  else if ($pfg/self::alt)
+  then <ptr target="epi-tfg-alt"/>
+  else if ($pfg/self::nonterminal)
+  then <ptr target="epi-tfg-nonterminal"/>
+  else if ($pfg/self::literal)
+  then <ptr target="epi-tfg-literal"/>
+  else element eek {
+      element desc {
+          "tree-from-pfg got "
+          || "an unexpected argument."
+      },
+      eri:trace($pfg, 'Unexpected argument!')
+  }
+};
+</scrap>
+</p>
+
+<p>We start with the parse-forest grammar itself, an <gi>ixml</gi>
+element.  We check to see whether the grammar is ambiguous or not by
+looking for rules with multiple right-hand sides.  Then we start
+serialization.  To avoid producing a <gi>Goal</gi> element for the
+start-symbol introduced by the Earley recognizer, we start work with
+the nonterminal on the right-hand side of the first rule.<note
+place="foot"> <p>Actually, <ident>Goal</ident> should carry
+<q><code>mark="-"</code></q> in any case.</p></note> If the
+parse-forest grammar describes more than one tree, we should mark
+the tree we return with <code>ixml:state="ambiguous"</code>.
+<scrap id="epi-tfg-ixml"
+       name="Extract tree from ixml parse-forest grammar">
+
+      let $f-ambig := exists($pfg//rule[count(alt) gt 1]),
+          $tree0 := epi:tree-from-pfg(
+                        $pfg/rule[1]/alt/nonterminal,
+                        'element',
+                        ()
+                    ),
+          $tree := copy $x-tree := $tree0
+                   modify insert node 
+                       attribute ixml:state { "ambiguous" }
+                       into $x-tree
+                   return $x-tree
+      return $tree
+</scrap>
+<hi>To do: check to make sure there are no top-exposed attributes or
+text nodes.</hi>
+The code just given does not test on <ident>$nodetype</ident>:
+since an <gi>ixml</gi> element should never be consulted
+when constructing an attribute, we assume <q><kw>document</kw></q>.
+<hi>To do:  check anyway, just in case?</hi>
+</p>
+
+<p>For a rule with multiple right-hand sides, the <gi>alt</gi>
+element to use is chosen at random.  If the current nodetype is
+<q><kw>element</kw></q>, multiple passes over the content will be
+needed, and they should all use the same right-hand side.  So
+element and attribute construction is handled here, not on
+nonterminal references.
+<scrap id="epi-tfg-rule"
+       name="Extract subtree from rule element">
+
+      let $n := count($pfg/alt),
+          $i := 1 + random:integer($n),
+          $ccc := $pfg/alt[$i]/*,
+          $ls0 := tokenize($pfg/@name, '&#xB7;'),
+          $nm0 := $ls0[1],
+          $fr  := $ls0[2],
+          $to  := $ls0[3],
+          $nm  := if ($nm0 castable as xs:Name)
+                  then $nm0
+                  else xs:QName('ap:error')
+      return <ptr target="epi-tfg-rule-elem"/>
+          else <ptr target="epi-tfg-rule-attr"/>
+          else <ptr target="epi-tfg-rule-content"/>
+          else <ptr target="epi-tfg-rule-av"/>
+          else <ptr target="epi-tfg-rule-zero"/>
+          else <ptr target="epi-tfg-rule-wha"/>
+</scrap>
+</p>
+<p>When the rule is marked <q><code>^</code></q>
+and <ident>$nodetype</ident> is <q><kw>element</kw></q>
+or <q><kw>content</kw></q>, the rule is serialized
+as an element.
+<scrap id="epi-tfg-rule-elem"
+       name="Serialize rule as element">
+if (($nodetype = ('element', 'content'))
+                 and ($mark eq '^'))
+          then element { $nm } {
+                   if ($nm0 ne $nm)
+                   then attribute ap:gi { $nm0 }
+                   else (),
+                   for $c in $ccc
+                   return epi:tree-from-pfg(
+                              $c, 
+                              'attribute',
+                              ()
+                   ),
+                   for $c in $ccc
+                   return epi:tree-from-pfg(
+                              $c, 
+                              'content',
+                              ()
+                   )
+               }
+</scrap>
+</p>
+
+<p>When the rule is marked <q><code>@</code></q> and
+<ident>$nodetype</ident> is <q><kw>attribute</kw></q>, the rule is
+serialized as an attribute.
+<scrap id="epi-tfg-rule-attr"
+       name="Serialize rule as attribute">
+if (($nodetype = ('attribute'))
+                 and ($mark eq '@'))
+          then attribute { $nm } {
+                   if ($nm0 ne $nm)
+                   then concat('[', $nm0, ']=')
+                   else (),
+                   for $c in $ccc
+                   return epi:tree-from-pfg(
+                              $c, 
+                              'value',
+                              ()
+                   )
+               }
+</scrap>
+</p>
+
+<p>When the rule is marked <q><code>-</code></q> and
+<ident>$nodetype</ident> is <q><kw>content</kw></q>, the rule is
+serialized without an enclosing element.
+<scrap id="epi-tfg-rule-content"
+       name="Serialize rule as content">
+if (($nodetype = ('content', 'element', 'attribute'))
+                 and ($mark eq '-'))
+          then for $c in $ccc
+               return epi:tree-from-pfg(
+                          $c, 
+                          $nodetype,
+                          ()
+               )
+</scrap>
+</p>
+
+<p>When <ident>$nodetype</ident> is <q><kw>value</kw></q>, the
+marking on the rule is ignored and the content is serialized as part
+of the attribute value.
+<scrap id="epi-tfg-rule-av"
+       name="Serialize rule as attribute value">
+if (($nodetype = ('value')))
+          then for $c in $ccc
+               return epi:tree-from-pfg(
+                          $c,
+                          'value',
+                          ()
+               ) 
+</scrap>
+</p>
+
+<p>When <ident>$nodetype</ident> and the mark are incompatible,
+the rule is not serialized at all.
+<scrap id="epi-tfg-rule-zero"
+       name="Serialize nothing, stop recursion">
+if (($nodetype = ('content'))
+                 and ($mark = ('@')))
+          then ()
+          else if (($nodetype = ('attribute'))
+                 and ($mark = ('^')))
+          then ()
+</scrap>
+</p>
+<p>
+
+<scrap id="epi-tfg-rule-wha"
+       name="Return an error element">
+if (($nodetype = ('element'))
+                 and ($mark = ('@')))
+          then element ap:error {
+                 attribute ap:desc {
+                   "Attribute cannot be root.",
+                   if ($nm ne $nm0)
+                   then "&amp;#xA;Also, the attribute"
+                        || " name is not a legal"
+                        || " XML name."
+                   else ()
+                 },
+                 attribute ap:attribute-name {
+                   $nm0
+                 },
+                 attribute ap:attribute-value {
+                   for $c in $ccc
+                   return epi:tree-from-pfg(
+                              $c,
+                              'value',
+                              ()
+                   )
+                 }
+               }
+          else element ap:error {
+            "Ran off a cliff, "
+            || "I don't remember a thing."
+          }
+</scrap>
+</p>
+
+<p>An <gi>alt</gi> element is similarly transparent:  we
+just process all the children.  (Actually, the function
+should never be called with <gi>alt</gi>, since
+rule handling skips straight to the children.)
+<scrap id="epi-tfg-alt"
+       name="Extract sequence of nodes from alt element">
+      for $c in $pfg/*
+      return epi:tree-from-pfg($c, $nodetype, ())
+</scrap>
+</p>
+
+<p>When we encounter a nonterminal element, we just recur
+on the relevant rule, passing along any mark we find.
+<scrap id="epi-tfg-nonterminal"
+       name="Extract subtree from nonterminal element">
+
+      let $nt := $pfg/@name/string(),
+          $rule := $pfg/ancestor::ixml[1]
+                   /rule[@name eq $nt]
+      return epi:tree-from-pfg($rule, 
+                   $nodetype, 
+                   $pfg/@mark/string())
+</scrap>
+</p>
+<p>
+Extracting a literal is simple:  it's always literally present
+in the <att>string</att> attribute, or else in the <att>hex</att>
+attribute.
+<scrap id="epi-tfg-literal"
+       name="Extract character data from literal element">
+let $s := if (exists($pfg/@string))
+           then string($pfg/@string)
+           else if (exists($pfg/@hex))
+           then eri:charXhex($pfg/@hex)
+           else '&amp;#x1D350;' (: tetragram for failure U+1D350 :)
+       return if ($pfg/@tmark eq '-') 
+              then ()
+              else if ($nodetype = ('element', 'attribute'))
+              then () (: is this an error? :)
+              else text { $s }
+</scrap>
+</p>
 </div>
 
 <div id="hi-ast-ex-rpt">
-<head>Extracting an abstract syntax tree from the raw parse tree</head>
+<head>Extracting an abstract syntax tree from a raw parse tree</head>
 <p>Watch this space.</p>
+<p>We have this code; it's just someplace else</p>
 </div>
 </div>
 
@@ -3516,7 +3865,7 @@ declare function ixi:sXei(
 </scrap>
 </p>
 <p>Next, a function to build an XML element representing an Earley
-item.  This is used less tracing than in returning verbose results.
+item.  This is used less in tracing than in returning verbose results.
 <scrap prev="eri-utils-and-misc"
        name="Define eXei() to build 'item' element for Earley item">
 (: ......................................................
@@ -3529,8 +3878,12 @@ declare function ixi:eXei(
   element item {
     attribute from { $E('from') },
     attribute to { $E('to') },
-    attribute rulemark { $E('rule')/@mark },
-    attribute rulename { $E('rule')/@name },
+    attribute rulemark { 
+        $E('rule')/(@mark, @tmark)[1] 
+    },
+    attribute rulename { 
+        $E('rule')/(@name, @xml:id)[1] 
+    },
     attribute ri { $E('ri') }
     }
 };
@@ -4385,7 +4738,7 @@ the user asks for a verbose dump we provide it.
                     else '',
                     substring($I, $start, $cL)
              ),
-      $sR := concat(substring($I, $high-water, $cR),
+      $sR := concat(substring($I, $high-water+1, 30 (: $cR :) ),
                     if ($cR lt 30)
                     then ''
                     else '...'

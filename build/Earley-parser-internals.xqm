@@ -125,7 +125,7 @@ declare function epi:earley-parse(
                     else '',
                     substring($I, $start, $cL)
              ),
-      $sR := concat(substring($I, $high-water, $cR),
+      $sR := concat(substring($I, $high-water+1, 30 (: $cR :) ),
                     if ($cR lt 30)
                     then ''
                     else '...'
@@ -302,7 +302,7 @@ declare function epi:make-pfg-rules(
   let $ei := head($leiQueue)
   
   let $r0 := $ei('rule'),
-      $dummy := eri:trace($r0, 'The rule through which we walk:')
+      $dummy := eri:notrace($r0, 'The rule through which we walk:')
   let $w  := map { 'item': $ei, 
                    'state': 'q0',
                    'follow-states': 
@@ -322,7 +322,14 @@ declare function epi:make-pfg-rules(
                   else ()             (: accumulator :),
                   map { 'tree-count': 2 } (: options :)
                 )
-  let $dummy := eri:trace(count($walks), 'find-walks found this many:')
+  let $dummy := if (count($walks) eq 0)
+                then (eri:trace($ei, 
+                      '!!! mpr: find-walks found no walks for '
+                      || 'this item?!!!'),
+		      eri:trace($w, 
+                      '!!! mpr: find-walks was called with '
+                      || 'this walk, and failed?!!!'))
+                else eri:notrace(count($walks), 'mpr: find-walks found how many walks?')
 
     let $rule := element rule {
                    attribute name {
@@ -333,32 +340,51 @@ declare function epi:make-pfg-rules(
                            $ei('to')
                        )
                    },
+                   $r0/@mark,
                    for $w in $walks
+                   let $dummy := eri:notrace(
+                       concat($r0/@name,
+                           '·',
+                           $ei('from'),
+                           '·',
+                           $ei('to')
+                       ), 
+                       'mpr: building rule for:')
+                   let $dummy := eri:notrace($w, 'mpr: calling rhs-from-walk with walk:')
                    return element alt { 
                        epi:rhs-from-walk($w, $I, ())
                    }
                }
 
-    let $lei0 := for $w in $walks
+    let $dummy := eri:notrace(count($walks),'make-pfg-rules is updating queue with # walks')
+
+  let $lei0 := for $w in $walks
                return epi:lei-from-walk($w, ()), 
                (: all completion items in $walks :)
 	       
+      $dummy := eri:notrace(count($lei0),'make-pfg-rules: lei0 has # items'),
+
       $lei1 := $lei0[
                  not(some $i in 1 to (position() - 1)
                      satisfies deep-equal(., $lei0[$i]))
                ],
                (: list of distinct completion items :)
 
+      $dummy := eri:notrace(count($lei1),'make-pfg-rules: lei1 has # items'),
+	       
       $lei2 := $lei1[
                  not(some $i in 2 to (count($leiQueue))
                      satisfies deep-equal(., $leiQueue[$i]))
                ]
                (: completion items not in the queue :)
 
+  let $dummy := eri:notrace(count($lei2),'make-pfg-rules: lei2 has # items')
 
   let $ls-defined := ($leRules, $rule)
-                     //nonterminal
                      /@name/string(),
+
+      $dummy := eri:notrace(string-join($ls-defined,' '),'make-pfg-rules: ls-defined'),
+
       $lei3 := for $ei in $lei2
                let $s := $ei('rule')/@name/string()
                          || '·'
@@ -369,8 +395,13 @@ declare function epi:make-pfg-rules(
                return $ei
                (: new completion items, 
                   not in queue and not already done :)
-			     
+
+  let $dummy := eri:notrace(count($lei3),'make-pfg-rules: lei3 has # items')
+		  
   let $new-queue := (tail($leiQueue), $lei3)
+
+  let $dummy := eri:notrace(count($new-queue),'make-pfg-rules: new-queue has # items')
+
 
     return epi:make-pfg-rules(
            $new-queue,
@@ -403,31 +434,36 @@ declare function epi:find-walks(
   then $acc
 
   else 
-    let $dummy := eri:trace(count($queue), 'find-walks queue has length: ')
+  
   let $new-queue := 
       for $w in $queue
-      let $x := $w('item')('from'),
+      let $x := if ($w?state eq 'q0')
+                then $w('item')('from')
+                else $w('item')('to'),
           $qqNext := $w('follow-states')
-      let $dummy := eri:trace(count($qqNext), 'find-walks walk has # follow-states: ')
+      let $dummy := eri:notrace($w, 'find-walks: trying to extend walk: ')
 
       for $qNext in $qqNext
       let $symbol := $eiParent('rule')//*[@xml:id=$qNext],
-          $dummy := eri:trace($qNext, 'find-walks: qNext ='),
-          $dummy := eri:trace($symbol, 'find-walks: symbol ='),
           $N := $symbol/self::nonterminal/@name/string(),
-          $T := $symbol[eri:fTerminal(.)]/@xml:id/string()
-      let $dummy := eri:trace(($N, $T), 'find-walks qNext, symbol name: ')
+          $T := $symbol[eri:fTerminal(.)]/@xml:id/string(),
+	  $symbol-mark := $symbol/(@mark, @tmark)/string(),
+	  $rule-mark := $symbol/ancestor::ixml[1]
+                        /rule[@name eq $N]/@mark/string(),
+          $effective-mark := 
+              ($symbol-mark, $rule-mark, '^')[1]
+
+      let $dummy := eri:trace($T,
+          'find-walks: seeking completion items for this terminal:')
 
       group by $x, $qNext, $N, $T
 
       let $items := $mei('from')($x)
                     [(.?rule/@name eq $N)
-                     or (.?rule eq $T)]
+                     or (.?rule/@xml:id eq $T)]
                     [eri:fFinalEi(.) 
                      or (.?ri eq '#terminal')]
                     [.?to le $eiParent('to')]
-
-      let $dummy := eri:trace(count($items), 'find-walks has # completions: ')
 
 
       for $i in $items
@@ -437,15 +473,24 @@ declare function epi:find-walks(
                                $qNext, $i, $w[1], ()
                            )
                       else ()
+ 
+      let $dummy := eri:notrace($qNext, 'fw: seeking followset of qNext ie of:'),
+          $dummy := eri:notrace($eiParent('rule'), 'fw: looking in this rule for followset:'),
+          $dummy := eri:notrace(($eiParent('rule')/attribute::follow:*)[1], 
+                    'fw: looking for @follow:*, this is the first:'),
+          $dummy := eri:notrace(($eiParent('rule')/attribute::follow:*[local-name() eq $qNext]), 
+                    'fw: this is the @follow:* we want:')
+
       let $qqNextfollow := tokenize(
                                $eiParent('rule')
                                /attribute::follow:*
-                               [local-name eq $qNext]
+                               [local-name() eq $qNext]
                            ),
           $f-qnext-final := ($qNext = 
                            eri:lriFinalstatesXR(
                                $eiParent('rule')
                            ))
+
       return if ($fNull and count($leiDups) gt 1)
       then ()
       else map {
@@ -453,10 +498,16 @@ declare function epi:find-walks(
                  'state' : $qNext,
                  'follow-states' : $qqNextfollow,
                  'final' : $f-qnext-final,
+                 'mark'  : $effective-mark,
                  'pred'  : $w[1]
              }
 
-    let $new-acc := ($acc, $new-queue[ .?final ])
+
+  
+  let $new-acc := ($acc, $new-queue
+                         [ .?final ]
+                         [ .?item?to eq $eiParent?to ])
+
 
   return epi:find-walks(
       $eiParent, 
@@ -474,24 +525,33 @@ declare function epi:rhs-from-walk(
   $I as xs:string,
   $acc as element()*
 ) as element()* {
-    if (empty($w)) 
+
+    if (empty($w) or ($w('state') eq 'q0')) 
   then $acc
 
   else   if ($w('item')('ri') eq '#terminal')
   then let $ei := $w('item')
+       let $dummy := eri:trace($ei, 'rhs-from-walk:  found a terminal item:')
        let $x := $ei('from'),
            $y := $ei('to'),
            $symbol := element literal {
+               attribute tmark { $w('mark') },
                attribute string {
-                   substring($I, $x, ($y - $x))              
+                   substring($I, $x+1, ($y - $x))              
                }
            },
+
+           $dummy := eri:trace($symbol, 'rhs-from-walk:  made a terminal symbol:'),
+
            $new-acc := ($symbol, $acc),
 	   $next-step := $w('pred')
        return epi:rhs-from-walk($next-step, $I, $new-acc)
 
   else   if (exists($w('item')('rule')/self::rule[@name]))
   then let $ei := $w('item'),
+
+           $dummy := eri:notrace($ei, 'rhs-from-walk:  found non-terminal item:'),
+  
            $symbol := element nonterminal {
                attribute name {
                    $ei('rule')/@name/string()
@@ -499,13 +559,16 @@ declare function epi:rhs-from-walk(
                    || $ei('from')
                    || '·'
                    || $ei('to')
-               }
+               },
+               attribute mark { $w('mark') }
            },
            $new-acc := ($symbol, $acc),
            $next-step := $w('pred')
        return epi:rhs-from-walk($next-step, $I, $new-acc)
 
-  else element ap:error {
+  else 
+let $dummy := eri:trace($w('item'), 'rhs-from-walk:  item fell through!') return
+       element ap:error {
            element p { 'Unexpected failure 83' },
            $acc,
            $w
@@ -546,6 +609,161 @@ declare function epi:dups-from-walk(
   else epi:lei-from-walk($w('pred'), $acc)
 };
 
+
+
+declare function epi:tree-from-pfg(
+  $pfg as element() 
+      (: ixml, rule, alt, nonterminal, literal :),
+  $nodetype as xs:string,
+  $mark as xs:string?
+) as node()* {
+  if ($pfg/self::ixml)
+  then 
+      let $f-ambig := exists($pfg//rule[count(alt) gt 1]),
+          $tree0 := epi:tree-from-pfg(
+                        $pfg/rule[1]/alt/nonterminal,
+                        'element',
+                        ()
+                    ),
+          $tree := copy $x-tree := $tree0
+                   modify insert node 
+                       attribute ixml:state { "ambiguous" }
+                       into $x-tree
+                   return $x-tree
+      return $tree
+
+  else if ($pfg/self::rule)
+  then 
+      let $n := count($pfg/alt),
+          $i := 1 + random:integer($n),
+          $ccc := $pfg/alt[$i]/*,
+          $ls0 := tokenize($pfg/@name, '·'),
+          $nm0 := $ls0[1],
+          $fr  := $ls0[2],
+          $to  := $ls0[3],
+          $nm  := if ($nm0 castable as xs:Name)
+                  then $nm0
+                  else xs:QName('ap:error')
+      return if (($nodetype = ('element', 'content'))
+                 and ($mark eq '^'))
+          then element { $nm } {
+                   if ($nm0 ne $nm)
+                   then attribute ap:gi { $nm0 }
+                   else (),
+                   for $c in $ccc
+                   return epi:tree-from-pfg(
+                              $c, 
+                              'attribute',
+                              ()
+                   ),
+                   for $c in $ccc
+                   return epi:tree-from-pfg(
+                              $c, 
+                              'content',
+                              ()
+                   )
+               }
+
+          else if (($nodetype = ('attribute'))
+                 and ($mark eq '@'))
+          then attribute { $nm } {
+                   if ($nm0 ne $nm)
+                   then concat('[', $nm0, ']=')
+                   else (),
+                   for $c in $ccc
+                   return epi:tree-from-pfg(
+                              $c, 
+                              'value',
+                              ()
+                   )
+               }
+
+          else if (($nodetype = ('content', 'element', 'attribute'))
+                 and ($mark eq '-'))
+          then for $c in $ccc
+               return epi:tree-from-pfg(
+                          $c, 
+                          $nodetype,
+                          ()
+               )
+
+          else if (($nodetype = ('value')))
+          then for $c in $ccc
+               return epi:tree-from-pfg(
+                          $c,
+                          'value',
+                          ()
+               ) 
+
+          else if (($nodetype = ('content'))
+                 and ($mark = ('@')))
+          then ()
+          else if (($nodetype = ('attribute'))
+                 and ($mark = ('^')))
+          then ()
+
+          else if (($nodetype = ('element'))
+                 and ($mark = ('@')))
+          then element ap:error {
+                 attribute ap:desc {
+                   "Attribute cannot be root.",
+                   if ($nm ne $nm0)
+                   then "&#xA;Also, the attribute"
+                        || " name is not a legal"
+                        || " XML name."
+                   else ()
+                 },
+                 attribute ap:attribute-name {
+                   $nm0
+                 },
+                 attribute ap:attribute-value {
+                   for $c in $ccc
+                   return epi:tree-from-pfg(
+                              $c,
+                              'value',
+                              ()
+                   )
+                 }
+               }
+          else element ap:error {
+            "Ran off a cliff, "
+            || "I don't remember a thing."
+          }
+
+
+  else if ($pfg/self::alt)
+  then       for $c in $pfg/*
+      return epi:tree-from-pfg($c, $nodetype, ())
+
+  else if ($pfg/self::nonterminal)
+  then 
+      let $nt := $pfg/@name/string(),
+          $rule := $pfg/ancestor::ixml[1]
+                   /rule[@name eq $nt]
+      return epi:tree-from-pfg($rule, 
+                   $nodetype, 
+                   $pfg/@mark/string())
+
+  else if ($pfg/self::literal)
+  then let $s := if (exists($pfg/@string))
+           then string($pfg/@string)
+           else if (exists($pfg/@hex))
+           then eri:charXhex($pfg/@hex)
+           else '&#x1D350;' (: tetragram for failure U+1D350 :)
+       return if ($pfg/@tmark eq '-') 
+              then ()
+              else if ($nodetype = ('element', 'attribute'))
+              then () (: is this an error? :)
+              else text { $s }
+
+  else element eek {
+      element desc {
+          "tree-from-pfg got "
+          || "an unexpected argument."
+      },
+      eri:trace($pfg, 'Unexpected argument!')
+  }
+};
 
 (: ******************************************************
    epi:all-node-sequences($item, $closure, 

@@ -1067,8 +1067,12 @@ declare function ixi:eXei(
   element item {
     attribute from { $E('from') },
     attribute to { $E('to') },
-    attribute rulemark { $E('rule')/@mark },
-    attribute rulename { $E('rule')/@name },
+    attribute rulemark { 
+        $E('rule')/(@mark, @tmark)[1] 
+    },
+    attribute rulename { 
+        $E('rule')/(@name, @xml:id)[1] 
+    },
     attribute ri { $E('ri') }
     }
 };
