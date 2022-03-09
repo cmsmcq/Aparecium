@@ -92,7 +92,9 @@ declare function epi:earley-parse(
         return $pfg
 
        else (: default to any-tree :)
-                    let $lpt := prof:time(
+                    if ($options?tree-constructor eq 'direct')
+        then 
+        let $lpt := prof:time(
                     epi:all-trees($leiCompletions, $meiClosure, $I)
                     , '0b making trees: ')
         let $dummy := eri:notrace((), 
@@ -103,6 +105,26 @@ declare function epi:earley-parse(
         else if ($options?tree-form eq 'both')
         then ($rpt, epi:astXparsetree($rpt, count($lpt)))
         else epi:astXparsetree($rpt, count($lpt))
+
+        else 
+        let $pfg := prof:time(
+                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I)
+                    , '0b making pfg: '),
+            $ast := prof:time(
+                    epi:tree-from-pfg($pfg, 'document', ())
+                    , '0c extracting tree: ')
+		    
+        let $dummy := eri:notrace((), 
+                      'epi:earley-parse() returning a result') 
+
+        return if (1 eq 0) (: debugging hack, delete sometime :)
+        then element ap:wrap { 
+                   element ap:ast { $ast }, 
+                   element ap:pfg { $pfg }
+        } 
+        else $ast
+
+
 
 
   else  (: otherwise, send an apology and explanation :)
@@ -323,7 +345,7 @@ declare function epi:make-pfg-rules(
                   map { 'tree-count': 2 } (: options :)
                 )
   let $dummy := if (count($walks) eq 0)
-                then (eri:trace($ei, 
+                then (eri:notrace($ei, 
                       '!!! mpr: find-walks found no walks for '
                       || 'this item?!!!'),
 		      eri:trace($w, 
@@ -341,7 +363,30 @@ declare function epi:make-pfg-rules(
                        )
                    },
                    $r0/@mark,
-                   for $w in $walks
+                   if (empty($walks))
+                   then element ap:error {
+                     element p { "make-pfg-rules here." },
+                     element p { "find-walks() failed." },
+                     element p { "Here is what I know." },
+                     element dump { 
+                       element var {
+                         attribute name { "ei" },
+                         eri:eXei($ei)
+                       },
+                       element var {
+                         attribute name { "ei?rule" },
+                         $r0
+                       },
+                       element var {
+                         attribute name { "closure" },
+                         for $n in map:keys($leiClosure('to'))
+  		         order by $n descending
+  		         for $ei in $leiClosure('to')($n)
+  		         return eri:eXei($ei)
+                       }
+                     }
+                   } 
+                   else for $w in $walks
                    let $dummy := eri:notrace(
                        concat($r0/@name,
                            '·',
@@ -447,14 +492,41 @@ declare function epi:find-walks(
       let $symbol := $eiParent('rule')//*[@xml:id=$qNext],
           $N := $symbol/self::nonterminal/@name/string(),
           $T := $symbol[eri:fTerminal(.)]/@xml:id/string(),
-	  $symbol-mark := $symbol/(@mark, @tmark)/string(),
+	  $symbol-mark := $symbol/(@mark, @tmark)/string()
+	  
+	  (:
 	  $rule-mark := $symbol/ancestor::ixml[1]
                         /rule[@name eq $N]/@mark/string(),
+          (: debug ... :)
+          $d0 := $symbol/ancestor::ixml,
+          $d1 := $symbol/ancestor::ixml[1],
+          $d2 := $symbol/ancestor::ixml[1]/rule,
+          $d3 := $symbol/ancestor::ixml[1]/rule[@name],
+          $d4 := $symbol/ancestor::ixml[1]/rule[@name eq $N],
+          $d5 := $symbol/ancestor::ixml[1]/rule[@name eq $N]/@mark,
+
+          $dummy := if (empty($rule-mark)) 
+                    then (eri:notrace($symbol, 'Calculating effective mark:'),
+                         eri:notrace(count($symbol/ancestor::rule), 'Expect one rule ancestor:'),
+                         eri:notrace(count($d0), 'Expect one ixml ancestor:'),
+                         eri:notrace(count($d1), 'Expect one first ixml ancestor:'),
+                         eri:notrace(count($d2), 'Expect multiple rules:'),
+                         eri:notrace(count($d3), 'Expect multiple rules with names:'),
+                         for $r00 in $d3
+                         return eri:notrace($r00/@name, 'One is named: '),
+                         eri:notrace(count($d4), 'Expect one or zero matching rule:'),
+                         eri:notrace($d4, 'The matching rule:'),
+                         eri:notrace(count($d5), 'Expect one or zero mark attributes:')
+                     )
+                     else (),
+          (: ... gubed :)
           $effective-mark := 
               ($symbol-mark, $rule-mark, '^')[1]
+          :)
 
-      let $dummy := eri:trace($T,
+      let $dummy := if (exists($T)) then eri:notrace($T,
           'find-walks: seeking completion items for this terminal:')
+          else ()
 
       group by $x, $qNext, $N, $T
 
@@ -473,6 +545,15 @@ declare function epi:find-walks(
                                $qNext, $i, $w[1], ()
                            )
                       else ()
+
+      let $dummy := if ($fNull) 
+                    then (
+                          eri:notrace(eri:sXei($i), 'fw: Found a null item:'),
+                          eri:notrace(count($leiDups), 'fw: found # dups for this null item:'),
+                          for $dup at $dupnum in $leiDups
+                          return eri:notrace($dup, 'Duplicate ' || $dupnum || ': ')
+                          )
+                    else ()
  
       let $dummy := eri:notrace($qNext, 'fw: seeking followset of qNext ie of:'),
           $dummy := eri:notrace($eiParent('rule'), 'fw: looking in this rule for followset:'),
@@ -498,7 +579,7 @@ declare function epi:find-walks(
                  'state' : $qNext,
                  'follow-states' : $qqNextfollow,
                  'final' : $f-qnext-final,
-                 'mark'  : $effective-mark,
+                 'mark'  : $symbol-mark,
                  'pred'  : $w[1]
              }
 
@@ -531,7 +612,7 @@ declare function epi:rhs-from-walk(
 
   else   if ($w('item')('ri') eq '#terminal')
   then let $ei := $w('item')
-       let $dummy := eri:trace($ei, 'rhs-from-walk:  found a terminal item:')
+       let $dummy := eri:notrace($ei, 'rhs-from-walk:  found a terminal item:')
        let $x := $ei('from'),
            $y := $ei('to'),
            $symbol := element literal {
@@ -541,7 +622,7 @@ declare function epi:rhs-from-walk(
                }
            },
 
-           $dummy := eri:trace($symbol, 'rhs-from-walk:  made a terminal symbol:'),
+           $dummy := eri:notrace($symbol, 'rhs-from-walk:  made a terminal symbol:'),
 
            $new-acc := ($symbol, $acc),
 	   $next-step := $w('pred')
@@ -560,7 +641,9 @@ declare function epi:rhs-from-walk(
                    || '·'
                    || $ei('to')
                },
-               attribute mark { $w('mark') }
+               if (exists($w('mark')))
+               then attribute mark { $w('mark') }
+               else ()
            },
            $new-acc := ($symbol, $acc),
            $next-step := $w('pred')
@@ -605,8 +688,8 @@ declare function epi:dups-from-walk(
   then $acc
   else if (deep-equal($ei, $w('item'))
           and $q eq $w('state'))
-  then epi:lei-from-walk($w('pred'), ($w, $acc))
-  else epi:lei-from-walk($w('pred'), $acc)
+  then epi:dups-from-walk($q, $ei, $w('pred'), ($w, $acc))
+  else epi:dups-from-walk($q, $ei, $w('pred'), $acc)
 };
 
 
@@ -625,15 +708,21 @@ declare function epi:tree-from-pfg(
                         'element',
                         ()
                     ),
-          $tree := copy $x-tree := $tree0
+          $tree1 := copy $x-tree := $tree0
                    modify insert node 
                        attribute ixml:state { "ambiguous" }
                        into $x-tree
                    return $x-tree
-      return $tree
+      return if ($f-ambig) then $tree1 else $tree0
 
   else if ($pfg/self::rule)
   then 
+      if ($pfg/ap:error)
+      then $pfg
+      else
+      let $mark := ($mark, 
+                    $pfg/@mark/string(),
+                    '^')[1]
       let $n := count($pfg/alt),
           $i := 1 + random:integer($n),
           $ccc := $pfg/alt[$i]/*,
@@ -668,14 +757,18 @@ declare function epi:tree-from-pfg(
                  and ($mark eq '@'))
           then attribute { $nm } {
                    if ($nm0 ne $nm)
-                   then concat('[', $nm0, ']=')
+                   then text { concat('[', $nm0, ']=') }
                    else (),
+		   (: hack :)
+                   string-join(
                    for $c in $ccc
-                   return epi:tree-from-pfg(
+                   let $node := epi:tree-from-pfg(
                               $c, 
                               'value',
                               ()
                    )
+                   return $node
+                   , '')
                }
 
           else if (($nodetype = ('content', 'element', 'attribute'))
@@ -726,8 +819,10 @@ declare function epi:tree-from-pfg(
                  }
                }
           else element ap:error {
-            "Ran off a cliff, "
-            || "I don't remember a thing."
+            "Ran off a cliff, ",
+            "I don't remember a thing. ",
+            "Nodetype is '" || $nodetype || "'",
+            "and mark is '" || $mark || "'."
           }
 
 
@@ -745,11 +840,12 @@ declare function epi:tree-from-pfg(
                    $pfg/@mark/string())
 
   else if ($pfg/self::literal)
-  then let $s := if (exists($pfg/@string))
+  then        let $s := if (exists($pfg/@string))
            then string($pfg/@string)
            else if (exists($pfg/@hex))
            then eri:charXhex($pfg/@hex)
            else '&#x1D350;' (: tetragram for failure U+1D350 :)
+
        return if ($pfg/@tmark eq '-') 
               then ()
               else if ($nodetype = ('element', 'attribute'))

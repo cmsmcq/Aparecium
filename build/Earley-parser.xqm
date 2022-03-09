@@ -38,7 +38,8 @@ declare function ep:any-tree(
       map { 'return': 'any-tree',
             'tree-count': 1,
             'ambiguity-test': true(),
-            'failure-dump': 'closure'
+            'failure-dump': 'closure',
+            'tree-constructor': 'pfg'
       }
   )
 };

@@ -60,7 +60,12 @@ then
 		 else '[! error in gl:ME !]'
 		 :)
       return element {name($E)} {
-         $E/@*,
+         $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @regex,
+                     @follow:*)),
          attribute xml:id { $id },
          attribute nullable { false() },
          attribute first { $id },
@@ -75,7 +80,11 @@ then
                 || (1 + count($E/preceding::nonterminal
                               [@name = $E/@name]))
      return element nonterminal {
-       $E/@*,
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
        attribute xml:id { $id },
        attribute nullable { false() },
        attribute first { $id },
@@ -93,7 +102,11 @@ then
 then
      let $id := 'exp_option_' || (1 + count($E/preceding::option))
      return element option {
-       $E/@*,
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
        attribute xml:id { $id },
        attribute nullable { true() },
        attribute first { $children/@first },
@@ -116,7 +129,11 @@ then let $gi := name($E)
          $F := gl:notrace($ch[1], "F: "),
          $G := gl:notrace($ch[2], "G: ")
      return element {$gi} {
-       $E/@*,
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
        attribute xml:id { $id },
        attribute nullable { 
          if ($gi = 'repeat0') 
@@ -192,7 +209,11 @@ then let $gi := name($E)
      let $id := 'exp_sep_'
                 || (1 + count($E/preceding::sep)) 
      return element sep {
-       $E/@*,
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
        attribute xml:id { $id },
        $ch/@nullable,
        $ch/@first,
@@ -205,7 +226,11 @@ then let $gi := name($E)
      let $id := 'exp_alt_'
                 || (1 + count($E/preceding::alt)) 
      return element alt {
-       $E/@*,
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
        attribute xml:id { $id },
        attribute nullable { 
          every $c in $ch
@@ -275,7 +300,11 @@ then let $gi := name($E)
                 $E/preceding::alts)
 		) 
           return element {name($E)} {
-       $E/@*,
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
        attribute xml:id { $id },
        attribute nullable { 
          some $c in $ch
@@ -299,7 +328,11 @@ then let $gi := name($E)
   else if ($E/self::rule) then
     let $id := $E/@name
          return element {name($E)} {
-       $E/@*,
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
        attribute xml:id { $id },
        attribute nullable { 
          some $c in $ch
