@@ -140,9 +140,9 @@
 <h3>4 February 2022, last revised 17 February 2022</h3>
 
 <div class="versionList"><p>Versions defined:</p><ul>
-<li id="qd" class="versionentry">Quick and dirty first cut</li>
-<li id="alt" class="versionentry">Alternative formulations of some constructs</li>
-<li id="v2" class="versionentry">Version 2, with time monitoring</li>
+<li id="qd" class="versionentry"><em>qd:</em>&nbsp;Quick and dirty first cut</li>
+<li id="alt" class="versionentry"><em>alt:</em>&nbsp;Alternative formulations of some constructs</li>
+<li id="v2" class="versionentry"><em>v2:</em>&nbsp;Version 2, with time monitoring (falls back to qd)</li>
 </ul></div>
 
 <hr><a name="toc"></a>
@@ -386,7 +386,7 @@ the directory where any output should go, including a timestamp in the
 directory name to allow the results of multiple test runs to be saved
 without interfering with each other.
 <div class="scrap"><span><a name="dr-setup">&#x3008; 5 Set up variables and options &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">let $catalog-index := 'test0' (: which catalog to run? short name :)
+<pre class="scrapbody">let $catalog-index := 'bogons' (: which catalog to run? short name :)
 
 let $invdir := "../../ixml/tests/",
     $apadir := "../../Aparecium/tests/",
@@ -416,6 +416,7 @@ indexing into the list.  It's easy to change the index.
       &lt;catalog n="test2" path="{$apadir}test2.xml"/&gt;
       &lt;catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/&gt;
       &lt;catalog n="misc" path="{$apadir}misc-tests.xml"/&gt;
+      &lt;catalog n="bogons" path="{$apadir}bogons-20220310.xml"/&gt;
 
       &lt;!-- syntax error tests in ixml repo --&gt;
       &lt;catalog n="syntax-cagt"
@@ -759,7 +760,9 @@ latter, we fetch the document and deal with its top-level test sets.
 It may contain a grammar (inline or via reference, in ixml or xml),
 and it may contain test cases and nested test sets.  
 <div class="scrap"><span><a name="lib-rts-do-inline">&#x3008; 15 Handle an inline test-set &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">    let $test-set-name := $test-set/@name/string()
+<pre class="scrapbody">    let $test-set-name := trace(
+                            $test-set/@name/string(),
+                            "Starting test set: ")
     <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-rts-grammar">Load and compile the grammar for a test set 17</a></em> &#x3009;</span>
     <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#lib-rts-grammar-test">Set $grammar-test-result 32</a></em> &#x3009;</span>
     return element tc:test-set-results {
@@ -1574,7 +1577,9 @@ For that matter, U+FFFD &#x201c;Replacement character&#x201d; might be
 apposite here.  It's usually used when transcoding into UCS does
 not work; this is roughly analogous.
 <div class="scrap"><span><a name="lib-rtc-misc-var">&#x3008; 46 Set some handy variables &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">  let $failure-string := ("&#xe004e;&#xe004f;&#xe0054;"
+<pre class="scrapbody">  let $dummy := trace($test-case/@name/string(),
+                      "Starting test case: ")
+  let $failure-string := ("&#xe004e;&#xe004f;&#xe0054;"
                       || "&#xe0020;&#xe0046;&#xe004f;"
                       || "&#xe0055;&#xe004e;&#xe0044;"
                          (: 'NOT FOUND' in tag block :),

@@ -55,7 +55,24 @@ declare function ixi:eiMakePPRRi(
     'from' : $From,
     'to' : $To,
     'rule' : $r,
-    'ri' : $ri
+    'ri' : $ri 
+    (: ,
+    'sig' : concat('(', $From, 
+                   '.', $To,
+                   '.', $r/@name,
+                   '/', $ri
+            )
+    :)(: ,
+    'final' : (($ri = tokenize($r/@last, '\s+')
+                      [normalize-space()])
+               or (($ri eq 'q0') 
+                  and 
+                  ($r/@nullable = ('true', '1')))),
+    'extensible' : ('' ne normalize-space(
+                       $r/attribute::follow:*
+                       [local-name() eq $ri]
+                   ))
+     :)
   }
 };
 (: ......................................................
@@ -71,7 +88,16 @@ declare function ixi:eiMakePPT(
     'from' : $From,
     'to' : $To,
     'rule' : $t,
-    'ri' : "#terminal"
+    'ri' : "#terminal" (:,
+    'sig' : concat('(', $From, 
+                   '.', $To,
+                   '.', $t,
+                   '/', '#terminal'
+            )
+    :)(:
+    'final' : true(),
+    'extensible' : false()
+    :)
   }
 };
 
@@ -200,35 +226,7 @@ declare function ixi:fFinalEiPN(
   let $f := xs:integer($E('to')) eq $pTo
             and $E('rule')/@name eq $n/@name
             and $E('ri') = ixi:lriFinalstatesXR($E('rule'))
-  (:
-  let $trace := ixi:notrace($E,
-        'Call to fFinalEiPN('
-        || ixi:sXei($E) || ','
-        || $pTo || ','
-        || $n/@name || ') ==> ' 
-        || $f
-      )
-  :)    
-  (:
-  let $trace := if ($f) then ()
-        else ixi:notrace($E,
-             'fFinalEiPN returns false: &#xA;'
-                || ' to-values ' 
-                  || (if (xs:integer($E('to')) eq $pTo)
-		      then ''
-		      else 'do not ' )
-                  || 'match, &#xA;' 
-                || ' symbol names '
-                  || (if ($E('rule')/@name eq $n/@name)
-                      then ''
-		      else 'do not ' )
-                  || 'match, &#xA;'
-                || ' state ' || $E('ri')/string() || ' is ' 
-                  || (if ($E('ri') = ixi:lriFinalstatesXR($E('rule'))) 
-                        then '' else 'not ' )
-                  || 'final. &#xA;' 
-               )
-  :)    
+
   return $f
 };
 
@@ -737,8 +735,9 @@ declare function ixi:reXTerminal(
   let $le := $t/*,
       $lsRegexbits := for $e in $le
                       return if ($e/self::range)
-                        then ixi:sceXS($e/@from)
+                        then                              ixi:sceXS($e/@from)
 		             || "-" || ixi:sceXS($e/@to)
+
                         else if ($e/self::literal) 
                         then ixi:sceXS($e/ixi:string-value($e)) 
                         else if ($e/self::class)

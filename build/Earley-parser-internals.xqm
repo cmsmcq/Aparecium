@@ -323,8 +323,10 @@ declare function epi:make-pfg-rules(
   else 
   let $ei := head($leiQueue)
   
-  let $r0 := $ei('rule'),
-      $dummy := eri:notrace($r0, 'The rule through which we walk:')
+  let $dummy := eri:trace(eri:sXei($ei), 'Making production rule for item: ')
+
+  
+  let $r0 := $ei('rule')
   let $w  := map { 'item': $ei, 
                    'state': 'q0',
                    'follow-states': 
@@ -344,14 +346,13 @@ declare function epi:make-pfg-rules(
                   else ()             (: accumulator :),
                   map { 'tree-count': 2 } (: options :)
                 )
-  let $dummy := if (count($walks) eq 0)
-                then (eri:notrace($ei, 
-                      '!!! mpr: find-walks found no walks for '
-                      || 'this item?!!!'),
-		      eri:trace($w, 
-                      '!!! mpr: find-walks was called with '
-                      || 'this walk, and failed?!!!'))
-                else eri:notrace(count($walks), 'mpr: find-walks found how many walks?')
+
+   let $dummy := (eri:trace(count($walks), 'Find-walks found # walks.'),
+                  if (count($walks) gt 1)
+                  then for $w at $walknum in $walks 
+                  return eri:trace($w, 'Walk no. ' || $walknum || ' is:')
+                  else ()
+                 )
 
     let $rule := element rule {
                    attribute name {
@@ -359,7 +360,9 @@ declare function epi:make-pfg-rules(
                            '·',
                            $ei('from'),
                            '·',
-                           $ei('to')
+                           $ei('to'),
+                           '·',
+                           $ei('ri')
                        )
                    },
                    $r0/@mark,
@@ -387,48 +390,41 @@ declare function epi:make-pfg-rules(
                      }
                    } 
                    else for $w in $walks
-                   let $dummy := eri:notrace(
-                       concat($r0/@name,
-                           '·',
-                           $ei('from'),
-                           '·',
-                           $ei('to')
-                       ), 
-                       'mpr: building rule for:')
-                   let $dummy := eri:notrace($w, 'mpr: calling rhs-from-walk with walk:')
                    return element alt { 
                        epi:rhs-from-walk($w, $I, ())
                    }
                }
 
-    let $dummy := eri:notrace(count($walks),'make-pfg-rules is updating queue with # walks')
-
+  
   let $lei0 := for $w in $walks
                return epi:lei-from-walk($w, ()), 
                (: all completion items in $walks :)
 	       
-      $dummy := eri:notrace(count($lei0),'make-pfg-rules: lei0 has # items'),
-
       $lei1 := $lei0[
                  not(some $i in 1 to (position() - 1)
-                     satisfies deep-equal(., $lei0[$i]))
+                  satisfies deep-equal(., $lei0[$i]))
+                  (: satisfies .?sig eq $lei0[$i]?sig :)
+		  (: satisfies ((.?from eq $lei0[$i]?from)
+                    and      (.?to   eq $lei0[$i]?to  )
+                    and deep-equal(
+                              .?rule,   $lei0[$i]?rule)) :)
                ],
                (: list of distinct completion items :)
 
-      $dummy := eri:notrace(count($lei1),'make-pfg-rules: lei1 has # items'),
-	       
       $lei2 := $lei1[
                  not(some $i in 2 to (count($leiQueue))
-                     satisfies deep-equal(., $leiQueue[$i]))
+                  satisfies deep-equal(., $leiQueue[$i]))
+                  (: satisfies .?sig eq $leiQueue[$i]?sig   :)
+		  (: satisfies ((.?from eq $lei0[$i]?from)
+                    and      (.?to   eq $lei0[$i]?to  )
+                    and deep-equal(
+                              .?rule,   $lei0[$i]?rule)) :)
+
                ]
                (: completion items not in the queue :)
 
-  let $dummy := eri:notrace(count($lei2),'make-pfg-rules: lei2 has # items')
-
   let $ls-defined := ($leRules, $rule)
                      /@name/string(),
-
-      $dummy := eri:notrace(string-join($ls-defined,' '),'make-pfg-rules: ls-defined'),
 
       $lei3 := for $ei in $lei2
                let $s := $ei('rule')/@name/string()
@@ -436,16 +432,14 @@ declare function epi:make-pfg-rules(
                          || $ei('from')
                          || '·'
                          || $ei('to')
+                         || '·'
+                         || $ei('ri')
                where not($s = $ls-defined)
                return $ei
                (: new completion items, 
                   not in queue and not already done :)
 
-  let $dummy := eri:notrace(count($lei3),'make-pfg-rules: lei3 has # items')
-		  
   let $new-queue := (tail($leiQueue), $lei3)
-
-  let $dummy := eri:notrace(count($new-queue),'make-pfg-rules: new-queue has # items')
 
 
     return epi:make-pfg-rules(
@@ -486,43 +480,12 @@ declare function epi:find-walks(
                 then $w('item')('from')
                 else $w('item')('to'),
           $qqNext := $w('follow-states')
-      let $dummy := eri:notrace($w, 'find-walks: trying to extend walk: ')
 
       for $qNext in $qqNext
       let $symbol := $eiParent('rule')//*[@xml:id=$qNext],
           $N := $symbol/self::nonterminal/@name/string(),
           $T := $symbol[eri:fTerminal(.)]/@xml:id/string(),
 	  $symbol-mark := $symbol/(@mark, @tmark)/string()
-	  
-	  (:
-	  $rule-mark := $symbol/ancestor::ixml[1]
-                        /rule[@name eq $N]/@mark/string(),
-          (: debug ... :)
-          $d0 := $symbol/ancestor::ixml,
-          $d1 := $symbol/ancestor::ixml[1],
-          $d2 := $symbol/ancestor::ixml[1]/rule,
-          $d3 := $symbol/ancestor::ixml[1]/rule[@name],
-          $d4 := $symbol/ancestor::ixml[1]/rule[@name eq $N],
-          $d5 := $symbol/ancestor::ixml[1]/rule[@name eq $N]/@mark,
-
-          $dummy := if (empty($rule-mark)) 
-                    then (eri:notrace($symbol, 'Calculating effective mark:'),
-                         eri:notrace(count($symbol/ancestor::rule), 'Expect one rule ancestor:'),
-                         eri:notrace(count($d0), 'Expect one ixml ancestor:'),
-                         eri:notrace(count($d1), 'Expect one first ixml ancestor:'),
-                         eri:notrace(count($d2), 'Expect multiple rules:'),
-                         eri:notrace(count($d3), 'Expect multiple rules with names:'),
-                         for $r00 in $d3
-                         return eri:notrace($r00/@name, 'One is named: '),
-                         eri:notrace(count($d4), 'Expect one or zero matching rule:'),
-                         eri:notrace($d4, 'The matching rule:'),
-                         eri:notrace(count($d5), 'Expect one or zero mark attributes:')
-                     )
-                     else (),
-          (: ... gubed :)
-          $effective-mark := 
-              ($symbol-mark, $rule-mark, '^')[1]
-          :)
 
       let $dummy := if (exists($T)) then eri:notrace($T,
           'find-walks: seeking completion items for this terminal:')
@@ -545,22 +508,6 @@ declare function epi:find-walks(
                                $qNext, $i, $w[1], ()
                            )
                       else ()
-
-      let $dummy := if ($fNull) 
-                    then (
-                          eri:notrace(eri:sXei($i), 'fw: Found a null item:'),
-                          eri:notrace(count($leiDups), 'fw: found # dups for this null item:'),
-                          for $dup at $dupnum in $leiDups
-                          return eri:notrace($dup, 'Duplicate ' || $dupnum || ': ')
-                          )
-                    else ()
- 
-      let $dummy := eri:notrace($qNext, 'fw: seeking followset of qNext ie of:'),
-          $dummy := eri:notrace($eiParent('rule'), 'fw: looking in this rule for followset:'),
-          $dummy := eri:notrace(($eiParent('rule')/attribute::follow:*)[1], 
-                    'fw: looking for @follow:*, this is the first:'),
-          $dummy := eri:notrace(($eiParent('rule')/attribute::follow:*[local-name() eq $qNext]), 
-                    'fw: this is the @follow:* we want:')
 
       let $qqNextfollow := tokenize(
                                $eiParent('rule')
@@ -612,7 +559,6 @@ declare function epi:rhs-from-walk(
 
   else   if ($w('item')('ri') eq '#terminal')
   then let $ei := $w('item')
-       let $dummy := eri:notrace($ei, 'rhs-from-walk:  found a terminal item:')
        let $x := $ei('from'),
            $y := $ei('to'),
            $symbol := element literal {
@@ -622,8 +568,6 @@ declare function epi:rhs-from-walk(
                }
            },
 
-           $dummy := eri:notrace($symbol, 'rhs-from-walk:  made a terminal symbol:'),
-
            $new-acc := ($symbol, $acc),
 	   $next-step := $w('pred')
        return epi:rhs-from-walk($next-step, $I, $new-acc)
@@ -631,8 +575,6 @@ declare function epi:rhs-from-walk(
   else   if (exists($w('item')('rule')/self::rule[@name]))
   then let $ei := $w('item'),
 
-           $dummy := eri:notrace($ei, 'rhs-from-walk:  found non-terminal item:'),
-  
            $symbol := element nonterminal {
                attribute name {
                    $ei('rule')/@name/string()
@@ -640,6 +582,8 @@ declare function epi:rhs-from-walk(
                    || $ei('from')
                    || '·'
                    || $ei('to')
+                   || '·'
+                   || $ei('ri')
                },
                if (exists($w('mark')))
                then attribute mark { $w('mark') }
@@ -686,8 +630,12 @@ declare function epi:dups-from-walk(
   then $acc
   else if ($w('state') eq 'q0')
   then $acc
-  else if (deep-equal($ei, $w('item'))
-          and $q eq $w('state'))
+  else if ( 
+            (: $ei?sig eq $w?item?sig :)
+            deep-equal($ei, $w('item')) 
+            and 
+            $q eq $w('state')
+          )
   then epi:dups-from-walk($q, $ei, $w('pred'), ($w, $acc))
   else epi:dups-from-walk($q, $ei, $w('pred'), $acc)
 };

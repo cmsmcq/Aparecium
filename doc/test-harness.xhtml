@@ -143,11 +143,12 @@
 <div class="versionList">
 <p>Versions defined:</p>
 <ul>
-<li id="qd" class="versionentry">Quick and dirty first cut</li>
-<li id="alt" class="versionentry">Alternative formulations of some
-constructs</li>
-<li id="v2" class="versionentry">Version 2, with time
-monitoring</li>
+<li id="qd" class="versionentry"><em>qd:</em>&nbsp;Quick and dirty
+first cut</li>
+<li id="alt" class="versionentry"><em>alt:</em>&nbsp;Alternative
+formulations of some constructs</li>
+<li id="v2" class="versionentry"><em>v2:</em>&nbsp;Version 2, with
+time monitoring (falls back to qd)</li>
 </ul>
 </div>
 <hr />
@@ -408,7 +409,7 @@ each other.
 <div class="scrap"><span><a name="dr-setup" id="dr-setup">〈 5 Set
 up variables and options 〉 ≡</a></span>
 <pre class=
-"scrapbody">let $catalog-index := 'test0' (: which catalog to run? short name :)
+"scrapbody">let $catalog-index := 'bogons' (: which catalog to run? short name :)
 
 let $invdir := "../../ixml/tests/",
     $apadir := "../../Aparecium/tests/",
@@ -443,6 +444,7 @@ List of available test-catalog files [continues</a> <a href=
       &lt;catalog n="test2" path="{$apadir}test2.xml"/&gt;
       &lt;catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/&gt;
       &lt;catalog n="misc" path="{$apadir}misc-tests.xml"/&gt;
+      &lt;catalog n="bogons" path="{$apadir}bogons-20220310.xml"/&gt;
 
       &lt;!-- syntax error tests in ixml repo --&gt;
       &lt;catalog n="syntax-cagt"
@@ -790,8 +792,9 @@ contain a grammar (inline or via reference, in ixml or xml), and it
 may contain test cases and nested test sets.
 <div class="scrap"><span><a name="lib-rts-do-inline" id=
 "lib-rts-do-inline">〈 15 Handle an inline test-set 〉 ≡</a></span>
-<pre class=
-"scrapbody">    let $test-set-name := $test-set/@name/string()
+<pre class="scrapbody">    let $test-set-name := trace(
+                            $test-set/@name/string(),
+                            "Starting test set: ")
     <span class="scrapref">〈 <em class="scrapptr"><a href=
 "#lib-rts-grammar">Load and compile the grammar for a test set 17</a></em> 〉</span>
     <span class="scrapref">〈 <em class="scrapptr"><a href=
@@ -1640,7 +1643,10 @@ would also work. (And be shorter.) For that matter, U+FFFD
 when transcoding into UCS does not work; this is roughly analogous.
 <div class="scrap"><span><a name="lib-rtc-misc-var" id=
 "lib-rtc-misc-var">〈 46 Set some handy variables 〉 ≡</a></span>
-<pre class="scrapbody">  let $failure-string := ("󠁎󠁏󠁔"
+<pre class=
+"scrapbody">  let $dummy := trace($test-case/@name/string(),
+                      "Starting test case: ")
+  let $failure-string := ("󠁎󠁏󠁔"
                       || "󠀠󠁆󠁏"
                       || "󠁕󠁎󠁄"
                          (: 'NOT FOUND' in tag block :),

@@ -113,7 +113,9 @@ declare function t:run-test-set(
                                    $options)
 
   else 
-    let $test-set-name := $test-set/@name/string()
+    let $test-set-name := trace(
+                            $test-set/@name/string(),
+                            "Starting test set: ")
           
       let $nxg-plus := prof:track(
           if ($test-set/tc:ixml-grammar)
@@ -446,7 +448,8 @@ declare function t:run-test-case(
   $G as element()?,
   $options as element(options)
 ) as element() {
-  
+    let $dummy := trace($test-case/@name/string(),
+                      "Starting test case: ")
   let $failure-string := ("󠁎󠁏󠁔"
                       || "󠀠󠁆󠁏"
                       || "󠁕󠁎󠁄"

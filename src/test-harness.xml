@@ -278,7 +278,7 @@ the directory where any output should go, including a timestamp in the
 directory name to allow the results of multiple test runs to be saved
 without interfering with each other.
 <scrap id="dr-setup" name="Set up variables and options">
-let $catalog-index := 'test0' (: which catalog to run? short name :)
+let $catalog-index := 'bogons' (: which catalog to run? short name :)
 
 let $invdir := "../../ixml/tests/",
     $apadir := "../../Aparecium/tests/",
@@ -305,6 +305,7 @@ indexing into the list.  It's easy to change the index.
       &lt;catalog n="test2" path="{$apadir}test2.xml"/>
       &lt;catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/>
       &lt;catalog n="misc" path="{$apadir}misc-tests.xml"/>
+      &lt;catalog n="bogons" path="{$apadir}bogons-20220310.xml"/>
 
       &lt;!-- syntax error tests in ixml repo -->
       &lt;catalog n="syntax-cagt"
@@ -630,7 +631,9 @@ and it may contain test cases and nested test sets.
 <scrap id="lib-rts-do-inline" 
        name="Handle an inline test-set">
 
-    let $test-set-name := $test-set/@name/string()
+    let $test-set-name := trace(
+                            $test-set/@name/string(),
+                            "Starting test set: ")
     <ptr target="lib-rts-grammar"/>
     <ptr target="lib-rts-grammar-test"/>
     return element tc:test-set-results {
@@ -1342,7 +1345,8 @@ apposite here.  It's usually used when transcoding into UCS does
 not work; this is roughly analogous.
 <scrap id="lib-rtc-misc-var"
        name="Set some handy variables">
-
+  let $dummy := trace($test-case/@name/string(),
+                      "Starting test case: ")
   let $failure-string := ("&#xE004E;&#xE004F;&#xE0054;"
                       || "&#xE0020;&#xE0046;&#xE004F;"
                       || "&#xE0055;&#xE004E;&#xE0044;"

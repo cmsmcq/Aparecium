@@ -19,12 +19,8 @@ declare function ix:scan(
   $I as item() (: INPUT :)
 ) as item()* (: ITEM? :) {
   let $p := ixi:pToXEi($E),
-      $lt := ixi:lsymExpectedXEi($E)[ixi:fTerminal(.)],
-      $dummy := ixi:notrace(ixi:sXei($E), 'ix:scan() on item:') 
+      $lt := ixi:lsymExpectedXEi($E)[ixi:fTerminal(.)]
   for $t in $lt
-  let $dummy := ixi:notrace($t, 'ix:scan() expects terminal:'),
-      $dummy := ixi:notrace(ixi:cMatchesIPT($I, $p, $t), 
-                          'ix:scan() matches? ') 
   return
     let $c := ixi:cMatchesIPT($I, $p, $t)
     return 
@@ -100,28 +96,7 @@ declare function ix:comp(
       $RESULT := if (ixi:fFinalEi($Ec)
                     and $pPTo eq $pCFrom)
                  then ixi:leiAdvanceEiSymP($Ep, $n, $pCTo)
-                 else (),
-      $trace1 := ixi:notrace($RESULT,
-      concat('&#xA;****** comp(',
-             '&#xA;            ',
-             '$Ec=',ixi:sXei($Ec),
-             '&#xA;            ',
-             '$Ep=',ixi:sXei($Ep),
-             ') ==> '
-            )
-      ),
-      $r      := ixi:rXEi($Ep),	    
-      $trace2 := ixi:notrace('sanity check',
-      concat('&#xA;****** comp(',
-             '&#xA;            ',
-             '$Ec=(',$pCFrom,' ',$pCTo, ' ',
-                     $n/@name, '/', $Ec/@ri,'),',
-             '&#xA;            ',
-             '$Ep=(', ixi:pFromXEi($Ep),' ',$pPTo, ' ',
-                     $r/@name, '/', $Ep/@ri, ')',
-             ')&#xA;'
-            )
-      )
+                 else ()
   return $RESULT
 };
 
@@ -159,12 +134,7 @@ declare function ix:recognizeX(
                                           $len,
                                           $symStart2)],
       $result := exists($leiCompletions)
-      (:
-      ,
-      $dummy := for $eiTmp in $meiClosure
-                return ixi:notrace($eiTmp,
-              '&#xA;&#xA; (*** closure ***) &#xA;')
-      :)
+
   return map {
     'Grammar' : $G2,
     'Initial-Item' : $eiInitial,
