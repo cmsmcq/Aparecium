@@ -1276,7 +1276,7 @@ can return the accumulated intermediate results.
   else 
   let $ei := head($leiQueue)
   
-  let $dummy := eri:trace(eri:sXei($ei), 'Making production rule for item: ')
+  let $dummy := eri:notrace(eri:sXei($ei), 'Making production rule for item: ')
 
   <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#epi-mpr-find-walk">Set $walks to possible child sequences for $ei 22</a></em> &#x3009;</span>
   <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#epi-mpr-make-rule">Set $rule to production rule for $ei 23</a></em> &#x3009;</span>
@@ -1469,12 +1469,12 @@ walk with a single step.  And if the parent FSA is nullable, we add that walk to
                   map { 'tree-count': 2 } (: options :)
                 )
 
-   let $dummy := (eri:trace(count($walks), 'Find-walks found # walks.'),
-                  if (count($walks) gt 1)
-                  then for $w at $walknum in $walks 
-                  return eri:trace($w, 'Walk no. ' || $walknum || ' is:')
-                  else ()
-                 )
+   let $dummy := if (count($walks) gt 1)
+                 then (eri:trace(count($walks), 'Find-walks found # walks'
+                       || ' for ' || eri:sXei($ei)),
+                     for $w at $walknum in $walks 
+                     return eri:trace($w, 'Walk no. ' || $walknum || ' is:'))
+                 else ()
 </pre>
 <span class="scrapcontinuations"></span>
 
@@ -1508,9 +1508,9 @@ appropriate expression on the right-hand side.
                            '&#xb7;',
                            $ei('from'),
                            '&#xb7;',
-                           $ei('to'),
+                           $ei('to') (: ,
                            '&#xb7;',
-                           $ei('ri')
+                           $ei('ri') :)
                        )
                    },
                    $r0/@mark,
@@ -1602,9 +1602,9 @@ against the items we already have rules for.
                          || '&#xb7;'
                          || $ei('from')
                          || '&#xb7;'
-                         || $ei('to')
+                         || $ei('to') (:
                          || '&#xb7;'
-                         || $ei('ri')
+                         || $ei('ri') :)
                where not($s = $ls-defined)
                return $ei
                (: new completion items, 
@@ -1748,13 +1748,28 @@ We look for items in the closure which:
 <li>advance no further than the endpoint of the
 parent completion item.</li>
 </ul>
+And then we de-dup them:  if any items differ only in
+their rule index, we take only one of them.
 <div class="scrap"><span><a name="d3e1406">&#x3008; 29 Find follow-on completion items [continues <a href="#pfg-fw-set-new-queue">28 Set new queue by extending all walks in the queue</a>]  &#x3009;  &#x2261;</a></span>
-<pre class="scrapbody">      let $items := $mei('from')($x)
-                    [(.?rule/@name eq $N)
-                     or (.?rule/@xml:id eq $T)]
-                    [eri:fFinalEi(.) 
-                     or (.?ri eq '#terminal')]
-                    [.?to le $eiParent('to')]
+<pre class="scrapbody">      let $items0 := $mei('from')($x)
+                     [(.?rule/@name eq $N)
+                      or (.?rule/@xml:id eq $T)]
+                     [eri:fFinalEi(.) 
+                      or (.?ri eq '#terminal')]
+                     [.?to le $eiParent('to')],
+          $items  := for $i at $index in $items0
+                     where not(
+                       some $j in 1 to ($index - 1) 
+                       satisfies (
+                         $items0[$j]?from eq $i?from
+                         and 
+                         $items0[$j]?to eq $i?to
+                         and deep-equal(
+                           $items0[$j]?rule, $i?rule
+                         )
+                       )
+                     )
+                     return $i
 
 </pre>
 <span class="scrapcontinuations"></span>
@@ -1894,9 +1909,9 @@ newly constructed nonterminal name, and recur.
                    || '&#xb7;'
                    || $ei('from')
                    || '&#xb7;'
-                   || $ei('to')
+                   || $ei('to') (:
                    || '&#xb7;'
-                   || $ei('ri')
+                   || $ei('ri') :)
                },
                if (exists($w('mark')))
                then attribute mark { $w('mark') }

@@ -25,40 +25,73 @@
 	<assert-xml-ref href="ambiguity-1.ixml.xml"/>
       </result>
     </grammar-test>
+
+    <test-case name="amb-1">
+      <created by="CMSMcQ" on="2022-03-09"/>
+      <test-string>a</test-string>
+      <result><assert-xml>
+	<S xmlns="">a</S>
+      </assert-xml><assert-xml>
+	<S xmlns=""><S>a</S></S>
+      </assert-xml><assert-xml>
+	<S xmlns=""><S><S>a</S></S></S>
+      </assert-xml><assert-xml>
+	<S xmlns=""><S><S><S>a</S></S></S></S>
+      </assert-xml><assert-xml>
+	<S xmlns=""><S><S><S><S>a</S></S></S></S></S>
+      </assert-xml><assert-xml>
+	<S xmlns=""><S><S><S><S><S>a</S></S></S></S></S></S>
+      </assert-xml><assert-xml>
+	<S xmlns=""><S><S><S><S><S><S>a</S></S></S></S></S></S></S>
+      </assert-xml><assert-xml>
+	<S xmlns=""><S><S><S><S><S><S><S>a</S></S></S></S></S></S></S></S>
+      </assert-xml></result>
+    </test-case>
+  </test-set>
+  
+  <test-set name="vowels">
+    <created by="CMSMcQ" on="2021-10-14"/>
+    <ixml-grammar>S : 'magic'; 'b', "c"; ["v"; 'aeiou'].</ixml-grammar>
+    <grammar-test>
+      <created by="CMSMcQ" on="2021-10-05"/>
+      <result>
+	<assert-xml-ref href="t2.ixml.xml"/>
+      </result>
+    </grammar-test>
     
     <test-case name="vowels-ok1">
       <created by="CMSMcQ" on="2021-10-14"/>
       <test-string>magic</test-string>
       <result><assert-xml>
-	<S>magic</S>
+	<S xmlns="">magic</S>
       </assert-xml></result>
     </test-case>
     <test-case name="vowels-ok2">
       <created by="CMSMcQ" on="2021-10-14"/>
       <test-string>bc</test-string>
       <result><assert-xml>
-	<S>bc</S>
+	<S xmlns="">bc</S>
       </assert-xml></result>
     </test-case>
     <test-case name="vowels-ok3">
       <created by="CMSMcQ" on="2021-10-14"/>
       <test-string>v</test-string>
       <result><assert-xml>
-	<S>v</S>
+	<S xmlns="">v</S>
       </assert-xml></result>
     </test-case>
     <test-case name="vowels-ok4">
       <created by="CMSMcQ" on="2021-10-14"/>
       <test-string>e</test-string>
       <result><assert-xml>
-	<S>e</S>
+	<S xmlns="">e</S>
       </assert-xml></result>
     </test-case>
     <test-case name="vowels-ok5">
       <created by="CMSMcQ" on="2021-10-14"/>
       <test-string>u</test-string>
       <result><assert-xml>
-	<S>u</S>
+	<S xmlns="">u</S>
       </assert-xml></result>
     </test-case>
     
@@ -110,7 +143,7 @@
 	<assert-xml-ref href="../lib/ixml.2022-01-25.ixml.xml"/>
 	-->
 	<assert-xml>	  
-	  <ixml
+	  <ixml xmlns=""
             ><rule name="ixml"
               ><alt
 		><nonterminal name="s"

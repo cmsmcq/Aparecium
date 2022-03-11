@@ -1138,7 +1138,7 @@ declare function epi:make-pfg-rules(
   else 
   let $ei := head($leiQueue)
   
-  let $dummy := eri:trace(eri:sXei($ei), 'Making production rule for item: ')
+  let $dummy := eri:notrace(eri:sXei($ei), 'Making production rule for item: ')
 
   <ptr target="epi-mpr-find-walk"/>
   <ptr target="epi-mpr-make-rule"/>
@@ -1351,12 +1351,12 @@ walk with a single step.  And if the parent FSA is nullable, we add that walk to
                   map { 'tree-count': 2 } (: options :)
                 )
 
-   let $dummy := (eri:trace(count($walks), 'Find-walks found # walks.'),
-                  if (count($walks) gt 1)
-                  then for $w at $walknum in $walks 
-                  return eri:trace($w, 'Walk no. ' || $walknum || ' is:')
-                  else ()
-                 )
+   let $dummy := if (count($walks) gt 1)
+                 then (eri:trace(count($walks), 'Find-walks found # walks'
+                       || ' for ' || eri:sXei($ei)),
+                     for $w at $walknum in $walks 
+                     return eri:trace($w, 'Walk no. ' || $walknum || ' is:'))
+                 else ()
 </scrap>
 The <q><kw>follow-states</kw></q> and <q><kw>final</kw></q>
 values are redundant; we store them in the map to avoid
@@ -1385,9 +1385,9 @@ appropriate expression on the right-hand side.
                            '&#xB7;',
                            $ei('from'),
                            '&#xB7;',
-                           $ei('to'),
+                           $ei('to') (: ,
                            '&#xB7;',
-                           $ei('ri')
+                           $ei('ri') :)
                        )
                    },
                    $r0/@mark,
@@ -1474,9 +1474,9 @@ against the items we already have rules for.
                          || '&#xB7;'
                          || $ei('from')
                          || '&#xB7;'
-                         || $ei('to')
+                         || $ei('to') (:
                          || '&#xB7;'
-                         || $ei('ri')
+                         || $ei('ri') :)
                where not($s = $ls-defined)
                return $ei
                (: new completion items, 
@@ -1616,15 +1616,30 @@ We look for items in the closure which:
 <item>advance no further than the endpoint of the
 parent completion item.</item>
 </list>
+And then we de-dup them:  if any items differ only in
+their rule index, we take only one of them.
 <scrap prev="pfg-fw-set-new-queue"
        name="Find follow-on completion items">
 
-      let $items := $mei('from')($x)
-                    [(.?rule/@name eq $N)
-                     or (.?rule/@xml:id eq $T)]
-                    [eri:fFinalEi(.) 
-                     or (.?ri eq '#terminal')]
-                    [.?to le $eiParent('to')]
+      let $items0 := $mei('from')($x)
+                     [(.?rule/@name eq $N)
+                      or (.?rule/@xml:id eq $T)]
+                     [eri:fFinalEi(.) 
+                      or (.?ri eq '#terminal')]
+                     [.?to le $eiParent('to')],
+          $items  := for $i at $index in $items0
+                     where not(
+                       some $j in 1 to ($index - 1) 
+                       satisfies (
+                         $items0[$j]?from eq $i?from
+                         and 
+                         $items0[$j]?to eq $i?to
+                         and deep-equal(
+                           $items0[$j]?rule, $i?rule
+                         )
+                       )
+                     )
+                     return $i
 
 </scrap>
 For each such item, we extend the walk we started with:
@@ -1740,9 +1755,9 @@ newly constructed nonterminal name, and recur.
                    || '&#xB7;'
                    || $ei('from')
                    || '&#xB7;'
-                   || $ei('to')
+                   || $ei('to') (:
                    || '&#xB7;'
-                   || $ei('ri')
+                   || $ei('ri') :)
                },
                if (exists($w('mark')))
                then attribute mark { $w('mark') }

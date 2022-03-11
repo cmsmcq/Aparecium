@@ -323,7 +323,7 @@ declare function epi:make-pfg-rules(
   else 
   let $ei := head($leiQueue)
   
-  let $dummy := eri:trace(eri:sXei($ei), 'Making production rule for item: ')
+  let $dummy := eri:notrace(eri:sXei($ei), 'Making production rule for item: ')
 
   
   let $r0 := $ei('rule')
@@ -347,12 +347,12 @@ declare function epi:make-pfg-rules(
                   map { 'tree-count': 2 } (: options :)
                 )
 
-   let $dummy := (eri:trace(count($walks), 'Find-walks found # walks.'),
-                  if (count($walks) gt 1)
-                  then for $w at $walknum in $walks 
-                  return eri:trace($w, 'Walk no. ' || $walknum || ' is:')
-                  else ()
-                 )
+   let $dummy := if (count($walks) gt 1)
+                 then (eri:trace(count($walks), 'Find-walks found # walks'
+                       || ' for ' || eri:sXei($ei)),
+                     for $w at $walknum in $walks 
+                     return eri:trace($w, 'Walk no. ' || $walknum || ' is:'))
+                 else ()
 
     let $rule := element rule {
                    attribute name {
@@ -360,9 +360,9 @@ declare function epi:make-pfg-rules(
                            '·',
                            $ei('from'),
                            '·',
-                           $ei('to'),
+                           $ei('to') (: ,
                            '·',
-                           $ei('ri')
+                           $ei('ri') :)
                        )
                    },
                    $r0/@mark,
@@ -431,9 +431,9 @@ declare function epi:make-pfg-rules(
                          || '·'
                          || $ei('from')
                          || '·'
-                         || $ei('to')
+                         || $ei('to') (:
                          || '·'
-                         || $ei('ri')
+                         || $ei('ri') :)
                where not($s = $ls-defined)
                return $ei
                (: new completion items, 
@@ -493,12 +493,25 @@ declare function epi:find-walks(
 
       group by $x, $qNext, $N, $T
 
-      let $items := $mei('from')($x)
-                    [(.?rule/@name eq $N)
-                     or (.?rule/@xml:id eq $T)]
-                    [eri:fFinalEi(.) 
-                     or (.?ri eq '#terminal')]
-                    [.?to le $eiParent('to')]
+      let $items0 := $mei('from')($x)
+                     [(.?rule/@name eq $N)
+                      or (.?rule/@xml:id eq $T)]
+                     [eri:fFinalEi(.) 
+                      or (.?ri eq '#terminal')]
+                     [.?to le $eiParent('to')],
+          $items  := for $i at $index in $items0
+                     where not(
+                       some $j in 1 to ($index - 1) 
+                       satisfies (
+                         $items0[$j]?from eq $i?from
+                         and 
+                         $items0[$j]?to eq $i?to
+                         and deep-equal(
+                           $items0[$j]?rule, $i?rule
+                         )
+                       )
+                     )
+                     return $i
 
 
       for $i in $items
@@ -581,9 +594,9 @@ declare function epi:rhs-from-walk(
                    || '·'
                    || $ei('from')
                    || '·'
-                   || $ei('to')
+                   || $ei('to') (:
                    || '·'
-                   || $ei('ri')
+                   || $ei('ri') :)
                },
                if (exists($w('mark')))
                then attribute mark { $w('mark') }

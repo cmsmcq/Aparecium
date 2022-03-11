@@ -10,7 +10,7 @@ declare namespace db =
 
 declare option db:chop "false";
 
-let $catalog-index := 'test0' (: which catalog to run? short name :)
+let $catalog-index := 'bogons' (: which catalog to run? short name :)
 
 let $invdir := "../../ixml/tests/",
     $apadir := "../../Aparecium/tests/",
@@ -31,6 +31,7 @@ let $invdir := "../../ixml/tests/",
       <catalog n="test2" path="{$apadir}test2.xml"/>
       <catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/>
       <catalog n="misc" path="{$apadir}misc-tests.xml"/>
+      <catalog n="bogons" path="{$apadir}bogons-20220310.xml"/>
 
       <!-- syntax error tests in ixml repo -->
       <catalog n="syntax-cagt"

@@ -300,12 +300,31 @@ indexing into the list.  It's easy to change the index.
     $catalog-of-catalogs := &lt;test-catalogs>
 
       &lt;!-- local catalogs, mostly simple -->
+      &lt;!-- under 60 seconds (2.1, 4.8, 20.1, 78.1) -->
       &lt;catalog n="test0" path="{$apadir}test0.xml"/>
       &lt;catalog n="test1" path="{$apadir}test1.xml"/>
-      &lt;catalog n="test2" path="{$apadir}test2.xml"/>
       &lt;catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/>
       &lt;catalog n="misc" path="{$apadir}misc-tests.xml"/>
-      &lt;catalog n="bogons" path="{$apadir}bogons-20220310.xml"/>
+
+      &lt;!-- under 10 minutes (153) -->
+      &lt;!-- embeds all the gxxx catalogs so they can be done in a single run -->
+      &lt;catalog n="gxxx"
+	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/>
+
+      &lt;!-- under 1 hour () -->
+      &lt;!-- under 2 hours () -->
+      &lt;!-- under 5 hours () -->
+
+      &lt;!-- over 5 hours () -->
+      &lt;!-- ixml-all is very slow (5.5h or so): 
+           all of the tests in the ixml repo -->
+      &lt;catalog n="ixml-all"
+	       path="{$invdir}test-catalog.xml"/>
+      
+      &lt;!-- to be timed -->
+
+      &lt;catalog n="test2" path="{$apadir}test2.xml"/>&lt;!-- nnn s -->
+      &lt;catalog n="bogons" path="{$apadir}bogons-20220310.xml"/>&lt;!-- nnn s -->
 
       &lt;!-- syntax error tests in ixml repo -->
       &lt;catalog n="syntax-cagt"
@@ -327,10 +346,6 @@ indexing into the list.  It's easy to change the index.
       &lt;catalog n="ixml-ixml"
 	       path="{$invdir}ixml/test-catalog.xml"/>
       
-      &lt;!-- ixml-all is very slow: 
-           all of the tests in the ixml repo -->
-      &lt;catalog n="ixml-all"
-	       path="{$invdir}test-catalog.xml"/>
 
 
       &lt;!-- Positive and negative catalogs for various small grammars -->
@@ -365,9 +380,6 @@ indexing into the list.  It's easy to change the index.
       &lt;catalog n="g112neg"
 	       path="{$ixtdir}gxxx/g112.O3.test-catalog.all.neg.xml"/>
 
-      &lt;!-- embeds all the gxxx catalogs so they can be done in a single run -->
-      &lt;catalog n="gxxx"
-	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/>
 
       &lt;!-- arithmetic expressions, with 
            2, 7638, 2886, 1020, and 338 test cases.

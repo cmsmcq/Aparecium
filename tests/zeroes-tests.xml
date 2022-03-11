@@ -9,7 +9,7 @@
     lot, as did the sharp rise in run time on some grammars
     as the input gets longer.</tc:p>
     <tc:p>The initial timings are from a report I made in December
-    2022.</tc:p>
+    2021.</tc:p>
   </tc:description>
 
   <tc:test-set name="z01">
