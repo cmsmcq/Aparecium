@@ -26,12 +26,31 @@ let $invdir := "../../ixml/tests/",
     $catalog-of-catalogs := <test-catalogs>
 
       <!-- local catalogs, mostly simple -->
+      <!-- under 60 seconds (2.1, 4.8, 20.1, 78.1) -->
       <catalog n="test0" path="{$apadir}test0.xml"/>
       <catalog n="test1" path="{$apadir}test1.xml"/>
-      <catalog n="test2" path="{$apadir}test2.xml"/>
       <catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/>
       <catalog n="misc" path="{$apadir}misc-tests.xml"/>
-      <catalog n="bogons" path="{$apadir}bogons-20220310.xml"/>
+
+      <!-- under 10 minutes (153) -->
+      <!-- embeds all the gxxx catalogs so they can be done in a single run -->
+      <catalog n="gxxx"
+	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/>
+
+      <!-- under 1 hour () -->
+      <!-- under 2 hours () -->
+      <!-- under 5 hours () -->
+
+      <!-- over 5 hours () -->
+      <!-- ixml-all is very slow (5.5h or so): 
+           all of the tests in the ixml repo -->
+      <catalog n="ixml-all"
+	       path="{$invdir}test-catalog.xml"/>
+      
+      <!-- to be timed -->
+
+      <catalog n="test2" path="{$apadir}test2.xml"/><!-- nnn s -->
+      <catalog n="bogons" path="{$apadir}bogons-20220310.xml"/><!-- nnn s -->
 
       <!-- syntax error tests in ixml repo -->
       <catalog n="syntax-cagt"
@@ -53,10 +72,6 @@ let $invdir := "../../ixml/tests/",
       <catalog n="ixml-ixml"
 	       path="{$invdir}ixml/test-catalog.xml"/>
       
-      <!-- ixml-all is very slow: 
-           all of the tests in the ixml repo -->
-      <catalog n="ixml-all"
-	       path="{$invdir}test-catalog.xml"/>
 
 
       <!-- Positive and negative catalogs for various small grammars -->
@@ -91,9 +106,6 @@ let $invdir := "../../ixml/tests/",
       <catalog n="g112neg"
 	       path="{$ixtdir}gxxx/g112.O3.test-catalog.all.neg.xml"/>
 
-      <!-- embeds all the gxxx catalogs so they can be done in a single run -->
-      <catalog n="gxxx"
-	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/>
 
       <!-- arithmetic expressions, with 
            2, 7638, 2886, 1020, and 338 test cases.

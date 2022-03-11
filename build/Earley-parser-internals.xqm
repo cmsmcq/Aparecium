@@ -402,24 +402,25 @@ declare function epi:make-pfg-rules(
 	       
       $lei1 := $lei0[
                  not(some $i in 1 to (position() - 1)
-                  satisfies deep-equal(., $lei0[$i]))
+                  satisfies deep-equal(., $lei0[$i]) 
                   (: satisfies .?sig eq $lei0[$i]?sig :)
 		  (: satisfies ((.?from eq $lei0[$i]?from)
                     and      (.?to   eq $lei0[$i]?to  )
                     and deep-equal(
                               .?rule,   $lei0[$i]?rule)) :)
+                 )
                ],
                (: list of distinct completion items :)
 
       $lei2 := $lei1[
                  not(some $i in 2 to (count($leiQueue))
-                  satisfies deep-equal(., $leiQueue[$i]))
-                  (: satisfies .?sig eq $leiQueue[$i]?sig   :)
-		  (: satisfies ((.?from eq $lei0[$i]?from)
-                    and      (.?to   eq $lei0[$i]?to  )
-                    and deep-equal(
+                   satisfies deep-equal(., $leiQueue[$i]) 
+                   (: satisfies .?sig eq $leiQueue[$i]?sig   :)
+		   (: satisfies ((.?from eq $lei0[$i]?from)
+                     and      (.?to   eq $lei0[$i]?to  )
+                     and deep-equal(
                               .?rule,   $lei0[$i]?rule)) :)
-
+                 )
                ]
                (: completion items not in the queue :)
 

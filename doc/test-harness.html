@@ -411,12 +411,31 @@ indexing into the list.  It's easy to change the index.
 <pre class="scrapbody">    $catalog-of-catalogs := &lt;test-catalogs&gt;
 
       &lt;!-- local catalogs, mostly simple --&gt;
+      &lt;!-- under 60 seconds (2.1, 4.8, 20.1, 78.1) --&gt;
       &lt;catalog n="test0" path="{$apadir}test0.xml"/&gt;
       &lt;catalog n="test1" path="{$apadir}test1.xml"/&gt;
-      &lt;catalog n="test2" path="{$apadir}test2.xml"/&gt;
       &lt;catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/&gt;
       &lt;catalog n="misc" path="{$apadir}misc-tests.xml"/&gt;
-      &lt;catalog n="bogons" path="{$apadir}bogons-20220310.xml"/&gt;
+
+      &lt;!-- under 10 minutes (153) --&gt;
+      &lt;!-- embeds all the gxxx catalogs so they can be done in a single run --&gt;
+      &lt;catalog n="gxxx"
+	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/&gt;
+
+      &lt;!-- under 1 hour () --&gt;
+      &lt;!-- under 2 hours () --&gt;
+      &lt;!-- under 5 hours () --&gt;
+
+      &lt;!-- over 5 hours () --&gt;
+      &lt;!-- ixml-all is very slow (5.5h or so): 
+           all of the tests in the ixml repo --&gt;
+      &lt;catalog n="ixml-all"
+	       path="{$invdir}test-catalog.xml"/&gt;
+      
+      &lt;!-- to be timed --&gt;
+
+      &lt;catalog n="test2" path="{$apadir}test2.xml"/&gt;&lt;!-- nnn s --&gt;
+      &lt;catalog n="bogons" path="{$apadir}bogons-20220310.xml"/&gt;&lt;!-- nnn s --&gt;
 
       &lt;!-- syntax error tests in ixml repo --&gt;
       &lt;catalog n="syntax-cagt"
@@ -438,10 +457,6 @@ indexing into the list.  It's easy to change the index.
       &lt;catalog n="ixml-ixml"
 	       path="{$invdir}ixml/test-catalog.xml"/&gt;
       
-      &lt;!-- ixml-all is very slow: 
-           all of the tests in the ixml repo --&gt;
-      &lt;catalog n="ixml-all"
-	       path="{$invdir}test-catalog.xml"/&gt;
 
 
       &lt;!-- Positive and negative catalogs for various small grammars --&gt;
@@ -476,9 +491,6 @@ indexing into the list.  It's easy to change the index.
       &lt;catalog n="g112neg"
 	       path="{$ixtdir}gxxx/g112.O3.test-catalog.all.neg.xml"/&gt;
 
-      &lt;!-- embeds all the gxxx catalogs so they can be done in a single run --&gt;
-      &lt;catalog n="gxxx"
-	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/&gt;
 
       &lt;!-- arithmetic expressions, with 
            2, 7638, 2886, 1020, and 338 test cases.

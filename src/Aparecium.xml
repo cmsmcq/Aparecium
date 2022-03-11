@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '23 February 2022' >
+<!ENTITY date.last.touched '10 March 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
@@ -13,6 +13,7 @@
 <!ENTITY prime  "&#x2032;" ><!--/prime =prime or minute-->
 <!ENTITY rarr   "&#x2192;" ><!--/rightarrow /to A: =rightward arrow-->
 <!ENTITY rArr   "&#x21D2;" ><!--/Rightarrow A: =implies-->
+<!ENTITY times  "&#215;" ><!--/times B: =multiply sign-->
 <!ENTITY uarr   "&#x2191;" ><!--/uparrow A: =upward arrow-->
 
 <!ENTITY c '<ident>c</ident>' >
@@ -42,6 +43,7 @@
 <!ENTITY q '<ident>q</ident>' >
 <!ENTITY q0 '<ident>q</ident><hi rend="sub">0</hi>' >
 <!ENTITY qf '<ident>q</ident><hi rend="sub">&f;</hi>' >
+<!ENTITY s '<ident>s</ident>' >
 <!ENTITY T '<ident>T</ident>' >
 <!ENTITY w '<ident>w</ident>' >
 <!ENTITY w- '<ident>w&prime;</ident>' >
@@ -78,6 +80,10 @@
 </fileDesc>
 <revisionDesc>
 <list>
+<item>2022-03-10 : CMSMcQ : re-organize section on top-level
+interfaces; mention error cases explicitly</item>
+<item>2022-03-02? / 03-10 : CMSMcQ : writing parse-forest grammar
+code, making it work</item>
 <item>2022-02-16 : CMSMcQ : trying to clean up a bit</item>
 <item>2022-02-16 : CMSMcQ : insert timing requests in earley-closure.
 Conjecture:  4/5 of the time will be in the call to leiPCSrel(),
@@ -147,6 +153,32 @@ applications will not find here what they seek.</p>
 
 <p>The specific literate programming system used here is SWeb; a
 description of its notation is given in <ptr target="msm-1996"/>.
+The locus classicus for literate programming in general is
+<ptr target="Knuth-1984"/>.<note place="foot">
+<p>In most crucial ways, SWeb resembles Knuth's WEB system, as do
+most other literate programming systems: code is presented in a
+sequence determined by rhetorical and expository considerations and
+not by the constraints imposed by the programming language, one code
+scrap can refer to another (which generally takes the form of a
+hyperlink in the readable documentation, and of a transclusion in
+the machine-processable form), and some code scraps are identified
+as continuations of others, without an explicit hyperlink from the
+predecessor to the continuation.</p>
+
+<p>There are, of course, some differences.  WEB and CWEB are each
+specialized to a particular programming language (C, Pascal) and
+pretty-print code scraps using a characteristic typographic style;
+SWeb follows the example of nuweb, noweb, and other
+language-independent systems in presenting code verbatim, much as it
+would appear in a programmer's editor before the widespread
+introduction of syntax-coloring.  WEB documents consist of a flat
+sequence of numbered <soCalled>modules</soCalled> each with at most
+one scrap of code; SWeb documents have (or can have) a more
+conventional hierarchical structure of sections and subsections; in
+consequence, the numbering of code scraps is independent of document
+structure.  WEB has a relatively simple but powerful macro system;
+SWeb has none.</p>
+</note>
 <!-- <ref target="notation">in an appendix</ref>. -->
 </p>
 
@@ -176,17 +208,15 @@ representation returned will be not the raw parse tree but the
 tree as modified by annotations in the grammar.
 </p>
 <!-- further description of ixml desirable -->
-<p>This paper assumes that the reader is familiar with the
-ideas of Invisible XML and those of Earley parsing.  Several
-accessible introductions to Invisible XML can be found at
+<p>This paper assumes that the reader is familiar with the ideas of
+Invisible XML and those of Earley parsing.  Several accessible
+introductions to Invisible XML can be found at
 <xref>http://invisiblexml.org</xref>, as can the formal
-specification itself (<ptr target="pemberton-2021"/>).
-A 
-discussion of the particular challenges of implementing
-an Earley parser in a declarative functional language,
-and a re-formulation of the Earley algorithm in declarative
-terms to simplify that task, may be found in
-<ptr target="msm-2017"/>.</p>
+specification itself (<ptr target="pemberton-2021"/>).  A discussion
+of the particular challenges of implementing an Earley parser in a
+declarative functional language, and a re-formulation of the Earley
+algorithm in declarative terms to simplify that task, may be found
+in <ptr target="msm-2017"/>.</p>
 </div>
 
 <div id="overall">
@@ -241,32 +271,55 @@ node, two <ident>S</ident> nodes, three, ...).</p>
 which provides an infinite number of parses for the
 empty string, which vary both in depth and in width.</p>
 </note></p>
-<p>For this reason, Aparecium can divide this step further.	   
+<p>For this reason, Aparecium typically divides this step further.
+For historical reasons, there are two work flows.
 <list>
 <item>
-<p>Aparecium can extract parse trees direct from the Earley set
-(though the current implementation is rather slow).  But it can also
-extract a parse-forest grammar representing all parse trees
-for the sentence.</p>
-<p>Parse-forest grammars have the convenient property that they can
-concisely describe more than one parse tree over the given input, even
-infinite trees.  It is relatively straightforward to tell by examining
-the parse-forest grammar whether it describes a single parse tree or
-multiple parse trees, and whether the number of parse trees is finite
-or infinite.</p>
+<p>In the original flow, Aparecium extracts raw parse trees direct
+from the Earley set.  It attempts to identify and return
+<emph>all</emph> the parse trees for the sentence, except that it
+uses simple forms of loop detection to avoid attempting to produce
+an infinite number of trees.</p>
 </item>
 <item>
-<p>A separate function extracts [er, will extract] a single parse tree
-from the parse-forest grammar and returns a pair consisting of (a) the
-tree extracted and (b) a function which can be called to extract
-another parse tree, if there is another.</p>
+<p>A second function then simplifies the raw parse trees as
+specified in the annotation of the ixml grammar, in order to produce
+the XML output (sometimes referred to here as an abtract syntax tree
+or AST).</p>
+</item>
+</list>
+A second flow works differently.
+<list>
+<item>
+<p>From the Earley set, the second flow extracts a parse-forest
+grammar extract a parse-forest grammar representing all parse trees
+for the sentence.  (Well, almost all: here, too, loop detection is
+used to keep the task finite.)</p>
+<p>Parse-forest grammars have the convenient property that they can
+concisely describe more than one parse tree over the given input,
+even infinite trees.  It is relatively straightforward to tell by
+examining the parse-forest grammar whether it describes a single
+parse tree or multiple parse trees, and whether the number of parse
+trees is finite or infinite.</p>
+</item>
+<item>
+<p>A separate function extracts a single parse tree from the
+parse-forest grammar.</p>
 </item>
 </list>
 </p>
 </item>
 <item>
-<p>The final step is to simplify the raw parse tree as
-specified in the annotation of the ixml grammar.</p>
+<p>Again depending on the top-level function called, we may return
+to the user a single tree, a collection of trees, or a parse-forest
+grammar.</p>
+<p>The design also foresees the user being able to specify a maximum
+number of parse trees to return in case of ambiguity, or the
+processor being able to deliver a <soCalled>tree cursor</soCalled>
+pair consisting of a parse tree and a function which, when called,
+returns the next parse tree and a function to call for the one after
+that.  At this time, these additional variations are not
+available.</p>
 </item>
 </list>
 </p>
@@ -335,6 +388,7 @@ module namespace aparecium =
 :)
 
 <ptr target="aparecium-imports"/>
+
 <ptr target="aparecium-main"/>
 <ptr target="aparecium-secondary"/>
 <ptr target="aparecium-tertiary"/>
@@ -358,6 +412,9 @@ import module namespace ws
    at "wstrimtree.xqm";
 </scrap>
 </p>
+<p>The user-facing functions of this module are described in
+sections <ptr target="hi-calling" type="secnum"/> and <ptr
+target="alt-calls" type="secnum"/>.</p>
 </div>
 
 <div id="files-parser">
@@ -365,9 +422,9 @@ import module namespace ws
 <p><ident>Earley-parser.xqm</ident> has the functions called
 by the Aparecium module to parse the input and construct the
 parse tree.</p>
-<p>As far as I have been able, the functions defined here are ignorant
-of details of how the data are represented; they call functions
-defined in other modules to take care of the details.
+<p>As far as I have been able to make it so, the functions defined
+here are ignorant of details of how the data are represented; they
+call functions defined in other modules to take care of the details.
 <scrap file="Earley-parser.xqm">
 module namespace ep =
 "http://blackmesatech.com/2019/iXML/Earley-parser";
@@ -516,6 +573,195 @@ declare namespace map =
 </div>
 <div id="hi-calling">
 <head>Calling the parser</head>
+
+<p>Aparecium is designed to make loading non-XML resources as easy
+as loading XML documents.  When loading XML, the user of the XPath 3
+function library merely needs to call the <code>doc()</code>
+function, with a URI naming the resource, and the processor takes
+care of the rest.</p>
+<p>Aparecium provides several main functions to do analogous work for
+non-XML data described by a gramar:<list>
+<item><p>The <ident>parse-resource()</ident> function takes URIs for
+the input string and the input grammar to be used to parse the
+string.</p></item>
+<item><p>The <ident>parse-string()</ident> function is intended for
+use when the input string and the input grammar are already
+available, as character strings.</p></item>
+<item><p>The <ident>parse-string-with-compiled-grammar()</ident>
+function caters for the case in which multiple strings are to be
+parsed with the same grammar; functions to compile the grammar for
+reuse are listed in section <ptr type="secnum"
+target="alt-calls-secondary"/>.</p></item>
+<item><p>The <ident>doc()</ident> function (not yet implemented) is
+an attempt to let the function library handle the task of
+identifying a suitable grammar for a given input.</p></item>
+</list>
+
+<scrap id="aparecium-main"
+       name="Main interfaces for Aparecium">
+
+(: ******************************************************
+   * Main interfaces (and the simplest) 
+   ******************************************************
+   :)  
+<ptr target="ap-pr"/>
+<ptr target="ap-ps"/>
+<ptr target="ap-pswcg"/>
+<ptr target="ap-doc"/>
+</scrap>
+</p>
+
+<p><hi>To do:</hi> allow options
+on these to control what is returned, and how:
+<list>
+<item>parse tree(s) or parse-forest grammar?</item>
+<item>AST (as in the spec) or raw parse tree (for debugging)?</item>
+<item>with or without <att>_from</att> and <att>_to</att> attributes
+giving character offsets of the construct?</item>
+</list>
+</p>
+
+<div id="hi-call-pr">
+<head>The <ident>parse-resource()</ident> function</head>
+<p>Given URIs for the input and an ixml grammar describing it, the
+<ident>parse-resource()</ident> function returns (if all goes well)
+the XML representation of the resource. If not all goes well, XML
+representations of other situations are returned:
+<list>
+<item><p>An <gi>aparecium:no-parse</gi> element indicates that the
+grammar does not actually describe the input &mdash; the input is
+not a sentence in the language described by the grammar.  The
+element may contain some diagnostic information intended to help the
+human user understand where the parsing attempt failed.</p></item>
+<item><p>An <gi>aparecium:error</gi> element indicates that
+something went wrong.  It should have both an error code (tbd) and
+some prose explanation of the error.</p>
+<p><hi>At present, the error detection and error reporting of
+Aparecium offer many opportunities for improvement.</hi></p></item>
+</list>
+<!-- scrap prev="aparecium-main" -->
+<scrap id="ap-pr"
+       name="Define parse-resource()">
+(: ......................................................
+   parse-resource($Input, $Grammar)
+   ......................................................
+:)
+
+declare function aparecium:parse-resource(
+  $uriI as xs:string,
+  $uriG as xs:string
+) as element() {
+  let $sI := if (unparsed-text-available($uriI))
+             then unparsed-text($uriI)
+             else (),
+      $sG := if (unparsed-text-available($uriG))
+             then unparsed-text($uriG)
+             else ()
+  return if (exists($sI) and exists($sG))
+         then aparecium:parse-string($sI, $sG)
+         else <ptr target="appr-errors"/>
+};
+</scrap>
+We wrap the attempts to dereference the URIs in conditionals so as
+to detect the case where they are not in fact available.  If both
+the input and the grammar are available, we call the
+<ident>parse-string()</ident> function and return its result.  (Note
+that we assume that if <ident>unparsed-text-available()</ident>
+succeeds, then <ident>unparsed-text()</ident> will also succeed.
+<hi>The Functions and Operators spec should be checked to make sure
+this is the guarantee.</hi>) If either, or both, are missing, we
+return an error element.
+<scrap id="appr-errors"
+       name="If input or grammar are not found, say so">
+         if (exists($sI))
+         then element aparecium:error {
+              attribute id { "ap:tbd01" },
+              "Grammar (" || $uriG || ") not found."
+         }
+         else if (exists($sG))
+         then element aparecium:error {
+              attribute id { "ap:tbd02" },
+              "Input string (" || $uriI || ") not found."
+         }
+         else element aparecium:error {
+              attribute id { "ap:tbd03" },
+              "Input string (" || $uriI || ") not found.",
+              "Grammar (" || $uriG || ") not found.",
+              "You're breaking my heart here."
+         }
+</scrap>
+</p>
+</div>
+
+<div id="hi-call-ps">
+<head>The <ident>aparecium:parse-string()</ident> function</head>
+
+<p>Given strings with the input and an ixml grammar describing it,
+the <ident>parse-string()</ident> function returns the XML
+representation of the resource, or an <gi>aparecium:no-parse</gi>
+element, or an <gi>aparecium:error</gi> element.
+
+<scrap id="ap-ps"       
+       name="Define parse-string()">
+(: ......................................................
+   parse-string($Input, $Grammar)
+   ......................................................
+:)
+
+declare function aparecium:parse-string(
+  $sI as xs:string,
+  $sG as xs:string
+) as element() {
+  let $cG := aparecium:compile-grammar-from-string($sG)
+  return 
+    aparecium:parse-string-with-compiled-grammar($sI, $cG)
+};
+</scrap>
+<hi>To do: detect compilation failure (and for that matter,
+catch any exceptions raised in compilation).</hi>
+</p>
+</div>
+
+<div id="hi-call-pscg">
+<head>The <ident>aparecium:parse-string-with-compiled-grammar()</ident> function</head>
+<p>Given a string with the input and the pre-processed form of an ixml
+grammar describing it, the function
+<ident>parse-string-with-compiled-grammar()</ident> returns the XML
+representation of the string's parse tree.</p>
+<p>This is the workhorse of the library, called by many other
+functions.
+<scrap id="ap-pswcg"
+       name="Define parse-string-with-compiled-grammar()">
+(: ......................................................
+   parse-string-with-compiled-grammar($Input, $Grammar)
+   ......................................................
+:)
+declare function aparecium:parse-string-with-compiled-grammar(
+  $sI as xs:string,
+  $cG as element(ixml)
+) as element() {
+  (: let $trace := trace((),'&#xA;parse-string-'
+                   || ' with-compiled-grammar()&#xA;') :)
+
+  let $result := prof:time(
+                 (: earley:all-trees($sI, $cG)  :)
+                 earley:any-tree($sI, $cG) 
+                 , '0 Outer call: ')
+		 
+  return if (count($result) eq 1)
+         then $result
+         else &lt;forest 
+              xmlns:ixml="http://invisiblexml.org/NS"
+	      >{$result}&lt;/forest>
+};
+</scrap>
+</p>
+</div>
+
+<div id="hi-call-doc">
+<head>The <ident>aparecium:doc()</ident> function</head>
+
+
 <p>In the simple case, Aparecium is designed to be callable
 in much the same way as the <code>doc()</code> function.
 If the file at <ident>http://example.com/local.css</ident>
@@ -530,30 +776,104 @@ fetch the CSS file and a grammar for CSS, use the grammar
 to parse the CSS, and return the document node of an XML
 document representing the resulting parse tree.</p>
 
-<p>
-<!-- scrap prev="aparecium-main" -->
-<scrap id="ap-pr"
-       name="Define parse-resource()">
+<p>The <ident>aparecium:doc()</ident> function is intended to be as close
+as possible to the <ident>fn:doc()</ident> function.
+
+<hi>This function is not yet implemented, because I haven't gotten
+around to it yet.  To work well, it requires a bit more
+infrastructure.</hi>
+
+<scrap id="ap-doc"
+       name="The doc() function">
 (: ......................................................
-   parse-resource($Input, $Grammar)
+   doc($InputURI)
    ......................................................
-   Given URIs for the input and an ixml grammar 
-   describing it, returns the XML representation of 
+   Given the URI of the input, fetch the ixml grammar 
+   describing it and return the XML representation of 
    the resource.
 :)
 
-declare function aparecium:parse-resource(
-  $uriI as xs:string,
-  $uriG as xs:string
+(: TO BE IMPLEMENTED: use html fetch to get both HTTP
+header and payload.  If MIME type is ixml, fetch grammar
+and call parse-string.  Otherwise, if XML and 200 return
+payload, otherwise return header and payload.
+
+declare function aparecium:doc(
+  $uriI as xs:string
 ) as element() {
   let $sI := unparsed-text($uriI),
       $sG := unparsed-text($uriG)
   return aparecium:parse-string($sI, $sG)
 };
-   
+:)
 </scrap>
+Before it can parse the resource, the <ident>doc()</ident> function
+will need to find a grammar for it.  There are two ways this
+can happen (maybe more).
+<list>
+<item><p>The web server hosting the resource can label it with an HTTP
+header in which a reference to the grammar is given.  In <ptr
+target="Pemberton-2013"/>, the example given is a CSS stylesheet which
+can be served either as <code>text/css</code> (which is usual)
+<emph>or</emph> with the HTTP mediatype header
+<code>application/xml-invisible;
+syntax=http://example.com/syntax/css</code>.  The media type
+<code>application/xml-invisible</code> (not currently standardized)
+signals that the resource is an invisible XML document; the
+<code>syntax</code> parameter gives the URI of an appropriate ixml
+grammar.</p>
+<p>This approach allows ixml to fit nicely into the architecture of
+the Web.  It has the drawback that for the foreseeable future few
+servers will provide such HTTP headers; of lesser importance in the
+long run (but one important reason the <ident>aparecium:doc()</ident> function
+has not yet been implemented) is that this approach requires
+the implementor of an invisible-XML parser to understand
+content negotiation and implement it correctly.</p>
+</item>
+<item><p>Even if the web server does not provide a pointer to an
+invisible-XML grammar, an ixml parser can keep a cache or directory of
+grammars for a set of known media types, and use the media type
+returned by the server to find an appropriate grammar.</p>
+<p>A parser's installation package might, for example, install
+grammars for common media types (<code>text/css</code>,
+<code>text/csv</code>, <!-- <code>text/javascript</code> or
+<code>application/javascript</code>, -->
+<code>text/markdown</code>,
+<code>application/sql</code>,
+<!-- <code>text/mizar</code>, 
+<code>text/n3</code>, 
+<code>text/php</code>, 
+<code>text/rfc822-headers</code>, 
+<code>text/rtf</code>, -->
+etc.) and use them when <ident>doc()</ident> is called on a resource
+with a known media type.  Since grammars for known media types will be
+useful for all ixml users, there might be reason to make the
+collection of grammars available on the web.</p>
+<p>A parser might allow the user to add grammars to the
+cache, to fill gaps in the collection.</p>
+<p>Unfortunately, a number of notations that might be of interest to
+ixml users have no MIME type registered with IANA, so this approach
+does not help for TeX or LaTeX files (even ones that do not change the
+default parsing rules), or for grammars in well known notations like
+ABNF or Wirth's EBNF or ISO-standard EBNF.  Other notations of
+possible interest for ixml users (such as SVG path expressions,
+XPath expressions, XSLT match patterns, and others) do not have
+registered media types because they are generally embedded in other
+contexts rather than being served as stand-alone resources.</p>
+</item>
+<item><p>In an environment where a small number of grammars are very
+often used, an ixml parser might emulate web browsers which sniff
+content by examining the first portion of a resource and seeing
+whether it <soCalled>looks</soCalled> like a known media type.  In the
+same way, an ixml parser could attempt to identify the grammar of an
+undocumented (or <code>text/plain</code>) resource by attempting to
+parse the first 100 characters using several grammars.  This seems
+unlikely to be generally useful, however: there are too many possible
+grammars.</p>
+</item>
+</list>
 </p>
-<p><hi>Move other primary functions here.</hi></p>
+</div>
 </div>
 
 <div id="hi-prep-input">
@@ -1445,24 +1765,25 @@ against the items we already have rules for.
 	       
       $lei1 := $lei0[
                  not(some $i in 1 to (position() - 1)
-                  satisfies deep-equal(., $lei0[$i]))
+                  satisfies deep-equal(., $lei0[$i]) 
                   (: satisfies .?sig eq $lei0[$i]?sig :)
 		  (: satisfies ((.?from eq $lei0[$i]?from)
                     and      (.?to   eq $lei0[$i]?to  )
                     and deep-equal(
                               .?rule,   $lei0[$i]?rule)) :)
+                 )
                ],
                (: list of distinct completion items :)
 
       $lei2 := $lei1[
                  not(some $i in 2 to (count($leiQueue))
-                  satisfies deep-equal(., $leiQueue[$i]))
-                  (: satisfies .?sig eq $leiQueue[$i]?sig   :)
-		  (: satisfies ((.?from eq $lei0[$i]?from)
-                    and      (.?to   eq $lei0[$i]?to  )
-                    and deep-equal(
+                   satisfies deep-equal(., $leiQueue[$i]) 
+                   (: satisfies .?sig eq $leiQueue[$i]?sig   :)
+		   (: satisfies ((.?from eq $lei0[$i]?from)
+                     and      (.?to   eq $lei0[$i]?to  )
+                     and deep-equal(
                               .?rule,   $lei0[$i]?rule)) :)
-
+                 )
                ]
                (: completion items not in the queue :)
 
@@ -4007,184 +4328,7 @@ declare function gl:trace($x as item()?, $s as xs:string) as item() {
 <head>Alternative interfaces</head>
 <p>The file Aparecium.xqm offers several different calls
 intended for users of the library.  They are defined here.</p>
-<div id="alt-calls-main">
-<head>Main user-facing calls</head>
-<p>The file Aparecium.xqm has the user-facing
-function definitions for the main interface
-and the alternative interfaces.  Also some
-maintenance routines.  <hi>To do:</hi> allow options
-on these to control what is returned, and how:
-<list>
-<item>parse tree(s) or parse-forest grammar?</item>
-<item>AST (as in the spec) or raw parse tree (for debugging)?</item>
-<item>with or without <att>_from</att> and <att>_to</att> attributes
-giving character offsets of the construct?</item>
-</list>
-</p>
-<p>The <ident>aparecium:doc()</ident> function is intended to be as close
-as possible to the <ident>fn:doc()</ident> function.  It is not yet
-implemented, because it requires a bit more infrastructure.
-<scrap id="aparecium-main"
-       name="Main interfaces for Aparecium">
-(: ******************************************************
-   * Main interfaces (and the simplest) 
-   ******************************************************
-   :)
-  
-(: ......................................................
-   doc($InputURI)
-   ......................................................
-   Given the URI of the input, fetch the ixml grammar 
-   describing it and return the XML representation of 
-   the resource.
-:)
 
-(: TO BE IMPLEMENTED: use html fetch to get both HTTP
-header and payload.  If MIME type is ixml, fetch grammar
-and call parse-string.  Otherwise, if XML and 200 return
-payload, otherwise return header and payload.
-
-declare function aparecium:doc(
-  $uriI as xs:string
-) as element() {
-  let $sI := unparsed-text($uriI),
-      $sG := unparsed-text($uriG)
-  return aparecium:parse-string($sI, $sG)
-};
-:)
-
-<ptr target="ap-pr"/>
-<ptr target="ap-ps"/>
-<ptr target="ap-pswcg"/>
-</scrap>
-Before it can parse the resource, the <ident>doc()</ident> function
-will need to find a grammar for it.  There are two ways this
-can happen (maybe more).
-<list>
-<item><p>The web server hosting the resource can label it with an HTTP
-header in which a reference to the grammar is given.  In <ptr
-target="Pemberton-2013"/>, the example given is a CSS stylesheet which
-can be served either as <code>text/css</code> (which is usual)
-<emph>or</emph> with the HTTP mediatype header
-<code>application/xml-invisible;
-syntax=http://example.com/syntax/css</code>.  The media type
-<code>application/xml-invisible</code> (not currently standardized)
-signals that the resource is an invisible XML document; the
-<code>syntax</code> parameter gives the URI of an appropriate ixml
-grammar.</p>
-<p>This approach allows ixml to fit nicely into the architecture of
-the Web.  It has the drawback that for the foreseeable future few
-servers will provide such HTTP headers; of lesser importance in the
-long run (but one important reason the <ident>aparecium:doc()</ident> function
-has not yet been implemented) is that this approach requires
-the implementor of an invisible-XML parser to understand
-content negotiation and implement it correctly.</p>
-</item>
-<item><p>Even if the web server does not provide a pointer to an
-invisible-XML grammar, an ixml parser can keep a cache or directory of
-grammars for a set of known media types, and use the media type
-returned by the server to find an appropriate grammar.</p>
-<p>A parser's installation package might, for example, install
-grammars for common media types (<code>text/css</code>,
-<code>text/csv</code>, <!-- <code>text/javascript</code> or
-<code>application/javascript</code>, -->
-<code>text/markdown</code>,
-<code>application/sql</code>,
-<!-- <code>text/mizar</code>, 
-<code>text/n3</code>, 
-<code>text/php</code>, 
-<code>text/rfc822-headers</code>, 
-<code>text/rtf</code>, -->
-etc.) and use them when <ident>doc()</ident> is called on a resource
-with a known media type.  Since grammars for known media types will be
-useful for all ixml users, there might be reason to make the
-collection of grammars available on the web.</p>
-<p>A parser might allow the user to add grammars to the
-cache, to fill gaps in the collection.</p>
-<p>Unfortunately, a number of notations that might be of interest to
-ixml users have no MIME type registered with IANA, so this approach
-does not help for TeX or LaTeX files (even ones that do not change the
-default parsing rules), or for grammars in well known notations like
-ABNF or Wirth's EBNF or ISO-standard EBNF.  Other notations of
-possible interest for ixml users (such as SVG path expressions,
-XPath expressions, XSLT match patterns, and others) do not have
-registered media types because they are generally embedded in other
-contexts rather than being served as stand-alone resources.</p>
-</item>
-<item><p>In an environment where a small number of grammars are very
-often used, an ixml parser might emulate web browsers which sniff
-content by examining the first portion of a resource and seeing
-whether it <soCalled>looks</soCalled> like a known media type.  In the
-same way, an ixml parser could attempt to identify the grammar of an
-undocumented (or <code>text/plain</code>) resource by attempting to
-parse the first 100 characters using several grammars.  This seems
-unlikely to be generally useful, however: there are too many possible
-grammars.</p>
-</item>
-</list>
-</p>
-<p>Although its surface simplicity is attractive, the
-<ident>aparecium:doc()</ident> function is not going to cover
-all cases.  So we need interfaces that allow the user to specify
-both a resource and a grammar.  And for cases where the notation
-to be parsed is embedded in an XML document, the user needs to be
-able to specify the input to be parsed, and the grammar, either
-as a resource (using a URI) or as a string.
-The <ident>parse-string()</ident> takes both as strings.
-<scrap id="ap-ps"       
-       name="Define parse-string()">
-(: ......................................................
-   parse-string($Input, $Grammar)
-   ......................................................
-   Given strings with the input and an ixml grammar
-   describing it, returns the XML representation of the
-   resource.
-:)
-
-declare function aparecium:parse-string(
-  $sI as xs:string,
-  $sG as xs:string
-) as element() {
-  let $cG := aparecium:compile-grammar-from-string($sG)
-  return 
-    aparecium:parse-string-with-compiled-grammar($sI, $cG)
-};
-   
-</scrap>
-</p>
-<p>Given a string with the input and the pre-processed form of an ixml
-grammar describing it, the function
-<ident>parse-string-with-compiled-grammar()</ident> returns the XML
-representation of the string's parse tree.</p>
-<p>This is the workhorse of the library, called by many other
-functions.
-<scrap id="ap-pswcg"
-       name="Define parse-string-with-compiled-grammar()">
-(: ......................................................
-   parse-string-with-compiled-grammar($Input, $Grammar)
-   ......................................................
-:)
-declare function aparecium:parse-string-with-compiled-grammar(
-  $sI as xs:string,
-  $cG as element(ixml)
-) as element() {
-  (: let $trace := trace((),'&#xA;parse-string-'
-                   || ' with-compiled-grammar()&#xA;') :)
-
-  let $result := prof:time(
-                 (: earley:all-trees($sI, $cG)  :)
-                 earley:any-tree($sI, $cG) 
-                 , '0 Outer call: ')
-		 
-  return if (count($result) eq 1)
-         then $result
-         else &lt;forest 
-              xmlns:ixml="http://invisiblexml.org/NS"
-	      >{$result}&lt;/forest>
-};
-</scrap>
-</p>
-</div>
 <div id="alt-calls-secondary">
 <head>Secondary user-facing calls</head>
 
@@ -6865,10 +7009,12 @@ for Aparecium</title>.  Unpublished technical report, 2022.</bibl>
 </listBibl>
 </div>
 
+<!--
 <div id="notation">
 <head>Literate programming notation</head>
 <p><hi>To be supplied:  a description of the notation used here.</hi></p>
 </div>
+-->
 
 <div id="to-do">
 <head>To do</head>
@@ -6881,136 +7027,273 @@ program is not finished. Hence the following to-do lists.</p>
 <p>At the moment (&date.last.touched;), the primary concerns are to
 improve performance and robustness.</p>
 <list>
-<item><p>Improve tree constructor. Or, rather, replace
-it. Concretely:</p>
-<list>
-<item><p>Define a function to generate a parse-forest grammar
-from the Earley set, rather than a parse tree.</p></item>
-<item><p>Define a function to extract one or more parse trees
-from a parse-forest grammar.</p>
-</item>
-</list>
-<p>The parse-tree constructor currently suffers from dismal
-performance on some tests; see in particular the zeroes test catalog.
-It performs its work without backtracking but also without memoization
-or a work queue or any mechanism to avoid doing the same task multiple
-times.  The result can be a combinatorial explosion, with the same
-subtrees being constructed hundreds and thousands of times even for
-input of only ten characters.</p>
-<p>Since I want to write a parse-forest grammar constructor in any
-case, I have not attempted to instrument the current tree constructor;
-my plan is just to construct a parse-forest grammar and then extract
-the tree from that, if the user wishes.</p>
 
-<p>My current expectation is that in most cases this will result in a
-modest improvement in performance.  Performance should improve because
-useless work will be avoided and necessary work will be performed
-only once.  But the improvement will be modest, because not all
-grammars cause much unnecessary or repeated work.</p>
-<p>To be concrete: at the moment tree construction normally takes
-between 15% and 50% of the running time, except in a few pathological
-cases.  (Some timing data are in the A subdirectory of this project.)
-A ten to twenty per cent improvement in the performance of tree
-construction will thus provide a one to ten per cent overall
-improvement.  In the pathological cases, the improvement should be
-greater.
-</p>
+<item>
+<p><label>Bug fixes</label>.  Clear all test-case failures.</p>
 </item>
-<item><p>Quick and dirty ad-hoc tokenization change for
-ixml grammar for ixml grammars.  (Hand-modify and
-hand-annotate the grammar, add support for the
-annotations.)</p></item>
-<item><p>Revise the document thoroughly, reorganizing as
-appropriate.  There are two audiences: those interested
-in understanding how the implementation works, and those
-maintaining the code.</p>
-<p>Begin by introducing scraps to represent the abstract
-data types <ident>Earley item</ident>, <ident>Earley
-set</ident>, etc., so that the high-level algorithm can
-be followed independently of the chosen
-representation.  Explain the high-level algorithm,
-then the internals.</p>
+
+<item><p><label>Brown Sugar</label> plan.<note place="foot">
+<p>So called because this is a dirty form of the
+<soCalled>sugar</soCalled> plan described below.</p>
+</note>
+Quick and dirty ad-hoc tokenization change for ixml grammar for ixml
+grammars.  Hand-modify and hand-annotate the grammar, add support for
+those annotations.</p>
+<p>Note that the ixml grammar has both safe and unsafe tokenization
+candidates: whitespace and comment-data are safe, and names are unsafe
+owing to the full stop.  So this is a quick and dirty test of both
+<soCalled>Sugar</soCalled> and <soCalled>Bruno</soCalled>.</p>
 </item>
-<item><p>Allow invoker to specify options, so they can choose whether
-to get back one parse tree, several, a parse-forest grammar, a raw
-parse tree, or the entire Earley set.</p>
-<p>The current organization based on higher-level functions should be
-scrapped, in order that Aparecium can run under Saxon.</p>
-<p>Eventually the current direct-construction code may be
-retired completely.</p>
+
+<item>
+<p><label>Vendor neutrality</label>.  Take time to make frameworks to
+run in multiple XQuery engines, both from any GUI interface and from
+the command line.  At least BaseX, Saxon, eXist, ...</p>
+<p>Not an atomic task.</p>
+<!-- The positioning of this item is contingent.
+If Brown Sugar produces a sizable speedup (say, a factor of two?),
+then further work on optimization can wait and is better done on
+several processors.
+If Brown Sugar does not produce a useful speedup, then it may be
+desirable to pull the Recursive Descent task forward.  It will feel
+better worrying about vendor neutrality if the tool is actually
+useful.
+-->
 </item>
-<item><p>Improve tokenization.</p>
+
+<item>
+<p><label>Direct tree construction</label>.  Revisit the old code for
+direct construction of trees to try to fix its problems.</p>
+<p>First try to restructure it in SWeb to make it easier to
+understand.  Then try to isolate bottlenecks and causes of problems.
+Then try to fix them.</p>
+</item>
+
+<item>
+<p><label>Revise and restructure</label>.  Revise the document
+thoroughly, reorganizing as appropriate.  There are two audiences:
+those interested in understanding how the implementation works, and
+those maintaining the code.</p>
+<p>Begin by introducing scraps to represent the abstract data types
+<ident>Earley item</ident>, <ident>Earley set</ident>, etc., so that
+the high-level algorithm can be followed independently of the chosen
+representation.  Explain the high-level algorithm, then the
+internals.</p>
+<p>This is not an atomic task and may be interleaved with other
+things.</p>
+</item>
+
+<item>
+<p><label>User options</label>.  Allow invoker to specify options, so
+they can choose whether to get back one parse tree, several, a
+parse-forest grammar, a raw parse tree, or the entire Earley set.</p>
+<p>This will also require some extension to the test harness and
+possibly to the test catalog schema.</p>
+</item>
+
+<item><p><label>Robustness</label>.  Improve robustness and resistance
+to unexpected error.  Not necessarily an atomic task, but worth a
+concerted effort to walk through every scrap of code checking for
+assumptions that need to be checked.</p></item>
+
+<item><p><label>Sugar</label>. Improve tokenization for
+<soCalled>suitable</soCalled> nonterminals.  <hi>This is only sensible
+if the experience from Brown Sugar suggests it produces a useful
+speedup.  I expect that it will.</hi></p>
+
 <p>Since ixml grammars don't have a distinct token level, either
 analysis by the processor or manual annotation, or both, may be
 required.  The goal is to identify nonterminals which can be
 recognized with a single greedy regular-expression match, and
-recognize them in that way.  I believe a nonterminal &N;
-qualifies for this treatment if and only if:
+recognize them in that way.  I believe a nonterminal &N; is suitable
+for this treatment if and only if:
+
 <list>
-<item>&N; defines a regular language.  (Sufficient but not necessary
+<item>
+<p>&N; defines a regular language.  (Sufficient but not necessary
 condition: no center embedding for them or any descendant.  A stronger
-and easier condition: no self-embedding at all.)</item>
-<item>Every nonterminal descendant of &N; is marked hidden.</item>
-<item>Every terminal descendant of &N; is marked visible.</item>
-<item>&N; is what we might call <term>end-stopped</term>, by analogy
+and easier condition: no self-embedding at all.)</p>
+</item>
+<item>
+<p>Every nonterminal descendant of &N; is marked hidden.</p>
+</item>
+<item>
+<p>Every terminal descendant of &N; is marked visible.</p>
+</item>
+<item>
+<p>&N; is what we might call <term>end-stopped</term>, by analogy
 with the metrical phenomenon in which syntactic and verse boundaries
 fall together, thus clearly marking the boundary.  Concretely, &N; is
 end-stopped if it is clear without lookahead where the end of an
 occurrence of &N; falls: any legal character is either a continuation
 of the &N; or the beginning of the next symbol, and no symbol can be
-read in both ways.<note place="foot">
+read in both ways.</p>
 
 <p>Operationally, I think end-stopping can be detected as follows.
 <list>
 
-<item>Construct the FSA for the &O0; regular superset approximation of
+<item>
+<p>Construct the FSA for the &O0; regular superset approximation of
 &L.G;, in the usual way.  For each nonterminal, keep track of the set
 of states that recognize that nonterminal.  (Including states in
 descendant nonterminals, if they have been retained; in practice, I
 expect it will make sense to rewrite the rules for &N; as a regular
-expression over characters.)</item>
+expression over characters.)</p></item>
 
-<item>For every nonterminal &N; and every state which can reach the
+<item>
+<p>For every nonterminal &N; and every state which can reach the
 final state of &N; via epsilon transitions, mark that state as a
 member of <ident>last</ident>(&N;).  The terminal subset of this set
-we can call <ident>last</ident><hi rend="sub">&T;</hi>(&N;).</item>
+we can call <ident>last</ident><hi rend="sub">&T;</hi>(&N;).</p>
+</item>
 
-<item>Remove epsilon transitions.</item>
+<item>
+<p>Remove epsilon transitions.</p>
+</item>
 
-<item>For each state &q; in <ident>last</ident><hi
+<item>
+<p>For each state &q; in <ident>last</ident><hi
 rend="sub">&T;</hi>(&N;), classify the outgoing arcs: either they lead
 to a state in the recognizer for &N;, or they lead to one of the
 initial states in a recognizer for some nonterminal in
 <ident>follow(N)</ident>.  We can call these <term>endotelic</term>
 and <term>exotelic</term> arcs: they have goals inside, or outside,
-the recognizer for &N;.</item>
+the recognizer for &N;.</p>
+</item>
 
-<item>If no symbol occurs on both an endotelic and an exotelic arc,
+<item>
+<p>If no symbol occurs on both an endotelic and an exotelic arc,
 then &N; is end-stopped: if an occurrence of &N; can be extended by
 including the next character in the input, then in any correct parse
 that character is included in the &N;.  If any symbol occurs on both
 kinds of arc, then it is not clear without further information
-whether it belongs in the &N; or outside it.</item>
+whether it belongs in the &N; or outside it.</p>
+</item>
 </list>
 </p>
-
-</note></item>
-<item></item>
+</item>
 </list></p>
 </item>
 
+<item>
+<p><label>Bruno</label>.  A brute-force variation on Sugar.  If an
+otherwise suitable nonterminal &N; is not end-stopped
+(e.g. <ident>name</ident> in the ixml specification grammar), it may
+still be worthwhile to use regular expressions to match it using a
+brute-force method to find the appropriate stopping point: register
+them all:</p>
+<list>
+<item>
+<p>When &N; is predicted at position &p;, use a greedy match to find
+the longest &N; in the input starting at &p;.  Assume this match has
+length &n;.</p>
+</item>
+<item>
+<p>For &i; in 0 to &n;:
+<list>
+<item>
+<p>Let &s; be the substring in the input beginning at &p; with length
+&i;.</p>
+</item>
+<item>
+<p>If &s; is an instance of &N;, record a completion item for &N; of the form
+(&p;, &p;+&i;, &N;, &qf;).</p>
+</item>
+</list>
+</p>
+<p>This will reduce the number of items produced for the range
+&I;[&p;, &p;+&n;] by about half, and may reduce run time: in the worst
+case we will have
+<list>
+<item>&n; calls to construct substring &s;</item>
+<item>&n; + 1 calls to <ident>matches</ident>(&s;, <ident>pattern</ident>)</item>
+<item>&n; completion items for &N;</item>
+<item>0 searches in the Earley set</item>
+</list>
+for a total of &n; &times; (cost of substring construction
++ cost of regex match + cost of item construction).
+In the standard Earley algorithm, the cost will be
+<list>
+<item>&n; inspections of &I;[&p; + &i;]</item>
+<item>&n; progress or completion items for &N; (or whatever the
+lowest-level parent of the repetition operator is)</item>
+<item>an indeterminate number of other progress or completion items for descendants of &N;</item>
+<item>one or two searches in the Earley set for each item constructed</item>
+</list>
+</p>
+</item>
+</list>
+<p><hi>This is only sensible if the experience from Brown Sugar
+suggests it produces a useful speedup.  I expect that it
+will.</hi></p>
+</item>
 
-<item><p>Improve diagnostics in case of failure.</p></item>
-<item><p>Improve robustness.</p></item>
+<item><p><label>Diagnostics</label>.  Improve diagnostics in case of
+failure.</p></item>
 
-<item><p>Upgrade the SWeb infrastructure to support
-XSLT.</p></item>
-<item><p>Create XSLT version of Aparecium.</p></item>
+<item><p><label>Recursive descent</label>.  Support recursive-descent
+parsing.</p>
 
-<item><p>Consider shifting to using BNF rather than EBNF
-internally. (This will make it simpler to handle various forms of
-infinite ambiguity satisfactorily, but will have little effect in
-ordinary grammars.)</p></item>
+<list>
+
+<item><p>Develop code to check whether a grammar is LL(1) or
+LL(k).</p></item>
+
+<item>
+<p>Make an LL(1) grammar out of the ixml grammar.</p>
+<p>Automate the grammar rewrites necessary to do this, so it can be
+re-done when the ixml grammar changes.</p>
+</item>
+
+<item>
+<p>Write code to generate tables from an LL(1) parser to drive a
+table-driven parser.</p>
+</item>
+
+<item>
+<p>Write code to generate a recursive-descent parser for an LL(1)
+grammar.</p>
+</item>
+
+<item>
+<p>Make a recursive-descent or table-driven LL(1) parser for the ixml
+spec grammar and use it when parsing input grammars.</p>
+<p>I hope that this change will produce an order of magnitude speedup
+in parsing input grammars.</p>
+</item>
+</list>
+
+<p>Initially, this code may be in Aparecium or in Gingersnap or in
+both.  If the LL(1) checking runs fast enough, it will be needed in
+Aparecium, so that when the user supplies an LL(1) grammar Aparecium
+can use a faster parsing algorithm than Earley.</p>
+</item>
+
+<item><p><label>Performance</label>.  Measure time, measure frequency
+of operations, look for opportunities to do better.  If calculations
+can be done statically, push them into the grammar compiler.</p>
+
+<p>By no means an atomic task.</p>
+
+<p>Note that several other items on this list are motivated largely or
+exclusively by the desire to improve time performance: Brown Sugar,
+revision of direct tree construction, Sugar, Bruno, and work on
+recursive descent.</p></item>
+
+<item><p><label>SWeb upgrade</label>.  Upgrade the SWeb infrastructure
+to support XSLT.</p></item>
+
+<item><p><label>XSLT</label>.  Create XSLT version of
+Aparecium.</p></item>
+
+<item><p><label>BNF</label>.  Consider shifting to using BNF rather
+than EBNF internally. This will make it simpler to handle various
+forms of infinite ambiguity satisfactorily, but will have little
+effect in ordinary grammars.</p>
+<p>Some but not all of the effects of switching to BNF can be tested
+by just comparing behavior on EBNF grammars and BNF equivalents.  This
+does not however account for possibly faster compilation and
+recognition; that would require alternate code.</p></item>
 
 </list>
 </div>
@@ -7057,6 +7340,7 @@ decent display / translation into XHTML), move to github.</item>
 tangle processor</item>
 </list>
 </div>
+
 <div>
 <head>To-do list from Earley recognizer internals module</head>
 <p>This module has a complicated enough to-do list of its own that
@@ -7112,6 +7396,118 @@ and fGES (to be renamed for the second.</p>
 </item>
 <item><p>For testing purposes, provide a recognize function that
 specifies a start symbol (analogous to phrase/2 in Prolog).</p></item>
+</list>
+</div>
+
+<div id="done-that">
+<head>Done</head>
+<p>This section records things that were on the to-do lists above
+and got done, in case that information is needed later.  Maybe I
+just want to remember that some things do get done.</p>
+<list>
+<item>
+<p>Improve tree constructor. Or, rather, replace
+it. Concretely:</p>
+<list>
+<item><p>Define a function to generate a parse-forest grammar
+from the Earley set, rather than a parse tree.</p></item>
+<item><p>Define a function to extract one or more parse trees
+from a parse-forest grammar.</p>
+</item>
+</list>
+<p>The parse-tree constructor currently suffers from dismal
+performance on some tests; see in particular the zeroes test catalog.
+It performs its work without backtracking but also without memoization
+or a work queue or any mechanism to avoid doing the same task multiple
+times.  The result can be a combinatorial explosion, with the same
+subtrees being constructed hundreds and thousands of times even for
+input of only ten characters.</p>
+<p>Since I want to write a parse-forest grammar constructor in any
+case, I have not attempted to instrument the current tree constructor;
+my plan is just to construct a parse-forest grammar and then extract
+the tree from that, if the user wishes.</p>
+
+<p>My current expectation is that in most cases this will result in a
+modest improvement in performance.  Performance should improve because
+useless work will be avoided and necessary work will be performed
+only once.  But the improvement will be modest, because not all
+grammars cause much unnecessary or repeated work.</p>
+<p>To be concrete: at the moment tree construction normally takes
+between 15% and 50% of the running time, except in a few pathological
+cases.  (Some timing data are in the A subdirectory of this project.)
+A ten to twenty per cent improvement in the performance of tree
+construction will thus provide a one to ten per cent overall
+improvement.  In the pathological cases, the improvement should be
+greater.
+</p>
+<p><hi>Parse-forest grammar constructor completed in early March
+2022.  It appears not to suffer from the pathological behavior on
+right-recursive grammars like some in the zeroes test set, but on
+other test cases it is slower than the old code, not faster; the
+overall test case times are 25% to 100% higher than for the old
+code.</hi></p>
+</item>
+<item>
+<p>The current organization based on higher-level functions should be
+scrapped, in order that Aparecium can run under Saxon.</p>
+<p><hi>Done in connection with parse-forest grammars, March
+2022.</hi></p>
+</item>
+</list>
+
+</div>
+<div id="puzzles">
+<head>Puzzles to come back to</head>
+<p>As this project has proceeded, I have encountered some unexpected
+phenomena.  Sometimes reflection or study has helped me to
+understand what at first was puzzling, sometimes not.  The list
+below mentions some things I have not yet understood and hope to
+come back to and understand, some time.</p>
+<list>
+<item>
+<p>The rules in Earley items sometimes appear to have no parents,
+sometimes to have an <gi>ixml</gi> parent which does not have the
+children I expected it to have.</p>
+<p>In v0.1, when Earley items were represented by elements, putting
+a rule into an item required that it be copied.  But when Earley
+items are represented by maps, copying should no longer be required.
+Is there code that is forcing a copy, and if so where?</p>
+</item>
+<item>
+<p>The code for attribute values in <ident>tree-from-pfg()</ident>
+collects text nodes, but if the sequence of text nodes is
+serialized, they are treated as if they were strings, or as if they
+were not adjacent: whitespace is injected.  Why?</p>
+<p>The current workaround with <ident>string-join()</ident> means I
+didn't need to solve this problem to proceed, but it's puzzling.</p>
+<p>This appears not to happen in mixed content; is it the fact of
+being serialized as an attribute value that is causing the
+issue?</p>
+</item>
+<item>
+<p>In Earley recognition, the rule index is a salient part of an
+Earley item; in generating a parse-forest grammar, it is irrelevant
+and two items are equivalent if they have the same
+<ident>from</ident>, <ident>to</ident>, and <ident>rule</ident>
+values.</p>
+<p>So when items are de-duped in <ident>find-walks()</ident>, it is
+necessary to ignore the rule index.  (When this was not done,
+duplicate right-hand sides and duplicate rules appeared in the
+parse-forest grammar for <q><code>a</code></q> parsed against
+<q><code>S=S;'a'.</code></q>)</p>
+<p>In principle, it appears that the same ought to apply to
+de-duping in <ident>make-pfg-rules()</ident>.  But when the code is
+changed to do that, PFG generation breaks.  Why?</p>
+</item>
+<item>
+<p>Why is tree construction via a parse-forest grammar slower than
+direct tree construction?</p>
+<p>Conjecture: because in unambiguous cases the PFG has more than
+twice as many element nodes:  one for the nonterminal reference, one
+for the rule, plus a <gi>literal</gi> element for each text node.</p>
+<p>Can empirical counts confirm this?</p>
+<p>Would a parse-forest map do better?</p>
+</item>
 </list>
 </div>
 </div>

@@ -24,57 +24,51 @@ import module namespace ws
    = "http://blackmesatech.com/2019/iXML/wstrimtree"
    at "wstrimtree.xqm";
 
+
+
 (: ******************************************************
    * Main interfaces (and the simplest) 
    ******************************************************
-   :)
-  
-(: ......................................................
-   doc($InputURI)
-   ......................................................
-   Given the URI of the input, fetch the ixml grammar 
-   describing it and return the XML representation of 
-   the resource.
-:)
-
-(: TO BE IMPLEMENTED: use html fetch to get both HTTP
-header and payload.  If MIME type is ixml, fetch grammar
-and call parse-string.  Otherwise, if XML and 200 return
-payload, otherwise return header and payload.
-
-declare function aparecium:doc(
-  $uriI as xs:string
-) as element() {
-  let $sI := unparsed-text($uriI),
-      $sG := unparsed-text($uriG)
-  return aparecium:parse-string($sI, $sG)
-};
-:)
-
+   :)  
 (: ......................................................
    parse-resource($Input, $Grammar)
    ......................................................
-   Given URIs for the input and an ixml grammar 
-   describing it, returns the XML representation of 
-   the resource.
 :)
 
 declare function aparecium:parse-resource(
   $uriI as xs:string,
   $uriG as xs:string
 ) as element() {
-  let $sI := unparsed-text($uriI),
-      $sG := unparsed-text($uriG)
-  return aparecium:parse-string($sI, $sG)
+  let $sI := if (unparsed-text-available($uriI))
+             then unparsed-text($uriI)
+             else (),
+      $sG := if (unparsed-text-available($uriG))
+             then unparsed-text($uriG)
+             else ()
+  return if (exists($sI) and exists($sG))
+         then aparecium:parse-string($sI, $sG)
+         else          if (exists($sI))
+         then element aparecium:error {
+              attribute id { "ap:tbd01" },
+              "Grammar (" || $uriG || ") not found."
+         }
+         else if (exists($sG))
+         then element aparecium:error {
+              attribute id { "ap:tbd02" },
+              "Input string (" || $uriI || ") not found."
+         }
+         else element aparecium:error {
+              attribute id { "ap:tbd03" },
+              "Input string (" || $uriI || ") not found.",
+              "Grammar (" || $uriG || ") not found.",
+              "You're breaking my heart here."
+         }
+
 };
-   
 
 (: ......................................................
    parse-string($Input, $Grammar)
    ......................................................
-   Given strings with the input and an ixml grammar
-   describing it, returns the XML representation of the
-   resource.
 :)
 
 declare function aparecium:parse-string(
@@ -85,7 +79,6 @@ declare function aparecium:parse-string(
   return 
     aparecium:parse-string-with-compiled-grammar($sI, $cG)
 };
-   
 
 (: ......................................................
    parse-string-with-compiled-grammar($Input, $Grammar)
@@ -111,6 +104,28 @@ parse-string-'
               xmlns:ixml="http://invisiblexml.org/NS"
 	      >{$result}</forest>
 };
+
+(: ......................................................
+   doc($InputURI)
+   ......................................................
+   Given the URI of the input, fetch the ixml grammar 
+   describing it and return the XML representation of 
+   the resource.
+:)
+
+(: TO BE IMPLEMENTED: use html fetch to get both HTTP
+header and payload.  If MIME type is ixml, fetch grammar
+and call parse-string.  Otherwise, if XML and 200 return
+payload, otherwise return header and payload.
+
+declare function aparecium:doc(
+  $uriI as xs:string
+) as element() {
+  let $sI := unparsed-text($uriI),
+      $sG := unparsed-text($uriG)
+  return aparecium:parse-string($sI, $sG)
+};
+:)
 
 
 (: ******************************************************
