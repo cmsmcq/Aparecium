@@ -283,6 +283,7 @@ let $catalog-index := 'bogons' (: which catalog to run? short name :)
 let $invdir := "../../ixml/tests/",
     $apadir := "../../Aparecium/tests/",
     $ixtdir := "../../ixml-tests/tests-straw/",
+    $itwdir := "../../ixml-tests/tests-wood/",
     $outdir := resolve-uri($apadir || 'results-' 
                || $catalog-index 
                || '-'
@@ -300,14 +301,17 @@ indexing into the list.  It's easy to change the index.
     $catalog-of-catalogs := &lt;test-catalogs>
 
       &lt;!-- local catalogs, mostly simple -->
-      &lt;!-- under 60 seconds (2.1, 4.8, 20.1, 78.1) -->
+      &lt;!-- under 60 seconds (2.1, 4.8, 20.1, 12.4) -->
       &lt;catalog n="test0" path="{$apadir}test0.xml"/>
       &lt;catalog n="test1" path="{$apadir}test1.xml"/>
       &lt;catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/>
-      &lt;catalog n="misc" path="{$apadir}misc-tests.xml"/>
+      &lt;catalog n="hygiene" path="{$itwdir}ixml-20220222/hygiene-tests.xml"/>
 
-      &lt;!-- under 10 minutes (153) -->
+      &lt;!-- under 10 minutes -->
+      &lt;!-- 78.1s -->
+      &lt;catalog n="misc" path="{$apadir}misc-tests.xml"/>
       &lt;!-- embeds all the gxxx catalogs so they can be done in a single run -->
+      &lt;!-- 153s -->
       &lt;catalog n="gxxx"
 	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/>
 
