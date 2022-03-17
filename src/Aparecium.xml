@@ -693,7 +693,7 @@ Other options may be described later.</p>
    ******************************************************
    :)
 declare variable $aparecium:options 
-   as map { xs:string, item()* }
+   as map(xs:string, item()*)
    := map {
         'return': 'any-tree',
         'tree-count': 2,
@@ -814,8 +814,8 @@ declare function aparecium:parse-string(
              &TATS;
              
   return 
-    if ($cG/self::ap:error)
-    then element ap:error {
+    if ($cG/self::aparecium:error)
+    then element aparecium:error {
       attribute id { "ap:tbd04" },
       "parse-string():  Error compiling grammar.",
       $cG      
@@ -835,7 +835,15 @@ grammar describing it, the function
 <ident>parse-string-with-compiled-grammar()</ident> returns the XML
 representation of the string's parse tree.</p>
 <p>This is the workhorse of the library, called by many other
-functions.
+functions.  Because it can be called directly with an untrusted
+grammar, by default it checks the grammar before using it.<note place="foot">
+<p>Since in many cases, the grammar in question will just
+have been checked, this may lead to unnecessary slowdowns
+in some cases.  If it becomes an issue, we can pass an option
+in signaling that the grammar has just been checked.  But in
+fact it's quite possible that the XQuery engine will detect
+the double call and re-use the answer from the first call.</p>
+</note>
 <scrap id="ap-pswcg"
        name="Define parse-string-with-compiled-grammar()">
 (: ......................................................
@@ -846,7 +854,9 @@ declare function aparecium:parse-string-with-compiled-grammar(
   $sI as xs:string,
   $cG as element(ixml)
 ) as element() {
-  let $cg-ok := ap:compiled-grammar-ok($cG)
+  let $cg-ok := &STAT;prof:time( &TATS;
+                aparecium:grammar-ok($cG)
+                &STAT;, 'pswcg() calling grammar-ok():')
 
   let $result := if ($cg-ok/self::ixml) 
                  then &STAT;prof:time( &TATS;
@@ -854,7 +864,7 @@ declare function aparecium:parse-string-with-compiled-grammar(
                      &STAT;
                      , '0 Outer call to earley:any-tree(): ')
                       &TATS;
-                 else element ap:error {
+                 else element aparecium:error {
                    attribute id { "ap:tbd05" },
                    "Compiled grammar flawed:",
                    $cg-ok
@@ -990,15 +1000,953 @@ grammars.</p>
 
 <div id="hi-prep-input">
 <head>Preparing the input</head>
-<p>Watch this space.</p>
+<p>The input does not require any particular preparation (beyond
+loading it from a URI in some cases). So this section turns out
+to be empty.</p>
 </div>
 
 <div id="hi-prep-grammar">
 <head>Preparing the grammar</head>
-<p>Watch this space.</p>
+<p>The grammar, on the other hand, does need preparation: once
+it's in XML form, it's <soCalled>compiled</soCalled>, which
+here means that attributes are added to each <gi>rule</gi> element
+describing the right-hand side of the rule as a finite state
+automaton, and providing some other information.</p>
+<p>In the ideal case, there would be three slightly different data
+flows, depending on how the grammar was supplied:
+<list>
+<item>for a string: parsing into XML, hygiene and other conformance
+checks, cleanup, compilation;</item>
+<item>for XML: structural checks on the XML, hygiene and other
+conformance checks, cleanup, compilation;</item>
+<item>for a compiled grammar supplied by the user: structural checks
+on the XML, hygiene and other conformance checks, cleanup.</item>
+</list>
+For the first two, cleanup precedes compilation since cleanup of the
+grammar can reduce its size, so the compiler has less work to do.</p>
+<p>But the current code uses the same work-flow for all grammars: an
+ixml grammar is parsed into XML; an XML grammar is compiled; a
+compiled grammar is examined for structural integrity and hygiene
+and then cleaned up if options permit it.</p>
 
-<div id="hi-check-grammar">
-<head>Checking and cleaning the grammar</head>
+<!--
+<div id="hi-initial-grammar-check">
+<head>Initial grammar checking</head>
+<p>Pre-compilation sanity checks.</p>
+<p>Omitted for now.</p>
+</div>
+-->
+
+<div id="hi-compile-grammar">
+<head>Compiling the grammar</head>
+
+<p>Compilation is handled by a separate module,
+<ident>Gluschkov.xqm</ident>, which has routines for annotating a
+grammar with attributes that allow the right-hand sides to be
+interpreted as Gluschkov automata: that is, finite state automata
+whose states are the basic symbols of the regular expression.
+<scrap file="Gluschkov.xqm">
+module namespace gl =
+"http://blackmesatech.com/2019/iXML/Gluschkov";
+
+(: Constructs a Gluschkov automaton for ixml :)
+
+(: GPL ...:) 
+
+<ptr target="gl-prolog"/>
+<ptr target="gl-ME"/>
+<ptr target="gl-merge"/>
+<ptr target="gl-read-one-ixml-char"/>
+<ptr target="gl-trace"/>
+</scrap></p>
+
+<p>This module is one place affected by the syntax changes
+between 2013 and 2021.  Most scraps are defined twice,
+once in the initial version following the 2013 syntax,
+and again for today's syntax. 
+(Steven's original paper said something about bootstrapping
+and supporting multiple syntaxes, but I got confused and am
+not going to try to do that.  Too clever for me.)
+</p>
+
+<div id="leggl-prolog">
+<head>Module prolog</head>
+<p>The module prolog defines a namespace for follow sets, and a
+variable with the namespace name.  We also import the
+<ident>d2x</ident> library so we can use its hex-to-decimal
+conversion.
+<scrap id="gl-prolog"
+       name="Prolog for Gluschkov module">
+declare namespace follow =
+"http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
+
+import module namespace d2x =
+'http://blackmesatech.com/2019/iXML/d2x'
+at "d2x.xqm";
+
+declare variable $gl:follow-ns :=
+"http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
+</scrap>
+</p>
+</div>
+
+<div id="leggl-ME">
+<head>Calculating the Gluschkov automaton &ME;</head>
+
+
+<p>For a regular expression &E;, the Gluschkov automaton
+(conventionally referred to as &M_E;) is a finite state automaton
+derived from (and in some sense constructed on top of) &E;.  The
+states of &ME; are the basic symbols of &E;, with the fairly
+straightforward interpretation that we are in a given state &q; if and
+only if we have just read an input character (or, in the general case,
+character sequence) that matches the atomic symbol &q;.  We calculate
+the Gluschkov automaton by following the algorithm laid out in
+Brüggemann-Klein 1993, adapted for the XML form of ixml grammars.</p>
+<p>Each node <ident>$E</ident> in the expression gets:
+<list>
+<item><att>id</att> to identify the expression; in the case of positions (i.e. 
+       occurrences of symbols in the alphabet, as opposed to
+       parenthesized expressions etc.), this also
+       serves as an identifier for the FSA state.</item>
+<item><att>first</att> = set of positions which match the first symbol of some word
+       in &L..E;</item>
+<item><att>last</att> = set of positions which match the last symbol in some word
+       in &L..E;</item>
+<item><att>nullable</att> = true iff &L..E; contains the empty
+word</item>
+</list>
+</p>
+<p>We also have attributes to represent the
+<ident>follow</ident>(<ident>exp</ident>, <ident>sym</ident>) function
+for <ident>exp</ident>=<ident>$E</ident>.  For each position $p in $E
+we have an attribute in the follow namespace whose local name is the
+ID of $p; the value of the attribute is the set of positions which can
+follow $p in a path through $E.
+</p>
+<p>By representing follow($E,$p) as an attribute on $E we avoid having
+to traverse the tree multiple times.
+</p>
+
+<p>The
+construction of the Gluschkov automaton consists largely of
+calculating, from the structure of &E;, which symbols can follow which
+other symbols, and defining an appropriate transition function.
+Along the way, various auxiliary functions are computed for each
+subexpression of &E;.</p>
+<p>For the right-hand side of a rule in an ixml grammar, the basic
+symbols of the expression are terminal and nonterminal symbols, and
+the subexpressions include both the basic symbols and the other
+elements in the XML representation of the right-hand side.  For each
+subexpression, we add attributes to record various values:
+<list>
+<item>an ID (for use in referring to the state)</item>
+<item><att>nullable</att> (is the empty string in the language
+defined by this sub-expression?)</item>
+<item><att>first</att> (what are the initial states in the
+sub-automaton for this sub-expression?)</item>
+<item><att>last</att> (what are the final states in the
+sub-automaton for this sub-expression?)</item>
+<item>for each state &q; within (the sub-automaton for) this
+sub-expression, what are the follow states of &q;?  Here, we need one
+attribute for every state within the sub-expression; we make them by
+creating, for each such state, an attribute with a local name matching
+the ID of the state, in a namespace designed to hold such follow-state
+attributes.  So if the states in a given expression are named
+<ident>q0</ident>, <ident>q1</ident>, and <ident>q2</ident>, we would
+have attributes named <ident>follow:q0</ident>,
+<ident>follow:q1</ident>, and <ident>follow:q2</ident>.</item>
+<item>For later use in recognition, it will also be helpful to
+calculate an XPath 3 regular expression that matches the
+terminal.</item>
+</list>
+These attributes are for the most part of only transient interest:
+they are essential for calculating information for the next higher
+level of sub-expression, but the information we care about when
+running the Earley parser is just the information on the top-level
+element of the right-hand side.</p>
+<p>Since the values of these attributes are in general calculated
+inductively, the first step in handling any element &e; is to recur
+to handle the element's children, and then to construct the values
+for &e; itself.
+<scrap id="gl-ME"
+       name="Define function gl:ME()">
+declare function gl:ME (
+  $E as element()
+) as element() {
+  let $children := for $c in $E/node() 
+                   return if ($c/self::element())
+                          then gl:ME($c)
+                          else $c,
+      $ch := $children[self::element()]
+  return <ptr target="gl-ME-identity"/>
+  else <ptr target="gl-ME-terminals"/>
+  else <ptr target="gl-ME-nonterminal"/>
+  else <ptr target="gl-ME-option"/>
+  else <ptr target="gl-ME-repeats"/>   
+  else <ptr target="gl-ME-sep"/>     
+  else <ptr target="gl-ME-alt"/>
+  else <ptr target="gl-ME-def"/>
+  else <ptr target="gl-ME-rule"/>
+  else <ptr target="gl-ME-comment"/>
+  else <ptr target="gl-ME-ixml"/>
+  else <ptr target="gl-ME-whahhh"/>
+};
+</scrap></p>
+
+<p>In the 2013 grammar supported by Aparecium 0.1, the elements
+<gi>quoted</gi>, <gi>charset</gi>, and several others were always
+assumed wrapped in a <gi>terminal</gi> element.  They thus occur below
+the level of the basic symbol and need no decorations.  We need to
+handle them, since when the function is called on their parent
+element, it will recursively be called on them, too.  But they can and
+should be returned without change. 
+<scrap id="gl-ME-identity-2013"
+       name="Handle leaf nodes (v0.1)">
+if ($E/(self::quoted
+      or self::charset or self::exclude
+      or self::range
+      or self::schar or self::dchar))
+then 
+      $E</scrap>
+</p>
+<p>In the 2021 grammar, the <gi>range</gi> and
+<gi>class</gi> elements fall into this category (always
+children of <gi>inclusion</gi> or <gi>exclusion</gi>.
+The <gi>literal</gi> element falls into this category
+when it is a child of <gi>inclusion</gi> or <gi>exclusion</gi>,
+but it does no harm to handle it separately.</p>
+<p>For ranges, the calculation of the correct regular
+is straightforward in the simple case:  put a hyphen
+between the values of the <att>from</att> and
+<att>to</att> attributes, and wrap the entire thing
+in square brackets.  But while those attributes
+will usually contain single characters, they can
+contain doubled quotation marks or hexadecimal strings
+preceded by '#'.  It would be tempting to inline this,
+but it's just complicated enough that I am going to write
+a utility function to do it.
+<scrap id="gl-read-one-ixml-char"
+       name="Define gl:read-one-char-spec()">
+declare function gl:read-one-char-spec(
+  $s as xs:string
+) as xs:string {
+  if (string-length($s) eq 1)
+  then string($s)
+  else if ($s eq '""') 
+  then '"' 
+  else if ($s eq "''") 
+  then "'"
+  else if (starts-with($s,'#'))
+  then codepoints-to-string(d2x:x2d(substring($s, 2)))
+  else ""
+};
+</scrap>
+</p>
+<p>Armed with that little function, we can easily
+specify the regex for a range.
+<scrap id="gl-ME-identity"
+       name="Handle leaf nodes">
+if ($E/self::range)
+then 
+   element { name($E) } {
+      $E/@*, 
+      attribute regex {
+         '['
+         || gl:read-one-char-spec(string($E/@from))
+	 || '-'
+         || gl:read-one-char-spec(string($E/@to))
+	 || ']'	 
+      },
+      $E/child::node()
+   }
+</scrap>
+</p>
+<p>For character-class expressions, the regular expression we need is
+also very simple: just the class code wrapped in <q><code>\p{
+... }</code></q>.
+<scrap prev="gl-ME-identity"
+       name="Handle character-class expressions">
+else if ($E/self::class)
+then 
+   element { name($E) } {
+      $E/@*, 
+      attribute regex { '\p{' || $E/@code || '}'}
+   }
+</scrap>
+</p>
+<p>For terminal symbols, all attribute values are straightforward.
+They are non-nullable, they are their own first and last
+states, and they have no follow states.  In 2013, all terminals
+were <gi>terminal</gi> elements. 
+<scrap id="gl-ME-terminals-2013"
+       name="Handle terminal nodes (v0.1)">
+if ($E/self::terminal)
+then let $id := '_t_' || (1 + count($E/preceding::terminal))
+     return element terminal {
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
+       attribute xml:id { $id },
+       attribute nullable { false() },
+       attribute first { $id },
+       attribute last { $id },
+       attribute {QName($gl:follow-ns, "follow:" || $id)} { },
+       $children
+     }</scrap></p>
+<p>In 2021, we distinguish several different terminals.
+<scrap id="gl-ME-terminals"
+       name="Handle terminal nodes">
+if ($E/self::inclusion or $E/self::exclusion
+    or $E/self::literal)
+then
+      let $id := '_t_' 
+                 || (1 + count(($E/preceding::* | $E/ancestor::*)
+                    [self::inclusion 
+                    or self::exclusion
+		    or self::literal])), 
+          $re := 'dummy' (:if ($E/self::inclusion) 
+                 then gl:inclusion-regex($E) 
+                 else if ($E/self::exclusion)
+                 then gl:exclusion-regex($E) 
+                 else if ($E/self::literal)
+		 then gl:literal-regex($E)
+		 else '[! error in gl:ME !]'
+		 :)
+      return element {name($E)} {
+         $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @regex,
+                     @follow:*)),
+         attribute xml:id { $id },
+         attribute nullable { false() },
+         attribute first { $id },
+         attribute last { $id },
+         attribute {QName($gl:follow-ns, "follow:" || $id)} { },
+	 attribute regex { $re },
+         $children
+      }</scrap>
+</p>
+<p>We have now committed to writing functions to create
+regular expressions for inclusions, exclusions, and literals.
+(But it's not the most pressing need, so for the moment
+I'm commenting it out.)
+</p>
+<p>Nonterminals are similarly straightforward:  from the
+point of view of the Gluschkov automaton, they are
+indistinguishable from terminals.
+<scrap id="gl-ME-nonterminal"
+       name="Handle nonterminal symbols">
+if ($E/self::nonterminal)
+then
+     let $id := $E/@name || '_'
+                || (1 + count($E/preceding::nonterminal
+                              [@name = $E/@name]))
+     return element nonterminal {
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
+       attribute xml:id { $id },
+       attribute nullable { false() },
+       attribute first { $id },
+       attribute last { $id },
+       attribute {QName($gl:follow-ns, "follow:" || $id)} { },
+       $children
+     }</scrap>
+</p>
+<p>Syntactically, an option is an expression to which a question mark
+has been added.  So any option &E; has the form (&F;?).  &E; is
+nullable regardless of whether &F; is or not, and &E; has the same
+first, final, and follow sets as &F;.
+Note than an <gi>option</gi> should only ever have one child element:
+a terminal symbol (inclusion, exclusion, literal), a nonterminal
+symbol, or a set of alternatives (<gi>alts</gi>).  If we ever see
+anything else, this case will not process it and it will fall through
+to the error case.
+<scrap id="gl-ME-option"
+       name="Handle options">
+if ($E/self::option
+    [count(*) eq 1]
+    [child::*[self::inclusion
+              or self::exclusion
+              or self::literal 
+              or self::nonterminal 
+	      or self::alts]])
+then
+     let $id := 'exp_option_' || (1 + count($E/preceding::option))
+     return element option {
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
+       attribute xml:id { $id },
+       attribute nullable { true() },
+       attribute first { $children/@first },
+       attribute last { $children/@last },
+       for $follow-att in $children/@follow:* 
+       return $follow-att,
+       $children
+     }</scrap>
+</p>
+<p>Repeats will have either one child element or two.  The
+first will be a terminal, a nonterminal, or a set of alternatives;
+the optional second child is a separator.  If anything else is
+encountered, we are not ready for it and we'll fall through to
+the error case.</p>
+<p>In the 2013 grammar, a set of alternatives was a
+<gi>def</gi> element: 
+<scrap id="gl-ME-repeats-2013"
+       name="Handle repetitions (v0.1)">
+if ($E[self::repeat0 or self::repeat1]
+      [*[1][self::terminal or self::nonterminal or self::def]]
+      [count(*) eq 1 or child::*[2][self::sep]]
+         ) 
+then
+     let $gi := name($E)
+     let $id := 'exp_' || $gi || '_' 
+                || (1 + count($E/preceding::*[name() = $gi])),
+         $F := gl:notrace($ch[1], "repetition factor F: "),
+         $G := gl:notrace($ch[2], "repetition sep G: ")
+     return element {$gi} {
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
+       attribute xml:id { $id },
+       attribute nullable { 
+         if ($gi = 'repeat0') 
+         then true() 
+         else $F/@nullable
+       },
+       attribute first { 
+         if (xs:boolean($F/@nullable) = true())
+         then concat($F/@first, ' ', $G/@first)
+         else $F/@first
+       },
+       attribute last { 
+         if (xs:boolean($F/@nullable) = true())
+         then concat($F/@last, ' ', $G/@last)
+         else $F/@last
+       },
+       <ptr target="gl-ME-rep-follow"/>
+       ,
+       $children
+     }
+</scrap></p>
+
+<p>In 2021, the functionality is the same, but the
+choice element is named <gi>alts</gi>:
+<scrap id="gl-ME-repeats"
+       name="Handle repetitions">
+if ($E[self::repeat0 or self::repeat1]
+      [*[1]
+        [self::inclusion or self::exclusion
+        or self::literal
+        or self::nonterminal
+	or self::alts]]
+      [count(*) eq 1 
+      or child::*[2][self::sep]]) 
+then let $gi := name($E)
+     let $id := 'exp_' || $gi || '_' 
+                || (1 + count($E/preceding::*[name() = $gi])),
+         $F := gl:notrace($ch[1], "F: "),
+         $G := gl:notrace($ch[2], "G: ")
+     return element {$gi} {
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
+       attribute xml:id { $id },
+       attribute nullable { 
+         if ($gi = 'repeat0') 
+         then true() 
+         else $F/@nullable
+       },
+       attribute first { 
+         if (xs:boolean($F/@nullable) = true())
+         then concat($F/@first, ' ', $G/@first)
+         else $F/@first
+       },
+       attribute last { 
+         if (xs:boolean($F/@nullable) = true())
+         then concat($F/@last, ' ', $G/@last)
+         else $F/@last
+       },
+       <ptr target="gl-ME-rep-follow"/>
+       ,         
+       $children
+     }
+</scrap>
+</p>
+<p>The calculation of the follow set here has several
+cases.  Watch carefully.  First case:  no separator.
+So for all positions &p; in the expression &E;,
+<list>
+<item>if &p; is in last(&E;)
+then follow(&E;*, &p;) is 
+the union of follow(&E;, &p;) with first(&E;)</item>
+<item>otherwise
+follow(&E;*, &p;) is  
+just follow(&E;, &p;)
+with no additions.</item>
+</list>
+<scrap id="gl-ME-rep-follow"
+       name="Calculate follow:* attributes for repetitions">
+       if (count($ch) eq 1)
+       then
+         let $lastF := tokenize($F/@last,'\s+'),
+             $firstF := tokenize($F/@first,'\s+')
+         for $a in $F/@follow:*
+         return if (local-name($a) = $lastF)
+           then attribute { 
+               QName($gl:follow-ns, "follow:"||local-name($a) ) 
+             } { 
+               gl:merge((tokenize($a,'\s+'), $firstF))    
+             }
+           else $a
+</scrap>
+</p>
+<p>If there is a separator, then the same principle
+applies, but things are complicated by the presence
+of the separator in the way.
+For all &p;
+in &F;*&G; or &F;+&G;, its follow-set depends
+on <list>
+<item>whether &p; is in &F; or in &G;,</item>
+<item>whether it's in last(&F;) or last(&G;),
+and </item>
+<item>whether &F; and &G; are nullable.</item>
+</list>
+So we break out the detailed calculations.
+The overall pattern is as follows.  We pre-calculate
+<list>
+<item>the two <ident>last()</ident> sets,</item>
+<item>the two <ident>first()</ident> sets,</item>
+<item>whether &F; and &G; are nullable, and</item>
+<item>for each position in &F; or &G;, its local
+name and its follow-set within &F; or &G;.</item>
+</list>
+<scrap prev="gl-ME-rep-follow"
+       name="Calculate follow-set for repetition with separator">
+       else (: count($children) eq 2 :)
+         let $lastF := tokenize($F/@last,'\s+'),
+             $lastG := tokenize($G/@last,'\s+'),
+             $firstF := tokenize($F/@first,'\s+'),
+             $firstG := tokenize($G/@first,'\s+'),
+             $nullableF := (xs:boolean($F/@nullable) = true()), 
+             $nullableG := (xs:boolean($G/@nullable) = true())
+         return 
+           for $a in $children/@follow:* 
+           let $p := local-name($a),
+               $follow0 := tokenize($a,'\s+')
+           let $followset :=  
+             <ptr target="gl-ME-rep-follow-sep-1"/>
+             <ptr target="gl-ME-rep-follow-sep-2"/>
+             <ptr target="gl-ME-rep-follow-sep-3"/>
+             <ptr target="gl-ME-rep-follow-sep-4"/>
+             <ptr target="gl-ME-rep-follow-sep-5"/>
+           return attribute { 
+                    QName($gl:follow-ns, 
+                          "follow:"||local-name($a) ) 
+                } { 
+                    $followset    
+                    }</scrap>
+</p>
+<p>If &p; is final in &F; and &G; is nullable, then it's final
+in &F;*&G; or &F;+&G; and can thus be followed by any first
+state of &G; and any first state of &F;, as well as (naturally)
+its follow-set within &F;:
+<scrap id="gl-ME-rep-follow-sep-1"
+       name="Follow set when p in last(F), G nullable">
+             if ($p = $lastF and $nullableG) 
+             then gl:merge(($follow0, $firstG, $firstF))
+</scrap></p>
+<p>If &p; is final in &F; and &G; is <emph>not</emph> nullable, 
+then its follow-set omits the first sets of &F;. 
+<scrap id="gl-ME-rep-follow-sep-2"
+       name="Follow set when p in last(F), G not nullable">
+             else if ($p = $lastF and not($nullableG))
+             then gl:merge(($follow0, $firstG))
+</scrap></p>
+<p>If &p; is final in &G; and &F; is nullable, 
+then we again have a three-way merge for its follow-set:
+its follow-set within &G;, the first-set of &F;, and
+(skipping &F; entirely, since it's nullable)
+the first-set of &G;. 
+<scrap id="gl-ME-rep-follow-sep-3"
+       name="Follow set when p in last(G), F nullable">
+             else if ($p = $lastG and $nullableF)
+             then gl:merge(($follow0, $firstG, $firstF))
+</scrap></p>
+<p>If &p; is final in &G; and &F; is <emph>not</emph> nullable, 
+then the first-set of &G; is not included in the follow-set
+of &p;.
+<scrap id="gl-ME-rep-follow-sep-4"
+       name="Follow set when p in last(G), F not nullable">
+             else if ($p = $lastG and not($nullableF))
+             then gl:merge(($follow0, $firstF))
+</scrap></p>
+<p>Finally, if none of the above are true, then &p;
+is non-final in either &F; or &G; and its follow-set is
+unaffected by the repetition operator, so we just copy it
+out again.
+<scrap id="gl-ME-rep-follow-sep-5"
+       name="Follow set when p non-final in F or G">
+             else string($a)
+</scrap></p>
+
+<p>We have appealed to a little utility function for merging
+sets of IDs.  It's quite straightforward, really, thanks
+to <ident>distinct-values()</ident>.
+<scrap id="gl-merge"
+       name="Define gl:merge()">
+declare function gl:merge(
+  $ids as xs:string*
+) as xs:string {
+  string-join(distinct-values($ids),' ')
+};
+</scrap>
+</p>
+
+<p>The <gi>sep</gi> element contains a single factor and
+changes none of its properties.
+<scrap id="gl-ME-sep"
+       name="Handle separator expressions">
+if ($E/self::sep
+           [count(*) eq 1]
+           [child::*[self::inclusion
+                     or self::exclusion 
+                     or self::literal 
+                     or self::nonterminal 
+                     or self::alts]]
+          ) then
+     let $id := 'exp_sep_'
+                || (1 + count($E/preceding::sep)) 
+     return element sep {
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
+       attribute xml:id { $id },
+       $ch/@nullable,
+       $ch/@first,
+       $ch/@last,
+       $ch/@follow:*,
+       $children
+     }
+</scrap>
+</p>
+<p>In 2013 the element names were different.  (Yawn.)
+<scrap id="gl-ME-sep-2013"
+       name="Handle separator expressions (v0.1)">
+if ($E/self::sep
+           [count(*) eq 1]
+           [child::*[self::terminal 
+                     or self::nonterminal
+                     or self::def]]
+          ) then
+     let $id := 'exp_sep_'
+                || (1 + count($E/preceding::sep)) 
+     return element sep {
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
+       attribute xml:id { $id },
+       attribute nullable { $ch/@nullable },
+       attribute first { $ch/@first },
+       attribute last { $ch/@last },
+       for $follow-att in $ch/@follow:* 
+       return $follow-att,
+       $children
+     }
+</scrap>
+</p>
+<p>An <gi>alt</gi> is one choice among (sometimes) several; it
+contains a sequence of terms (i.e. terminal, nonterminal, repetition,
+option, nested set of alternatives).  Since it's an arbitrary-length
+sequence, not a binary operator, the calculation of first and last and
+follow gets a bit tricky.  We may end up needing to normalize to
+binary form just to keep things simple.
+<scrap id="gl-ME-alt"
+       name="Handle alt elements">
+if ($E/self::alt) then
+     let $id := 'exp_alt_'
+                || (1 + count($E/preceding::alt)) 
+     return element alt {
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
+       attribute xml:id { $id },
+       attribute nullable { 
+         every $c in $ch
+         satisfies (xs:boolean($c/@nullable) eq true())
+       },
+       attribute first { 
+         string-join(
+           for $c at $pos in $ch
+           return if (every $lsib
+	              in $ch[position() lt $pos]
+                      satisfies
+		      (xs:boolean($lsib/@nullable)
+		      eq true() ))
+                  then $c/@first
+                  else (),
+           ' '
+         )
+       },
+       attribute last { 
+         string-join(
+           for $c at $pos in $ch
+           return if (every $rsib
+	              in $ch[position() gt $pos]
+                      satisfies
+		      (xs:boolean($rsib/@nullable)
+		      eq true() ))
+                  then $c/@last
+                  else (),
+           ' '
+         )
+       },
+       <ptr target="gl-ME-alt-follow"/>
+       ,
+       $children
+     }
+</scrap>
+</p>
+<p>Again, calculating the follow-set is the most complicated
+of the subcalculations for this type of expression.  So let's
+take it slowly.
+<list>
+<item>For every position &p; in each child &c;, the follow set 
+follow(&E;,&p;) includes follow(&c;,&p;).</item>
+<item>In addition, if &p; is in last(&c;) and &c; has a following sibling,
+then follow(&E;,&p;) should include start(next-sibling(&c;)).</item>
+<item>
+In addition, if &p; is in last(&c;) and &c; has a following sibling,
+and also next-sibling(&c;) is nullable, 
+then follow(&E;,&p;) should include start(nextsib(nextsib(&c;))).
+</item>
+<item>
+And so forth.</item>
+</list>
+
+<scrap id="gl-ME-alt-follow"
+       name="Calculate follow:* attributes for alt">
+       for $c at $cpos in $ch 
+       for $a in $c/@follow:*
+       let $p := local-name($a),
+           $lastC := tokenize($c/@last,'\s+'),
+           $rightsibs := $ch[position() gt $cpos],
+           $followset := if ($p = $lastC)
+	   then string-join(
+             (  $a,
+                for $rsib at $rpos in $rightsibs
+                let $inbetweens := $rightsibs
+		                   [position() lt $rpos]
+                return if (every $msib in $inbetweens
+                           satisfies
+                           (xs:boolean($msib/@nullable)
+			   = true() ))
+                       then $rsib/@first
+                       else ()
+             ),
+             ' '
+           )
+           else
+             $a
+       return attribute { 
+             QName($gl:follow-ns, "follow:"||$p )
+         } { 
+             $followset    
+         }
+</scrap>
+</p>
+<p>An <gi>alts</gi> element contains a set of alternatives,
+each an <gi>alt</gi> element.
+The 2013 alternative was the <gi>def</gi> element,
+but note that <gi>def</gi> was required as the top-level
+element of a right-hand side, which <gi>alts</gi> is not.
+That doesn't affect the treatment of this element,
+but it does affect
+the treatment of rules, below. 
+<scrap id="gl-ME-def"
+       name="Handle alts elements (= def)">
+if ($E[self::<ptr target="gl-alts-gi"/>]) then
+     let $id := 'exp_' || name($E) || '_' 
+                || (1 + count(
+                $E/preceding::<ptr target="gl-alts-gi"/>)
+		) 
+     <ptr target="gl-ME-alternatives"/>
+</scrap>
+We factor out the treatment of alternatives
+so that we can re-use it for rules, below.
+The properties should all be self-explanatory.
+<scrap id="gl-ME-alternatives"
+       name="Handle alternatives">
+     return element {name($E)} {
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
+       attribute xml:id { $id },
+       attribute nullable { 
+         some $c in $ch
+         satisfies
+	 (xs:boolean($c/@nullable) eq true() )
+       },
+       attribute first { 
+         string-join($ch/@first, ' ')
+       },
+       attribute last { 
+         string-join($ch/@last, ' ')
+       },
+       
+       (: follow-set is simple here. :) 
+       for $a in $ch/@follow:*
+       return $a,
+       $children
+     }
+</scrap></p>
+<p>As an experiment, I am putting the generic identifier
+for the element in a scrap.  If this works, much of the
+duplication earlier in this section can be removed.
+(Why do ideas come so late?)
+<scrap id="gl-alts-gi"
+       name="GI for alts element">alts</scrap>
+In 2013, it was <gi>def</gi>:
+<scrap id="gl-alts-gi-2013"
+       name="GI for alts element (v0.1)">def</scrap>
+</p>
+<p>Since the alternatives inside a rule are not now wrapped
+in a <gi>def</gi> or <gi>alts</gi> elements, we need to
+put the properties for the rule as a whole on the <gi>rule</gi>
+element.
+<scrap id="gl-ME-rule"
+       name="Handle rule elements">
+if ($E/self::rule) then
+    let $id := $E/@name
+    <ptr target="gl-ME-alternatives"/>
+</scrap>
+</p>
+<p>In 2013, it was simpler.
+<scrap id="gl-ME-rule-2013"
+       name="Handle rule elements (v0.1)">
+if ($E/self::rule) then 
+    element rule {
+      $E/@*,
+      $children
+    }</scrap>
+</p>
+<p>Finally, a few miscellaneous elements.  Comments
+require no annotation.
+<scrap id="gl-ME-comment"
+       name="Handle comment elements">
+if ($E/self::comment) then
+    $E
+</scrap>
+</p>
+<p>The <gi>ixml</gi> element also requires no
+annotation.
+<scrap id="gl-ME-ixml"
+       name="Handle ixml elements (grammars)">
+if ($E/self::ixml) then 
+    element ixml {
+      attribute follow:info { 
+        "auxiliary namespace for FSA description"
+      },
+      $E/@*,
+      $children
+    }
+</scrap>
+</p>
+<p>And finally, at the bottom of the if-then-else ladder,
+we handle unexpected elements.
+<scrap id="gl-ME-whahhh"
+       name="Handle unexpected elements">
+if ($E/self::option or $E/self::sep)
+then &lt;error>Element {name($E)} with unexpected content: {$E}&lt;/error>
+else if ($E/(self::repeat1 or self::repeat0))
+then &lt;error>Element {name($E)} with unexpected content: {$E}&lt;/error>
+else &lt;error>Unexpected element {$E}&lt;/error></scrap>
+</p>
+</div>
+
+</div>
+
+<div id="hi-check-compiled-grammar">
+<head>Checking the compiled grammar</head>
+
+<p>The grammar needs to be checked for problems. Most of this could
+in principle be done either before or after compilation, but since
+we allow the user to supply a compiled grammar we do it after.</p>
+
+<p>What is checked for in the grammar is pretty much the same in all
+cases, but what is done when problems are found depends in part on the
+user's options.
+<list>
+<item><p><label>structural problems</label>: The grammar needs to be
+structurally sound and usable for parsing; the grammar should also
+satisfy the spec's requirement that a conforming XML grammar <q>can be
+derived from an ixml grammar in ixml form by parsing as described in
+this specification</q>.
+<list>
+<item>If <q><kw>conformance</kw></q> = <q><kw>pedantic</kw></q> or
+<q><kw>strict</kw></q>, then we check every element in the grammar to
+ensure that it conforms to the implicit requirements of the ixml
+specification grammar, with respect to:
+<list>
+<item>its children and their sequence</item>
+<item>its attributes and their lexical form</item>
+</list>
+This should be at least approximately equivalent to validation against
+a DTD or schema derived mechanically from the ixml grammar.</item>
+<item>If <q><kw>conformance</kw></q> = <q><kw>tolerant</kw></q>,
+the same checks are performed, but 
+<list>
+<item>pragmas and namespace-qualified elements are ignored</item>
+<item>namespace-qualified attributes are ignored</item>
+</list>
+</item>
+</list>
+</p>
+</item>
+
+<item><p><label>compilation artifacts</label>: Every rule should have
+the attributes supplied by the compiler.  We can't check them for
+integrity, of course; this is just a sanity check in case the user
+accidentally supplies an uncompiled grammar when we expect a compiled
+one.</p></item>
+
+<item><p><label>non-XML names</label>: All nonterminals must either be
+acceptable as XML names or marked <q><code>-</code></q>.</p></item>
+<item><p><label>uniqueness of rules</label>: Any two <gi>rule</gi>
+elements must have different names.</p></item>
+<item><p><label>character classes</label>: Any character class
+appearing as a member of a character set (an <gi>inclusion</gi> or an
+<gi>exclusion</gi>) must be one listed in Unicode.</p></item>
+<item><p><label>undefined nonterminals</label>: Every nonterminal
+referred to should be defined.</p></item>
+<item><p><label>unreachable nonterminals</label>: Every nonterminal
+defined should be reachable from the start symbol.</p></item>
+<item><p><label>unproductive nonterminals</label>: Every nonterminal
+defined should generate some set of strings.</p></item>
+</list>
+</p>
 
 <p>The ixml specification defines grammars as non-conforming if they
 contain multiple rules for the same nonterminal or undefined
@@ -1037,25 +1985,28 @@ grammar smaller and in some cases will avoid useless work by the
 Earley parser.</p>
 </note>
 </p>
-<p>The user can control some of what happens here by setting the
-following options:
+
+<p>The user can <hi>[will be able to]</hi> control some of what
+happens here by setting the following options:
 <list>
 <item><kw>multiple-definitions</kw></item>
 <item><kw>undefined-nonterminals</kw></item>
 <item><kw>unreachable-rules</kw></item>
 <item><kw>unproductive-nonterminals</kw></item>
 </list>
+
 For all four, possible values are <q><kw>error</kw></q>,
 <q><kw>warning</kw></q>, or <q><kw>silence</kw></q>.  All four default
-to <q><kw>warning</kw></q>, unless the user specifies strict
-conformance to the ixml spec, in which case the first two are set to
-<q><kw>error</kw></q>.
+will eventually default to <q><kw>warning</kw></q>, unless the user
+specifies strict conformance to the ixml spec, in which case the first
+two will be set to <q><kw>error</kw></q>.  For the moment, however, we
+define the default options to be what the spec requires and no more.
 <scrap id="aparecium-other-default-options"
        name="Other default options">
-        'multiple-definitions': 'warning',
-        'undefined-symbols: 'warning',
-        'unreachable-symbols: 'warning',
-        'unproductive-symbols: 'warning',
+        'multiple-definitions': 'error',
+        'undefined-symbols': 'error',
+        'unreachable-symbols': 'silence',
+        'unproductive-symbols': 'silence',
 </scrap>
 </p>
 <p>We will also need to define an option to control how pedantically
@@ -1070,12 +2021,238 @@ going to feel satisfactory.
 and <q>lax</q> (<q>loose</q>, <q>slipshod</q>).</hi>
 </p>
 
-</div>
+<p>All of the grammar checking is managed by the Aparecium
+<ident>grammar-ok()</ident> function.  The basic plan is
+simple: we collect several lists of error elements
+(<q><code>lee-...</code></q>), and if at the end all lists are empty,
+we succeed.  If we find errors, we wrap them with the grammar
+and return an <gi>aparecium:error</gi> element.
+<scrap id="ap-grok"
+       name="The grammar-ok() function">
+(: grammar-ok(): check grammar 
+:)
+declare function aparecium:grammar-ok(
+  $G as element()
+) as element() {
+  if ($G/self::ixml)
+  then 
+  let $dummy := trace($G/rule[1]/@name/string(),
+                'grammar-ok() called on grammar for: ')
+  <ptr target="ap-grok-str"/>
+  <ptr target="ap-grok-comp"/>
+  <ptr target="ap-grok-names"/>
+  <ptr target="ap-grok-uniqdef"/>
+  <ptr target="ap-grok-charclass"/>
+  <ptr target="ap-grok-alldef"/>
+  <ptr target="ap-grok-reach"/>
+  <ptr target="ap-grok-prod"/>
+  let $lee-all := ($lee-struc, $lee-comp,
+                   $lee-names,  
+                   $lee-uniqdef, $lee-charclass,
+                   $lee-alldef, 
+                   $lee-reachable, $lee-productive)
+  return if (empty($lee-all/self::aparecium:error))
+  then $G
+  else element aparecium:error {
+    attribute id { "ap:tbd06" },
+    element p { "Errors found in grammar." },
+    $lee-all,
+    $G
+  }
+  else element aparecium:error {
+    attribute id { "ap:tbd07" },
+    element p { "This is not a grammar." },
+    $G
+  }
+};
+</scrap>
+</p>
 
-<div id="hi-compile-grammar">
-<head>Compiling the grammar</head>
+<p>For now, our structural checks are rudimentary, more symbolic than
+real.  We have already checked that <ident>$G</ident> is an
+<gi>ixml</gi> element; here we check that all the children of
+<gi>ixml</gi> are rules or comments or pragmas, and all the
+children of <gi>rule</gi> elements are <gi>alt</gi> or
+comments or pragmas.
+<scrap id="ap-grok-str"
+       name="Check for structural problems">
+  let $lee-struc := (
+      let $le0 := $G/*
+          [not(self::rule or self::comment or self::pragma)]
+      for $e in $le0 
+      return element aparecium:error {
+        attribute id { "ap:tbd08" },
+        "Unexpected " || $e/name() 
+        || " element as child of ixml."
+      },
 
-<p>Watch this space.</p>
+      let $le0 := $G/rule/*
+          [not(self::alt or self::comment or self::pragma)]
+      for $e in $le0 
+      return element aparecium:error {
+        attribute id { "ap:tbd09" },
+        "Unexpected " || $e/name() 
+        || " element as child of rule."
+      }
+
+  )
+      
+</scrap>
+Later, this will be replaced with code to validate every
+child against the appropriate content model and check
+attributes.
+</p>
+<p>Since we cannot check the compilation of the grammar
+in detail, we limit ourselves to checking that every
+rule has the attributes assigned by the compiler.
+<scrap id="ap-grok-comp"
+       name="Check for compiler attributes">
+  let $lee-comp := ()
+</scrap>
+<hi>The data flow has gotten confused. Let's leave this out for
+now.</hi>
+<scrap name="Check for compiler attributes">
+  let $lee-comp := (
+      for $r in $G/rule[not(@xml:id)
+          or not(@nullable)
+          or not(@first)
+          or not(@last)
+          ]
+      return element aparecium:error { 
+        attribute id { "ap:tbd10" },
+        "Compilation problem?  Rule " || $r/@name 
+        || " lacks compiler attributes."
+      }
+  )
+</scrap>
+</p>
+<p>The ixml spec makes it a dynamic error in the grammar
+for a nonterminal with a non-XML name to be serialized.
+We detect the problem statically:  if a name is not
+castable as xs:NCName, then it must be marked as hidden,
+either on the <gi>rule</gi> element or on all
+references to it.<note place="foot">
+<p>Strictly speaking, a nonterminal which is only
+ever used in an attribute value can use any mark
+desired, since the mark is ignored.  In this case,
+Aparecium will flag an error even though the dynamic
+error case cannot arise.</p>
+<p>Somehow, this does not worry me much.</p></note>
+<scrap id="ap-grok-names"
+       name="Check for non-XML names">
+  let $lee-names := (
+      for $r in $G/rule
+                [not(@name castable as xs:NCName)]
+      let $nt := $r/@name/string(),
+          $mark := string($r/@mark),
+          $references := $G//nonterminal[@name eq $nt],
+          $rmarks := distinct-values(
+	      for $ref in $references
+              return string($ref/@mark)
+          )
+      where (( ($mark = ('^', '@', ''))
+               and ($rmarks = ('^', '@', '')) )
+            or ( ($mark eq '-')
+               and ($rmarks = ('^', '@')) ))
+      return element aparecium:error {
+               attribute id { "ap:tbd11" },
+               $nt || " is not allowed as an XML name."
+               || " It must be marked as hidden."
+             }
+  ) 
+</scrap>
+</p>
+<p>The ixml spec requires that no nonterminal have
+two <gi>rule</gi> elements.  So we group by name and
+seek groups with count greater than one.
+<scrap id="ap-grok-uniqdef"
+       name="Check rules for uniqueness">
+  let $lee-uniqdef := (
+      for $r in $G/rule
+      let $nt := string($r/@name)
+      group by $nt
+      return if (count($r) gt 1)
+      then (
+        trace((), 
+           "Symbol " || $nt 
+           || " defined " || count($r) || "&#215;: "),
+        element aparecium:error {
+        attribute id { "ap:tbd12" },
+        $nt || " is defined " ||
+        (if (count($r) eq 2)
+        then "twice"
+        else count($r) || " times")
+        || "."
+      })
+      else ()
+  )
+</scrap>
+</p>
+<p>In character sets, classes referred to must be
+classes listed in Unicode.  The XML representation of
+classes is changing, so this code will (for now)
+check both forms.
+<scrap id="ap-grok-charclass"
+       name="Check character classes">
+  let $lee-charclass := (
+      for $cc in ($G//class/@code,
+                  $G//member/@code)
+      let $nt := string($cc/ancestor::rule/@name)
+      where not(matches($cc,
+                '^(L[ulmo]?'
+                || '|M[nce]?'
+                || '|N[dlo]?'
+                || '|P[cdseifo]?'
+                || '|Z[slp]?'
+                || '|S[mcko]?'
+                || '|C[cfon]?)$'))
+      return element aparecium:error {
+        attribute id { "ap:tbd16" },
+        "Character class", string($cc), 
+        "in the definition of", $nt, 
+        "is not known."
+      }
+  )
+</scrap>
+</p>
+<p>The spec forbids references to undefined
+nonterminals; here we group references by name
+and look each name up.
+<scrap id="ap-grok-alldef"
+       name="Check for undefined symbols">
+  let $lee-alldef := (
+      for $ref in $G//nonterminal
+      let $nt := string($ref/@name)
+      group by $nt
+      return if (empty($G/rule[@name eq $nt]))
+      then element aparecium:error {
+        attribute id { "ap:tbd13" },
+        $nt || " is referred to but not defined." 
+      }
+      else ()
+  )
+</scrap>
+</p>
+<p>Unreachable nonterminals are not defined as an error
+by the ixml spec.  They should be detected and warnings
+should be issued, but for now we simply ignore them.
+<scrap id="ap-grok-reach"
+       name="Check for unreachable symbols (rsn)">
+  let $lee-reachable := ()
+</scrap>
+</p>
+<p>Unproductive nonterminals are not defined as an error
+by the ixml spec.  They should be detected and warnings
+should be issued, but for now we simply ignore them,
+just as for unreachable nonterminals.
+<scrap id="ap-grok-prod"
+       name="Check for unproductive symbols (rsn)">
+  let $lee-productive := ()
+</scrap>
+</p>
+<p>
+That code should clear the hygiene problems.
+</p>
 
 </div>
 </div>
@@ -4558,8 +5735,15 @@ retrieves the grammar and parses it by calling
 declare function aparecium:parse-grammar-from-uri(
   $uriG as xs:string
 ) as element() {
-  let $sG := unparsed-text($uriG)
-  return aparecium:parse-grammar-from-string($sG)
+  let $sG := if (unparsed-text-available($uriG))
+             then unparsed-text($uriG)
+             else ()
+  return if (exists($sG)) 
+         then aparecium:parse-grammar-from-string($sG)
+         else element aparecium:error {
+           attribute id { "ap:tbd14" },
+           "Grammar (" || $uriG || ") not found."
+         }
 };
 </scrap>
 </p>
@@ -4579,12 +5763,22 @@ grammar for ixml grammars.
 
 declare function aparecium:parse-grammar-from-string(
   $G as xs:string
-) as element(ixml) {
+) as element() {
   (: CGIG:  compiled grammar for ixml grammars :)
   let $CGIG := doc($aparecium:ixml.gl.xml)/ixml,
       (: PG: parsed grammar :)
-      $PG := aparecium:parse-string-with-compiled-grammar($G,$CGIG)
-  return if ($PG/self::forest) 
+      $PG0 := aparecium:parse-string-with-compiled-grammar($G,$CGIG),
+      $PG := &STAT;prof:time( &TATS;
+             aparecium:grammar-ok($PG0)
+             &STAT;, 'pgfs() calling grammar-ok():')
+  return $PG
+};
+</scrap>
+The call to <ident>grammar-ok()</ident> replaces
+some earlier rudimentary checking, retained here
+for the moment in case it's needed.
+<scrap name="Old code for result">
+if ($PG/self::forest) 
       then trace($PG/ixml,
                  'Warning:  submitted grammar was ambiguous.') 
       else if ($PG/self::Goal) 
@@ -4595,7 +5789,6 @@ declare function aparecium:parse-grammar-from-string(
         &lt;!--* Something is very wrong here *-->
         { $PG }
       &lt;/ixml>
-};   
 </scrap>
 </p>
 <p>The <ident>compile-grammar-from-uri()</ident> function
@@ -4652,9 +5845,19 @@ returns its compiled representation.
 :)   
 
 declare function aparecium:compile-grammar-from-xml(
-  $xmlG as element(ixml)
+  $xmlG as element()
 ) as element(ixml) {
-  gluschkov:ME($xmlG)
+  let $G := &STAT;prof:time( &TATS;
+            aparecium:grammar-ok($xmlG)
+            &STAT;, 'cgfx() calling grammar-ok():')
+  return if ($G/self::ixml)
+         then gluschkov:ME($xmlG)
+         else element aparecium:error {
+           attribute id { "ap:tbd15" },
+           "compile-grammar-from-xml(): ",
+           "Unable to compile grammar: ",
+	   "grammar not ok."
+         }
 };
 
 </scrap>
@@ -4704,6 +5907,8 @@ declare function aparecium:recompile-ixml-grammar(
       $aparecium:ixml.ixml
   )/Goal/ixml
 };
+
+<ptr target="ap-grok"/>
 </scrap>
 </p>
 <p>Where are these things we may need? They really should be in a
@@ -6272,852 +7477,11 @@ declare function epi:contentXpt(
 </div>
 </div>
 </div>
-
+<!--
 <div id="legacy-Gluschkov.xqm">
 <head>Construction of the Gluschkov automaton</head>
-<p>The file Gluschkov.xqm has routines for annotating
-a grammar with attributes that allow the right-hand
-sides to be interpreted as Gluschkov automata:  that is,
-finite state automata whose states are the basic symbols
-of the regular expression.
-<scrap file="Gluschkov.xqm">
-module namespace gl =
-"http://blackmesatech.com/2019/iXML/Gluschkov";
-
-(: Constructs a Gluschkov automaton for ixml :)
-
-(: GPL ...:) 
-
-<ptr target="gl-prolog"/>
-<ptr target="gl-ME"/>
-<ptr target="gl-merge"/>
-<ptr target="gl-read-one-ixml-char"/>
-<ptr target="gl-trace"/>
-</scrap></p>
-<p>This module is one place affected by the syntax changes
-between 2013 and 2021.  Most scraps are defined twice,
-once in the initial version following the 2013 syntax,
-and again for today's syntax. 
-(Steven's original paper said something about bootstrapping
-and supporting multiple syntaxes, but I got confused and am
-not going to try to do that.  Too clever for me.)
-</p>
-<div id="leggl-prolog">
-<head>Module prolog</head>
-<p>The module prolog defines a namespace for follow sets, and a
-variable with the namespace name.  We also import the
-<ident>d2x</ident> library so we can use its hex-to-decimal
-conversion.
-<scrap id="gl-prolog"
-       name="Prolog for Gluschkov module">
-declare namespace follow =
-"http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
-
-import module namespace d2x =
-'http://blackmesatech.com/2019/iXML/d2x'
-at "d2x.xqm";
-
-declare variable $gl:follow-ns :=
-"http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
-</scrap>
-</p>
 </div>
-<div id="leggl-ME">
-<head>Calculating the Gluschkov automaton &ME;</head>
-
-
-<p>For a regular expression &E;, the Gluschkov automaton
-(conventionally referred to as &M_E;) is a finite state automaton
-derived from (and in some sense constructed on top of) &E;.  The
-states of &ME; are the basic symbols of &E;, with the fairly
-straightforward interpretation that we are in a given state &q; if and
-only if we have just read an input character (or, in the general case,
-character sequence) that matches the atomic symbol &q;.  We calculate
-the Gluschkov automaton by following the algorithm laid out in
-Brüggemann-Klein 1993, adapted for the XML form of ixml grammars.</p>
-<p>Each node <ident>$E</ident> in the expression gets:
-<list>
-<item><att>id</att> to identify the expression; in the case of positions (i.e. 
-       occurrences of symbols in the alphabet, as opposed to
-       parenthesized expressions etc.), this also
-       serves as an identifier for the FSA state.</item>
-<item><att>first</att> = set of positions which match the first symbol of some word
-       in &L..E;</item>
-<item><att>last</att> = set of positions which match the last symbol in some word
-       in &L..E;</item>
-<item><att>nullable</att> = true iff &L..E; contains the empty
-word</item>
-</list>
-</p>
-<p>We also have attributes to represent the
-<ident>follow</ident>(<ident>exp</ident>, <ident>sym</ident>) function
-for <ident>exp</ident>=<ident>$E</ident>.  For each position $p in $E
-we have an attribute in the follow namespace whose local name is the
-ID of $p; the value of the attribute is the set of positions which can
-follow $p in a path through $E.
-</p>
-<p>By representing follow($E,$p) as an attribute on $E we avoid having
-to traverse the tree multiple times.
-</p>
-
-<p>The
-construction of the Gluschkov automaton consists largely of
-calculating, from the structure of &E;, which symbols can follow which
-other symbols, and defining an appropriate transition function.
-Along the way, various auxiliary functions are computed for each
-subexpression of &E;.</p>
-<p>For the right-hand side of a rule in an ixml grammar, the basic
-symbols of the expression are terminal and nonterminal symbols, and
-the subexpressions include both the basic symbols and the other
-elements in the XML representation of the right-hand side.  For each
-subexpression, we add attributes to record various values:
-<list>
-<item>an ID (for use in referring to the state)</item>
-<item><att>nullable</att> (is the empty string in the language
-defined by this sub-expression?)</item>
-<item><att>first</att> (what are the initial states in the
-sub-automaton for this sub-expression?)</item>
-<item><att>last</att> (what are the final states in the
-sub-automaton for this sub-expression?)</item>
-<item>for each state &q; within (the sub-automaton for) this
-sub-expression, what are the follow states of &q;?  Here, we need one
-attribute for every state within the sub-expression; we make them by
-creating, for each such state, an attribute with a local name matching
-the ID of the state, in a namespace designed to hold such follow-state
-attributes.  So if the states in a given expression are named
-<ident>q0</ident>, <ident>q1</ident>, and <ident>q2</ident>, we would
-have attributes named <ident>follow:q0</ident>,
-<ident>follow:q1</ident>, and <ident>follow:q2</ident>.</item>
-<item>For later use in recognition, it will also be helpful to
-calculate an XPath 3 regular expression that matches the
-terminal.</item>
-</list>
-These attributes are for the most part of only transient interest:
-they are essential for calculating information for the next higher
-level of sub-expression, but the information we care about when
-running the Earley parser is just the information on the top-level
-element of the right-hand side.</p>
-<p>Since the values of these attributes are in general calculated
-inductively, the first step in handling any element &e; is to recur
-to handle the element's children, and then to construct the values
-for &e; itself.
-<scrap id="gl-ME"
-       name="Define function gl:ME()">
-declare function gl:ME (
-  $E as element()
-) as element() {
-  let $children := for $c in $E/node() 
-                   return if ($c/self::element())
-                          then gl:ME($c)
-                          else $c,
-      $ch := $children[self::element()]
-  return <ptr target="gl-ME-identity"/>
-  else <ptr target="gl-ME-terminals"/>
-  else <ptr target="gl-ME-nonterminal"/>
-  else <ptr target="gl-ME-option"/>
-  else <ptr target="gl-ME-repeats"/>   
-  else <ptr target="gl-ME-sep"/>     
-  else <ptr target="gl-ME-alt"/>
-  else <ptr target="gl-ME-def"/>
-  else <ptr target="gl-ME-rule"/>
-  else <ptr target="gl-ME-comment"/>
-  else <ptr target="gl-ME-ixml"/>
-  else <ptr target="gl-ME-whahhh"/>
-};
-</scrap></p>
-
-<p>In the 2013 grammar supported by Aparecium 0.1, the elements
-<gi>quoted</gi>, <gi>charset</gi>, and several others were always
-assumed wrapped in a <gi>terminal</gi> element.  They thus occur below
-the level of the basic symbol and need no decorations.  We need to
-handle them, since when the function is called on their parent
-element, it will recursively be called on them, too.  But they can and
-should be returned without change. 
-<scrap id="gl-ME-identity-2013"
-       name="Handle leaf nodes (v0.1)">
-if ($E/(self::quoted
-      or self::charset or self::exclude
-      or self::range
-      or self::schar or self::dchar))
-then 
-      $E</scrap>
-</p>
-<p>In the 2021 grammar, the <gi>range</gi> and
-<gi>class</gi> elements fall into this category (always
-children of <gi>inclusion</gi> or <gi>exclusion</gi>.
-The <gi>literal</gi> element falls into this category
-when it is a child of <gi>inclusion</gi> or <gi>exclusion</gi>,
-but it does no harm to handle it separately.</p>
-<p>For ranges, the calculation of the correct regular
-is straightforward in the simple case:  put a hyphen
-between the values of the <att>from</att> and
-<att>to</att> attributes, and wrap the entire thing
-in square brackets.  But while those attributes
-will usually contain single characters, they can
-contain doubled quotation marks or hexadecimal strings
-preceded by '#'.  It would be tempting to inline this,
-but it's just complicated enough that I am going to write
-a utility function to do it.
-<scrap id="gl-read-one-ixml-char"
-       name="Define gl:read-one-char-spec()">
-declare function gl:read-one-char-spec(
-  $s as xs:string
-) as xs:string {
-  if (string-length($s) eq 1)
-  then string($s)
-  else if ($s eq '""') 
-  then '"' 
-  else if ($s eq "''") 
-  then "'"
-  else if (starts-with($s,'#'))
-  then codepoints-to-string(d2x:x2d(substring($s, 2)))
-  else ""
-};
-</scrap>
-</p>
-<p>Armed with that little function, we can easily
-specify the regex for a range.
-<scrap id="gl-ME-identity"
-       name="Handle leaf nodes">
-if ($E/self::range)
-then 
-   element { name($E) } {
-      $E/@*, 
-      attribute regex {
-         '['
-         || gl:read-one-char-spec(string($E/@from))
-	 || '-'
-         || gl:read-one-char-spec(string($E/@to))
-	 || ']'	 
-      },
-      $E/child::node()
-   }
-</scrap>
-</p>
-<p>For character-class expressions, the regular expression we need is
-also very simple: just the class code wrapped in <q><code>\p{
-... }</code></q>.
-<scrap prev="gl-ME-identity"
-       name="Handle character-class expressions">
-else if ($E/self::class)
-then 
-   element { name($E) } {
-      $E/@*, 
-      attribute regex { '\p{' || $E/@code || '}'}
-   }
-</scrap>
-</p>
-<p>For terminal symbols, all attribute values are straightforward.
-They are non-nullable, they are their own first and last
-states, and they have no follow states.  In 2013, all terminals
-were <gi>terminal</gi> elements. 
-<scrap id="gl-ME-terminals-2013"
-       name="Handle terminal nodes (v0.1)">
-if ($E/self::terminal)
-then let $id := '_t_' || (1 + count($E/preceding::terminal))
-     return element terminal {
-       $E/(@* except (@xml:id, 
-                     @nullable, 
-                     @first, 
-                     @last, 
-                     @follow:*)),
-       attribute xml:id { $id },
-       attribute nullable { false() },
-       attribute first { $id },
-       attribute last { $id },
-       attribute {QName($gl:follow-ns, "follow:" || $id)} { },
-       $children
-     }</scrap></p>
-<p>In 2021, we distinguish several different terminals.
-<scrap id="gl-ME-terminals"
-       name="Handle terminal nodes">
-if ($E/self::inclusion or $E/self::exclusion
-    or $E/self::literal)
-then
-      let $id := '_t_' 
-                 || (1 + count(($E/preceding::* | $E/ancestor::*)
-                    [self::inclusion 
-                    or self::exclusion
-		    or self::literal])), 
-          $re := 'dummy' (:if ($E/self::inclusion) 
-                 then gl:inclusion-regex($E) 
-                 else if ($E/self::exclusion)
-                 then gl:exclusion-regex($E) 
-                 else if ($E/self::literal)
-		 then gl:literal-regex($E)
-		 else '[! error in gl:ME !]'
-		 :)
-      return element {name($E)} {
-         $E/(@* except (@xml:id, 
-                     @nullable, 
-                     @first, 
-                     @last, 
-                     @regex,
-                     @follow:*)),
-         attribute xml:id { $id },
-         attribute nullable { false() },
-         attribute first { $id },
-         attribute last { $id },
-         attribute {QName($gl:follow-ns, "follow:" || $id)} { },
-	 attribute regex { $re },
-         $children
-      }</scrap>
-</p>
-<p>We have now committed to writing functions to create
-regular expressions for inclusions, exclusions, and literals.
-(But it's not the most pressing need, so for the moment
-I'm commenting it out.)
-</p>
-<p>Nonterminals are similarly straightforward:  from the
-point of view of the Gluschkov automaton, they are
-indistinguishable from terminals.
-<scrap id="gl-ME-nonterminal"
-       name="Handle nonterminal symbols">
-if ($E/self::nonterminal)
-then
-     let $id := $E/@name || '_'
-                || (1 + count($E/preceding::nonterminal
-                              [@name = $E/@name]))
-     return element nonterminal {
-       $E/(@* except (@xml:id, 
-                     @nullable, 
-                     @first, 
-                     @last, 
-                     @follow:*)),
-       attribute xml:id { $id },
-       attribute nullable { false() },
-       attribute first { $id },
-       attribute last { $id },
-       attribute {QName($gl:follow-ns, "follow:" || $id)} { },
-       $children
-     }</scrap>
-</p>
-<p>Syntactically, an option is an expression to which a question mark
-has been added.  So any option &E; has the form (&F;?).  &E; is
-nullable regardless of whether &F; is or not, and &E; has the same
-first, final, and follow sets as &F;.
-Note than an <gi>option</gi> should only ever have one child element:
-a terminal symbol (inclusion, exclusion, literal), a nonterminal
-symbol, or a set of alternatives (<gi>alts</gi>).  If we ever see
-anything else, this case will not process it and it will fall through
-to the error case.
-<scrap id="gl-ME-option"
-       name="Handle options">
-if ($E/self::option
-    [count(*) eq 1]
-    [child::*[self::inclusion
-              or self::exclusion
-              or self::literal 
-              or self::nonterminal 
-	      or self::alts]])
-then
-     let $id := 'exp_option_' || (1 + count($E/preceding::option))
-     return element option {
-       $E/(@* except (@xml:id, 
-                     @nullable, 
-                     @first, 
-                     @last, 
-                     @follow:*)),
-       attribute xml:id { $id },
-       attribute nullable { true() },
-       attribute first { $children/@first },
-       attribute last { $children/@last },
-       for $follow-att in $children/@follow:* 
-       return $follow-att,
-       $children
-     }</scrap>
-</p>
-<p>Repeats will have either one child element or two.  The
-first will be a terminal, a nonterminal, or a set of alternatives;
-the optional second child is a separator.  If anything else is
-encountered, we are not ready for it and we'll fall through to
-the error case.</p>
-<p>In the 2013 grammar, a set of alternatives was a
-<gi>def</gi> element: 
-<scrap id="gl-ME-repeats-2013"
-       name="Handle repetitions (v0.1)">
-if ($E[self::repeat0 or self::repeat1]
-      [*[1][self::terminal or self::nonterminal or self::def]]
-      [count(*) eq 1 or child::*[2][self::sep]]
-         ) 
-then
-     let $gi := name($E)
-     let $id := 'exp_' || $gi || '_' 
-                || (1 + count($E/preceding::*[name() = $gi])),
-         $F := gl:notrace($ch[1], "repetition factor F: "),
-         $G := gl:notrace($ch[2], "repetition sep G: ")
-     return element {$gi} {
-       $E/(@* except (@xml:id, 
-                     @nullable, 
-                     @first, 
-                     @last, 
-                     @follow:*)),
-       attribute xml:id { $id },
-       attribute nullable { 
-         if ($gi = 'repeat0') 
-         then true() 
-         else $F/@nullable
-       },
-       attribute first { 
-         if (xs:boolean($F/@nullable) = true())
-         then concat($F/@first, ' ', $G/@first)
-         else $F/@first
-       },
-       attribute last { 
-         if (xs:boolean($F/@nullable) = true())
-         then concat($F/@last, ' ', $G/@last)
-         else $F/@last
-       },
-       <ptr target="gl-ME-rep-follow"/>
-       ,
-       $children
-     }
-</scrap></p>
-
-<p>In 2021, the functionality is the same, but the
-choice element is named <gi>alts</gi>:
-<scrap id="gl-ME-repeats"
-       name="Handle repetitions">
-if ($E[self::repeat0 or self::repeat1]
-      [*[1]
-        [self::inclusion or self::exclusion
-        or self::literal
-        or self::nonterminal
-	or self::alts]]
-      [count(*) eq 1 
-      or child::*[2][self::sep]]) 
-then let $gi := name($E)
-     let $id := 'exp_' || $gi || '_' 
-                || (1 + count($E/preceding::*[name() = $gi])),
-         $F := gl:notrace($ch[1], "F: "),
-         $G := gl:notrace($ch[2], "G: ")
-     return element {$gi} {
-       $E/(@* except (@xml:id, 
-                     @nullable, 
-                     @first, 
-                     @last, 
-                     @follow:*)),
-       attribute xml:id { $id },
-       attribute nullable { 
-         if ($gi = 'repeat0') 
-         then true() 
-         else $F/@nullable
-       },
-       attribute first { 
-         if (xs:boolean($F/@nullable) = true())
-         then concat($F/@first, ' ', $G/@first)
-         else $F/@first
-       },
-       attribute last { 
-         if (xs:boolean($F/@nullable) = true())
-         then concat($F/@last, ' ', $G/@last)
-         else $F/@last
-       },
-       <ptr target="gl-ME-rep-follow"/>
-       ,         
-       $children
-     }
-</scrap>
-</p>
-<p>The calculation of the follow set here has several
-cases.  Watch carefully.  First case:  no separator.
-So for all positions &p; in the expression &E;,
-<list>
-<item>if &p; is in last(&E;)
-then follow(&E;*, &p;) is 
-the union of follow(&E;, &p;) with first(&E;)</item>
-<item>otherwise
-follow(&E;*, &p;) is  
-just follow(&E;, &p;)
-with no additions.</item>
-</list>
-<scrap id="gl-ME-rep-follow"
-       name="Calculate follow:* attributes for repetitions">
-       if (count($ch) eq 1)
-       then
-         let $lastF := tokenize($F/@last,'\s+'),
-             $firstF := tokenize($F/@first,'\s+')
-         for $a in $F/@follow:*
-         return if (local-name($a) = $lastF)
-           then attribute { 
-               QName($gl:follow-ns, "follow:"||local-name($a) ) 
-             } { 
-               gl:merge((tokenize($a,'\s+'), $firstF))    
-             }
-           else $a
-</scrap>
-</p>
-<p>If there is a separator, then the same principle
-applies, but things are complicated by the presence
-of the separator in the way.
-For all &p;
-in &F;*&G; or &F;+&G;, its follow-set depends
-on <list>
-<item>whether &p; is in &F; or in &G;,</item>
-<item>whether it's in last(&F;) or last(&G;),
-and </item>
-<item>whether &F; and &G; are nullable.</item>
-</list>
-So we break out the detailed calculations.
-The overall pattern is as follows.  We pre-calculate
-<list>
-<item>the two <ident>last()</ident> sets,</item>
-<item>the two <ident>first()</ident> sets,</item>
-<item>whether &F; and &G; are nullable, and</item>
-<item>for each position in &F; or &G;, its local
-name and its follow-set within &F; or &G;.</item>
-</list>
-<scrap prev="gl-ME-rep-follow"
-       name="Calculate follow-set for repetition with separator">
-       else (: count($children) eq 2 :)
-         let $lastF := tokenize($F/@last,'\s+'),
-             $lastG := tokenize($G/@last,'\s+'),
-             $firstF := tokenize($F/@first,'\s+'),
-             $firstG := tokenize($G/@first,'\s+'),
-             $nullableF := (xs:boolean($F/@nullable) = true()), 
-             $nullableG := (xs:boolean($G/@nullable) = true())
-         return 
-           for $a in $children/@follow:* 
-           let $p := local-name($a),
-               $follow0 := tokenize($a,'\s+')
-           let $followset :=  
-             <ptr target="gl-ME-rep-follow-sep-1"/>
-             <ptr target="gl-ME-rep-follow-sep-2"/>
-             <ptr target="gl-ME-rep-follow-sep-3"/>
-             <ptr target="gl-ME-rep-follow-sep-4"/>
-             <ptr target="gl-ME-rep-follow-sep-5"/>
-           return attribute { 
-                    QName($gl:follow-ns, 
-                          "follow:"||local-name($a) ) 
-                } { 
-                    $followset    
-                    }</scrap>
-</p>
-<p>If &p; is final in &F; and &G; is nullable, then it's final
-in &F;*&G; or &F;+&G; and can thus be followed by any first
-state of &G; and any first state of &F;, as well as (naturally)
-its follow-set within &F;:
-<scrap id="gl-ME-rep-follow-sep-1"
-       name="Follow set when p in last(F), G nullable">
-             if ($p = $lastF and $nullableG) 
-             then gl:merge(($follow0, $firstG, $firstF))
-</scrap></p>
-<p>If &p; is final in &F; and &G; is <emph>not</emph> nullable, 
-then its follow-set omits the first sets of &F;. 
-<scrap id="gl-ME-rep-follow-sep-2"
-       name="Follow set when p in last(F), G not nullable">
-             else if ($p = $lastF and not($nullableG))
-             then gl:merge(($follow0, $firstG))
-</scrap></p>
-<p>If &p; is final in &G; and &F; is nullable, 
-then we again have a three-way merge for its follow-set:
-its follow-set within &G;, the first-set of &F;, and
-(skipping &F; entirely, since it's nullable)
-the first-set of &G;. 
-<scrap id="gl-ME-rep-follow-sep-3"
-       name="Follow set when p in last(G), F nullable">
-             else if ($p = $lastG and $nullableF)
-             then gl:merge(($follow0, $firstG, $firstF))
-</scrap></p>
-<p>If &p; is final in &G; and &F; is <emph>not</emph> nullable, 
-then the first-set of &G; is not included in the follow-set
-of &p;.
-<scrap id="gl-ME-rep-follow-sep-4"
-       name="Follow set when p in last(G), F not nullable">
-             else if ($p = $lastG and not($nullableF))
-             then gl:merge(($follow0, $firstF))
-</scrap></p>
-<p>Finally, if none of the above are true, then &p;
-is non-final in either &F; or &G; and its follow-set is
-unaffected by the repetition operator, so we just copy it
-out again.
-<scrap id="gl-ME-rep-follow-sep-5"
-       name="Follow set when p non-final in F or G">
-             else string($a)
-</scrap></p>
-
-<p>We have appealed to a little utility function for merging
-sets of IDs.  It's quite straightforward, really, thanks
-to <ident>distinct-values()</ident>.
-<scrap id="gl-merge"
-       name="Define gl:merge()">
-declare function gl:merge(
-  $ids as xs:string*
-) as xs:string {
-  string-join(distinct-values($ids),' ')
-};
-</scrap>
-</p>
-
-<p>The <gi>sep</gi> element contains a single factor and
-changes none of its properties.
-<scrap id="gl-ME-sep"
-       name="Handle separator expressions">
-if ($E/self::sep
-           [count(*) eq 1]
-           [child::*[self::inclusion
-                     or self::exclusion 
-                     or self::literal 
-                     or self::nonterminal 
-                     or self::alts]]
-          ) then
-     let $id := 'exp_sep_'
-                || (1 + count($E/preceding::sep)) 
-     return element sep {
-       $E/(@* except (@xml:id, 
-                     @nullable, 
-                     @first, 
-                     @last, 
-                     @follow:*)),
-       attribute xml:id { $id },
-       $ch/@nullable,
-       $ch/@first,
-       $ch/@last,
-       $ch/@follow:*,
-       $children
-     }
-</scrap>
-</p>
-<p>In 2013 the element names were different.  (Yawn.)
-<scrap id="gl-ME-sep-2013"
-       name="Handle separator expressions (v0.1)">
-if ($E/self::sep
-           [count(*) eq 1]
-           [child::*[self::terminal 
-                     or self::nonterminal
-                     or self::def]]
-          ) then
-     let $id := 'exp_sep_'
-                || (1 + count($E/preceding::sep)) 
-     return element sep {
-       $E/(@* except (@xml:id, 
-                     @nullable, 
-                     @first, 
-                     @last, 
-                     @follow:*)),
-       attribute xml:id { $id },
-       attribute nullable { $ch/@nullable },
-       attribute first { $ch/@first },
-       attribute last { $ch/@last },
-       for $follow-att in $ch/@follow:* 
-       return $follow-att,
-       $children
-     }
-</scrap>
-</p>
-<p>An <gi>alt</gi> is one choice among (sometimes) several; it
-contains a sequence of terms (i.e. terminal, nonterminal, repetition,
-option, nested set of alternatives).  Since it's an arbitrary-length
-sequence, not a binary operator, the calculation of first and last and
-follow gets a bit tricky.  We may end up needing to normalize to
-binary form just to keep things simple.
-<scrap id="gl-ME-alt"
-       name="Handle alt elements">
-if ($E/self::alt) then
-     let $id := 'exp_alt_'
-                || (1 + count($E/preceding::alt)) 
-     return element alt {
-       $E/(@* except (@xml:id, 
-                     @nullable, 
-                     @first, 
-                     @last, 
-                     @follow:*)),
-       attribute xml:id { $id },
-       attribute nullable { 
-         every $c in $ch
-         satisfies (xs:boolean($c/@nullable) eq true())
-       },
-       attribute first { 
-         string-join(
-           for $c at $pos in $ch
-           return if (every $lsib
-	              in $ch[position() lt $pos]
-                      satisfies
-		      (xs:boolean($lsib/@nullable)
-		      eq true() ))
-                  then $c/@first
-                  else (),
-           ' '
-         )
-       },
-       attribute last { 
-         string-join(
-           for $c at $pos in $ch
-           return if (every $rsib
-	              in $ch[position() gt $pos]
-                      satisfies
-		      (xs:boolean($rsib/@nullable)
-		      eq true() ))
-                  then $c/@last
-                  else (),
-           ' '
-         )
-       },
-       <ptr target="gl-ME-alt-follow"/>
-       ,
-       $children
-     }
-</scrap>
-</p>
-<p>Again, calculating the follow-set is the most complicated
-of the subcalculations for this type of expression.  So let's
-take it slowly.
-<list>
-<item>For every position &p; in each child &c;, the follow set 
-follow(&E;,&p;) includes follow(&c;,&p;).</item>
-<item>In addition, if &p; is in last(&c;) and &c; has a following sibling,
-then follow(&E;,&p;) should include start(next-sibling(&c;)).</item>
-<item>
-In addition, if &p; is in last(&c;) and &c; has a following sibling,
-and also next-sibling(&c;) is nullable, 
-then follow(&E;,&p;) should include start(nextsib(nextsib(&c;))).
-</item>
-<item>
-And so forth.</item>
-</list>
-
-<scrap id="gl-ME-alt-follow"
-       name="Calculate follow:* attributes for alt">
-       for $c at $cpos in $ch 
-       for $a in $c/@follow:*
-       let $p := local-name($a),
-           $lastC := tokenize($c/@last,'\s+'),
-           $rightsibs := $ch[position() gt $cpos],
-           $followset := if ($p = $lastC)
-	   then string-join(
-             (  $a,
-                for $rsib at $rpos in $rightsibs
-                let $inbetweens := $rightsibs
-		                   [position() lt $rpos]
-                return if (every $msib in $inbetweens
-                           satisfies
-                           (xs:boolean($msib/@nullable)
-			   = true() ))
-                       then $rsib/@first
-                       else ()
-             ),
-             ' '
-           )
-           else
-             $a
-       return attribute { 
-             QName($gl:follow-ns, "follow:"||$p )
-         } { 
-             $followset    
-         }
-</scrap>
-</p>
-<p>An <gi>alts</gi> element contains a set of alternatives,
-each an <gi>alt</gi> element.
-The 2013 alternative was the <gi>def</gi> element,
-but note that <gi>def</gi> was required as the top-level
-element of a right-hand side, which <gi>alts</gi> is not.
-That doesn't affect the treatment of this element,
-but it does affect
-the treatment of rules, below. 
-<scrap id="gl-ME-def"
-       name="Handle alts elements (= def)">
-if ($E[self::<ptr target="gl-alts-gi"/>]) then
-     let $id := 'exp_' || name($E) || '_' 
-                || (1 + count(
-                $E/preceding::<ptr target="gl-alts-gi"/>)
-		) 
-     <ptr target="gl-ME-alternatives"/>
-</scrap>
-We factor out the treatment of alternatives
-so that we can re-use it for rules, below.
-The properties should all be self-explanatory.
-<scrap id="gl-ME-alternatives"
-       name="Handle alternatives">
-     return element {name($E)} {
-       $E/(@* except (@xml:id, 
-                     @nullable, 
-                     @first, 
-                     @last, 
-                     @follow:*)),
-       attribute xml:id { $id },
-       attribute nullable { 
-         some $c in $ch
-         satisfies
-	 (xs:boolean($c/@nullable) eq true() )
-       },
-       attribute first { 
-         string-join($ch/@first, ' ')
-       },
-       attribute last { 
-         string-join($ch/@last, ' ')
-       },
-       
-       (: follow-set is simple here. :) 
-       for $a in $ch/@follow:*
-       return $a,
-       $children
-     }
-</scrap></p>
-<p>As an experiment, I am putting the generic identifier
-for the element in a scrap.  If this works, much of the
-duplication earlier in this section can be removed.
-(Why do ideas come so late?)
-<scrap id="gl-alts-gi"
-       name="GI for alts element">alts</scrap>
-In 2013, it was <gi>def</gi>:
-<scrap id="gl-alts-gi-2013"
-       name="GI for alts element (v0.1)">def</scrap>
-</p>
-<p>Since the alternatives inside a rule are not now wrapped
-in a <gi>def</gi> or <gi>alts</gi> elements, we need to
-put the properties for the rule as a whole on the <gi>rule</gi>
-element.
-<scrap id="gl-ME-rule"
-       name="Handle rule elements">
-if ($E/self::rule) then
-    let $id := $E/@name
-    <ptr target="gl-ME-alternatives"/>
-</scrap>
-</p>
-<p>In 2013, it was simpler.
-<scrap id="gl-ME-rule-2013"
-       name="Handle rule elements (v0.1)">
-if ($E/self::rule) then 
-    element rule {
-      $E/@*,
-      $children
-    }</scrap>
-</p>
-<p>Finally, a few miscellaneous elements.  Comments
-require no annotation.
-<scrap id="gl-ME-comment"
-       name="Handle comment elements">
-if ($E/self::comment) then
-    $E
-</scrap>
-</p>
-<p>The <gi>ixml</gi> element also requires no
-annotation.
-<scrap id="gl-ME-ixml"
-       name="Handle ixml elements (grammars)">
-if ($E/self::ixml) then 
-    element ixml {
-      attribute follow:info { 
-        "auxiliary namespace for FSA description"
-      },
-      $E/@*,
-      $children
-    }
-</scrap>
-</p>
-<p>And finally, at the bottom of the if-then-else ladder,
-we handle unexpected elements.
-<scrap id="gl-ME-whahhh"
-       name="Handle unexpected elements">
-if ($E/self::option or $E/self::sep)
-then &lt;error>Element {name($E)} with unexpected content: {$E}&lt;/error>
-else if ($E/(self::repeat1 or self::repeat0))
-then &lt;error>Element {name($E)} with unexpected content: {$E}&lt;/error>
-else &lt;error>Unexpected element {$E}&lt;/error></scrap>
-</p>
-</div>
-</div>
+-->
 
 </div>
 
@@ -7298,6 +7662,12 @@ they can choose whether to get back one parse tree, several, a
 parse-forest grammar, a raw parse tree, or the entire Earley set.</p>
 <p>This will also require some extension to the test harness and
 possibly to the test catalog schema.</p>
+</item>
+
+<item>
+<p><label>Grammar cleanup</label>.  Implement automatic cleanup
+of grammar hygiene problems (unreachable, unproductive, and
+undefined symbols); improve diagnostics.</p>
 </item>
 
 <item><p><label>Robustness</label>.  Improve robustness and resistance

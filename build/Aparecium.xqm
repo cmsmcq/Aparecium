@@ -75,9 +75,22 @@ declare function aparecium:parse-string(
   $sI as xs:string,
   $sG as xs:string
 ) as element() {
-  let $cG := aparecium:compile-grammar-from-string($sG)
+  let $cG := (:stat:) prof:time( (:tats:)
+             aparecium:compile-grammar-from-string($sG)
+             (:stat:) , 
+             'parse-string: compiling grammar from string:') 
+             (:tats:)
+             
   return 
-    aparecium:parse-string-with-compiled-grammar($sI, $cG)
+    if ($cG/self::aparecium:error)
+    then element aparecium:error {
+      attribute id { "ap:tbd04" },
+      "parse-string():  Error compiling grammar.",
+      $cG      
+    }
+    else (:stat:) prof:time( (:tats:)
+         aparecium:parse-string-with-compiled-grammar($sI, $cG)
+         (:stat:) , 'parse-string:  parsing input string:') (:tats:)
 };
 
 (: ......................................................
@@ -88,15 +101,21 @@ declare function aparecium:parse-string-with-compiled-grammar(
   $sI as xs:string,
   $cG as element(ixml)
 ) as element() {
-  (: let $trace := trace((),'
-parse-string-'
-                   || ' with-compiled-grammar()
-') :)
+  let $cg-ok := (:stat:) prof:time( (:tats:)
+                aparecium:grammar-ok($cG)
+                (:stat:) , 'pswcg() calling grammar-ok():')
 
-  let $result := prof:time(
-                 (: earley:all-trees($sI, $cG)  :)
-                 earley:any-tree($sI, $cG) 
-                 , '0 Outer call: ')
+  let $result := if ($cg-ok/self::ixml) 
+                 then (:stat:) prof:time( (:tats:)
+                     earley:any-tree($sI, $cG) 
+                     (:stat:) 
+                     , '0 Outer call to earley:any-tree(): ')
+                      (:tats:)
+                 else element aparecium:error {
+                   attribute id { "ap:tbd05" },
+                   "Compiled grammar flawed:",
+                   $cg-ok
+                 }
 		 
   return if (count($result) eq 1)
          then $result
@@ -140,8 +159,15 @@ declare function aparecium:doc(
 declare function aparecium:parse-grammar-from-uri(
   $uriG as xs:string
 ) as element() {
-  let $sG := unparsed-text($uriG)
-  return aparecium:parse-grammar-from-string($sG)
+  let $sG := if (unparsed-text-available($uriG))
+             then unparsed-text($uriG)
+             else ()
+  return if (exists($sG)) 
+         then aparecium:parse-grammar-from-string($sG)
+         else element aparecium:error {
+           attribute id { "ap:tbd14" },
+           "Grammar (" || $uriG || ") not found."
+         }
 };
 
 
@@ -152,23 +178,16 @@ declare function aparecium:parse-grammar-from-uri(
 
 declare function aparecium:parse-grammar-from-string(
   $G as xs:string
-) as element(ixml) {
+) as element() {
   (: CGIG:  compiled grammar for ixml grammars :)
   let $CGIG := doc($aparecium:ixml.gl.xml)/ixml,
       (: PG: parsed grammar :)
-      $PG := aparecium:parse-string-with-compiled-grammar($G,$CGIG)
-  return if ($PG/self::forest) 
-      then trace($PG/ixml,
-                 'Warning:  submitted grammar was ambiguous.') 
-      else if ($PG/self::Goal) 
-      then $PG/ixml 
-      else if ($PG/self::ixml) 
-      then $PG
-      else <ixml>
-        <!--* Something is very wrong here *-->
-        { $PG }
-      </ixml>
-};   
+      $PG0 := aparecium:parse-string-with-compiled-grammar($G,$CGIG),
+      $PG := (:stat:) prof:time( (:tats:)
+             aparecium:grammar-ok($PG0)
+             (:stat:) , 'pgfs() calling grammar-ok():')
+  return $PG
+};
 
 
 (: ......................................................
@@ -206,9 +225,19 @@ declare function aparecium:compile-grammar-from-string(
 :)   
 
 declare function aparecium:compile-grammar-from-xml(
-  $xmlG as element(ixml)
+  $xmlG as element()
 ) as element(ixml) {
-  gluschkov:ME($xmlG)
+  let $G := (:stat:) prof:time( (:tats:)
+            aparecium:grammar-ok($xmlG)
+            (:stat:) , 'cgfx() calling grammar-ok():')
+  return if ($G/self::ixml)
+         then gluschkov:ME($xmlG)
+         else element aparecium:error {
+           attribute id { "ap:tbd15" },
+           "compile-grammar-from-xml(): ",
+           "Unable to compile grammar: ",
+	   "grammar not ok."
+         }
 };
 
 
@@ -250,10 +279,154 @@ declare function aparecium:recompile-ixml-grammar(
   )/Goal/ixml
 };
 
+(: grammar-ok(): check grammar 
+:)
+declare function aparecium:grammar-ok(
+  $G as element()
+) as element() {
+  if ($G/self::ixml)
+  then 
+  let $dummy := trace($G/rule[1]/@name/string(),
+                'grammar-ok() called on grammar for: ')
+    let $lee-struc := (
+      let $le0 := $G/*
+          [not(self::rule or self::comment or self::pragma)]
+      for $e in $le0 
+      return element aparecium:error {
+        attribute id { "ap:tbd08" },
+        "Unexpected " || $e/name() 
+        || " element as child of ixml."
+      },
+
+      let $le0 := $G/rule/*
+          [not(self::alt or self::comment or self::pragma)]
+      for $e in $le0 
+      return element aparecium:error {
+        attribute id { "ap:tbd09" },
+        "Unexpected " || $e/name() 
+        || " element as child of rule."
+      }
+
+  )
+      
+
+    let $lee-comp := ()
+
+    let $lee-names := (
+      for $r in $G/rule
+                [not(@name castable as xs:NCName)]
+      let $nt := $r/@name/string(),
+          $mark := string($r/@mark),
+          $references := $G//nonterminal[@name eq $nt],
+          $rmarks := distinct-values(
+	      for $ref in $references
+              return string($ref/@mark)
+          )
+      where (( ($mark = ('^', '@', ''))
+               and ($rmarks = ('^', '@', '')) )
+            or ( ($mark eq '-')
+               and ($rmarks = ('^', '@')) ))
+      return element aparecium:error {
+               attribute id { "ap:tbd11" },
+               $nt || " is not allowed as an XML name."
+               || " It must be marked as hidden."
+             }
+  ) 
+
+    let $lee-uniqdef := (
+      for $r in $G/rule
+      let $nt := string($r/@name)
+      group by $nt
+      return if (count($r) gt 1)
+      then (
+        trace((), 
+           "Symbol " || $nt 
+           || " defined " || count($r) || "×: "),
+        element aparecium:error {
+        attribute id { "ap:tbd12" },
+        $nt || " is defined " ||
+        (if (count($r) eq 2)
+        then "twice"
+        else count($r) || " times")
+        || "."
+      })
+      else ()
+  )
+
+    let $lee-charclass := (
+      for $cc in ($G//class/@code,
+                  $G//member/@code)
+      let $nt := string($cc/ancestor::rule/@name)
+      where not(matches($cc,
+                '^(L[ulmo]?'
+                || '|M[nce]?'
+                || '|N[dlo]?'
+                || '|P[cdseifo]?'
+                || '|Z[slp]?'
+                || '|S[mcko]?'
+                || '|C[cfon]?)$'))
+      return element aparecium:error {
+        attribute id { "ap:tbd16" },
+        "Character class", string($cc), 
+        "in the definition of", $nt, 
+        "is not known."
+      }
+  )
+
+    let $lee-alldef := (
+      for $ref in $G//nonterminal
+      let $nt := string($ref/@name)
+      group by $nt
+      return if (empty($G/rule[@name eq $nt]))
+      then element aparecium:error {
+        attribute id { "ap:tbd13" },
+        $nt || " is referred to but not defined." 
+      }
+      else ()
+  )
+
+    let $lee-reachable := ()
+
+    let $lee-productive := ()
+
+  let $lee-all := ($lee-struc, $lee-comp,
+                   $lee-names,  
+                   $lee-uniqdef, $lee-charclass,
+                   $lee-alldef, 
+                   $lee-reachable, $lee-productive)
+  return if (empty($lee-all/self::aparecium:error))
+  then $G
+  else element aparecium:error {
+    attribute id { "ap:tbd06" },
+    element p { "Errors found in grammar." },
+    $lee-all,
+    $G
+  }
+  else element aparecium:error {
+    attribute id { "ap:tbd07" },
+    element p { "This is not a grammar." },
+    $G
+  }
+};
+
+
 (: ******************************************************
    * Variables (of interest only for maintainer) 
    ******************************************************
    :)
+declare variable $aparecium:options 
+   as map(xs:string, item()*)
+   := map {
+        'return': 'any-tree',
+        'tree-count': 2,
+        'tree-form': 'ast',
+                'multiple-definitions': 'error',
+        'undefined-symbols': 'error',
+        'unreachable-symbols': 'silence',
+        'unproductive-symbols': 'silence',
+        'conformance': 'tolerant' 
+
+      };
 declare variable $aparecium:libloc as xs:string
   := '../lib';
 declare variable $aparecium:ixml.ixml as xs:string
