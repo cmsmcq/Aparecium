@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '17 February 2022' >
+<!ENTITY date.last.touched '16 March 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
@@ -34,6 +34,9 @@ form of this document.</p>
 </fileDesc>
 <revisionDesc>
 <list>
+<item>2022-03-16 : CMSMcQ : record a to-do item:  the grammar
+preparation here should use standard functions, not roll its own.
+What were you thinking?</item>
 <item>2022-02-09/2022-02-12 : CMSMcQ : finally reach the actual test
 cases and slowly knock off rough edges here and there</item>
 <item>2022-02-04 : CMSMcQ : made file, to replace earlier test harness
@@ -81,6 +84,8 @@ better code.</p>
 <p>
 <hi>To do:</hi>
 <list>
+<item><hi>Revise grammar-test handling to use standard
+compile-grammar functions?</hi></item>
 <item><hi>Revise grammar-test handling to put details where
 the user asked for them.</hi></item>
 <item><hi>Write out external expected/reported pairs only if there is
@@ -766,7 +771,13 @@ and hope for the best.  (Quick and dirty, remember.)
           } catch * {
                element tc:error {
                  attribute id { "t:tbd04" },
-                 text { "ixml compilation failed" }
+                 text { "ixml compilation failed.&amp;#xA;" },
+                 "Parse function blew up. ",
+                 $err:code, $err:value, 
+                 " module: ",
+                 $err:module, 
+                 "(", $err:line-number, ",", 
+                 $err:column-number, ")"
                }               
           }
 </scrap></p>
@@ -802,7 +813,13 @@ For now (quick and dirty) we don't cover them all.
                      } catch * {
                        element tc:error {
                          attribute id { "t:tbd06" },
-                         text { "ixml compilation failed" }
+                         "ixml compilation failed.&amp;#xA;",
+                         "Parse function blew up. ",
+                         $err:code, $err:value, 
+                         " module: ",
+                         $err:module, 
+                         "(", $err:line-number, ",", 
+                         $err:column-number, ")"
                        }
                      }
                 else element tc:error {
@@ -851,6 +868,15 @@ here.</emph>
 <scrap id="lib-rts-vxml-grammar-check"
        name="Set $checked-xml-grammar">
 
+      let $checked-xml-grammar := prof:time(
+          ap:grammar-ok($new-xml-grammar)
+          , 'test-harness: checking XML grammar.')
+</scrap>
+The older version, for reference:
+<scrap corresp="lib-rts-vxml-grammar-check"
+       version="alt"
+       name="Set $checked-xml-grammar">
+
       let $checked-xml-grammar := 
           if (empty($new-xml-grammar))
           then ()
@@ -876,9 +902,13 @@ If the new grammar is OK so far, we need to compile it.
           } catch * {
             element tc:error {
               attribute id {"t:tbd11"},
-              text { 
-                "Error compiling grammar"
-              }
+              "Error compiling grammar.&amp;#xA;",
+              "Parse function blew up. ",
+              $err:code, $err:value, 
+              " module: ",
+              $err:module, 
+              "(", $err:line-number, ",", 
+              $err:column-number, ")"
             }
           }
       else $grammar
@@ -942,7 +972,12 @@ usable grammar.  First, we check for error signals in the
 </scrap></p>
 
 <p>Then, in a slightly paranoid way, we check that the
-grammar is actually an <gi>ixml</gi> element.
+grammar is actually an <gi>ixml</gi> element.<note place="foot">
+<p>As the text suggests, this test was inserted in a moment
+of paranoia, with descriptive text including the phrase
+<q>This case is not supposed to happen.</q>  The paranoia
+paid off:  this case now fires normally when Aparecium
+finds a conformance error in the grammar.</p></note>
 <scrap prev="lib-rts-abort"
        name="If grammar is not good, stop now">
     else if (exists($checked-xml-grammar)
@@ -952,7 +987,6 @@ grammar is actually an <gi>ixml</gi> element.
            element tc:p {
              "No workable grammar.  Skipping test",
              "&amp;#xA;cases and nested test sets.",
-             "&amp;#xA;This case is not supposed to happen."
            }
          },
          element tc:app-info { $checked-xml-grammar }
@@ -1145,9 +1179,11 @@ found, then again we did not run the test.
        name="Check for grammar-not-found errors">
 
     else if ($xml-grammar/self::tc:error
-             [@id = ("t:tbd07", "t:tbd08", "t:tbd09")])
+             [@id = ("t:tbd07", "t:tbd08", "t:tbd09")]
+             or $xml-grammar/descendant-or-self::ap:error
+             [@id = ('ap:tbd01', 'ap:tbd03', 'ap:tbd14')]
+            )
     then (
-           (: grammar parsed but was nonconformant :)
            attribute result { "not-run" },
            element tc:result {
              $expectation
@@ -1164,10 +1200,15 @@ then we pass the test.
     else if ($expectation[self::tc:assert-not-a-grammar
              or self::tc:assert-not-a-sentence]
              and
-             ($xml-grammar/self::tc:error[@id = 
-             ("t:tbd04", "t:tbd06")]
+             ($xml-grammar/self::tc:error
+             [@id = ("t:tbd04", "t:tbd06")]
              or $xml-grammar/self::no-parse
              or $xml-grammar/child::no-parse
+             or $xml-grammar/descendant-or-self::ap:error
+	     [@id = ('ap:tbd05', 'ap:tbd06', 'ap:tbd08',
+             'ap:tbd09', 'ap:tbd11', 'ap:tbd12',
+	     'ap:tbd13', 'ap:tbd16')]
+	     (: maybe also 04, 07, 15? :)
              )
             )
     then (

@@ -127,7 +127,13 @@ declare function t:run-test-set(
           } catch * {
                element tc:error {
                  attribute id { "t:tbd04" },
-                 text { "ixml compilation failed" }
+                 text { "ixml compilation failed.&#xA;" },
+                 "Parse function blew up. ",
+                 $err:code, $err:value, 
+                 " module: ",
+                 $err:module, 
+                 "(", $err:line-number, ",", 
+                 $err:column-number, ")"
                }               
           }
 
@@ -147,7 +153,13 @@ declare function t:run-test-set(
                      } catch * {
                        element tc:error {
                          attribute id { "t:tbd06" },
-                         text { "ixml compilation failed" }
+                         "ixml compilation failed.&#xA;",
+                         "Parse function blew up. ",
+                         $err:code, $err:value, 
+                         " module: ",
+                         $err:module, 
+                         "(", $err:line-number, ",", 
+                         $err:column-number, ")"
                        }
                      }
                 else element tc:error {
@@ -188,16 +200,9 @@ declare function t:run-test-set(
           
 
       
-      let $checked-xml-grammar := 
-          if (empty($new-xml-grammar))
-          then ()
-          else if ($new-xml-grammar/self::ixml)
-          then $new-xml-grammar
-          else element tc:error {
-            attribute id { "t:tbd10" },
-            text { "XML grammar not conformant:" },
-            $new-xml-grammar
-          }
+      let $checked-xml-grammar := prof:time(
+          ap:grammar-ok($new-xml-grammar)
+          , 'test-harness: checking XML grammar.')
 
       
       let $grammar := if (exists($new-xml-grammar)
@@ -207,9 +212,13 @@ declare function t:run-test-set(
           } catch * {
             element tc:error {
               attribute id {"t:tbd11"},
-              text { 
-                "Error compiling grammar"
-              }
+              "Error compiling grammar.&#xA;",
+              "Parse function blew up. ",
+              $err:code, $err:value, 
+              " module: ",
+              $err:module, 
+              "(", $err:line-number, ",", 
+              $err:column-number, ")"
             }
           }
       else $grammar
@@ -364,9 +373,11 @@ declare function t:test-grammar(
          )
 
     else if ($xml-grammar/self::tc:error
-             [@id = ("t:tbd07", "t:tbd08", "t:tbd09")])
+             [@id = ("t:tbd07", "t:tbd08", "t:tbd09")]
+             or $xml-grammar/descendant-or-self::ap:error
+             [@id = ('ap:tbd01', 'ap:tbd03', 'ap:tbd14')]
+            )
     then (
-           (: grammar parsed but was nonconformant :)
            attribute result { "not-run" },
            element tc:result {
              $expectation
@@ -377,10 +388,15 @@ declare function t:test-grammar(
     else if ($expectation[self::tc:assert-not-a-grammar
              or self::tc:assert-not-a-sentence]
              and
-             ($xml-grammar/self::tc:error[@id = 
-             ("t:tbd04", "t:tbd06")]
+             ($xml-grammar/self::tc:error
+             [@id = ("t:tbd04", "t:tbd06")]
              or $xml-grammar/self::no-parse
              or $xml-grammar/child::no-parse
+             or $xml-grammar/descendant-or-self::ap:error
+	     [@id = ('ap:tbd05', 'ap:tbd06', 'ap:tbd08',
+             'ap:tbd09', 'ap:tbd11', 'ap:tbd12',
+	     'ap:tbd13', 'ap:tbd16')]
+	     (: maybe also 04, 07, 15? :)
              )
             )
     then (

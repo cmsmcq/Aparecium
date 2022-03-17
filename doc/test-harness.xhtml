@@ -139,7 +139,7 @@
 <h1>Test harness</h1>
 <h1>for Aparecium</h1>
 <h3>C. M. Sperberg-McQueen</h3>
-<h3>4 February 2022, last revised 17 February 2022</h3>
+<h3>4 February 2022, last revised 16 March 2022</h3>
 <div class="versionList">
 <p>Versions defined:</p>
 <ul>
@@ -211,6 +211,8 @@ back and to a v0.2 version that replaces some of those quick and
 dirty shortcuts with better code.</div>
 <div class="Real-P"><i>To do:</i>
 <ul>
+<li><i>Revise grammar-test handling to use standard compile-grammar
+functions?</i></li>
 <li><i>Revise grammar-test handling to put details where the user
 asked for them.</i></li>
 <li><i>Write out external expected/reported pairs only if there is
@@ -227,7 +229,7 @@ failure record more about the test inputs.</i></li>
 protecting against and diagnosing errors.</i></li>
 <li><i>TO DO: in all uses of try/catch, record the error details as
 is done now in <a name="ref-to-lib-rtc-parse" href="#lib-rtc-parse"
-id="ref-to-lib-rtc-parse">49</a>.</i></li>
+id="ref-to-lib-rtc-parse">50</a>.</i></li>
 </ul>
 </div>
 <div class="div">
@@ -262,7 +264,7 @@ let $dummy  := file:create-dir($outdir),
     $report := t:run-tests($test-catalog-uri, $options)
 
 <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#dr-counts">Count tests and classify results 59</a></em> 〉</span>
+"#dr-counts">Count tests and classify results 60</a></em> 〉</span>
     
 return ($report,
         file:write($report-uri, $report))
@@ -296,7 +298,7 @@ declare namespace db =
 
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e517">Namespace declarations and imports, cont'd
+"#d3e520">Namespace declarations and imports, cont'd
 21</a>〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#lib-top">[File test-harness.xqm] 2</a>
 〉<br /></span></div>
@@ -311,9 +313,9 @@ will define:
 <span class="scrapref">〈 <em class="scrapptr"><a href=
 "#lib-run-test-set">The run-test-set() function 12</a></em> 〉</span>
 <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-test-grammar">The test-grammar() function 34</a></em> 〉</span>
+"#lib-test-grammar">The test-grammar() function 35</a></em> 〉</span>
 <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-run-test-case">The run-test-case() function 44</a></em> 〉</span></pre>
+"#lib-run-test-case">The run-test-case() function 45</a></em> 〉</span></pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#lib-top">[File test-harness.xqm] 2</a> 〉<br /></span></div>
 </div>
@@ -414,6 +416,7 @@ up variables and options 〉 ≡</a></span>
 let $invdir := "../../ixml/tests/",
     $apadir := "../../Aparecium/tests/",
     $ixtdir := "../../ixml-tests/tests-straw/",
+    $itwdir := "../../ixml-tests/tests-wood/",
     $outdir := resolve-uri($apadir || 'results-' 
                || $catalog-index 
                || '-'
@@ -425,7 +428,7 @@ let $invdir := "../../ixml/tests/",
 <span class="scrapcontinuations">Continued in 〈<a href=
 "#dr-catfiles">List of available test-catalog files 6</a>〉,
 〈<a href="#dr-options">Set the options for the test harness
-58</a>〉<br /></span> <span class="scrapinbound">This code is used
+59</a>〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#dr-top">[File test-driver.xq] 1</a>
 〉<br /></span></div>
 </div>
@@ -439,14 +442,17 @@ List of available test-catalog files [continues</a> <a href=
 "scrapbody">    $catalog-of-catalogs := &lt;test-catalogs&gt;
 
       &lt;!-- local catalogs, mostly simple --&gt;
-      &lt;!-- under 60 seconds (2.1, 4.8, 20.1, 78.1) --&gt;
+      &lt;!-- under 60 seconds (2.1, 4.8, 20.1, 12.4) --&gt;
       &lt;catalog n="test0" path="{$apadir}test0.xml"/&gt;
       &lt;catalog n="test1" path="{$apadir}test1.xml"/&gt;
       &lt;catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/&gt;
-      &lt;catalog n="misc" path="{$apadir}misc-tests.xml"/&gt;
+      &lt;catalog n="hygiene" path="{$itwdir}ixml-20220222/hygiene-tests.xml"/&gt;
 
-      &lt;!-- under 10 minutes (153) --&gt;
+      &lt;!-- under 10 minutes --&gt;
+      &lt;!-- 78.1s --&gt;
+      &lt;catalog n="misc" path="{$apadir}misc-tests.xml"/&gt;
       &lt;!-- embeds all the gxxx catalogs so they can be done in a single run --&gt;
+      &lt;!-- 153s --&gt;
       &lt;catalog n="gxxx"
                path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/&gt;
 
@@ -622,12 +628,12 @@ some aspects of the library's behavior.
   }
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e321">Load catalog file into $catalog (v. alt) 9</a>
+<a href="#d3e324">Load catalog file into $catalog (v. alt) 9</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#lib-run-tests">The run-tests() function 7</a>
 〉<br /></span></div>
 A simpler version of this might be:
-<div class="scrap"><span><a name="d3e326" id="d3e326">〈 9 Load
+<div class="scrap"><span><a name="d3e329" id="d3e329">〈 9 Load
 catalog file into $catalog 〉 (for version <em>alt</em>)
 ≡</a></span>
 <pre class=
@@ -810,20 +816,20 @@ may contain test cases and nested test sets.
     <span class="scrapref">〈 <em class="scrapptr"><a href=
 "#lib-rts-grammar">Load and compile the grammar for a test set 17</a></em> 〉</span>
     <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rts-grammar-test">Set $grammar-test-result 32</a></em> 〉</span>
+"#lib-rts-grammar-test">Set $grammar-test-result 33</a></em> 〉</span>
     return element tc:test-set-results {
           $test-set/@*, 
           <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rts-write-grammar-result">Record grammar test result 27</a></em> 〉</span>
+"#lib-rts-write-grammar-result">Record grammar test result 28</a></em> 〉</span>
           <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rts-abort">If grammar is bad, stop now 28</a></em> 〉</span>
+"#lib-rts-abort">If grammar is bad, stop now 29</a></em> 〉</span>
           else <span class="scrapref">〈 <em class=
 "scrapptr"><a href=
 "#lib-rts-nested">Handle nested test sets and test cases 16</a></em> 〉</span>
         }
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e1160">Handle an inline test-set (v. alt) 69</a>
+<a href="#d3e1166">Handle an inline test-set (v. alt) 70</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#lib-rts3">The recursive run-test-set() function 13</a>
 〉<br /></span></div>
@@ -856,7 +862,7 @@ appropriate function to handle them.
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#lib-rts-do-inline">Handle an inline test-set 15</a> 〉 〈 <a href=
-"#d3e1163">Handle an inline test-set (v. alt) 69</a>
+"#d3e1169">Handle an inline test-set (v. alt) 70</a>
 〉<br /></span></div>
 </div>
 </div>
@@ -889,13 +895,13 @@ may be combined in different ways in different output.
       <span class="scrapref">〈 <em class="scrapptr"><a href=
 "#lib-rts-vxml-grammar-check">Set $checked-xml-grammar 25</a></em> 〉</span>
       <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rts-grammar-compilation">Set $grammar to compiled grammar 26</a></em> 〉</span></pre>
+"#lib-rts-grammar-compilation">Set $grammar to compiled grammar 27</a></em> 〉</span></pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e1172">Load and test the grammar for a test set (v.
-alt) 70</a> 〉<br /></span> <span class="scrapinbound">This code is
+<a href="#d3e1178">Load and test the grammar for a test set (v.
+alt) 71</a> 〉<br /></span> <span class="scrapinbound">This code is
 used in 〈 <a href="#lib-rts-do-inline">Handle an inline test-set
-15</a> 〉 〈 <a href="#d3e1163">Handle an inline test-set (v. alt)
-69</a> 〉<br /></span></div>
+15</a> 〉 〈 <a href="#d3e1169">Handle an inline test-set (v. alt)
+70</a> 〉<br /></span></div>
 <i>Old version in <a href="#geniza">appendix</a>.</i></div>
 <div class="Real-P">If a grammar is specified, we get it into XML
 form as the value of <i>$new-xml-grammar</i>. The basic form of
@@ -922,16 +928,16 @@ this is straightforward:
           else ()
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e493">Set $new-xml-grammar (v. v2) 19</a>
+<a href="#d3e496">Set $new-xml-grammar (v. v2) 19</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#lib-rts-grammar">Load and compile the grammar for a test
-set 17</a> 〉 〈 <a href="#d3e1175">Load and test the grammar for a
-test set (v. alt) 70</a> 〉<br /></span></div>
+set 17</a> 〉 〈 <a href="#d3e1181">Load and test the grammar for a
+test set (v. alt) 71</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">In version 2 of the test harness, we ask BaseX
 to keep track of the time taken, so we can record that in the test
 report.
-<div class="scrap"><span><a name="d3e495" id="d3e495">〈 19 Set
+<div class="scrap"><span><a name="d3e498" id="d3e498">〈 19 Set
 $new-xml-grammar 〉 (for version <em>v2</em>) ≡</a></span>
 <pre class="scrapbody">      let $nxg-plus := prof:track(
           if ($test-set/tc:ixml-grammar)
@@ -970,18 +976,24 @@ hope for the best. (Quick and dirty, remember.)
           } catch * {
                element tc:error {
                  attribute id { "t:tbd04" },
-                 text { "ixml compilation failed" }
+                 text { "ixml compilation failed.&amp;#xA;" },
+                 "Parse function blew up. ",
+                 $err:code, $err:value, 
+                 " module: ",
+                 $err:module, 
+                 "(", $err:line-number, ",", 
+                 $err:column-number, ")"
                }               
           }
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#lib-rts-g-new">Set $new-xml-grammar 18</a> 〉 〈 <a href=
-"#d3e495">Set $new-xml-grammar (v. v2) 19</a> 〉<br /></span></div>
+"#d3e498">Set $new-xml-grammar (v. v2) 19</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">In order to call the
 <i>parse-grammar-from-string()</i> function (and its relatives) in
 the Aparecium library, we are going to need to import that library:
-<div class="scrap"><span><a name="d3e517" id="d3e517">〈 21
+<div class="scrap"><span><a name="d3e520" id="d3e520">〈 21
 Namespace declarations and imports, cont'd [continues</a> <a href=
 "#lib-nsdecls">3 Namespace declarations and imports for library
 module</a>] 〉 ≡</span>
@@ -998,7 +1010,7 @@ the grammar is already in XML, so we just assign it.
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#lib-rts-g-new">Set $new-xml-grammar 18</a> 〉 〈 <a href=
-"#d3e495">Set $new-xml-grammar (v. v2) 19</a> 〉<br /></span></div>
+"#d3e498">Set $new-xml-grammar (v. v2) 19</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">The external-ixml case has several ways to
 fail. For now (quick and dirty) we don't cover them all.
@@ -1017,7 +1029,13 @@ grammar 〉 ≡</a></span>
                      } catch * {
                        element tc:error {
                          attribute id { "t:tbd06" },
-                         text { "ixml compilation failed" }
+                         "ixml compilation failed.&amp;#xA;",
+                         "Parse function blew up. ",
+                         $err:code, $err:value, 
+                         " module: ",
+                         $err:module, 
+                         "(", $err:line-number, ",", 
+                         $err:column-number, ")"
                        }
                      }
                 else element tc:error {
@@ -1027,7 +1045,7 @@ grammar 〉 ≡</a></span>
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#lib-rts-g-new">Set $new-xml-grammar 18</a> 〉 〈 <a href=
-"#d3e495">Set $new-xml-grammar (v. v2) 19</a> 〉<br /></span></div>
+"#d3e498">Set $new-xml-grammar (v. v2) 19</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">The external-vxml case also has several ways to
 fail, most not covered here.
@@ -1062,7 +1080,7 @@ fail, most not covered here.
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#lib-rts-g-new">Set $new-xml-grammar 18</a> 〉 〈 <a href=
-"#d3e495">Set $new-xml-grammar (v. v2) 19</a> 〉<br /></span></div>
+"#d3e498">Set $new-xml-grammar (v. v2) 19</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">Once we have the new XML grammar, we need to
 check it for conformance. Aparecium currently lacks any function to
@@ -1074,6 +1092,19 @@ not do it here.</em>
 <div class="scrap"><span><a name="lib-rts-vxml-grammar-check" id=
 "lib-rts-vxml-grammar-check">〈 25 Set $checked-xml-grammar 〉
 ≡</a></span>
+<pre class="scrapbody">      let $checked-xml-grammar := prof:time(
+          ap:grammar-ok($new-xml-grammar)
+          , 'test-harness: checking XML grammar.')
+</pre>
+<span class="scrapinbound">Other versions of this code are in 〈
+<a href="#d3e538">Set $checked-xml-grammar (v. alt) 26</a>
+〉<br /></span> <span class="scrapinbound">This code is used in 〈
+<a href="#lib-rts-grammar">Load and compile the grammar for a test
+set 17</a> 〉 〈 <a href="#d3e1181">Load and test the grammar for a
+test set (v. alt) 71</a> 〉<br /></span></div>
+The older version, for reference:
+<div class="scrap"><span><a name="d3e545" id="d3e545">〈 26 Set
+$checked-xml-grammar 〉 (for version <em>alt</em>) ≡</a></span>
 <pre class="scrapbody">      let $checked-xml-grammar := 
           if (empty($new-xml-grammar))
           then ()
@@ -1085,15 +1116,14 @@ not do it here.</em>
             $new-xml-grammar
           }
 </pre>
-<span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-rts-grammar">Load and compile the grammar for a test set
-17</a> 〉 〈 <a href="#d3e1175">Load and test the grammar for a test
-set (v. alt) 70</a> 〉<br /></span></div>
+<span class="scrapinbound">This code is a variant of 〈 <a href=
+"#lib-rts-vxml-grammar-check">Set $checked-xml-grammar 25</a>
+〉</span></div>
 </div>
 <div class="Real-P">If the new grammar is OK so far, we need to
 compile it.
 <div class="scrap"><span><a name="lib-rts-grammar-compilation" id=
-"lib-rts-grammar-compilation">〈 26 Set $grammar to compiled grammar
+"lib-rts-grammar-compilation">〈 27 Set $grammar to compiled grammar
 〉 ≡</a></span>
 <pre class=
 "scrapbody">      let $grammar := if (exists($new-xml-grammar)
@@ -1103,17 +1133,21 @@ compile it.
           } catch * {
             element tc:error {
               attribute id {"t:tbd11"},
-              text { 
-                "Error compiling grammar"
-              }
+              "Error compiling grammar.&amp;#xA;",
+              "Parse function blew up. ",
+              $err:code, $err:value, 
+              " module: ",
+              $err:module, 
+              "(", $err:line-number, ",", 
+              $err:column-number, ")"
             }
           }
       else $grammar
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#lib-rts-grammar">Load and compile the grammar for a test set
-17</a> 〉 〈 <a href="#d3e1175">Load and test the grammar for a test
-set (v. alt) 70</a> 〉<br /></span></div>
+17</a> 〉 〈 <a href="#d3e1181">Load and test the grammar for a test
+set (v. alt) 71</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">At this point, the code digresses to checking
 whether the user requested a grammar test or not; that is described
@@ -1132,7 +1166,7 @@ we also need to write out the file for the grammar test.
 the user wants details by-file, just take the element and the
 attributes, strip the children.</i>
 <div class="scrap"><span><a name="lib-rts-write-grammar-result" id=
-"lib-rts-write-grammar-result">〈 27 Record grammar test result 〉
+"lib-rts-write-grammar-result">〈 28 Record grammar test result 〉
 ≡</a></span>
 <pre class="scrapbody">        if (($options/@details = 'by-case')
            and exists($grammar-test-result
@@ -1154,7 +1188,7 @@ attributes, strip the children.</i>
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#lib-rts-do-inline">Handle an inline test-set 15</a> 〉 〈 <a href=
-"#d3e1163">Handle an inline test-set (v. alt) 69</a>
+"#d3e1169">Handle an inline test-set (v. alt) 70</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">Before recurring on nested test sets and
@@ -1164,7 +1198,7 @@ but even if no grammar test was run we need to check to make sure
 we actually have a usable grammar. First, we check for error
 signals in the <i>$checked-xml-grammar</i>.
 <div class="scrap"><span><a name="lib-rts-abort" id=
-"lib-rts-abort">〈 28 If grammar is bad, stop now 〉 ≡</a></span>
+"lib-rts-abort">〈 29 If grammar is bad, stop now 〉 ≡</a></span>
 <pre class="scrapbody">    if ($checked-xml-grammar/self::tc:error)
     then (element tc:description {
            element tc:p {
@@ -1175,19 +1209,19 @@ signals in the <i>$checked-xml-grammar</i>.
          element tc:app-info { $checked-xml-grammar }
          )
 </pre>
-<span class="scrapcontinuations">Continued in 〈<a href="#d3e586">If
-grammar is not good, stop now 29</a>〉, 〈<a href="#d3e593">If we
-failed the grammar test, stop now 30</a>〉, 〈<a href="#d3e599">If
-grammar compilation failed, stop now 31</a>〉<br /></span>
+<span class="scrapcontinuations">Continued in 〈<a href="#d3e592">If
+grammar is not good, stop now 30</a>〉, 〈<a href="#d3e599">If we
+failed the grammar test, stop now 31</a>〉, 〈<a href="#d3e605">If
+grammar compilation failed, stop now 32</a>〉<br /></span>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#lib-rts-do-inline">Handle an inline test-set 15</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">Then, in a slightly paranoid way, we check that
 the grammar is actually an &lt;<em>ixml</em>&gt; element.
-<div class="scrap"><span><a name="d3e586" id="d3e586">〈 29 If
+<div class="scrap"><span><a name="d3e592" id="d3e592">〈 30 If
 grammar is not good, stop now [continues</a> <a href=
-"#lib-rts-abort">28 If grammar is bad, stop now</a>] 〉 ≡</span>
+"#lib-rts-abort">29 If grammar is bad, stop now</a>] 〉 ≡</span>
 <pre class="scrapbody">    else if (exists($checked-xml-grammar)
              and 
              not($checked-xml-grammar/self::ixml))
@@ -1204,9 +1238,9 @@ grammar is not good, stop now [continues</a> <a href=
 </div>
 <div class="Real-P">We also check to make sure that we actually
 passed the grammar test.
-<div class="scrap"><span><a name="d3e593" id="d3e593">〈 30 If we
+<div class="scrap"><span><a name="d3e599" id="d3e599">〈 31 If we
 failed the grammar test, stop now [continues</a> <a href=
-"#lib-rts-abort">28 If grammar is bad, stop now</a>] 〉 ≡</span>
+"#lib-rts-abort">29 If grammar is bad, stop now</a>] 〉 ≡</span>
 <pre class=
 "scrapbody">    else if ($grammar-test-result/@result ne 'pass')
     then element tc:description {
@@ -1219,9 +1253,9 @@ failed the grammar test, stop now [continues</a> <a href=
 </div>
 <div class="Real-P">If something went wrong in the compilation
 step, the compiled grammar will be an error element.
-<div class="scrap"><span><a name="d3e599" id="d3e599">〈 31 If
+<div class="scrap"><span><a name="d3e605" id="d3e605">〈 32 If
 grammar compilation failed, stop now [continues</a> <a href=
-"#lib-rts-abort">28 If grammar is bad, stop now</a>] 〉 ≡</span>
+"#lib-rts-abort">29 If grammar is bad, stop now</a>] 〉 ≡</span>
 <pre class="scrapbody">    else if ($grammar/self::tc:error)
     then (element tc:description {
            element tc:p {
@@ -1244,7 +1278,7 @@ checking for; they should be inserted here.</div>
 delegate the handling of the test to the <i>t:test-grammar()</i>
 function. The basic form of this is as follows:
 <div class="scrap"><span><a name="lib-rts-grammar-test" id=
-"lib-rts-grammar-test">〈 32 Set $grammar-test-result 〉 ≡</a></span>
+"lib-rts-grammar-test">〈 33 Set $grammar-test-result 〉 ≡</a></span>
 <pre class="scrapbody">    let $gt := $test-set/tc:grammar-test
     let $grammar-test-result := 
         if (exists($gt))
@@ -1254,18 +1288,18 @@ function. The basic form of this is as follows:
         else ()
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e612">Set $grammar-test-result (v. v2) 33</a> 〉 〈
-<a href="#d3e1187">Set $grammar-test-result (v. alt) 71</a>
+<a href="#d3e618">Set $grammar-test-result (v. v2) 34</a> 〉 〈
+<a href="#d3e1193">Set $grammar-test-result (v. alt) 72</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#lib-rts-do-inline">Handle an inline test-set 15</a> 〉 〈
-<a href="#d3e1175">Load and test the grammar for a test set (v.
-alt) 70</a> 〉<br /></span></div>
+<a href="#d3e1181">Load and test the grammar for a test set (v.
+alt) 71</a> 〉<br /></span></div>
 In order to record the time taken to parse the grammar, we need to
 inject some information into the grammar test result, which we do
 using the update facility. And if there is no grammar test, we
 stick a <i>tc:description</i> into the variable to record the
 information.
-<div class="scrap"><span><a name="d3e623" id="d3e623">〈 33 Set
+<div class="scrap"><span><a name="d3e629" id="d3e629">〈 34 Set
 $grammar-test-result 〉 (for version <em>v2</em>) ≡</a></span>
 <pre class="scrapbody">    let $gt := $test-set/tc:grammar-test,
         $parsetime := attribute t:parsetime {
@@ -1289,7 +1323,7 @@ $grammar-test-result 〉 (for version <em>v2</em>) ≡</a></span>
              }
 </pre>
 <span class="scrapinbound">This code is a variant of 〈 <a href=
-"#lib-rts-grammar-test">Set $grammar-test-result 32</a>
+"#lib-rts-grammar-test">Set $grammar-test-result 33</a>
 〉</span></div>
 </div>
 <div class="Real-P">The <i>test-grammar()</i> function is called
@@ -1299,16 +1333,16 @@ it's external, and compare our result to the expected result. For
 now, we assume there will never be more than one expected XML
 result for a grammar.
 <div class="scrap"><span><a name="lib-test-grammar" id=
-"lib-test-grammar">〈 34 The test-grammar() function 〉 ≡</a></span>
+"lib-test-grammar">〈 35 The test-grammar() function 〉 ≡</a></span>
 <pre class="scrapbody">declare function t:test-grammar(
   $grammar-test as element(tc:grammar-test),
   $xml-grammar as element(),
   $options as element(options)
 ) as element(tc:grammar-result) {
   <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-tg-fetch">Fetch expected result of grammar test 35</a></em> 〉</span>
+"#lib-tg-fetch">Fetch expected result of grammar test 36</a></em> 〉</span>
   <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-tg-compare">Compare the grammar with the expectation 36</a></em> 〉</span>
+"#lib-tg-compare">Compare the grammar with the expectation 37</a></em> 〉</span>
 };
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
@@ -1317,7 +1351,7 @@ result for a grammar.
 </div>
 <div class="Real-P">First, we fetch any external result.
 <div class="scrap"><span><a name="lib-tg-fetch" id="lib-tg-fetch">〈
-35 Fetch expected result of grammar test 〉 ≡</a></span>
+36 Fetch expected result of grammar test 〉 ≡</a></span>
 <pre class="scrapbody">  let $e0 := $grammar-test/tc:result/*[1],
       $expectation :=
         if ($e0/self::tc:assert-xml-ref)
@@ -1341,7 +1375,7 @@ result for a grammar.
         else $e0 (: assert-not-a-{grammar,sentence} :)
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-test-grammar">The test-grammar() function 34</a>
+"#lib-test-grammar">The test-grammar() function 35</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">We now have an ixml grammar in one hand and an
@@ -1352,24 +1386,24 @@ the if-then-else chain up into several code scraps to avoid having
 any of them get too long. (Informally: if I can't see it all on one
 screen, the scrap is probably too long.)
 <div class="scrap"><span><a name="lib-tg-compare" id=
-"lib-tg-compare">〈 36 Compare the grammar with the expectation 〉
+"lib-tg-compare">〈 37 Compare the grammar with the expectation 〉
 ≡</a></span>
 <pre class="scrapbody">  return element tc:grammar-result {
     <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-tg-cf-errors">Check for error conditions, non-conformant grammar 38</a></em> 〉</span>  
+"#lib-tg-cf-errors">Check for error conditions, non-conformant grammar 39</a></em> 〉</span>  
     <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-tg-cf-ok">Return pass if grammar is as expected 37</a></em> 〉</span>
+"#lib-tg-cf-ok">Return pass if grammar is as expected 38</a></em> 〉</span>
     <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-tg-cf-other">Grammar conformant but not as expected 43</a></em> 〉</span>
+"#lib-tg-cf-other">Grammar conformant but not as expected 44</a></em> 〉</span>
   }
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-test-grammar">The test-grammar() function 34</a>
+"#lib-test-grammar">The test-grammar() function 35</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">The main case is here:
 <div class="scrap"><span><a name="lib-tg-cf-ok" id="lib-tg-cf-ok">〈
-37 Return pass if grammar is as expected 〉 ≡</a></span>
+38 Return pass if grammar is as expected 〉 ≡</a></span>
 <pre class=
 "scrapbody">    else if (deep-equal($xml-grammar, $expectation))
     then (
@@ -1378,7 +1412,7 @@ screen, the scrap is probably too long.)
          )
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-tg-compare">Compare the grammar with the expectation 36</a>
+"#lib-tg-compare">Compare the grammar with the expectation 37</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">However, we can't just run that test without
@@ -1388,7 +1422,7 @@ out a lot of other cases.</div>
 <div class="Real-P">If we were unable to fetch the expected result,
 then the test case counts as not having been run.
 <div class="scrap"><span><a name="lib-tg-cf-errors" id=
-"lib-tg-cf-errors">〈 38 Check for error conditions, non-conformant
+"lib-tg-cf-errors">〈 39 Check for error conditions, non-conformant
 grammar 〉 ≡</a></span>
 <pre class="scrapbody">    if ($expectation/self::tc:error)
     then ( 
@@ -1404,25 +1438,27 @@ grammar 〉 ≡</a></span>
          )
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e677">Check for grammar-not-found errors 39</a>〉, 〈<a href=
-"#d3e683">Check for syntax errors in grammar 40</a>〉, 〈<a href=
-"#d3e689">Check for not-a-grammar test 41</a>〉, 〈<a href=
-"#d3e700">Check for other errors in grammar 42</a>〉<br /></span>
+"#d3e683">Check for grammar-not-found errors 40</a>〉, 〈<a href=
+"#d3e689">Check for syntax errors in grammar 41</a>〉, 〈<a href=
+"#d3e695">Check for not-a-grammar test 42</a>〉, 〈<a href=
+"#d3e706">Check for other errors in grammar 43</a>〉<br /></span>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-tg-compare">Compare the grammar with the expectation 36</a>
+"#lib-tg-compare">Compare the grammar with the expectation 37</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">If the <i>$xml-grammar</i> parameter is a
 &lt;<em>tc:error</em>&gt; element indicating the grammar was not
 found, then again we did not run the test.
-<div class="scrap"><span><a name="d3e677" id="d3e677">〈 39 Check
+<div class="scrap"><span><a name="d3e683" id="d3e683">〈 40 Check
 for grammar-not-found errors [continues</a> <a href=
-"#lib-tg-cf-errors">38 Check for error conditions, non-conformant
+"#lib-tg-cf-errors">39 Check for error conditions, non-conformant
 grammar</a>] 〉 ≡</span>
 <pre class="scrapbody">    else if ($xml-grammar/self::tc:error
-             [@id = ("t:tbd07", "t:tbd08", "t:tbd09")])
+             [@id = ("t:tbd07", "t:tbd08", "t:tbd09")]
+             or $xml-grammar/descendant-or-self::ap:error
+             [@id = ('ap:tbd01', 'ap:tbd03', 'ap:tbd14')]
+            )
     then (
-           (: grammar parsed but was nonconformant :)
            attribute result { "not-run" },
            element tc:result {
              $expectation
@@ -1433,18 +1469,23 @@ grammar</a>] 〉 ≡</span>
 </div>
 <div class="Real-P">If we caught intentional syntax errors in the
 grammar, then we pass the test.
-<div class="scrap"><span><a name="d3e683" id="d3e683">〈 40 Check
+<div class="scrap"><span><a name="d3e689" id="d3e689">〈 41 Check
 for syntax errors in grammar [continues</a> <a href=
-"#lib-tg-cf-errors">38 Check for error conditions, non-conformant
+"#lib-tg-cf-errors">39 Check for error conditions, non-conformant
 grammar</a>] 〉 ≡</span>
 <pre class=
 "scrapbody">    else if ($expectation[self::tc:assert-not-a-grammar
              or self::tc:assert-not-a-sentence]
              and
-             ($xml-grammar/self::tc:error[@id = 
-             ("t:tbd04", "t:tbd06")]
+             ($xml-grammar/self::tc:error
+             [@id = ("t:tbd04", "t:tbd06")]
              or $xml-grammar/self::no-parse
              or $xml-grammar/child::no-parse
+             or $xml-grammar/descendant-or-self::ap:error
+             [@id = ('ap:tbd05', 'ap:tbd06', 'ap:tbd08',
+             'ap:tbd09', 'ap:tbd11', 'ap:tbd12',
+             'ap:tbd13', 'ap:tbd16')]
+             (: maybe also 04, 07, 15? :)
              )
             )
     then (
@@ -1459,9 +1500,9 @@ grammar</a>] 〉 ≡</span>
 </div>
 <div class="Real-P">If the grammar is syntactically OK but
 intentionally not conforming, then we pass the test.
-<div class="scrap"><span><a name="d3e689" id="d3e689">〈 41 Check
+<div class="scrap"><span><a name="d3e695" id="d3e695">〈 42 Check
 for not-a-grammar test [continues</a> <a href=
-"#lib-tg-cf-errors">38 Check for error conditions, non-conformant
+"#lib-tg-cf-errors">39 Check for error conditions, non-conformant
 grammar</a>] 〉 ≡</span>
 <pre class=
 "scrapbody">    else if ($expectation[self::tc:assert-not-a-grammar]
@@ -1484,9 +1525,9 @@ here.</div>
 <div class="Real-P">As a final filter before comparing the grammar
 to the expectation we catch any &lt;<em>tc:error</em>&gt; elements
 we have not tested for specifically in the grammar argument.
-<div class="scrap"><span><a name="d3e700" id="d3e700">〈 42 Check
+<div class="scrap"><span><a name="d3e706" id="d3e706">〈 43 Check
 for other errors in grammar [continues</a> <a href=
-"#lib-tg-cf-errors">38 Check for error conditions, non-conformant
+"#lib-tg-cf-errors">39 Check for error conditions, non-conformant
 grammar</a>] 〉 ≡</span>
 <pre class="scrapbody">    else if ($xml-grammar/self::tc:error)
     then (
@@ -1507,7 +1548,7 @@ grammar</a>] 〉 ≡</span>
 but the grammar was not deep-equal to the expected result, we have
 a sort of catch-all error case.
 <div class="scrap"><span><a name="lib-tg-cf-other" id=
-"lib-tg-cf-other">〈 43 Grammar conformant but not as expected 〉
+"lib-tg-cf-other">〈 44 Grammar conformant but not as expected 〉
 ≡</a></span>
 <pre class="scrapbody">  else (
          (: grammar conformant but not as expected :)
@@ -1522,7 +1563,7 @@ a sort of catch-all error case.
        )
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-tg-compare">Compare the grammar with the expectation 36</a>
+"#lib-tg-compare">Compare the grammar with the expectation 37</a>
 〉<br /></span></div>
 </div>
 </div>
@@ -1577,7 +1618,7 @@ failure.</li>
 presence or absence of an <em>ixml:state</em> attribute.</i></div>
 <div class="Real-P">The <i>run-test-case()</i> function ...
 <div class="scrap"><span><a name="lib-run-test-case" id=
-"lib-run-test-case">〈 44 The run-test-case() function 〉
+"lib-run-test-case">〈 45 The run-test-case() function 〉
 ≡</a></span>
 <pre class="scrapbody">declare function t:run-test-case(
   $test-case as element(tc:test-case),
@@ -1585,33 +1626,33 @@ presence or absence of an <em>ixml:state</em> attribute.</i></div>
   $options as element(options)
 ) as element() {
   <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-misc-var">Set some handy variables 46</a></em> 〉</span>
+"#lib-rtc-misc-var">Set some handy variables 47</a></em> 〉</span>
   <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-fetch-input">Set $input-string 45</a></em> 〉</span>
+"#lib-rtc-fetch-input">Set $input-string 46</a></em> 〉</span>
   <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-fetch-expected">Set $expectations 47</a></em> 〉</span>
+"#lib-rtc-fetch-expected">Set $expectations 48</a></em> 〉</span>
   <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-parse">Set $parse-tree by parsing the test input string 49</a></em> 〉</span>
+"#lib-rtc-parse">Set $parse-tree by parsing the test input string 50</a></em> 〉</span>
   <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-evaluate">Set $result 55</a></em> 〉</span>
+"#lib-rtc-evaluate">Set $result 56</a></em> 〉</span>
   <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-errors">Set $error-details 56</a></em> 〉</span>
+"#lib-rtc-errors">Set $error-details 57</a></em> 〉</span>
   <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-details">Set $details 61</a></em> 〉</span>
+"#lib-rtc-details">Set $details 62</a></em> 〉</span>
   
   return (element tc:test-result {
     $test-case/@*,
     attribute result { $result },
     <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-report-time">Report parse time if available 52</a></em> 〉</span>,
+"#lib-rtc-report-time">Report parse time if available 53</a></em> 〉</span>,
     <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-report-error">If errors arose in a test case, report them 57</a></em> 〉</span>,
+"#lib-rtc-report-error">If errors arose in a test case, report them 58</a></em> 〉</span>,
     if ($options/@details eq 'inline')
     then $details
     else ()
   },
   <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-write-test-result">Optionally write out test result 68</a></em> 〉</span>
+"#lib-rtc-write-test-result">Optionally write out test result 69</a></em> 〉</span>
   )
 };
 </pre>
@@ -1625,7 +1666,7 @@ URI), we have a problem. We are expecting a string, and we can't
 return an error element. And we're not set up to throw and catch
 exceptions. So we use a magic string.
 <div class="scrap"><span><a name="lib-rtc-fetch-input" id=
-"lib-rtc-fetch-input">〈 45 Set $input-string 〉 ≡</a></span>
+"lib-rtc-fetch-input">〈 46 Set $input-string 〉 ≡</a></span>
 <pre class="scrapbody">    let $input-string := 
         if ($test-case/tc:test-string)
         then string($test-case/tc:test-string)
@@ -1642,7 +1683,7 @@ exceptions. So we use a magic string.
         else "Ich versteh die Welt nicht mehr"
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-run-test-case">The run-test-case() function 44</a>
+"#lib-run-test-case">The run-test-case() function 45</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">As our magic string we use the words “NOT
@@ -1654,7 +1695,7 @@ would also work. (And be shorter.) For that matter, U+FFFD
 “Replacement character” might be apposite here. It's usually used
 when transcoding into UCS does not work; this is roughly analogous.
 <div class="scrap"><span><a name="lib-rtc-misc-var" id=
-"lib-rtc-misc-var">〈 46 Set some handy variables 〉 ≡</a></span>
+"lib-rtc-misc-var">〈 47 Set some handy variables 〉 ≡</a></span>
 <pre class=
 "scrapbody">  let $dummy := trace($test-case/@name/string(),
                       "Starting test case: ")
@@ -1667,15 +1708,15 @@ when transcoding into UCS does not work; this is roughly analogous.
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
 "#lib-rtc-mv-testset">Set $test-set-name, $test-case-ID
-62</a>〉<br /></span> <span class="scrapinbound">This code is used
+63</a>〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#lib-run-test-case">The run-test-case() function
-44</a> 〉<br /></span></div>
+45</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">If the expected results are external, we need
 to fetch them, too. We need to be careful to ensure that the value
 of <i>$expectations</i> is an element and not a document node.
 <div class="scrap"><span><a name="lib-rtc-fetch-expected" id=
-"lib-rtc-fetch-expected">〈 47 Set $expectations 〉 ≡</a></span>
+"lib-rtc-fetch-expected">〈 48 Set $expectations 〉 ≡</a></span>
 <pre class="scrapbody">    let $expectations := 
         for $e in $test-case/tc:result/*
         return if ($e/self::tc:assert-not-a-sentence)
@@ -1706,7 +1747,7 @@ of <i>$expectations</i> is an element and not a document node.
                  }
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-run-test-case">The run-test-case() function 44</a>
+"#lib-run-test-case">The run-test-case() function 45</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">We have input string and expectations ready, or
@@ -1717,7 +1758,7 @@ several iterations, perhaps best understood in roughly
 chronological order.</div>
 <div class="Real-P">The initial version of the parser call was
 straightforward:
-<div class="scrap"><span><a name="d3e821" id="d3e821">〈 48 Direct
+<div class="scrap"><span><a name="d3e827" id="d3e827">〈 49 Direct
 invocation of parse for test case 〉 (for version <em>alt</em>)
 ≡</a></span>
 <pre class=
@@ -1728,18 +1769,18 @@ invocation of parse for test case 〉 (for version <em>alt</em>)
 </pre>
 <span class="scrapinbound">This code is a variant of 〈 <a href=
 "#lib-rtc-parse-with-timeout">Parse the input, with a time limit
-50</a> 〉</span></div>
+51</a> 〉</span></div>
 But that has some drawbacks, including occasional uncaught
 exceptions. So we wrap it in a try/catch.
 <div class="scrap"><span><a name="lib-rtc-parse" id=
-"lib-rtc-parse">〈 49 Set $parse-tree by parsing the test input
+"lib-rtc-parse">〈 50 Set $parse-tree by parsing the test input
 string 〉 ≡</a></span>
 <pre class="scrapbody">    let $parse-tree := 
         <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-parse-precheck">If input string, grammar, or expectations is bad, stop now 54</a></em> 〉</span>
+"#lib-rtc-parse-precheck">If input string, grammar, or expectations is bad, stop now 55</a></em> 〉</span>
         else try {
           <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-parse-with-timeout">Parse the input, with a time limit 50</a></em> 〉</span>
+"#lib-rtc-parse-with-timeout">Parse the input, with a time limit 51</a></em> 〉</span>
         } catch xquery:timeout {
           element tc:error {
               attribute id { "t:tbd19" },
@@ -1760,10 +1801,10 @@ string 〉 ≡</a></span>
         }
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e846">Set $parse-tree by parsing the test input string
-(v. v2) 51</a> 〉<br /></span> <span class="scrapinbound">This code
+<a href="#d3e852">Set $parse-tree by parsing the test input string
+(v. v2) 52</a> 〉<br /></span> <span class="scrapinbound">This code
 is used in 〈 <a href="#lib-run-test-case">The run-test-case()
-function 44</a> 〉<br /></span></div>
+function 45</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">Wrapping the call to the parse function in a
 try/catch expression helps with some problems, but not all. It is
@@ -1781,7 +1822,7 @@ do this with the third parameter to the BaseX <i>xquery:eval()</i>
 function. So we wrap the parse request in a call to
 <i>xquery:eval()</i>, specifying a maximum amount of time.
 <div class="scrap"><span><a name="lib-rtc-parse-with-timeout" id=
-"lib-rtc-parse-with-timeout">〈 50 Parse the input, with a time
+"lib-rtc-parse-with-timeout">〈 51 Parse the input, with a time
 limit 〉 ≡</a></span>
 <pre class=
 "scrapbody">          let $query := "import module namespace aparecium
@@ -1801,11 +1842,11 @@ limit 〉 ≡</a></span>
           return xquery:eval($query, $bindings, $options)
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e819">Direct invocation of parse for test case (v. alt)
-48</a> 〉<br /></span> <span class="scrapinbound">This code is used
+<a href="#d3e825">Direct invocation of parse for test case (v. alt)
+49</a> 〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#lib-rtc-parse">Set $parse-tree by parsing the test
-input string 49</a> 〉 〈 <a href="#d3e850">Set $parse-tree by
-parsing the test input string (v. v2) 51</a> 〉<br /></span></div>
+input string 50</a> 〉 〈 <a href="#d3e856">Set $parse-tree by
+parsing the test input string (v. v2) 52</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">Note that this formulation gives us a processor
 dependency; when I get around to trying to run the test harness in
@@ -1815,15 +1856,15 @@ it would be nicer to have them co-exist.)</div>
 <div class="Real-P">In version 2, we modify the code for setting
 the variable <i>$parse-tree</i> to gather timing information as
 well.
-<div class="scrap"><span><a name="d3e850" id="d3e850">〈 51 Set
+<div class="scrap"><span><a name="d3e856" id="d3e856">〈 52 Set
 $parse-tree by parsing the test input string 〉 (for version
 <em>v2</em>) ≡</a></span>
 <pre class="scrapbody">    let $pt-plus := prof:track(
         <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-parse-precheck">If input string, grammar, or expectations is bad, stop now 54</a></em> 〉</span>
+"#lib-rtc-parse-precheck">If input string, grammar, or expectations is bad, stop now 55</a></em> 〉</span>
         else try {
           <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-parse-with-timeout">Parse the input, with a time limit 50</a></em> 〉</span>
+"#lib-rtc-parse-with-timeout">Parse the input, with a time limit 51</a></em> 〉</span>
         } catch xquery:timeout {
           element tc:error {
               attribute id { "t:tbd19" },
@@ -1847,37 +1888,37 @@ $parse-tree by parsing the test input string 〉 (for version
 </pre>
 <span class="scrapinbound">This code is a variant of 〈 <a href=
 "#lib-rtc-parse">Set $parse-tree by parsing the test input string
-49</a> 〉</span></div>
+50</a> 〉</span></div>
 </div>
 <div class="Real-P">The variable <i>$pt-plus</i> also has timing
 information, which we report as needed.
 <div class="scrap"><span><a name="lib-rtc-report-time" id=
-"lib-rtc-report-time">〈 52 Report parse time if available 〉
+"lib-rtc-report-time">〈 53 Report parse time if available 〉
 ≡</a></span>
 <pre class="scrapbody">  if (exists($pt-plus))
   then attribute t:parsetime { $pt-plus?time }
   else ()
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-run-test-case">The run-test-case() function 44</a>
+"#lib-run-test-case">The run-test-case() function 45</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">The mechanism for setting options has not yet
 been described, but it will be no surprise that it involves an XML
 document. We can set the <i>timeout</i> option this way:
 <div class="scrap"><span><a name="set-timeout-option" id=
-"set-timeout-option">〈 53 Set timeout option 〉 ≡</a></span>
+"set-timeout-option">〈 54 Set timeout option 〉 ≡</a></span>
 <pre class="scrapbody">      attribute timeout { 600 }
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#dr-options">Set the options for the test harness 58</a>
+"#dr-options">Set the options for the test harness 59</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">The preliminary checks before parsing are for
 failures in fetching the input string or the expectations, or for a
 bad grammar.
 <div class="scrap"><span><a name="lib-rtc-parse-precheck" id=
-"lib-rtc-parse-precheck">〈 54 If input string, grammar, or
+"lib-rtc-parse-precheck">〈 55 If input string, grammar, or
 expectations is bad, stop now 〉 ≡</a></span>
 <pre class=
 "scrapbody">        if ($input-string eq $failure-string)
@@ -1895,8 +1936,8 @@ expectations is bad, stop now 〉 ≡</a></span>
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#lib-rtc-parse">Set $parse-tree by parsing the test input string
-49</a> 〉 〈 <a href="#d3e850">Set $parse-tree by parsing the test
-input string (v. v2) 51</a> 〉<br /></span></div>
+50</a> 〉 〈 <a href="#d3e856">Set $parse-tree by parsing the test
+input string (v. v2) 52</a> 〉<br /></span></div>
 </div>
 </div>
 <div class="div">
@@ -1908,7 +1949,7 @@ expectations and set the three variables <i>$result</i>,
 will be repeated, but I don't see a good way to avoid the
 repetition.
 <div class="scrap"><span><a name="lib-rtc-evaluate" id=
-"lib-rtc-evaluate">〈 55 Set $result 〉 ≡</a></span>
+"lib-rtc-evaluate">〈 56 Set $result 〉 ≡</a></span>
 <pre class="scrapbody">    let $result :=
         if ($input-string eq $failure-string)
         then "not-run"
@@ -1944,13 +1985,13 @@ repetition.
         else "fail"
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-run-test-case">The run-test-case() function 44</a>
+"#lib-run-test-case">The run-test-case() function 45</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">We only need the error details for the
 conditions where we caught an error of some kind.
 <div class="scrap"><span><a name="lib-rtc-errors" id=
-"lib-rtc-errors">〈 56 Set $error-details 〉 ≡</a></span>
+"lib-rtc-errors">〈 57 Set $error-details 〉 ≡</a></span>
 <pre class="scrapbody">    let $error-details :=
         if ($input-string eq $failure-string)
         then element tc:error {
@@ -1966,13 +2007,13 @@ conditions where we caught an error of some kind.
         else ()
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-run-test-case">The run-test-case() function 44</a>
+"#lib-run-test-case">The run-test-case() function 45</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">If and only if we caught an error, we will want
 to wrap it in an &lt;<em>app-info</em>&gt; element for reporting:
 <div class="scrap"><span><a name="lib-rtc-report-error" id=
-"lib-rtc-report-error">〈 57 If errors arose in a test case, report
+"lib-rtc-report-error">〈 58 If errors arose in a test case, report
 them 〉 ≡</a></span>
 <pre class="scrapbody">    if (exists($error-details))
     then element tc:app-info {
@@ -1981,9 +2022,9 @@ them 〉 ≡</a></span>
     else ()
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-run-test-case">The run-test-case() function 44</a> 〉 〈
+"#lib-run-test-case">The run-test-case() function 45</a> 〉 〈
 <a href="#lib-rtc-write-test-result">Optionally write out test
-result 68</a> 〉<br /></span></div>
+result 69</a> 〉<br /></span></div>
 </div>
 </div>
 <div class="div">
@@ -2076,7 +2117,7 @@ whether individual files are written out for each test set or each
 test case are set in the driver. In order to remind myself later of
 what the expected options are, I list them all and index into them
 to choose the one I want for a given run.
-<div class="scrap"><span><a name="dr-options" id="dr-options">〈 58
+<div class="scrap"><span><a name="dr-options" id="dr-options">〈 59
 Set the options for the test harness [continues</a> <a href=
 "#dr-setup">5 Set up variables and options</a>] 〉 ≡</span>
 <pre class="scrapbody">    $options := element options {
@@ -2123,7 +2164,7 @@ Set the options for the test harness [continues</a> <a href=
         ($outdir)[1]
       },
       <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#set-timeout-option">Set timeout option 53</a></em> 〉</span>
+"#set-timeout-option">Set timeout option 54</a></em> 〉</span>
     }
 </pre></div>
 <i>N.B. In the current version of this test harness, not all of
@@ -2157,7 +2198,7 @@ failed, and so on. This could be done by the test-harness library,
 but for now I'm just going to handle it in the driver. We get back
 the report, we make the counts,and we insert them into the report
 before writing it out.
-<div class="scrap"><span><a name="dr-counts" id="dr-counts">〈 59
+<div class="scrap"><span><a name="dr-counts" id="dr-counts">〈 60
 Count tests and classify results 〉 ≡</a></span>
 <pre class=
 "scrapbody">let $grammar-tests := $report//tc:grammar-result
@@ -2189,7 +2230,7 @@ let $summary := element tc:description {
                   $tc-summary
                 }
 <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#dr-insert-counts">Insert result summary into $report 60</a></em> 〉</span></pre>
+"#dr-insert-counts">Insert result summary into $report 61</a></em> 〉</span></pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#dr-top">[File test-driver.xq] 1</a> 〉<br /></span></div>
 </div>
@@ -2199,7 +2240,7 @@ a clean handling of identifier scopes. It's purely declarative even
 though it looks and behaves a little bit like a mutating
 assignment.
 <div class="scrap"><span><a name="dr-insert-counts" id=
-"dr-insert-counts">〈 60 Insert result summary into $report 〉
+"dr-insert-counts">〈 61 Insert result summary into $report 〉
 ≡</a></span>
 <pre class="scrapbody">let $report := copy $x-report := $report
                modify insert node $summary
@@ -2207,7 +2248,7 @@ assignment.
                return $x-report
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#dr-counts">Count tests and classify results 59</a>
+"#dr-counts">Count tests and classify results 60</a>
 〉<br /></span></div>
 </div>
 </div>
@@ -2218,21 +2259,21 @@ Recording the details of a test</h4>
 This gets a little tedious, so I've broken it out into smaller
 bits.
 <div class="scrap"><span><a name="lib-rtc-details" id=
-"lib-rtc-details">〈 61 Set $details 〉 ≡</a></span>
+"lib-rtc-details">〈 62 Set $details 〉 ≡</a></span>
 <pre class="scrapbody">    let $details :=
         if ($options/@details = 'none')
         then ()
         else (
             <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-rpt-grammar">Optionally report grammar used 63</a></em> 〉</span>,
+"#lib-rtc-rpt-grammar">Optionally report grammar used 64</a></em> 〉</span>,
             <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-rpt-string">Optionally report input string 64</a></em> 〉</span>,
+"#lib-rtc-rpt-string">Optionally report input string 65</a></em> 〉</span>,
             <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rtc-rpt-output">Optionally report expected and actual output 65</a></em> 〉</span>
+"#lib-rtc-rpt-output">Optionally report expected and actual output 66</a></em> 〉</span>
         )
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-run-test-case">The run-test-case() function 44</a>
+"#lib-run-test-case">The run-test-case() function 45</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">When the user asks for things to be written out
@@ -2244,8 +2285,8 @@ putting together the details of the report, including the identify
 the containing test set and the test set where the current grammar
 appeared (not necessarily the same set).
 <div class="scrap"><span><a name="lib-rtc-mv-testset" id=
-"lib-rtc-mv-testset">〈 62 Set $test-set-name, $test-case-ID
-[continues</a> <a href="#lib-rtc-misc-var">46 Set some handy
+"lib-rtc-mv-testset">〈 63 Set $test-set-name, $test-case-ID
+[continues</a> <a href="#lib-rtc-misc-var">47 Set some handy
 variables</a>] 〉 ≡</span>
 <pre class=
 "scrapbody">    let $test-set-parent := $test-case/parent::tc:test-set,
@@ -2275,7 +2316,7 @@ get. Here “easy to retrieve” means it was inline. If the
 user-specified grammar was external, then we end up using the
 compiled grammar.
 <div class="scrap"><span><a name="lib-rtc-rpt-grammar" id=
-"lib-rtc-rpt-grammar">〈 63 Optionally report grammar used 〉
+"lib-rtc-rpt-grammar">〈 64 Optionally report grammar used 〉
 ≡</a></span>
 <pre class=
 "scrapbody">            let $kw := $options/@input-grammar
@@ -2301,12 +2342,12 @@ compiled grammar.
             else ()
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-rtc-details">Set $details 61</a> 〉<br /></span></div>
+"#lib-rtc-details">Set $details 62</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">For the input string, it's not too hard to
 support the <tt>inline-if-short</tt> option.
 <div class="scrap"><span><a name="lib-rtc-rpt-string" id=
-"lib-rtc-rpt-string">〈 64 Optionally report input string 〉
+"lib-rtc-rpt-string">〈 65 Optionally report input string 〉
 ≡</a></span>
 <pre class=
 "scrapbody">            let $kw := $options/@input-string,
@@ -2334,13 +2375,13 @@ support the <tt>inline-if-short</tt> option.
             else ()
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-rtc-details">Set $details 61</a> 〉<br /></span></div>
+"#lib-rtc-details">Set $details 62</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">If the user requested that either the expected
 output or the reported output, or both, be included in the report,
 we need to wrap them in a &lt;<em>tc:result</em>&gt; element.
 <div class="scrap"><span><a name="lib-rtc-rpt-output" id=
-"lib-rtc-rpt-output">〈 65 Optionally report expected and actual
+"lib-rtc-rpt-output">〈 66 Optionally report expected and actual
 output 〉 ≡</a></span>
 <pre class="scrapbody">            if (
                 ($options/@expected-result ne 'none')
@@ -2352,14 +2393,14 @@ output 〉 ≡</a></span>
                )
             then element tc:result {
               <span class="scrapref">〈 <em class=
-"scrapptr"><a href="#lib-rtc-rpt-expected">Optionally report expected result 66</a></em> 〉</span>,
+"scrapptr"><a href="#lib-rtc-rpt-expected">Optionally report expected result 67</a></em> 〉</span>,
               <span class="scrapref">〈 <em class=
-"scrapptr"><a href="#lib-rtc-rpt-reported">Optionally report parser output 67</a></em> 〉</span>
+"scrapptr"><a href="#lib-rtc-rpt-reported">Optionally report parser output 68</a></em> 〉</span>
             }
             else ()
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-rtc-details">Set $details 61</a> 〉<br /></span></div>
+"#lib-rtc-details">Set $details 62</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">We write out the expected result only if the
 test case failed, but not if there was some error. If the
@@ -2373,7 +2414,7 @@ then
 option), we serialize it externally.</li>
 </ul>
 <div class="scrap"><span><a name="lib-rtc-rpt-expected" id=
-"lib-rtc-rpt-expected">〈 66 Optionally report expected result 〉
+"lib-rtc-rpt-expected">〈 67 Optionally report expected result 〉
 ≡</a></span>
 <pre class=
 "scrapbody">            let $kwD := $options/@expected-result,
@@ -2415,12 +2456,12 @@ option), we serialize it externally.</li>
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#lib-rtc-rpt-output">Optionally report expected and actual output
-65</a> 〉<br /></span></div>
+66</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">The logic for reported results is similar but
 is not conditional on failure of the test.
 <div class="scrap"><span><a name="lib-rtc-rpt-reported" id=
-"lib-rtc-rpt-reported">〈 67 Optionally report parser output 〉
+"lib-rtc-rpt-reported">〈 68 Optionally report parser output 〉
 ≡</a></span>
 <pre class=
 "scrapbody">            let $kwD := $options/@reported-result,
@@ -2470,13 +2511,13 @@ is not conditional on failure of the test.
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#lib-rtc-rpt-output">Optionally report expected and actual output
-65</a> 〉<br /></span></div>
+66</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">If the user has specified that results should
 be written out in separate files for separate tests, we need to
 write out the test result.
 <div class="scrap"><span><a name="lib-rtc-write-test-result" id=
-"lib-rtc-write-test-result">〈 68 Optionally write out test result 〉
+"lib-rtc-write-test-result">〈 69 Optionally write out test result 〉
 ≡</a></span>
 <pre class="scrapbody">        if ($options/@details = 'by-case')
         then let $outfn := $test-case-ID
@@ -2491,14 +2532,14 @@ write out the test result.
                         attribute result { $result },
                         <span class="scrapref">〈 <em class=
 "scrapptr"><a href=
-"#lib-rtc-report-error">If errors arose in a test case, report them 57</a></em> 〉</span>,
+"#lib-rtc-report-error">If errors arose in a test case, report them 58</a></em> 〉</span>,
                         $details
                       }
                     )
         else ()
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#lib-run-test-case">The run-test-case() function 44</a>
+"#lib-run-test-case">The run-test-case() function 45</a>
 〉<br /></span></div>
 </div>
 </div>
@@ -2528,108 +2569,109 @@ grammar 24</a></li>
 <li><a href="#lib-rts-ld-ixml">Cautiously parse ixml grammar
 20</a></li>
 <li><a href="#lib-tg-cf-errors">Check for error conditions,
-non-conformant grammar 38</a></li>
+non-conformant grammar 39</a></li>
 <li><a href="#lib-rt-check-cat-read">Check for errors reading the
 catalog 10</a></li>
-<li><a href="#d3e677">Check for grammar-not-found errors
-39</a></li>
-<li><a href="#d3e689">Check for not-a-grammar test 41</a></li>
-<li><a href="#d3e700">Check for other errors in grammar 42</a></li>
-<li><a href="#d3e683">Check for syntax errors in grammar
+<li><a href="#d3e683">Check for grammar-not-found errors
 40</a></li>
+<li><a href="#d3e695">Check for not-a-grammar test 42</a></li>
+<li><a href="#d3e706">Check for other errors in grammar 43</a></li>
+<li><a href="#d3e689">Check for syntax errors in grammar
+41</a></li>
 <li><a href="#lib-tg-compare">Compare the grammar with the
-expectation 36</a></li>
+expectation 37</a></li>
 <li><a href="#dr-counts">Count tests and classify results
-59</a></li>
+60</a></li>
 <li><a href="#lib-functions">Declare library functions 4</a></li>
-<li><a href="#d3e821">Direct invocation of parse for test case (v.
-alt) 48</a></li>
+<li><a href="#d3e827">Direct invocation of parse for test case (v.
+alt) 49</a></li>
 <li><a href="#lib-tg-fetch">Fetch expected result of grammar test
-35</a></li>
+36</a></li>
 <li><a href="#lib-tg-cf-other">Grammar conformant but not as
-expected 43</a></li>
+expected 44</a></li>
 <li><a href="#lib-rts-do-ref">Handle a test-set reference
 14</a></li>
 <li><a href="#lib-rts-do-inline">Handle an inline test-set
 15</a></li>
-<li><a href="#d3e1163">Handle an inline test-set (v. alt)
-69</a></li>
+<li><a href="#d3e1169">Handle an inline test-set (v. alt)
+70</a></li>
 <li><a href="#lib-rts-nested">Handle nested test sets and test
 cases 16</a></li>
 <li><a href="#lib-rtc-report-error">If errors arose in a test case,
-report them 57</a></li>
-<li><a href="#d3e599">If grammar compilation failed, stop now
-31</a></li>
+report them 58</a></li>
+<li><a href="#d3e605">If grammar compilation failed, stop now
+32</a></li>
 <li><a href="#lib-rts-abort">If grammar is bad, stop now
-28</a></li>
-<li><a href="#d3e586">If grammar is not good, stop now 29</a></li>
+29</a></li>
+<li><a href="#d3e592">If grammar is not good, stop now 30</a></li>
 <li><a href="#lib-rtc-parse-precheck">If input string, grammar, or
-expectations is bad, stop now 54</a></li>
-<li><a href="#d3e593">If we failed the grammar test, stop now
-30</a></li>
+expectations is bad, stop now 55</a></li>
+<li><a href="#d3e599">If we failed the grammar test, stop now
+31</a></li>
 <li><a href="#dr-insert-counts">Insert result summary into $report
-60</a></li>
+61</a></li>
 <li><a href="#dr-catfiles">List of available test-catalog files
 6</a></li>
 <li><a href="#lib-rts-grammar">Load and compile the grammar for a
 test set 17</a></li>
-<li><a href="#d3e1175">Load and test the grammar for a test set (v.
-alt) 70</a></li>
+<li><a href="#d3e1181">Load and test the grammar for a test set (v.
+alt) 71</a></li>
 <li><a href="#lib-rt-load-cat">Load catalog file into $catalog
 8</a></li>
-<li><a href="#d3e326">Load catalog file into $catalog (v. alt)
+<li><a href="#d3e329">Load catalog file into $catalog (v. alt)
 9</a></li>
 <li><a href="#lib-nsdecls">Namespace declarations and imports for
 library module 3</a></li>
-<li><a href="#d3e517">Namespace declarations and imports, cont'd
+<li><a href="#d3e520">Namespace declarations and imports, cont'd
 21</a></li>
 <li><a href="#lib-rtc-rpt-output">Optionally report expected and
-actual output 65</a></li>
+actual output 66</a></li>
 <li><a href="#lib-rtc-rpt-expected">Optionally report expected
-result 66</a></li>
+result 67</a></li>
 <li><a href="#lib-rtc-rpt-grammar">Optionally report grammar used
-63</a></li>
-<li><a href="#lib-rtc-rpt-string">Optionally report input string
 64</a></li>
+<li><a href="#lib-rtc-rpt-string">Optionally report input string
+65</a></li>
 <li><a href="#lib-rtc-rpt-reported">Optionally report parser output
-67</a></li>
+68</a></li>
 <li><a href="#lib-rtc-write-test-result">Optionally write out test
-result 68</a></li>
+result 69</a></li>
 <li><a href="#lib-rtc-parse-with-timeout">Parse the input, with a
-time limit 50</a></li>
+time limit 51</a></li>
 <li><a href="#lib-rts-write-grammar-result">Record grammar test
-result 27</a></li>
+result 28</a></li>
 <li><a href="#lib-rtc-report-time">Report parse time if available
-52</a></li>
+53</a></li>
 <li><a href="#lib-tg-cf-ok">Return pass if grammar is as expected
-37</a></li>
+38</a></li>
 <li><a href="#lib-rts-vxml-grammar-check">Set $checked-xml-grammar
 25</a></li>
-<li><a href="#lib-rtc-details">Set $details 61</a></li>
-<li><a href="#lib-rtc-errors">Set $error-details 56</a></li>
-<li><a href="#lib-rtc-fetch-expected">Set $expectations 47</a></li>
+<li><a href="#d3e545">Set $checked-xml-grammar (v. alt) 26</a></li>
+<li><a href="#lib-rtc-details">Set $details 62</a></li>
+<li><a href="#lib-rtc-errors">Set $error-details 57</a></li>
+<li><a href="#lib-rtc-fetch-expected">Set $expectations 48</a></li>
 <li><a href="#lib-rts-grammar-compilation">Set $grammar to compiled
-grammar 26</a></li>
+grammar 27</a></li>
 <li><a href="#lib-rts-grammar-test">Set $grammar-test-result
-32</a></li>
-<li><a href="#d3e623">Set $grammar-test-result (v. v2) 33</a></li>
-<li><a href="#d3e1189">Set $grammar-test-result (v. alt)
-71</a></li>
-<li><a href="#lib-rtc-fetch-input">Set $input-string 45</a></li>
+33</a></li>
+<li><a href="#d3e629">Set $grammar-test-result (v. v2) 34</a></li>
+<li><a href="#d3e1195">Set $grammar-test-result (v. alt)
+72</a></li>
+<li><a href="#lib-rtc-fetch-input">Set $input-string 46</a></li>
 <li><a href="#lib-rts-g-new">Set $new-xml-grammar 18</a></li>
-<li><a href="#d3e495">Set $new-xml-grammar (v. v2) 19</a></li>
+<li><a href="#d3e498">Set $new-xml-grammar (v. v2) 19</a></li>
 <li><a href="#lib-rtc-parse">Set $parse-tree by parsing the test
-input string 49</a></li>
-<li><a href="#d3e850">Set $parse-tree by parsing the test input
-string (v. v2) 51</a></li>
-<li><a href="#lib-rtc-evaluate">Set $result 55</a></li>
+input string 50</a></li>
+<li><a href="#d3e856">Set $parse-tree by parsing the test input
+string (v. v2) 52</a></li>
+<li><a href="#lib-rtc-evaluate">Set $result 56</a></li>
 <li><a href="#lib-rtc-mv-testset">Set $test-set-name, $test-case-ID
-62</a></li>
+63</a></li>
 <li><a href="#lib-rtc-misc-var">Set some handy variables
-46</a></li>
+47</a></li>
 <li><a href="#dr-options">Set the options for the test harness
-58</a></li>
-<li><a href="#set-timeout-option">Set timeout option 53</a></li>
+59</a></li>
+<li><a href="#set-timeout-option">Set timeout option 54</a></li>
 <li><a href="#dr-setup">Set up variables and options 5</a></li>
 <li><a href="#lib-rt-metadata">Supply basic metadata for the test
 report 11</a></li>
@@ -2638,18 +2680,21 @@ report 11</a></li>
 <li><a href="#lib-rts3">The recursive run-test-set() function
 13</a></li>
 <li><a href="#lib-run-test-case">The run-test-case() function
-44</a></li>
+45</a></li>
 <li><a href="#lib-run-test-set">The run-test-set() function
 12</a></li>
 <li><a href="#lib-run-tests">The run-tests() function 7</a></li>
 <li><a href="#lib-test-grammar">The test-grammar() function
-34</a></li>
+35</a></li>
 </ul>
 </div>
 </div>
 <div>
 <h1>Index of scrap names</h1>
 <ul>
+<li>2022-03-16 : CMSMcQ : record a to-do item: the grammar
+preparation here should use standard functions, not roll its own.
+What were you thinking?</li>
 <li>2022-02-09/2022-02-12 : CMSMcQ : finally reach the actual test
 cases and slowly knock off rough edges here and there</li>
 <li>2022-02-04 : CMSMcQ : made file, to replace earlier test
@@ -2662,7 +2707,7 @@ harness lost in a disk crash</li>
 reference, and as a fallback if necessary.</div>
 <div class="Real-P"><i>The old version is kept around for a
 bit.</i>
-<div class="scrap"><span><a name="d3e1163" id="d3e1163">〈 69 Handle
+<div class="scrap"><span><a name="d3e1169" id="d3e1169">〈 70 Handle
 an inline test-set 〉 (for version <em>alt</em>) ≡</a></span>
 <pre class=
 "scrapbody">    let $test-set-name := $test-set/@name/string(),
@@ -2673,7 +2718,7 @@ an inline test-set 〉 (for version <em>alt</em>) ≡</a></span>
           return (
             $grammar-test-result,
             <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rts-write-grammar-result">Record grammar test result 27</a></em> 〉</span>
+"#lib-rts-write-grammar-result">Record grammar test result 28</a></em> 〉</span>
             if (($grammar-test-result/@result = 'pass')
                or empty($grammar-test-result)) 
             then (: run the tests, handle nested sets :)
@@ -2700,7 +2745,7 @@ an inline test-set 〉 (for version <em>alt</em>) ≡</a></span>
 different structure. I keep it around partly as a menetekel to
 remind myself that sometimes things need to be refactored, but
 mostly in case I need to go back to it.</i>
-<div class="scrap"><span><a name="d3e1175" id="d3e1175">〈 70 Load
+<div class="scrap"><span><a name="d3e1181" id="d3e1181">〈 71 Load
 and test the grammar for a test set 〉 (for version <em>alt</em>)
 ≡</a></span>
 <pre class="scrapbody">      <span class="scrapref">〈 <em class=
@@ -2709,16 +2754,16 @@ and test the grammar for a test set 〉 (for version <em>alt</em>)
       <span class="scrapref">〈 <em class="scrapptr"><a href=
 "#lib-rts-vxml-grammar-check">Set $checked-xml-grammar 25</a></em> 〉</span>
       <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rts-grammar-test">Set $grammar-test-result 32</a></em> 〉</span>
+"#lib-rts-grammar-test">Set $grammar-test-result 33</a></em> 〉</span>
       <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#lib-rts-grammar-compilation">Set $grammar to compiled grammar 26</a></em> 〉</span></pre>
+"#lib-rts-grammar-compilation">Set $grammar to compiled grammar 27</a></em> 〉</span></pre>
 <span class="scrapinbound">This code is a variant of 〈 <a href=
 "#lib-rts-grammar">Load and compile the grammar for a test set
 17</a> 〉</span></div>
 </div>
 <div class="Real-P">The initial version of the grammar-test code is
 retained here as a fallback, for a while.
-<div class="scrap"><span><a name="d3e1189" id="d3e1189">〈 71 Set
+<div class="scrap"><span><a name="d3e1195" id="d3e1195">〈 72 Set
 $grammar-test-result 〉 (for version <em>alt</em>) ≡</a></span>
 <pre class="scrapbody">      let $gt := $test-set/tc:grammar-test
       let $grammar-test-result := 
@@ -2782,7 +2827,7 @@ $grammar-test-result 〉 (for version <em>alt</em>) ≡</a></span>
           }      
 </pre>
 <span class="scrapinbound">This code is a variant of 〈 <a href=
-"#lib-rts-grammar-test">Set $grammar-test-result 32</a>
+"#lib-rts-grammar-test">Set $grammar-test-result 33</a>
 〉</span></div>
 <i>TO DO: pass options down to this level, if user asks for
 individual tests to be reported to files, then do so. At user
