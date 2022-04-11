@@ -49,9 +49,9 @@ declare function epi:earley-parse(
                  'failure-dump': 'closure' }
       else $options
 
-  let $mapResult := prof:time(
-                    er:recognizeX($I, $G), 
-                    '0a recognize(): '),
+  let $mapResult := (:stat ...prof:time( ... tats:)
+                    er:recognizeX($I, $G),
+                    (:stat ...'0a recognize(): '),... tats:)
 
       $meiClosure := $mapResult('Closure'),
       $leiCompletions := $mapResult('Completions')
@@ -62,9 +62,9 @@ declare function epi:earley-parse(
        then         let $dummy := eri:notrace((), 
                       'epi:earley-parse() has result') 
 
-        let $lpt := prof:time(
+        let $lpt := (:stat ...prof:time(... tats:)
                     epi:all-trees($leiCompletions, $meiClosure, $I)
-                    , '0b making trees: ')
+                    (:stat ..., '0b making trees: ')... tats:)
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
         for $rpt at $npt in $lpt
@@ -84,9 +84,9 @@ declare function epi:earley-parse(
        then         let $dummy := eri:notrace((), 
                       'epi:earley-parse() has result') 
 
-        let $pfg := prof:time(
+        let $pfg := (:stat ...prof:time(... tats:)
                     epi:parse-forest-grammar($leiCompletions, $meiClosure, $I)
-                    , '0b making pfg: ')
+                    (:stat ..., '0b making pfg: ')... tats:)
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a parse-forest grammart') 
         return $pfg
@@ -94,9 +94,9 @@ declare function epi:earley-parse(
        else (: default to any-tree :)
                     if ($options?tree-constructor eq 'direct')
         then 
-        let $lpt := prof:time(
+        let $lpt := (:stat ...prof:time(... tats:)
                     epi:all-trees($leiCompletions, $meiClosure, $I)
-                    , '0b making trees: ')
+                    (:stat ..., '0b making trees: ')... tats:)
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
         for $rpt in $lpt[1]
@@ -107,12 +107,12 @@ declare function epi:earley-parse(
         else epi:astXparsetree($rpt, count($lpt))
 
         else 
-        let $pfg := prof:time(
-                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I)
-                    , '0b making pfg: '),
-            $ast := prof:time(
+        let $pfg := (:stat ...prof:time(... tats:)
+                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I),
+                    (:stat ...'0b making pfg: '),... tats:)
+            $ast := (:stat ...prof:time(... tats:)
                     epi:tree-from-pfg($pfg, 'document', ())
-                    , '0c extracting tree: ')
+                    (:stat ..., '0c extracting tree: ')... tats:)
 		    
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
@@ -612,7 +612,7 @@ let $dummy := eri:trace($w('item'), 'rhs-from-walk:  item fell through!') return
        element ap:error {
            element p { 'Unexpected failure 83' },
            $acc,
-           $w
+           $w?state
        }
 
 };
@@ -669,13 +669,14 @@ declare function epi:tree-from-pfg(
                         $pfg/rule[1]/alt/nonterminal,
                         'element',
                         ()
-                    ),
-          $tree1 := copy $x-tree := $tree0
-                   modify insert node 
-                       attribute ixml:state { "ambiguous" }
-                       into $x-tree
-                   return $x-tree
-      return if ($f-ambig) then $tree1 else $tree0
+                    )
+      return if (not($f-ambig))
+      then $tree0
+      else element { name($tree0) } {
+        attribute ixml:state { "ambiguous" },
+        $tree0/attribute::*,
+        $tree0/child::node()
+      }
 
   else if ($pfg/self::rule)
   then 
@@ -685,8 +686,48 @@ declare function epi:tree-from-pfg(
       let $mark := ($mark, 
                     $pfg/@mark/string(),
                     '^')[1]
-      let $n := count($pfg/alt),
-          $i := 1 + random:integer($n),
+      let $n := count($pfg/alt),     
+          $ran := (: What random number function is available? :)
+let $f1 := function-lookup(
+              QName('http://basex.org/modules/random', 
+                    'integer'), 
+              1),
+    $f2 := function-lookup(
+              QName('http://exslt.org/random', 
+                    'random-sequence'), 
+           2),
+    $f3 := function-lookup(
+              QName('http://exslt.org/math', 
+                    'random'), 
+           0)
+
+return 
+
+(: basex random:integer() :)
+if (exists($f1)) 
+then $f1($n)
+
+(: exslt-random:random-sequence() returns fraction 
+   in 0..1; multiply by $n and take the floor to
+   get the number we need :)
+else if (exists($f2)) 
+then let $frac := $f2(1,seconds-from-dateTime(current-dateTime()))
+     return if ($frac eq 1) 
+            then 0 
+            else floor($frac * $n)
+
+(: exslt-math:random(); use same procedure :)
+else if (exists($f3)) 
+then let $frac := $f3()
+     return if ($frac eq 1) 
+            then 0 
+            else floor($frac * $n)
+
+else error(QName(
+"http://blackmesatech.com/2019/iXML/Aparecium",
+"tbd17"), 'No random number generator found!')
+,
+          $i := 1 + $ran,
           $ccc := $pfg/alt[$i]/*,
           $ls0 := tokenize($pfg/@name, '·'),
           $nm0 := $ls0[1],

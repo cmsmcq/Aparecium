@@ -2,6 +2,8 @@
   <head>Timing data for Aparecium</head>
   <date>16-17 February 2022</date>
   <p>All times in ms.</p>
+  <!-- Looking for zeroes timings? 
+       See file:///home/cmsmcq/2021/ixml/misc/timings.xhtml -->
   <!--
 	    <th>Test set</th>
 	    <th>Total time (from GUI)</th>

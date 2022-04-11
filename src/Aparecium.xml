@@ -6,6 +6,12 @@
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
 
+<!-- to turn debugging and statistics off -->
+<!ENTITY DEBUG  "(:debug ...">
+<!ENTITY GUBED  "... gubed:)">
+<!ENTITY STAT   "(:stat ...">
+<!ENTITY TATS   "... tats:)">
+
 <!-- to turn debugging and statistics on -->
 <!ENTITY DEBUG  "(:debug:)">
 <!ENTITY GUBED  "(:gubed:)">
@@ -18,12 +24,6 @@
 <!ENTITY STAT   "">
 <!ENTITY TATS   "">
 
-<!-- to turn debugging and statistics off -->
-<!ENTITY DEBUG  "(:debug ...">
-<!ENTITY GUBED  "... gubed:)">
-<!ENTITY STAT   "(:stat ...">
-<!ENTITY TATS   "... tats:)">
-
 <!ENTITY darr   "&#x2193;" ><!--/downarrow A: =downward arrow-->
 <!ENTITY isin   "&#x2208;" ><!--/in R: =set membership-->
 <!ENTITY larr   "&#x2190;" ><!--/leftarrow /gets A: =leftward arrow-->
@@ -33,6 +33,7 @@
 <!ENTITY rArr   "&#x21D2;" ><!--/Rightarrow A: =implies-->
 <!ENTITY times  "&#215;" ><!--/times B: =multiply sign-->
 <!ENTITY uarr   "&#x2191;" ><!--/uparrow A: =upward arrow-->
+<!ENTITY uuml    "&#252;" ><!-- small u, dieresis or umlaut mark -->
 
 <!ENTITY c '<ident>c</ident>' >
 <!ENTITY C '<ident>C</ident>' >
@@ -54,7 +55,7 @@
 <!ENTITY N '<ident>N</ident>' >
 <!ENTITY N.. '<ident>N&prime;</ident>' >
 <!ENTITY N.x.y '&N;·&x;·&y;' >
-<!ENTITY M_E '&M; <hi rend="sub">&E;</hi>' >
+<!ENTITY M_E '&M;<hi rend="sub">&E;</hi>' >
 <!ENTITY ME '&M_E;' >
 <!ENTITY O0 '<ident>O</ident><hi rend="sub">0</hi>' >
 <!ENTITY p '<ident>p</ident>' >
@@ -63,6 +64,7 @@
 <!ENTITY qf '<ident>q</ident><hi rend="sub">&f;</hi>' >
 <!ENTITY s '<ident>s</ident>' >
 <!ENTITY T '<ident>T</ident>' >
+<!ENTITY V '<ident>V</ident>' >
 <!ENTITY w '<ident>w</ident>' >
 <!ENTITY w- '<ident>w&prime;</ident>' >
 <!ENTITY x '<ident>x</ident>' >
@@ -856,7 +858,7 @@ declare function aparecium:parse-string-with-compiled-grammar(
 ) as element() {
   let $cg-ok := &STAT;prof:time( &TATS;
                 aparecium:grammar-ok($cG)
-                &STAT;, 'pswcg() calling grammar-ok():')
+                &STAT;, 'pswcg() calling grammar-ok():') &TATS;
 
   let $result := if ($cg-ok/self::ixml) 
                  then &STAT;prof:time( &TATS;
@@ -1037,6 +1039,61 @@ and then cleaned up if options permit it.</p>
 </div>
 -->
 
+<p><hi>Notes towards refactoring:</hi> There are several operations
+we need to perform on the grammar; how should they be sequenced?
+A tentative sequence:
+<list>
+
+<item>calculating effective mark for every nonterminal
+reference(?)</item>
+
+<item>regular expressions for terminals:<list>
+<item>generation of regular expressions for terminals</item>
+<item>simplification of resulting expressions (to deal with
+terminals which generate the empty language)</item>
+</list>
+Simplification should precede calculation of Gluschkov automaton.
+</item>
+
+<item>inlining to reduce number of Earley items to create:
+<list>
+<item>identification of nonterminals which should be inlined</item>
+<item>rewriting the grammar with inlined hidden nonterminals</item>
+<item>simplifying resulting expressions</item>
+</list>
+Rewriting and simplification should precede calculation of Gluschkov
+automaton.
+The inlining of hidden nonterminals will interact with the detection
+of hidden pseudo-terminals.
+</item>
+
+<item>rewriting to create pseudo-terminals:
+<list>
+<item>marking all nonterminals as CDATA, element-only, or mixed</item>
+<item>identification of nonterminals which are candidate
+pseudo-terminals:<list>
+<item>regular (only regular descendants)</item>
+<item>marked ^ with no ^ descendants, or marked - but with a parent
+which is not a candidate pseudo-terminal</item>
+</list></item>
+<item>calculating regular expressions for pseudo-tokens</item>
+<item>marking pseudo-tokens</item>
+</list>
+The detection of hidden pseudo-terminals will interact with
+the inlining of hidden nonterminals.
+</item>
+
+<item>annotation of each rule with Gluschkov automaton for its
+right-hand sides</item>
+<item>calculating whether the grammar is LL(1)</item>
+<item>determining whether a pseudo-token can be recognized greedily
+or must be recognized cautiously.</item>
+</list>
+<hi>For now, the sequence is simpler: we calculate regexes for
+terminals in the same pass as the Gluschkov automaton.  We do not
+identify pseudo-terminals, we do not inline hidden nonterminals,</hi>
+</p>
+
 <div id="hi-compile-grammar">
 <head>Compiling the grammar</head>
 
@@ -1056,33 +1113,45 @@ module namespace gl =
 <ptr target="gl-prolog"/>
 <ptr target="gl-ME"/>
 <ptr target="gl-merge"/>
-<ptr target="gl-read-one-ixml-char"/>
+<!-- <ptr target="gl-read-one-ixml-char"/> -->
 <ptr target="gl-trace"/>
 </scrap></p>
 
 <p>This module is one place affected by the syntax changes
-between 2013 and 2021.  Most scraps are defined twice,
+between 2013 and 2021.  Most scraps have been written twice,
 once in the initial version following the 2013 syntax,
 and again for today's syntax. 
 (Steven's original paper said something about bootstrapping
 and supporting multiple syntaxes, but I got confused and am
 not going to try to do that.  Too clever for me.)
+Most of the old code should by now have been moved into
+an <ref target="ob-ll-sym">appendix</ref>.
 </p>
 
-<div id="leggl-prolog">
+<div id="higl-prolog">
 <head>Module prolog</head>
 <p>The module prolog defines a namespace for follow sets, and a
 variable with the namespace name.  We also import the
 <ident>d2x</ident> library so we can use its hex-to-decimal
-conversion.
+conversion, and the Earley recognizer internal module, for
+constructing regexes from terminal symbols.<note place="foot">
+<p>The resulting circular import seems to suggest a failure
+of analysis:  perhaps the regex construction belongs here.
+But I expect grammar compilation to be refactored soonish,
+and the import of <ident>eri</ident> may no longer be needed.</p>
+</note>
 <scrap id="gl-prolog"
        name="Prolog for Gluschkov module">
-declare namespace follow =
-"http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
-
 import module namespace d2x =
 'http://blackmesatech.com/2019/iXML/d2x'
 at "d2x.xqm";
+
+import module namespace eri =
+"http://blackmesatech.com/2019/iXML/Earley-rec-internals"
+at "Earley-rec-internals.xqm";
+
+declare namespace follow =
+"http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
 
 declare variable $gl:follow-ns :=
 "http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
@@ -1090,9 +1159,8 @@ declare variable $gl:follow-ns :=
 </p>
 </div>
 
-<div id="leggl-ME">
+<div id="higl-ME">
 <head>Calculating the Gluschkov automaton &ME;</head>
-
 
 <p>For a regular expression &E;, the Gluschkov automaton
 (conventionally referred to as &M_E;) is a finite state automaton
@@ -1101,39 +1169,58 @@ states of &ME; are the basic symbols of &E;, with the fairly
 straightforward interpretation that we are in a given state &q; if and
 only if we have just read an input character (or, in the general case,
 character sequence) that matches the atomic symbol &q;.  We calculate
-the Gluschkov automaton by following the algorithm laid out in
-Brüggemann-Klein 1993, adapted for the XML form of ixml grammars.</p>
+the Gluschkov automaton by following the algorithm laid out in <ptr
+target="ABK1993"/>, adapted for the XML form of ixml grammars.</p>
+
 <p>Each node <ident>$E</ident> in the expression gets:
 <list>
-<item><att>id</att> to identify the expression; in the case of positions (i.e. 
-       occurrences of symbols in the alphabet, as opposed to
-       parenthesized expressions etc.), this also
-       serves as an identifier for the FSA state.</item>
-<item><att>first</att> = set of positions which match the first symbol of some word
-       in &L..E;</item>
-<item><att>last</att> = set of positions which match the last symbol in some word
-       in &L..E;</item>
+<item><att>id</att> to identify the expression; in the case of
+positions (i.e.  occurrences of symbols in the alphabet, as opposed to
+parenthesized expressions etc.), this also serves as an identifier for
+the FSA state.</item>
+<item><att>first</att> = set of positions which match the first symbol
+of some word in &L..E;</item>
+<item><att>last</att> = set of positions which match the last symbol
+in some word in &L..E;</item>
 <item><att>nullable</att> = true iff &L..E; contains the empty
-word</item>
-</list>
-</p>
-<p>We also have attributes to represent the
-<ident>follow</ident>(<ident>exp</ident>, <ident>sym</ident>) function
-for <ident>exp</ident>=<ident>$E</ident>.  For each position $p in $E
-we have an attribute in the follow namespace whose local name is the
-ID of $p; the value of the attribute is the set of positions which can
-follow $p in a path through $E.
-</p>
-<p>By representing follow($E,$p) as an attribute on $E we avoid having
-to traverse the tree multiple times.
+word<note place="foot">
+
+<p>Note that if some nonterminal &N; is required in &E;,
+<ident>nullable</ident> is false even when &N; generates the empty
+string.</p>
+
+<p>It may be helpful in some contexts to distinguish between
+<gloss>generates the empty string of symbols in &V;</gloss>
+(<ident>nullable<hi rend="sub">V</hi></ident>) from <gloss>generates
+the empty string of symbols in &T;</gloss> (<ident>nullable<hi
+rend="sub">T</hi></ident>).  Here, <ident>nullable</ident> is just
+short for <ident>nullable<hi rend="sub">V</hi></ident>.
 </p>
 
-<p>The
-construction of the Gluschkov automaton consists largely of
+</note></item>
+</list>
+</p>
+
+<p>We also have attributes to represent the
+<ident>follow</ident>(<ident>exp</ident>, <ident>sym</ident>) function
+for <ident>exp</ident>=<ident>$E</ident>.  For each position
+<ident>$p</ident> in <ident>$E</ident> we have an attribute in the
+<ident>follow</ident> namespace whose local name is the ID of
+<ident>$p</ident>; the value of the attribute is the set of positions
+which can follow <ident>$p</ident> in a path through
+<ident>$E</ident>.
+</p>
+
+<p>By representing <ident>follow($E,$p)</ident> as an attribute on
+<ident>$E</ident> we avoid having to traverse the tree multiple
+times.</p>
+
+<p>The construction of the Gluschkov automaton consists largely of
 calculating, from the structure of &E;, which symbols can follow which
-other symbols, and defining an appropriate transition function.
-Along the way, various auxiliary functions are computed for each
+other symbols, and defining an appropriate transition function.  Along
+the way, various auxiliary functions are computed for each
 subexpression of &E;.</p>
+
 <p>For the right-hand side of a rule in an ixml grammar, the basic
 symbols of the expression are terminal and nonterminal symbols, and
 the subexpressions include both the basic symbols and the other
@@ -1165,6 +1252,7 @@ they are essential for calculating information for the next higher
 level of sub-expression, but the information we care about when
 running the Earley parser is just the information on the top-level
 element of the right-hand side.</p>
+
 <p>Since the values of these attributes are in general calculated
 inductively, the first step in handling any element &e; is to recur
 to handle the element's children, and then to construct the values
@@ -1193,110 +1281,33 @@ declare function gl:ME (
   else <ptr target="gl-ME-whahhh"/>
 };
 </scrap></p>
+<p>The following sections describe the handling of individual kinds of
+expressions.</p>
+</div>
 
-<p>In the 2013 grammar supported by Aparecium 0.1, the elements
-<gi>quoted</gi>, <gi>charset</gi>, and several others were always
-assumed wrapped in a <gi>terminal</gi> element.  They thus occur below
-the level of the basic symbol and need no decorations.  We need to
-handle them, since when the function is called on their parent
-element, it will recursively be called on them, too.  But they can and
-should be returned without change. 
-<scrap id="gl-ME-identity-2013"
-       name="Handle leaf nodes (v0.1)">
-if ($E/(self::quoted
-      or self::charset or self::exclude
-      or self::range
-      or self::schar or self::dchar))
-then 
-      $E</scrap>
-</p>
-<p>In the 2021 grammar, the <gi>range</gi> and
-<gi>class</gi> elements fall into this category (always
-children of <gi>inclusion</gi> or <gi>exclusion</gi>.
-The <gi>literal</gi> element falls into this category
-when it is a child of <gi>inclusion</gi> or <gi>exclusion</gi>,
-but it does no harm to handle it separately.</p>
-<p>For ranges, the calculation of the correct regular
-is straightforward in the simple case:  put a hyphen
-between the values of the <att>from</att> and
-<att>to</att> attributes, and wrap the entire thing
-in square brackets.  But while those attributes
-will usually contain single characters, they can
-contain doubled quotation marks or hexadecimal strings
-preceded by '#'.  It would be tempting to inline this,
-but it's just complicated enough that I am going to write
-a utility function to do it.
-<scrap id="gl-read-one-ixml-char"
-       name="Define gl:read-one-char-spec()">
-declare function gl:read-one-char-spec(
-  $s as xs:string
-) as xs:string {
-  if (string-length($s) eq 1)
-  then string($s)
-  else if ($s eq '""') 
-  then '"' 
-  else if ($s eq "''") 
-  then "'"
-  else if (starts-with($s,'#'))
-  then codepoints-to-string(d2x:x2d(substring($s, 2)))
-  else ""
-};
-</scrap>
-</p>
-<p>Armed with that little function, we can easily
-specify the regex for a range.
+<div id="higl-ME-terminals">
+<head>Gluschkov automata for terminal symbols</head>
+
+<p>The <gi>range</gi> and <gi>class</gi> elements are always children
+of <gi>inclusion</gi> or <gi>exclusion</gi>.  They are thus internal
+to the basic symbol and need no decoration, but when the function
+handles the parent it will call itself recursively on them; they
+should be returned without change.  The <gi>literal</gi> element falls
+into this category when it is a child of <gi>inclusion</gi> or
+<gi>exclusion</gi>, but it does no harm to handle it separately.</p>
+
+<p>Since all we do is return the elements without change, the code is
+trivial.
 <scrap id="gl-ME-identity"
        name="Handle leaf nodes">
-if ($E/self::range)
-then 
-   element { name($E) } {
-      $E/@*, 
-      attribute regex {
-         '['
-         || gl:read-one-char-spec(string($E/@from))
-	 || '-'
-         || gl:read-one-char-spec(string($E/@to))
-	 || ']'	 
-      },
-      $E/child::node()
-   }
+if ($E/self::range) then $E
+else if ($E/self::class) then $E
 </scrap>
 </p>
-<p>For character-class expressions, the regular expression we need is
-also very simple: just the class code wrapped in <q><code>\p{
-... }</code></q>.
-<scrap prev="gl-ME-identity"
-       name="Handle character-class expressions">
-else if ($E/self::class)
-then 
-   element { name($E) } {
-      $E/@*, 
-      attribute regex { '\p{' || $E/@code || '}'}
-   }
-</scrap>
-</p>
+
 <p>For terminal symbols, all attribute values are straightforward.
-They are non-nullable, they are their own first and last
-states, and they have no follow states.  In 2013, all terminals
-were <gi>terminal</gi> elements. 
-<scrap id="gl-ME-terminals-2013"
-       name="Handle terminal nodes (v0.1)">
-if ($E/self::terminal)
-then let $id := '_t_' || (1 + count($E/preceding::terminal))
-     return element terminal {
-       $E/(@* except (@xml:id, 
-                     @nullable, 
-                     @first, 
-                     @last, 
-                     @follow:*)),
-       attribute xml:id { $id },
-       attribute nullable { false() },
-       attribute first { $id },
-       attribute last { $id },
-       attribute {QName($gl:follow-ns, "follow:" || $id)} { },
-       $children
-     }</scrap></p>
-<p>In 2021, we distinguish several different terminals.
+They are non-nullable, they are their own first and last states, and
+they have no follow states.  
 <scrap id="gl-ME-terminals"
        name="Handle terminal nodes">
 if ($E/self::inclusion or $E/self::exclusion
@@ -1307,14 +1318,7 @@ then
                     [self::inclusion 
                     or self::exclusion
 		    or self::literal])), 
-          $re := 'dummy' (:if ($E/self::inclusion) 
-                 then gl:inclusion-regex($E) 
-                 else if ($E/self::exclusion)
-                 then gl:exclusion-regex($E) 
-                 else if ($E/self::literal)
-		 then gl:literal-regex($E)
-		 else '[! error in gl:ME !]'
-		 :)
+          $re := eri:reXTerminal($E)
       return element {name($E)} {
          $E/(@* except (@xml:id, 
                      @nullable, 
@@ -1329,13 +1333,17 @@ then
          attribute {QName($gl:follow-ns, "follow:" || $id)} { },
 	 attribute regex { $re },
          $children
-      }</scrap>
+      }
+</scrap>
+The calculation of a regular expression to match the terminal is
+delegated to <ident>reXTerminal()</ident> from the Earley
+internals module.
 </p>
-<p>We have now committed to writing functions to create
-regular expressions for inclusions, exclusions, and literals.
-(But it's not the most pressing need, so for the moment
-I'm commenting it out.)
-</p>
+
+</div>
+<div id="higl-ME-nonterminals">
+<head>Gluschkov automata for nonterminal symbols</head>
+
 <p>Nonterminals are similarly straightforward:  from the
 point of view of the Gluschkov automaton, they are
 indistinguishable from terminals.
@@ -1360,6 +1368,11 @@ then
        $children
      }</scrap>
 </p>
+
+</div>
+<div id="higl-ME-opt-rep">
+<head>Gluschkov automata for repetitions and options</head>
+
 <p>Syntactically, an option is an expression to which a question mark
 has been added.  So any option &E; has the form (&F;?).  &E; is
 nullable regardless of whether &F; is or not, and &E; has the same
@@ -1395,11 +1408,13 @@ then
        $children
      }</scrap>
 </p>
+
 <p>Repeats will have either one child element or two.  The
 first will be a terminal, a nonterminal, or a set of alternatives;
 the optional second child is a separator.  If anything else is
 encountered, we are not ready for it and we'll fall through to
 the error case.</p>
+
 <p>In the 2013 grammar, a set of alternatives was a
 <gi>def</gi> element: 
 <scrap id="gl-ME-repeats-2013"
@@ -1487,6 +1502,7 @@ then let $gi := name($E)
      }
 </scrap>
 </p>
+
 <p>The calculation of the follow set here has several
 cases.  Watch carefully.  First case:  no separator.
 So for all positions &p; in the expression &E;,
@@ -1515,6 +1531,7 @@ with no additions.</item>
            else $a
 </scrap>
 </p>
+
 <p>If there is a separator, then the same principle
 applies, but things are complicated by the presence
 of the separator in the way.
@@ -1561,6 +1578,7 @@ name and its follow-set within &F; or &G;.</item>
                     $followset    
                     }</scrap>
 </p>
+
 <p>If &p; is final in &F; and &G; is nullable, then it's final
 in &F;*&G; or &F;+&G; and can thus be followed by any first
 state of &G; and any first state of &F;, as well as (naturally)
@@ -1570,6 +1588,7 @@ its follow-set within &F;:
              if ($p = $lastF and $nullableG) 
              then gl:merge(($follow0, $firstG, $firstF))
 </scrap></p>
+
 <p>If &p; is final in &F; and &G; is <emph>not</emph> nullable, 
 then its follow-set omits the first sets of &F;. 
 <scrap id="gl-ME-rep-follow-sep-2"
@@ -1577,6 +1596,7 @@ then its follow-set omits the first sets of &F;.
              else if ($p = $lastF and not($nullableG))
              then gl:merge(($follow0, $firstG))
 </scrap></p>
+
 <p>If &p; is final in &G; and &F; is nullable, 
 then we again have a three-way merge for its follow-set:
 its follow-set within &G;, the first-set of &F;, and
@@ -1587,6 +1607,7 @@ the first-set of &G;.
              else if ($p = $lastG and $nullableF)
              then gl:merge(($follow0, $firstG, $firstF))
 </scrap></p>
+
 <p>If &p; is final in &G; and &F; is <emph>not</emph> nullable, 
 then the first-set of &G; is not included in the follow-set
 of &p;.
@@ -1595,6 +1616,7 @@ of &p;.
              else if ($p = $lastG and not($nullableF))
              then gl:merge(($follow0, $firstF))
 </scrap></p>
+
 <p>Finally, if none of the above are true, then &p;
 is non-final in either &F; or &G; and its follow-set is
 unaffected by the repetition operator, so we just copy it
@@ -1646,6 +1668,7 @@ if ($E/self::sep
      }
 </scrap>
 </p>
+
 <p>In 2013 the element names were different.  (Yawn.)
 <scrap id="gl-ME-sep-2013"
        name="Handle separator expressions (v0.1)">
@@ -1673,6 +1696,12 @@ if ($E/self::sep
      }
 </scrap>
 </p>
+
+</div>
+
+<div id="higl-ME-sequences">
+<head>Gluschkov automata for sequences (<gi>alt</gi>)</head>
+
 <p>An <gi>alt</gi> is one choice among (sometimes) several; it
 contains a sequence of terms (i.e. terminal, nonterminal, repetition,
 option, nested set of alternatives).  Since it's an arbitrary-length
@@ -1727,6 +1756,7 @@ if ($E/self::alt) then
      }
 </scrap>
 </p>
+
 <p>Again, calculating the follow-set is the most complicated
 of the subcalculations for this type of expression.  So let's
 take it slowly.
@@ -1775,6 +1805,11 @@ And so forth.</item>
          }
 </scrap>
 </p>
+</div>
+
+<div id="higl-ME-choice">
+<head>Gluschkov automata for choice (<gi>alts</gi>)</head>
+
 <p>An <gi>alts</gi> element contains a set of alternatives,
 each an <gi>alt</gi> element.
 The 2013 alternative was the <gi>def</gi> element,
@@ -1822,6 +1857,7 @@ The properties should all be self-explanatory.
        $children
      }
 </scrap></p>
+
 <p>As an experiment, I am putting the generic identifier
 for the element in a scrap.  If this works, much of the
 duplication earlier in this section can be removed.
@@ -1832,6 +1868,7 @@ In 2013, it was <gi>def</gi>:
 <scrap id="gl-alts-gi-2013"
        name="GI for alts element (v0.1)">def</scrap>
 </p>
+
 <p>Since the alternatives inside a rule are not now wrapped
 in a <gi>def</gi> or <gi>alts</gi> elements, we need to
 put the properties for the rule as a whole on the <gi>rule</gi>
@@ -1843,6 +1880,7 @@ if ($E/self::rule) then
     <ptr target="gl-ME-alternatives"/>
 </scrap>
 </p>
+
 <p>In 2013, it was simpler.
 <scrap id="gl-ME-rule-2013"
        name="Handle rule elements (v0.1)">
@@ -1852,6 +1890,12 @@ if ($E/self::rule) then
       $children
     }</scrap>
 </p>
+
+</div>
+
+<div id="higl-ME-choice">
+<head>Gluschkov automata for other elements</head>
+
 <p>Finally, a few miscellaneous elements.  Comments
 require no annotation.
 <scrap id="gl-ME-comment"
@@ -1860,6 +1904,7 @@ if ($E/self::comment) then
     $E
 </scrap>
 </p>
+
 <p>The <gi>ixml</gi> element also requires no
 annotation.
 <scrap id="gl-ME-ixml"
@@ -1874,6 +1919,7 @@ if ($E/self::ixml) then
     }
 </scrap>
 </p>
+
 <p>And finally, at the bottom of the if-then-else ladder,
 we handle unexpected elements.
 <scrap id="gl-ME-whahhh"
@@ -3470,9 +3516,13 @@ let $dummy := eri:trace($w('item'), 'rhs-from-walk:  item fell through!') return
        element ap:error {
            element p { 'Unexpected failure 83' },
            $acc,
-           $w
+           $w?state
        }
 </scrap>
+<hi>BaseX will serialize $w, but Saxon will not,
+so we trace just $w?state, not $w.  This should be
+cleaner, probably; I'm beginning to hack at things
+in order to get the program to run under Saxon.</hi>
 </p>
 </div>
 <div id="hi-pfgc-make-lei">
@@ -3617,6 +3667,27 @@ the tree we return with <code>ixml:state="ambiguous"</code>.
                         $pfg/rule[1]/alt/nonterminal,
                         'element',
                         ()
+                    )
+      return if (not($f-ambig))
+      then $tree0
+      else element { name($tree0) } {
+        attribute ixml:state { "ambiguous" },
+        $tree0/attribute::*,
+        $tree0/child::node()
+      }
+</scrap></p>
+
+<p>Another version of this code uses XQuery Update to inject the
+attribute.  I took this out because Saxon PE and HE don't seem to
+support the update facility.
+<scrap 
+       name="Extract tree from ixml parse-forest grammar">
+
+      let $f-ambig := exists($pfg//rule[count(alt) gt 1]),
+          $tree0 := epi:tree-from-pfg(
+                        $pfg/rule[1]/alt/nonterminal,
+                        'element',
+                        ()
                     ),
           $tree1 := copy $x-tree := $tree0
                    modify insert node 
@@ -3625,6 +3696,8 @@ the tree we return with <code>ixml:state="ambiguous"</code>.
                    return $x-tree
       return if ($f-ambig) then $tree1 else $tree0
 </scrap>
+</p>
+<p>
 <hi>To do: check to make sure there are no top-exposed attributes or
 text nodes.</hi>
 The code just given does not test on <ident>$nodetype</ident>:
@@ -3648,8 +3721,9 @@ nonterminal references.
       let $mark := ($mark, 
                     $pfg/@mark/string(),
                     '^')[1]
-      let $n := count($pfg/alt),
-          $i := 1 + random:integer($n),
+      let $n := count($pfg/alt),     
+          $ran := <ptr target="epi-tfg-random"/>,
+          $i := 1 + $ran,
           $ccc := $pfg/alt[$i]/*,
           $ls0 := tokenize($pfg/@name, '&#xB7;'),
           $nm0 := $ls0[1],
@@ -3665,6 +3739,59 @@ nonterminal references.
           else <ptr target="epi-tfg-rule-zero"/>
           else <ptr target="epi-tfg-rule-wha"/>
 </scrap>
+</p>
+<p>The generation of a random number is vendor-specific, so
+we factor it out into a separate bit of code.
+<scrap id="epi-tfg-random"
+       name="Select random integer in 0..$n">
+(: What random number function is available? :)
+let $f1 := function-lookup(
+              QName('http://basex.org/modules/random', 
+                    'integer'), 
+              1),
+    $f2 := function-lookup(
+              QName('http://exslt.org/random', 
+                    'random-sequence'), 
+           2),
+    $f3 := function-lookup(
+              QName('http://exslt.org/math', 
+                    'random'), 
+           0)
+
+return 
+
+(: basex random:integer() :)
+if (exists($f1)) 
+then $f1($n)
+
+(: exslt-random:random-sequence() returns fraction 
+   in 0..1; multiply by $n and take the floor to
+   get the number we need :)
+else if (exists($f2)) 
+then let $frac := $f2(1,seconds-from-dateTime(current-dateTime()))
+     return if ($frac eq 1) 
+            then 0 
+            else floor($frac * $n)
+
+(: exslt-math:random(); use same procedure :)
+else if (exists($f3)) 
+then let $frac := $f3()
+     return if ($frac eq 1) 
+            then 0 
+            else floor($frac * $n)
+
+else error(QName(
+"http://blackmesatech.com/2019/iXML/Aparecium",
+"tbd17"), 'No random number generator found!')
+</scrap>
+<hi>To do: move this into a library of vendor-sensitive
+functions.</hi>
+This code prefers EXSLT's <ident>random-sequence()</ident>
+function to their <ident>random()</ident> function,
+because Saxonica's documentation says explicitly that
+their optimization sometimes ensures that <ident>random()</ident>
+always returns the same number. That would be disastrous
+here, if the number chosen were one that led to a loop.
 </p>
 <p>When the rule is marked <q><code>^</code></q>
 and <ident>$nodetype</ident> is <q><kw>element</kw></q>
@@ -4910,16 +5037,18 @@ declare function ixi:lriStartstatesXR(
 <div id="ll-symbols">
 <head>Working with symbols</head>
 
-<p>A symbol is (represented by) an element: one of nonterminal,
-literal, inclusion, exclusion.
+<p>A symbol is (represented by) an element: one of <gi>nonterminal</gi>,
+<gi>literal</gi>, <gi>inclusion</gi>, or <gi>exclusion</gi>.
 </p>
-<p>(Any references to elements named 'terminal' is a relic from the
-2016 grammar of ixml and now constitutes an error.)
+<p>(Any reference to elements named <q><gi>terminal</gi></q> is a
+relic from the 2016 grammar of ixml and now constitutes an error.)
 </p>
+
 <p>Note that functions relating to symbols in context are not here but
-under Grammars above.  (Test: is $G a parameter?)  Functions here
-relate solely to the symbol in isolation.  That may be why there
-are so few of them.</p>
+under Grammars above.  (If <ident>$G</ident> is a parameter, it's with
+grammars.)  Functions here relate solely to the symbol in isolation.
+That may be why there are so few of them.</p>
+
 <p>Similarly any function that involves the input string is not here
 but under Input, below.
 <scrap id="eri-symbols"
@@ -4946,9 +5075,14 @@ but under Input, below.
 <ptr target="eri-sym-fSymbolmatchRRiSym"/>
 </scrap>
 </p>
+
+<div id="ll-sym-match-length">
+<head>The <ident>match-length()</ident> function</head>
 <p>In tree-builder, we want match-length info just from terminal; we
 don't have access to $I.  If terminals ever become variable-length,
-this will break.</p>
+this will break. <hi>Is this still true, or does <ident>scan()</ident>
+now produce Earley items from which the length and the string
+can be found without <ident>$I</ident>?</hi></p>
 <p>See also match-length#3 below under Input.
 <scrap id="eri-sym-match-length"
        name="Define match-length()">
@@ -4964,6 +5098,10 @@ declare function ixi:match-length(
 };
 </scrap>
 </p>
+</div>
+
+<div>
+<head>Making regular expressions from terminal symbols</head>
 <p>The function <ident>reXTerminal($t)</ident> returns a regular
 expression, given a terminal element.  Note that the regular
 expression will match one character (or none) in the input; we don't
@@ -4994,7 +5132,7 @@ declare function ixi:reXTerminal(
                       return if ($e/self::range)
                         then <ptr target="eri-sym-reXT-range"/>
                         else if ($e/self::literal) 
-                        then ixi:sceXS($e/ixi:string-value($e)) 
+                        then <ptr target="eri-sym-reXT-lit"/>
                         else if ($e/self::class)
                         then ixi:catescXS($e/@code) 
                         else () (: error :)
@@ -5006,15 +5144,28 @@ declare function ixi:reXTerminal(
 };
 </scrap>
 </p>
-<p>
-<scrap id="eri-sym-reXT-range">
+<p>Ranges require special care.
+<scrap id="eri-sym-reXT-range"
+       name="Make positive character group for range">
                              ixi:sceXS($e/@from)
 		             || "-" || ixi:sceXS($e/@to)
 </scrap></p>
+<p>Literals require special care if they are hex-encoded.
+<scrap id="eri-sym-reXT-lit"
+       name="Make positive character group from literal">
+
+                             ixi:sceXS($e/ixi:string-value($e)) 
+</scrap>
+</p>
+</div>
+
+<div>
+<head>Testing for symbol type</head>
 <p>The function <ident>fTerminal()</ident> returns true iff the
 argument is a terminal symbol.  This version supports both my
-interpretation of the 2016 syntax (with element type 'terminal') and
-the 2019 syntax (literal, inclusion, exclusion).
+interpretation of the 2016 syntax (with element type
+<gi>terminal</gi>) and the 2019 syntax (literal, inclusion,
+exclusion).
 <scrap id="eri-sym-fTerminal"
        name="Define fTerminal()">
 (: ......................................................
@@ -5045,6 +5196,9 @@ declare function ixi:fNonterminal(
 };
 </scrap>
 </p>
+</div>
+<div>
+<head>Matching symbols against rule indices</head>
 <p>The function <ident>fSymbolmatchRRiSym($r, $ri, $sym)</ident>
 determines whether a symbol element $sym matches rule index $ri in
 rule $r.  Equivalently: in the FSA for rule $r, does state $ri mean
@@ -5121,6 +5275,7 @@ declare function ixi:fSymbolmatchRRiSym(
 };
 </scrap>
 </p>
+</div>
 </div>
 
 <div id="ll-input">
@@ -5770,7 +5925,7 @@ declare function aparecium:parse-grammar-from-string(
       $PG0 := aparecium:parse-string-with-compiled-grammar($G,$CGIG),
       $PG := &STAT;prof:time( &TATS;
              aparecium:grammar-ok($PG0)
-             &STAT;, 'pgfs() calling grammar-ok():')
+             &STAT;, 'pgfs() calling grammar-ok():') &TATS;
   return $PG
 };
 </scrap>
@@ -5849,7 +6004,7 @@ declare function aparecium:compile-grammar-from-xml(
 ) as element(ixml) {
   let $G := &STAT;prof:time( &TATS;
             aparecium:grammar-ok($xmlG)
-            &STAT;, 'cgfx() calling grammar-ok():')
+            &STAT;, 'cgfx() calling grammar-ok():') &TATS;
   return if ($G/self::ixml)
          then gluschkov:ME($xmlG)
          else element aparecium:error {
@@ -6222,9 +6377,9 @@ declare function epi:earley-parse(
                  'failure-dump': 'closure' }
       else $options
 
-  let $mapResult := prof:time(
-                    er:recognizeX($I, $G), 
-                    '0a recognize(): '),
+  let $mapResult := &STAT;prof:time( &TATS;
+                    er:recognizeX($I, $G),
+                    &STAT;'0a recognize(): '),&TATS;
 
       $meiClosure := $mapResult('Closure'),
       $leiCompletions := $mapResult('Completions')
@@ -6340,9 +6495,9 @@ the required XML.
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() has result') 
 
-        let $lpt := prof:time(
+        let $lpt := &STAT;prof:time(&TATS;
                     epi:all-trees($leiCompletions, $meiClosure, $I)
-                    , '0b making trees: ')
+                    &STAT;, '0b making trees: ')&TATS;
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
         for $rpt at $npt in $lpt
@@ -6379,9 +6534,9 @@ to construct all the trees, and then choose one.
 <scrap id="epi-ep-any-direct"
        name="Construct one tree directly">
 
-        let $lpt := prof:time(
+        let $lpt := &STAT;prof:time(&TATS;
                     epi:all-trees($leiCompletions, $meiClosure, $I)
-                    , '0b making trees: ')
+                    &STAT;, '0b making trees: ')&TATS;
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
         for $rpt in $lpt[1]
@@ -6398,12 +6553,12 @@ a call to extract the tree.
 <scrap id="epi-ep-any-via-pfg"
        name="Construct one tree via parse-forest-grammar">
 
-        let $pfg := prof:time(
-                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I)
-                    , '0b making pfg: '),
-            $ast := prof:time(
+        let $pfg := &STAT;prof:time(&TATS;
+                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I),
+                    &STAT;'0b making pfg: '),&TATS;
+            $ast := &STAT;prof:time(&TATS;
                     epi:tree-from-pfg($pfg, 'document', ())
-                    , '0c extracting tree: ')
+                    &STAT;, '0c extracting tree: ')&TATS;
 		    
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
@@ -6423,9 +6578,9 @@ a call to extract the tree.
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() has result') 
 
-        let $pfg := prof:time(
+        let $pfg := &STAT;prof:time(&TATS;
                     epi:parse-forest-grammar($leiCompletions, $meiClosure, $I)
-                    , '0b making pfg: ')
+                    &STAT;, '0b making pfg: ')&TATS;
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a parse-forest grammart') 
         return $pfg
@@ -7488,10 +7643,19 @@ declare function epi:contentXpt(
 
 </body>
 <back>
+
 <div id="references">
 <head>References</head>
 <p><hi>Incomplete.</hi></p>
 <listBibl>
+
+<bibl id="ABK1993" n="Br&uuml;ggemann-Klein 1993">
+<author>Anne Br&uuml;ggemann-Klein</author>,
+<title level="a">Regular expressions into finite automata,</title>
+<title level="j">Theoretical Computer Science</title>
+120.2 (1993): 197-213.
+</bibl>
+
 <bibl id="GJ" n="Grune / Jacobs 2007">
 <author>Dick Grune and Ceriel J. H. Jacobs</author>,
 <title level="m">Parsing techniques:  a practical guide</title>
@@ -7593,21 +7757,26 @@ improve performance and robustness.</p>
 <item>
 <p><label>Vendor neutrality</label>.  Take time to make frameworks to
 run in multiple XQuery engines, both from whatever GUI interface they
-provide and from the command line.  Initial targets:  BaseX, Saxon, eXist-db.
+provide and from the command line.  Initial targets:  BaseX, Saxon, eXist-db,
+Xidel.
 <!-- To do, if feasible:
 <list>
 <item>BaseX from BaseXGUI (done) and command line (I think this has worked in the past)</item>
 <item>Saxon EE from Oxygen GUI (has worked in past, need to check again),
 Saxon HE from Oxygen GUI and command line</item>
-<item>eXist-db from GUI and from command line</item>
+<item>(installed) eXist-db from GUI and from command line</item>
 <item>MarkLogic from GUI and from command line</item>
 <item>FusionDB from GUI and from command line</item>
-<item>BerkeleyDB from command line (do they have a GUI?)</item>
+<item>(nogo) BerkeleyDB from command line (do they have a GUI?) 
+(installed, no map support)</item>
 <item>Zorba?</item>
 <item>xqib?</item>
 </list>
 -->
 </p>
+<p>XQilla and BerkeleyDB XML support XQuery 1.0, and possibly
+3.0, but not 3.1, which means they have no support for maps,
+which means they are not candidates for this work.</p>
 <p>Not an atomic task; time-consuming steps should be broken up to
 avoid blocking other work.</p>
 <!-- The positioning of this item is contingent.
@@ -7866,6 +8035,9 @@ recursive descent.</p>
 . pre-calculate predictions for any nonterminal
 . gather statistics on frequency of all basic operations:  item creation,
   item tests, item searches
+. conjecture:  inlining hidden nonterminals will reduce the number of items
+  and speed things up, independent of tokenization.  (test on 19 Mar 22
+  gave a 4x speedup on ixml.ixml)
 -->
 
 </item>
@@ -8273,6 +8445,7 @@ at the beginnings of the individual modules.</p>
 </p>
 </div>
 </div>
+
 <div id="obsolete">
 <head>Older versions of some code</head>
 <p>Some portions of v0.2 have been made obsolete.
@@ -8395,9 +8568,9 @@ declare function epi:earley-parse(
   ) as item()* 
 ) as item()* {
   let $dummy := eri:notrace((), 'epi:earley-parse() ...') 
-  let $mapResult := prof:time(
+  let $mapResult := &STAT;prof:time(&TATS;
                     er:recognizeX($I, $G), 
-                    '0a recognize(): '),
+                    &STAT;'0a recognize(): '),&TATS;
 
       $meiClosure := $mapResult('Closure'),
       $leiCompletions := $mapResult('Completions')
@@ -8405,9 +8578,9 @@ declare function epi:earley-parse(
     then (: if we have a result, return each parse tree :)
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() has result') 
-        let $lpt := prof:time(
+        let $lpt := &STAT;prof:time(&TATS;
                     $f($leiCompletions, $meiClosure, $I (: , $G :) )
-                    , '0b making trees: ')
+                    &STAT;, '0b making trees: ')&TATS;
         for $pt at $npt in $lpt
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
@@ -8459,6 +8632,105 @@ declare function epi:earley-parse(
 };
 </scrap>
 </p>
+</div>
+
+<div id="obs-ll-sym">
+<head>Code for older versions of the ixml specification grammars</head>
+<p>The ixml specification grammar and its XML representation have
+changed somewhat over time.  At various times, Aparecium has tried
+to support multiple versions of the grammar.  Those efforts are now, I
+hope, of no further interest.  In case I need them, however, I have
+moved them here.</p>
+
+<div id="obs-ll-sym-gl-regex">
+<head>2013 code for terminal symbols in the Gluschkov automaton</head>
+<p>In the 2013 grammar supported by Aparecium 0.1, the elements
+<gi>quoted</gi>, <gi>charset</gi>, and several others were always
+assumed wrapped in a <gi>terminal</gi> element.  They thus occur below
+the level of the basic symbol and need no decorations.  We need to
+handle them, since when the function is called on their parent
+element, it will recursively be called on them, too.  But they can and
+should be returned without change. 
+<scrap id="gl-ME-identity-2013"
+       name="Handle leaf nodes (v0.1)">
+if ($E/(self::quoted
+      or self::charset or self::exclude
+      or self::range
+      or self::schar or self::dchar))
+then 
+      $E</scrap>
+</p>
+<p><hi>Old version of handling for terminal elements in the construction
+of the Gluschkov automaton.</hi> In 2013, all terminals
+were <gi>terminal</gi> elements. 
+<scrap id="gl-ME-terminals-2013"
+       name="Handle terminal nodes (v0.1)">
+if ($E/self::terminal)
+then let $id := '_t_' || (1 + count($E/preceding::terminal))
+     return element terminal {
+       $E/(@* except (@xml:id, 
+                     @nullable, 
+                     @first, 
+                     @last, 
+                     @follow:*)),
+       attribute xml:id { $id },
+       attribute nullable { false() },
+       attribute first { $id },
+       attribute last { $id },
+       attribute {QName($gl:follow-ns, "follow:" || $id)} { },
+       $children
+}</scrap></p>
+
+<p><hi>Old code for regexes in Gluschkov module.</hi></p>
+<p>For ranges, the calculation of the correct regular expression
+is straightforward in the simple case:  put a hyphen
+between the values of the <att>from</att> and
+<att>to</att> attributes, and wrap the entire thing
+in square brackets.  But while those attributes
+will usually contain single characters, they can
+contain doubled quotation marks or hexadecimal strings
+preceded by '#'.  It would be tempting to inline this,
+but it's just complicated enough that I am going to write
+a utility function to do it.
+<scrap id="gl-read-one-ixml-char"
+       name="Define gl:read-one-char-spec()">
+declare function gl:read-one-char-spec(
+  $s as xs:string
+) as xs:string {
+  if (string-length($s) eq 1)
+  then string($s)
+  else if ($s eq '""') 
+  then '"' 
+  else if ($s eq "''") 
+  then "'"
+  else if (starts-with($s,'#'))
+  then codepoints-to-string(d2x:x2d(substring($s, 2)))
+  else ""
+};
+</scrap>
+</p>
+
+
+<p>Armed with that little function, we can easily
+specify the regex for a range.
+<scrap id="gl-ME-identity"
+       name="Handle leaf nodes">
+if ($E/self::range)
+then 
+   element { name($E) } {
+      $E/@*, 
+      attribute regex {
+         '['
+         || gl:read-one-char-spec(string($E/@from))
+	 || '-'
+         || gl:read-one-char-spec(string($E/@to))
+	 || ']'	 
+      },
+      $E/child::node()
+   }
+</scrap>
+</p>
+</div>
 </div>
 </div>
 

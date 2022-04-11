@@ -10,6 +10,17 @@ ins { text-decoration: none; }
 del { color: gray; }
 ins { color: #8D8; }
 
+/* quick navigation experiment */
+div.quicknav {
+    float: right;
+}
+
+span.arrow {
+    display: inline-block;
+    width: 1.2em;
+}
+span.arrow > a { text-decoration: none; }
+
 /* paragraphs */
 div.p {
     margin-bottom: 1em;

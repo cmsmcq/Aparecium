@@ -1,4 +1,5 @@
 <tc:test-catalog xmlns:tc="https://github.com/cmsmcq/ixml-tests"
+                 xmlns:ixml="http://invisiblexml.org/NS"
 		 name="Miscellany"
 		 release-date="2022-02-17"
 		 >
@@ -111,6 +112,52 @@ name: namestart, namefollower* .
     
       <tc:result>
 	<tc:assert-not-a-sentence/>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+
+  <tc:test-set name="Kings-01">
+    <tc:created on="2022-03-17" by="CMSMcQ"/>
+    <tc:description>
+      <tc:p>Illustrates the point that the class of unused
+      nonterminals is broader than the class of unreferenced
+      nonterminals.  The ixml spec defines unreferenced nonterminals (other th)</tc:p>
+    </tc:description>
+
+    <tc:ixml-grammar>
+S: A .
+A: 'a', B ; 'x' .
+B: 'b', A ; LDOE, A .
+LDOE: M; 'l' .
+M: 'm'; LDOE .
+    </tc:ixml-grammar>
+    <tc:test-case name="t1">
+      <tc:test-string>amalx</tc:test-string>
+      <tc:result>
+	<tc:assert-xml>
+	  <S ixml:state="ambiguous"><A>a<B><LDOE><M>m</M>l</LDOE><A></A></B></A></S>
+	</tc:assert-xml>
+	<tc:assert-xml>
+	  <S ixml:state="ambiguous"
+            ><A>a<B
+	    ><LDOE
+              ><M>m</M
+            ></LDOE
+            ><A>a<B
+            ><LDOE
+              ><M
+		><LDOE
+                  ><M
+                    ><LDOE>l</LDOE
+                  ></M
+                ></LDOE
+              ></M
+            ></LDOE
+            ><A>x</A
+            ></B></A
+            ></B></A
+	  ></S>
+	</tc:assert-xml>
       </tc:result>
     </tc:test-case>
   </tc:test-set>

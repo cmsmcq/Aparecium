@@ -194,15 +194,18 @@ declare function t:run-test-set(
                       }
           
 
-          else ()
+          else () (: no new grammar:  inherited, or none :)
           ),
           $new-xml-grammar := $nxg-plus?value
           
 
       
-      let $checked-xml-grammar := prof:time(
-          ap:grammar-ok($new-xml-grammar)
-          , 'test-harness: checking XML grammar.')
+      let $checked-xml-grammar := 
+          if (exists($new-xml-grammar)) 
+          then prof:time(
+                  ap:grammar-ok($new-xml-grammar)
+               , 'test-harness: checking XML grammar.')
+          else ()
 
       
       let $grammar := if (exists($new-xml-grammar)
@@ -282,8 +285,7 @@ declare function t:run-test-set(
     then (element tc:description {
            element tc:p {
              "No workable grammar.  Skipping test",
-             "&#xA;cases and nested test sets.",
-             "&#xA;This case is not supposed to happen."
+             "&#xA;cases and nested test sets."
            }
          },
          element tc:app-info { $checked-xml-grammar }

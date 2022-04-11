@@ -90,14 +90,18 @@
  <xsl:template match='/'>
   <!--* <html><head><title>Temp</title></head><body><xmp> *-->
 
-  <xsl:element name="html">&txtnl;
-   <xsl:comment>
-    <xsl:text>Need to find a way to insert the current date</xsl:text>
-   </xsl:comment>&txtnl;
-   <xsl:element name="head">&txtnl;
+  <xsl:element name="html">
+    <xsl:text>&#xA;</xsl:text>
+    <xsl:comment>
+      <xsl:text>Need to find a way to insert the current date</xsl:text>
+    </xsl:comment>
+    <xsl:text>&#xA;</xsl:text>
+    <xsl:element name="head">
+      <xsl:text>&#xA;</xsl:text>
     <xsl:element name="title">
      <xsl:value-of select="/TEI.2/teiHeader/fileDesc/titleStmt/title[1]"/>
-    </xsl:element>&txtnl;
+    </xsl:element>
+    <xsl:text>&#xA;</xsl:text>
     <xsl:choose>
      <xsl:when test="/TEI.2/@rend='w3c-member'">
      <xsl:element name="link">
@@ -133,7 +137,8 @@
      </xsl:element>
 *-->
      </xsl:otherwise>
-    </xsl:choose>&txtnl;
+    </xsl:choose>
+    <xsl:text>&#xA;</xsl:text>
     <xsl:call-template name="main-css-styles"/>
     <xsl:call-template name="additional-html-head-elements"/>
    </xsl:element>
@@ -154,7 +159,8 @@
     <xsl:apply-templates/>
     <!--* </xsl:element> *-->
    </xsl:element>
-  </xsl:element>&txtnlnl;
+  </xsl:element>
+  <xsl:text>&#xA;&#xA;</xsl:text>
   <!--* </xmp></body></html> *-->
  </xsl:template>
 
@@ -269,6 +275,10 @@
     span.typename { 
       display: inline;
       font-family: monospace;
+    }
+    a.selflink {
+      text-decoration: none; 
+      color: initial;
     }
    </xsl:text>
    <xsl:call-template name="additional-css-styles"/>
@@ -466,7 +476,8 @@
   <xsl:if test="//div1 | //div">
    <xsl:element name="hr"/>
    <xsl:element name="a"><xsl:attribute name="name">toc</xsl:attribute>
-   </xsl:element>&txtnl;
+   </xsl:element>
+   <xsl:text>&#xA;</xsl:text>
    <xsl:if test="//div1">
     <xsl:call-template name="numbereddivtoc">
      <xsl:with-param name="depth" select="$depth"/>
@@ -490,22 +501,28 @@
   </xsl:variable>
   <xsl:choose>
    <xsl:when test="//body/div0">
-    <xsl:element name="ul">&txtnl;
-     <xsl:comment> and a 98 </xsl:comment>&txtnl;
+     <xsl:element name="ul">
+       <xsl:text>&#xA;</xsl:text>
+       <xsl:comment> and a 98 </xsl:comment>
+       <xsl:text>&#xA;</xsl:text>
      <xsl:for-each select="//body/div0">
       <xsl:call-template name="donumtocline">
        <xsl:with-param name="levels" select="$levels"/>
-      </xsl:call-template>&txtnl;
+      </xsl:call-template>
+      <xsl:text>&#xA;</xsl:text>
      </xsl:for-each>
     </xsl:element>
    </xsl:when>
    <xsl:when test="//body/div1">
-    <xsl:element name="ul">&txtnl;
-     <xsl:comment> and a 97 </xsl:comment>&txtnl;
+     <xsl:element name="ul">
+       <xsl:text>&#xA;</xsl:text>
+       <xsl:comment> and a 97 </xsl:comment>
+       <xsl:text>&#xA;</xsl:text>
      <xsl:for-each select="//body//div1">
       <xsl:call-template name="donumtocline">
        <xsl:with-param name="levels" select="$levels"/>
-      </xsl:call-template>&txtnl;
+      </xsl:call-template>
+      <xsl:text>&#xA;</xsl:text>
      </xsl:for-each>
     </xsl:element>
    </xsl:when>
@@ -513,15 +530,19 @@
     <xsl:message terminate="yes">What on earth am I doing in the numbereddivtoc template?!</xsl:message>
    </xsl:otherwise>
   </xsl:choose>
-  <xsl:if test="//back/div1 | //back/div">&txtnl;
-   <xsl:element name="ul">&txtnl;
-     <xsl:comment> and a 96 </xsl:comment>&txtnl;
+  <xsl:if test="//back/div1 | //back/div">
+    <xsl:text>&#xA;</xsl:text>
+    <xsl:element name="ul">
+      <xsl:text>&#xA;</xsl:text>
+      <xsl:comment> and a 96 </xsl:comment>
+      <xsl:text>&#xA;</xsl:text>
     <xsl:for-each select="//back//div1">
      <!--* <xsl:message>Hi, dad.</xsl:message> *-->
      <xsl:call-template name="donumtocline">
       <xsl:with-param name="levels" select="$levels"/>
       <xsl:with-param name="numstyle">A.</xsl:with-param>
-     </xsl:call-template>&txtnl;
+     </xsl:call-template>
+     <xsl:text>&#xA;</xsl:text>
     </xsl:for-each>
    </xsl:element>
   </xsl:if>
@@ -547,9 +568,12 @@
     <xsl:apply-templates select="head" mode="toc"/>
    </xsl:element>
    <xsl:if test="(not($levels = 0)) and ((./div1) or (./div2) or (./div3))">
-    <xsl:element name="ul">&txtnl;
-     <xsl:comment> and a 95 </xsl:comment>&txtnl;
-     <xsl:for-each select="(./div1) | (./div2) | (./div3)">&txtnl;
+     <xsl:element name="ul">
+       <xsl:text>&#xA;</xsl:text>
+       <xsl:comment> and a 95 </xsl:comment>
+       <xsl:text>&#xA;</xsl:text>
+       <xsl:for-each select="(./div1) | (./div2) | (./div3)">
+	 <xsl:text>&#xA;</xsl:text>
       <xsl:call-template name="donumtocline">
        <xsl:with-param name="numstyle">
 	<xsl:value-of select="$numstyle"/>
@@ -565,12 +589,13 @@
     </xsl:element>
    </xsl:if>
   </xsl:element>
-  &txtnl;
+  <xsl:text>&#xA;</xsl:text>
  </xsl:template>
 
  <xsl:template name="vanilladivtoc">
   <xsl:element name="ul">
-   <xsl:comment> and a 1! </xsl:comment>&txtnl;
+    <xsl:comment> and a 1! </xsl:comment>
+    <xsl:text>&#xA;</xsl:text>
    <xsl:for-each select="//body/div">
     <xsl:element name="li">
      <xsl:number level="single" format="1. "/>
@@ -579,8 +604,10 @@
       <xsl:apply-templates select="head" mode="toc"/>
      </xsl:element>
      <xsl:if test="./div">
-      <xsl:element name="ul">&txtnl;
-       <xsl:comment> and a 2! </xsl:comment>&txtnl;
+       <xsl:element name="ul">
+	 <xsl:text>&#xA;</xsl:text>
+	 <xsl:comment> and a 2! </xsl:comment>
+	 <xsl:text>&#xA;</xsl:text>
        <xsl:for-each select="./div">
 	<xsl:element name="li">
 	 <xsl:number level="multiple" count="div" format="1.1. "/>
@@ -590,7 +617,8 @@
 	 </xsl:element>
 	 <xsl:if test="./div">
 	  <xsl:element name="ul">
-	   <xsl:comment> and a 3! </xsl:comment>&txtnl;
+	    <xsl:comment> and a 3! </xsl:comment>
+	    <xsl:text>&#xA;</xsl:text>
 	   <xsl:for-each select="./div">
 	    <xsl:element name="li">
 	     <xsl:number level="multiple" count="div" format="1.1. "/>
@@ -602,7 +630,8 @@
 	   </xsl:for-each>
 	  </xsl:element>
 	 </xsl:if>
-	</xsl:element>&txtnl;
+	</xsl:element>
+	<xsl:text>&#xA;</xsl:text>
        </xsl:for-each>
       </xsl:element>
      </xsl:if>
@@ -625,15 +654,19 @@
     <xsl:call-template name="make-href-to-current"/>
     <xsl:apply-templates select="head" mode="toc"/>
    </xsl:element>
-  </xsl:element>&txtnl;
+  </xsl:element>
+  <xsl:text>&#xA;</xsl:text>
  </xsl:template>
 
  <xsl:template name="oldnumbereddivtoc">
-  <xsl:element name="a"><xsl:attribute name="name">toc</xsl:attribute>
+   <xsl:element name="a">
+     <xsl:attribute name="name">toc</xsl:attribute>
   </xsl:element>
   <xsl:element name="hr"/>
-  <xsl:element name="ul">&txtnl;
-     <xsl:comment> and a 95 </xsl:comment>&txtnl;
+  <xsl:element name="ul">
+    <xsl:text>&#xA;</xsl:text>
+    <xsl:comment> and a 95 </xsl:comment>
+    <xsl:text>&#xA;</xsl:text>
    <xsl:for-each select="//body//div1">
     <xsl:call-template name="donumtocline">
      <xsl:with-param name="numstyle">1. </xsl:with-param>
@@ -648,8 +681,10 @@
       <xsl:apply-templates select="head" mode="toc"/>
      </xsl:element>
      <xsl:if test="./div2">
-      <xsl:element name="ul">&txtnl;
-     <xsl:comment> and a 94 </xsl:comment>&txtnl;
+       <xsl:element name="ul">
+	 <xsl:text>&#xA;</xsl:text>
+	 <xsl:comment> and a 94 </xsl:comment>
+	 <xsl:text>&#xA;</xsl:text>
        <xsl:for-each select="./div2">
 	<xsl:element name="li">
 	 <xsl:number level="multiple" count="div1|div2" format="1.1. "/>
@@ -658,8 +693,10 @@
 	  <xsl:apply-templates select="head" mode="toc"/>
 	 </xsl:element>
 	 <xsl:if test="./div3">
-	  <xsl:element name="ul">&txtnl;
-     <xsl:comment> and a 93 </xsl:comment>&txtnl;
+	   <xsl:element name="ul">
+	     <xsl:text>&#xA;</xsl:text>
+	     <xsl:comment> and a 93 </xsl:comment>
+	     <xsl:text>&#xA;</xsl:text>
 	   <xsl:for-each select="./div3">
 	    <xsl:element name="li">
 	     <xsl:number level="multiple" 
@@ -669,20 +706,26 @@
 	      <xsl:call-template name="make-href-to-current"/>
 	      <xsl:apply-templates select="head" mode="toc"/>
 	     </xsl:element>
-	    </xsl:element>&txtnl;
+	    </xsl:element>
+	    <xsl:text>&#xA;</xsl:text>
 	   </xsl:for-each>
 	  </xsl:element>
 	 </xsl:if>
-	</xsl:element>&txtnl;
+	</xsl:element>
+	<xsl:text>&#xA;</xsl:text>
        </xsl:for-each>
       </xsl:element>
      </xsl:if>
-    </xsl:element>&txtnl;
+    </xsl:element>
+    <xsl:text>&#xA;</xsl:text>
    </xsl:for-each>
   </xsl:element>
-  <xsl:if test="//back/div1">&txtnl;
-   <xsl:element name="ul">&txtnl;
-    <xsl:comment> and a 99! </xsl:comment>&txtnl;
+  <xsl:if test="//back/div1">
+    <xsl:text>&#xA;</xsl:text>
+    <xsl:element name="ul">
+      <xsl:text>&#xA;</xsl:text>
+      <xsl:comment> and a 99! </xsl:comment>
+      <xsl:text>&#xA;</xsl:text>
     <xsl:for-each select="//back//div1">
      <xsl:element name="li">
       <xsl:number level="single" format="A. "/>
@@ -690,7 +733,8 @@
        <xsl:call-template name="make-href-to-current"/>
        <xsl:apply-templates select="head" mode="toc"/>
       </xsl:element>
-       </xsl:element>&txtnl;
+     </xsl:element>
+     <xsl:text>&#xA;</xsl:text>
     </xsl:for-each>
    </xsl:element>
   </xsl:if>
@@ -716,7 +760,9 @@
    <xsl:apply-templates/>
   </xsl:element>
  </xsl:template>
- <xsl:template match="doctitle|docTitle"><xsl:apply-templates/></xsl:template>
+ <xsl:template match="doctitle|docTitle">
+   <xsl:apply-templates/>
+ </xsl:template>
  <xsl:template match="doctitle/titlepart|docTitle/titlePart">
   <xsl:element name="h1">
    <xsl:apply-templates/>
@@ -798,7 +844,8 @@
   </xsl:element>
  </xsl:template>
  <xsl:template match="addrline|addrLine">
-  <xsl:apply-templates/><xsl:element name="br"/>
+   <xsl:apply-templates/>
+   <xsl:element name="br"/>
  </xsl:template>
 
  <!--* Back matter *-->
@@ -846,7 +893,9 @@
  </xsl:template>
 
  <xsl:template match="bibl/gap | title/gap">
-  [<xsl:element name="i"><xsl:value-of select="@desc"/></xsl:element>]
+   [<xsl:element name="i">
+   <xsl:value-of select="@desc"/>
+   </xsl:element>]
  </xsl:template>
 
  <xsl:template match="bibl"><xsl:apply-templates/></xsl:template>
@@ -903,10 +952,10 @@
  </xsl:template>
 
  <xsl:template match="div0|div1|div2|div3|div4|div5|div6|div7|div">
-   &txtnl;
+   <xsl:text>&#xA;</xsl:text>
   <xsl:element name="div">
    <xsl:attribute name="class">div</xsl:attribute>
-    &txtnl;
+    <xsl:text>&#xA;</xsl:text>
    <xsl:apply-templates/>
   </xsl:element>
  </xsl:template>
@@ -917,7 +966,9 @@
     <xsl:attribute name="class">comment</xsl:attribute>
    </xsl:if>
    <xsl:element name="a">
+    <xsl:attribute name="class">selflink</xsl:attribute>
     <xsl:call-template name="make-name-.."/>
+    <xsl:for-each select=".."><xsl:call-template name="make-href-to-current"/></xsl:for-each>
     <xsl:if test="not(preceding-sibling::head)">
      <xsl:if test="ancestor::div0">
       <xsl:number level="single" count="div0" format="I."/>
@@ -944,7 +995,9 @@
   <xsl:element name="h2">
    <xsl:number level="single" count="div0" format="I. "/>
    <xsl:element name="a">
+    <xsl:attribute name="class">selflink</xsl:attribute>
     <xsl:call-template name="make-name-.."/>
+    <xsl:for-each select=".."><xsl:call-template name="make-href-to-current"/></xsl:for-each>
     <xsl:if test="not(preceding-sibling::head)">
      <xsl:number level="single" count="div1|div" format="I "/>
     </xsl:if>
@@ -959,7 +1012,9 @@
     <xsl:attribute name="class">comment</xsl:attribute>
    </xsl:if>
    <xsl:element name="a">
+    <xsl:attribute name="class">selflink</xsl:attribute>
     <xsl:call-template name="make-name-.."/>
+    <xsl:for-each select=".."><xsl:call-template name="make-href-to-current"/></xsl:for-each>
     <xsl:if test="ancestor::body and not(preceding-sibling::head)">
      <xsl:number level="multiple" count="div1|div2|div" format="1. "/>
     </xsl:if>
@@ -975,7 +1030,9 @@
     <xsl:attribute name="class">comment</xsl:attribute>
    </xsl:if>
    <xsl:element name="a">
+    <xsl:attribute name="class">selflink</xsl:attribute>
     <xsl:call-template name="make-name-.."/>
+    <xsl:for-each select=".."><xsl:call-template name="make-href-to-current"/></xsl:for-each>
     <xsl:if test="ancestor::body">
      <xsl:number level="multiple" count="div1|div2|div3|div" format="1. "/>
     </xsl:if>
@@ -990,7 +1047,9 @@
     <xsl:attribute name="class">comment</xsl:attribute>
    </xsl:if>
    <xsl:element name="a">
+    <xsl:attribute name="class">selflink</xsl:attribute>
     <xsl:call-template name="make-name-.."/>
+    <xsl:for-each select=".."><xsl:call-template name="make-href-to-current"/></xsl:for-each>
     <xsl:if test="ancestor::body">
      <xsl:number level="multiple" count="div1|div2|div3|div4|div" format="1. "/>
     </xsl:if>
@@ -1005,7 +1064,9 @@
     <xsl:attribute name="class">comment</xsl:attribute>
    </xsl:if>
    <xsl:element name="a">
+    <xsl:attribute name="class">selflink</xsl:attribute>
     <xsl:call-template name="make-name-.."/>
+    <xsl:for-each select=".."><xsl:call-template name="make-href-to-current"/></xsl:for-each>
     <xsl:if test="ancestor::body">
      <xsl:number level="multiple" count="div1|div2|div3|div4|div5|div" format="1. "/>
     </xsl:if>
@@ -1020,7 +1081,9 @@
     <xsl:attribute name="class">comment</xsl:attribute>
    </xsl:if>
    <xsl:element name="a">
+    <xsl:attribute name="class">selflink</xsl:attribute>
     <xsl:call-template name="make-name-.."/>
+    <xsl:for-each select=".."><xsl:call-template name="make-href-to-current"/></xsl:for-each>
     <xsl:if test="ancestor::body">
      <xsl:number 
 		 level="multiple" 
@@ -1174,21 +1237,21 @@
   <xsl:element name="table">
    <xsl:attribute name="border">0</xsl:attribute>
    <xsl:attribute name="width">100%</xsl:attribute>
-    &txtnl;
+    <xsl:text>&#xA;</xsl:text>
    <xsl:element name="col">
     <xsl:attribute name="width">8%</xsl:attribute>
     <xsl:attribute name="valign">top</xsl:attribute>
    </xsl:element>
-    &txtnl;
+    <xsl:text>&#xA;</xsl:text>
    <xsl:element name="col">
     <xsl:attribute name="width">92%</xsl:attribute>
     <xsl:attribute name="valign">top</xsl:attribute>
    </xsl:element>
-    &txtnl;
+    <xsl:text>&#xA;</xsl:text>
    <xsl:element name="tbody">
     <xsl:apply-templates/>
    </xsl:element>
-    &txtnl;
+    <xsl:text>&#xA;</xsl:text>
   </xsl:element>
  </xsl:template>
  <xsl:template match="table/head">
@@ -1777,13 +1840,15 @@
  <xsl:template match="list[@type='gloss']/item">
   <xsl:element name="dd">
    <xsl:apply-templates/>
-  </xsl:element>&txtnl;
+  </xsl:element>
+  <xsl:text>&#xA;</xsl:text>
  </xsl:template>
  <xsl:template match="list[@type='gloss']/label">
   <xsl:element name="dt">
 <xsl:attribute name="style">font-weight: bold;</xsl:attribute>
    <xsl:apply-templates/>
-  </xsl:element>&txtnl;
+  </xsl:element>
+  <xsl:text>&#xA;</xsl:text>
  </xsl:template>
 
  <!--* Phrase-level elements *-->
@@ -1825,7 +1890,7 @@
  <xsl:template match="title[@level='a' or @level='u']" priority="1">
   <xsl:text>&ldquo;</xsl:text
    ><xsl:apply-templates
-			 /><xsl:text>&rdquo;</xsl:text>
+   /><xsl:text>&rdquo;</xsl:text>
  </xsl:template>
 
  <xsl:template match="gloss">

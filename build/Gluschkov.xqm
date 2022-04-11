@@ -5,12 +5,16 @@ module namespace gl =
 
 (: GPL ...:) 
 
-declare namespace follow =
-"http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
-
 import module namespace d2x =
 'http://blackmesatech.com/2019/iXML/d2x'
 at "d2x.xqm";
+
+import module namespace eri =
+"http://blackmesatech.com/2019/iXML/Earley-rec-internals"
+at "Earley-rec-internals.xqm";
+
+declare namespace follow =
+"http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
 
 declare variable $gl:follow-ns :=
 "http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
@@ -23,25 +27,8 @@ declare function gl:ME (
                           then gl:ME($c)
                           else $c,
       $ch := $children[self::element()]
-  return if ($E/self::range)
-then 
-   element { name($E) } {
-      $E/@*, 
-      attribute regex {
-         '['
-         || gl:read-one-char-spec(string($E/@from))
-	 || '-'
-         || gl:read-one-char-spec(string($E/@to))
-	 || ']'	 
-      },
-      $E/child::node()
-   }
-else if ($E/self::class)
-then 
-   element { name($E) } {
-      $E/@*, 
-      attribute regex { '\p{' || $E/@code || '}'}
-   }
+  return if ($E/self::range) then $E
+else if ($E/self::class) then $E
 
   else if ($E/self::inclusion or $E/self::exclusion
     or $E/self::literal)
@@ -51,14 +38,7 @@ then
                     [self::inclusion 
                     or self::exclusion
 		    or self::literal])), 
-          $re := 'dummy' (:if ($E/self::inclusion) 
-                 then gl:inclusion-regex($E) 
-                 else if ($E/self::exclusion)
-                 then gl:exclusion-regex($E) 
-                 else if ($E/self::literal)
-		 then gl:literal-regex($E)
-		 else '[! error in gl:ME !]'
-		 :)
+          $re := eri:reXTerminal($E)
       return element {name($E)} {
          $E/(@* except (@xml:id, 
                      @nullable, 
@@ -74,6 +54,7 @@ then
 	 attribute regex { $re },
          $children
       }
+
   else if ($E/self::nonterminal)
 then
      let $id := $E/@name || '_'
@@ -378,19 +359,6 @@ declare function gl:merge(
   string-join(distinct-values($ids),' ')
 };
 
-declare function gl:read-one-char-spec(
-  $s as xs:string
-) as xs:string {
-  if (string-length($s) eq 1)
-  then string($s)
-  else if ($s eq '""') 
-  then '"' 
-  else if ($s eq "''") 
-  then "'"
-  else if (starts-with($s,'#'))
-  then codepoints-to-string(d2x:x2d(substring($s, 2)))
-  else ""
-};
 
 (: ......................................................
    trace($i, $s):  a utility function to help make code 

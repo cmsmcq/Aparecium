@@ -739,7 +739,9 @@ declare function ixi:reXTerminal(
 		             || "-" || ixi:sceXS($e/@to)
 
                         else if ($e/self::literal) 
-                        then ixi:sceXS($e/ixi:string-value($e)) 
+                        then 
+                             ixi:sceXS($e/ixi:string-value($e)) 
+
                         else if ($e/self::class)
                         then ixi:catescXS($e/@code) 
                         else () (: error :)

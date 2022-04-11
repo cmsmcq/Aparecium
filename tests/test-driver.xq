@@ -15,6 +15,7 @@ let $catalog-index := 'bogons' (: which catalog to run? short name :)
 let $invdir := "../../ixml/tests/",
     $apadir := "../../Aparecium/tests/",
     $ixtdir := "../../ixml-tests/tests-straw/",
+    $itwdir := "../../ixml-tests/tests-wood/",
     $outdir := resolve-uri($apadir || 'results-' 
                || $catalog-index 
                || '-'
@@ -26,16 +27,20 @@ let $invdir := "../../ixml/tests/",
     $catalog-of-catalogs := <test-catalogs>
 
       <!-- local catalogs, mostly simple -->
-      <!-- under 60 seconds (2.1, 4.8, 20.1, 78.1) -->
+      <!-- under 60 seconds (2.1, 4.8, 20.1, 12.4) -->
       <catalog n="test0" path="{$apadir}test0.xml"/>
       <catalog n="test1" path="{$apadir}test1.xml"/>
       <catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/>
-      <catalog n="misc" path="{$apadir}misc-tests.xml"/>
+      <catalog n="hygiene" path="{$itwdir}ixml-20220222/hygiene-tests.xml"/>
 
-      <!-- under 10 minutes (153) -->
+      <!-- under 10 minutes -->
+      <!-- 78.1s -->
+      <catalog n="misc" path="{$apadir}misc-tests.xml"/>
       <!-- embeds all the gxxx catalogs so they can be done in a single run -->
+      <!-- 153s -->
       <catalog n="gxxx"
 	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/>
+      <catalog n="bogons" path="{$apadir}bogons-20220310.xml"/><!-- 439 s -->
 
       <!-- under 1 hour () -->
       <!-- under 2 hours () -->
@@ -50,7 +55,6 @@ let $invdir := "../../ixml/tests/",
       <!-- to be timed -->
 
       <catalog n="test2" path="{$apadir}test2.xml"/><!-- nnn s -->
-      <catalog n="bogons" path="{$apadir}bogons-20220310.xml"/><!-- nnn s -->
 
       <!-- syntax error tests in ixml repo -->
       <catalog n="syntax-cagt"
