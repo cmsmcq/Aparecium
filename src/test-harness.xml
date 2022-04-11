@@ -15,6 +15,7 @@
 
       For now, do this manually.  I don't know how to
       make Aquamacs do it using eval-last-sexp or eval-expression.
+      (set-variable 'nxml-child-indent 0)
     *-->
 ]>
 <TEI.2>
@@ -319,6 +320,7 @@ indexing into the list.  It's easy to change the index.
       &lt;!-- 153s -->
       &lt;catalog n="gxxx"
 	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/>
+      &lt;catalog n="bogons" path="{$apadir}bogons-20220310.xml"/>&lt;!-- 439 s -->
 
       &lt;!-- under 1 hour () -->
       &lt;!-- under 2 hours () -->
@@ -333,7 +335,6 @@ indexing into the list.  It's easy to change the index.
       &lt;!-- to be timed -->
 
       &lt;catalog n="test2" path="{$apadir}test2.xml"/>&lt;!-- nnn s -->
-      &lt;catalog n="bogons" path="{$apadir}bogons-20220310.xml"/>&lt;!-- nnn s -->
 
       &lt;!-- syntax error tests in ixml repo -->
       &lt;catalog n="syntax-cagt"
@@ -701,11 +702,14 @@ function to handle them.
 <div id="grammar-load">
 <head>Loading the grammar</head>
 
-<p>A grammar may be given inline or externally, in ixml or in XML.
-The initial steps to be taken vary among the four cases, but once the
-grammar is in XML the steps are the same for all.  So we begin by
-getting the grammar into XML and into memory, with a four-way branch
-on the nature of the grammar specification.
+<p>A grammar may be given inline or externally, in ixml or in XML
+&mdash; or not at all in the case of a test set which merely groups
+other test sets.
+The initial steps to be taken vary among the five cases, but once the
+grammar is in XML the steps are the same for all except the last.  So
+we begin by getting the grammar into XML and into memory, if there is
+a grammar, with a five-way branch on the nature of the grammar
+specification.
 The locally specified grammar unconditionally overrides any grammar
 passed in as an argument, and we keep life simple by using the same
 name for it.</p>
@@ -736,7 +740,7 @@ straightforward:
           then <ptr target="lib-rts-ld-ixml-ref"/> 
           else if ($test-set/tc:vxml-grammar-ref)
           then <ptr target="lib-rts-ld-vxml-ref"/>
-          else ()
+          else () (: no new grammar:  inherited, or none :)
 </scrap></p>
 <p>In version 2 of the test harness, we ask BaseX to keep track
 of the time taken, so we can record that in the test report.
@@ -752,7 +756,7 @@ of the time taken, so we can record that in the test report.
           then <ptr target="lib-rts-ld-ixml-ref"/> 
           else if ($test-set/tc:vxml-grammar-ref)
           then <ptr target="lib-rts-ld-vxml-ref"/>
-          else ()
+          else () (: no new grammar:  inherited, or none :)
           ),
           $new-xml-grammar := $nxg-plus?value
           
@@ -790,6 +794,7 @@ import module namespace ap =
 "http://blackmesatech.com/2019/iXML/Aparecium"
 at "Aparecium.xqm";
 </scrap></p>
+
 <p>The second case is the inline vxml case.  Here the grammar is
 already in XML, so we just assign it.
 <scrap id="lib-rts-ld-vxml"
@@ -858,19 +863,21 @@ covered here.
                       }
           
 </scrap></p>
+
 <p>Once we have the new XML grammar, we need to check it for
-conformance.  Aparecium currently lacks any function to do this, so
-for the moment this is basically a nop.  <emph>Aparecium needs to do a
-much better job making the compilation of grammars reliable and
-robust.  It's tempting to start checking grammars for problems here,
-but that work belongs in Aparecium itself, so we do not do it
-here.</emph>
+conformance.  Aparecium provides the <ident>ap:grammar-ok()</ident>
+function to do this, and the test harness should not do any better
+than Aparecium itself in checking the grammar, so we just call that
+function, if we have a new grammar.
 <scrap id="lib-rts-vxml-grammar-check"
        name="Set $checked-xml-grammar">
 
-      let $checked-xml-grammar := prof:time(
-          ap:grammar-ok($new-xml-grammar)
-          , 'test-harness: checking XML grammar.')
+      let $checked-xml-grammar := 
+          if (exists($new-xml-grammar)) 
+          then prof:time(
+                  ap:grammar-ok($new-xml-grammar)
+               , 'test-harness: checking XML grammar.')
+          else ()
 </scrap>
 The older version, for reference:
 <scrap corresp="lib-rts-vxml-grammar-check"
@@ -986,7 +993,7 @@ finds a conformance error in the grammar.</p></note>
     then (element tc:description {
            element tc:p {
              "No workable grammar.  Skipping test",
-             "&amp;#xA;cases and nested test sets.",
+             "&amp;#xA;cases and nested test sets."
            }
          },
          element tc:app-info { $checked-xml-grammar }
