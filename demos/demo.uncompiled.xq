@@ -9,8 +9,8 @@ let $demo := <demo>
   using the given grammar. Edit the grammar and test input and re-evaluate
   to see the effects of your changes.</p>
   <options show-parsed-grammar="no"/>
-  <grammar>ceci n'est pas une grammaire</grammar>
-  <test-input>The conference starts Thursday, 9th Feb 2017 at 10:00.</test-input>
+  <grammar>n = ds, ds. ds=d, more. d = ['0'-'9']. more = {}; d, more.</grammar>
+  <test-input>123.</test-input>
 </demo>
 
 return <results>{

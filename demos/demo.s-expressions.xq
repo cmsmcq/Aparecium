@@ -14,7 +14,7 @@ let $demo := <demo>
   list = -'(', item*s, -')'.
   -s = -' '+.
   </grammar>
-  <test-input>42</test-input>
+  <test-input>4222</test-input>
   <test-input>(1 3 5 (7 9 11) 13)</test-input>
 </demo>
 
