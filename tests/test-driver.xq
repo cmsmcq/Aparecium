@@ -32,6 +32,9 @@ let $invdir := "../../ixml/tests/",
     $catalog-of-catalogs := <test-catalogs>
 
       <!-- local catalogs, mostly simple -->
+
+      <catalog n="expr1" path="{$apadir}expr1-20220415.xml"/><!-- ??? s -->
+    
       <!-- under 60 seconds (2.1, 4.8, 20.1, 12.4) -->
       <catalog n="test0" path="{$apadir}test0.xml"/><!-- 2 s -->
       <catalog n="test1" path="{$apadir}test1.xml"/><!-- 5 s -->

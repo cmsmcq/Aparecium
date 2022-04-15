@@ -524,6 +524,8 @@ declare function t:run-test-case(
             then $e
             else if ($e/self::tc:assert-not-a-grammar)
             then $e
+            else if ($e/self::tc:assert-dynamic-error)
+            then $e
             else if ($e/self::tc:assert-xml)
             then $e/*
             else if ($e/self::tc:assert-xml-ref)
@@ -618,6 +620,11 @@ declare function t:run-test-case(
         else if ($parse-tree/self::no-parse
                  and $expectations
                  /self::tc:assert-not-a-sentence)
+        then "pass"
+        else if (($parse-tree/self::no-parse
+                 or $parse-tree/self::ap:error)
+                 and $expectations
+                 /self::tc:assert-dynamic-error)
         then "pass"
         else if ($parse-tree/self::no-parse
                  and $expectations

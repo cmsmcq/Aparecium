@@ -676,14 +676,27 @@ declare function epi:tree-from-pfg(
                         $pfg/rule[1]/alt/nonterminal,
                         'element',
                         ()
-                    )
+                    ),
+          $tree1 := if (exists($tree0
+                       /descendant-or-self::ap:error))
+                    then element ap:error {
+                           attribute ixml:state { "failed" },
+                           attribute id { "ap:tbd19" },
+                           attribute ap:desc { "ill-formed output" },
+                           $tree0
+                         }
+                    else $tree0
       return if (not($f-ambig))
-      then $tree0
-      else element { name($tree0) } {
-        attribute ixml:state { "ambiguous" },
-        $tree0/attribute::*,
-        $tree0/child::node()
-      }
+             then $tree1
+             else element { name($tree1) } {
+                     attribute ixml:state { 
+                        "ambiguous" ,
+                        $tree1/@ixml:state
+                     },
+                     ($tree1/attribute::* 
+                       except $tree1/@ixml:state),
+                     $tree1/child::node()
+                  }
 
   else if ($pfg/self::rule)
   then 
@@ -757,12 +770,19 @@ else error(QName(
                                  'attribute',
                                  ()
                       )
+let $dummy := trace(count($lnAtts), 'Gathering attributes, found #: ')
+let $dummy := trace($lnAtts, 'Gathering attributes, found these: ')
                    let $lnAok := 
                        $lnAtts
                        [every $i in 1 to (position() - 1)
                         satisfies
                         $lnAtts[$i]/name() ne ./name()]
-	           let $lnAdups := $lnAtts[not(. = $lnAok)]
+let $dummy := trace(count($lnAok), 'Of these some are OK: ')
+	           let $lnAdups := $lnAtts
+                       [some $i in 1 to (position() - 1)
+                        satisfies
+                        $lnAtts[$i]/name() eq ./name()]
+let $dummy := trace(count($lnAdups), 'Of these some are dups: ')
                    return ($lnAok,
 		       for $n in $lnAdups
                        return element ap:error {

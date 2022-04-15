@@ -4467,14 +4467,27 @@ than one tree, we should mark the tree we return with
                         $pfg/rule[1]/alt/nonterminal,
                         'element',
                         ()
-                    )
+                    ),
+          $tree1 := if (exists($tree0
+                       /descendant-or-self::ap:error))
+                    then element ap:error {
+                           attribute ixml:state { "failed" },
+                           attribute id { "ap:tbd19" },
+                           attribute ap:desc { "ill-formed output" },
+                           $tree0
+                         }
+                    else $tree0
       return if (not($f-ambig))
-      then $tree0
-      else element { name($tree0) } {
-        attribute ixml:state { "ambiguous" },
-        $tree0/attribute::*,
-        $tree0/child::node()
-      }
+             then $tree1
+             else element { name($tree1) } {
+                     attribute ixml:state { 
+                        "ambiguous" ,
+                        $tree1/@ixml:state
+                     },
+                     ($tree1/attribute::* 
+                       except $tree1/@ixml:state),
+                     $tree1/child::node()
+                  }
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#epi-tree-from-pfg">The epi:tree-from-pfg() function 87</a>
@@ -4663,12 +4676,19 @@ asked to serialize two attribute nodes with the same name.
                                  'attribute',
                                  ()
                       )
+let $dummy := trace(count($lnAtts), 'Gathering attributes, found #: ')
+let $dummy := trace($lnAtts, 'Gathering attributes, found these: ')
                    let $lnAok := 
                        $lnAtts
                        [every $i in 1 to (position() - 1)
                         satisfies
                         $lnAtts[$i]/name() ne ./name()]
-                   let $lnAdups := $lnAtts[not(. = $lnAok)]
+let $dummy := trace(count($lnAok), 'Of these some are OK: ')
+                   let $lnAdups := $lnAtts
+                       [some $i in 1 to (position() - 1)
+                        satisfies
+                        $lnAtts[$i]/name() eq ./name()]
+let $dummy := trace(count($lnAdups), 'Of these some are dups: ')
                    return ($lnAok,
                        for $n in $lnAdups
                        return element ap:error {
@@ -7995,7 +8015,7 @@ it depends on what option the user specified.
 "#epi-ep-parse-forest-map">Return a parse-forest map 187</a></em> 〉</span>
        else if ($options?return = 'parse-forest-grammar')
        then <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-ep-parse-forest-grammar">Return a tree cursor 185</a></em> 〉</span>
+"#epi-ep-parse-forest-grammar">Return a parse-forest grammar 185</a></em> 〉</span>
        else (: default to any-tree :)
             <span class="scrapref">〈 <em class="scrapptr"><a href=
 "#epi-ep-any-tree">Return any tree 182</a></em> 〉</span></pre>
@@ -8189,7 +8209,7 @@ parse-forest-grammar 〉 ≡</a></span>
 <div class="Real-P">Parse-forest grammars require no
 post-processing.
 <div class="scrap"><span><a name="epi-ep-parse-forest-grammar" id=
-"epi-ep-parse-forest-grammar">〈 185 Return a tree cursor 〉
+"epi-ep-parse-forest-grammar">〈 185 Return a parse-forest grammar 〉
 ≡</a></span>
 <pre class="scrapbody">        let $dummy := eri:notrace((), 
                       'epi:earley-parse() has result') 
@@ -10880,10 +10900,10 @@ nor nonterminal 209</a></li>
 accumulator 73</a></li>
 <li><a href="#epi-ep-all-trees">Return (approximately) all trees
 181</a></li>
+<li><a href="#epi-ep-parse-forest-grammar">Return a parse-forest
+grammar 185</a></li>
 <li><a href="#epi-ep-parse-forest-map">Return a parse-forest map
 187</a></li>
-<li><a href="#epi-ep-parse-forest-grammar">Return a tree cursor
-185</a></li>
 <li><a href="#epi-ep-tree-cursor">Return a tree cursor 186</a></li>
 <li><a href="#epi-tfg-rule-wha">Return an error element 99</a></li>
 <li><a href="#epi-ep-any-tree">Return any tree 182</a></li>

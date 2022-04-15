@@ -478,6 +478,9 @@ List of available test-catalog files [continues</a> <a href=
 "scrapbody">    $catalog-of-catalogs := &lt;test-catalogs&gt;
 
       &lt;!-- local catalogs, mostly simple --&gt;
+
+      &lt;catalog n="expr1" path="{$apadir}expr1-20220415.xml"/&gt;&lt;!-- ??? s --&gt;
+    
       &lt;!-- under 60 seconds (2.1, 4.8, 20.1, 12.4) --&gt;
       &lt;catalog n="test0" path="{$apadir}test0.xml"/&gt;&lt;!-- 2 s --&gt;
       &lt;catalog n="test1" path="{$apadir}test1.xml"/&gt;&lt;!-- 5 s --&gt;
@@ -1821,6 +1824,8 @@ of <i>$expectations</i> is an element and not a document node.
             then $e
             else if ($e/self::tc:assert-not-a-grammar)
             then $e
+            else if ($e/self::tc:assert-dynamic-error)
+            then $e
             else if ($e/self::tc:assert-xml)
             then $e/*
             else if ($e/self::tc:assert-xml-ref)
@@ -2067,6 +2072,11 @@ repetition.
         else if ($parse-tree/self::no-parse
                  and $expectations
                  /self::tc:assert-not-a-sentence)
+        then "pass"
+        else if (($parse-tree/self::no-parse
+                 or $parse-tree/self::ap:error)
+                 and $expectations
+                 /self::tc:assert-dynamic-error)
         then "pass"
         else if ($parse-tree/self::no-parse
                  and $expectations

@@ -3668,14 +3668,27 @@ the tree we return with <code>ixml:state="ambiguous"</code>.
                         $pfg/rule[1]/alt/nonterminal,
                         'element',
                         ()
-                    )
+                    ),
+          $tree1 := if (exists($tree0
+                       /descendant-or-self::ap:error))
+                    then element ap:error {
+                           attribute ixml:state { "failed" },
+                           attribute id { "ap:tbd19" },
+                           attribute ap:desc { "ill-formed output" },
+                           $tree0
+                         }
+                    else $tree0
       return if (not($f-ambig))
-      then $tree0
-      else element { name($tree0) } {
-        attribute ixml:state { "ambiguous" },
-        $tree0/attribute::*,
-        $tree0/child::node()
-      }
+             then $tree1
+             else element { name($tree1) } {
+                     attribute ixml:state { 
+                        "ambiguous" ,
+                        $tree1/@ixml:state
+                     },
+                     ($tree1/attribute::* 
+                       except $tree1/@ixml:state),
+                     $tree1/child::node()
+                  }
 </scrap></p>
 
 <p>Another version of this code uses XQuery Update to inject the
@@ -3836,12 +3849,19 @@ being asked to serialize two attribute nodes with the same name.
                                  'attribute',
                                  ()
                       )
+let $dummy := trace(count($lnAtts), 'Gathering attributes, found #: ')
+let $dummy := trace($lnAtts, 'Gathering attributes, found these: ')
                    let $lnAok := 
                        $lnAtts
                        [every $i in 1 to (position() - 1)
                         satisfies
                         $lnAtts[$i]/name() ne ./name()]
-	           let $lnAdups := $lnAtts[not(. = $lnAok)]
+let $dummy := trace(count($lnAok), 'Of these some are OK: ')
+	           let $lnAdups := $lnAtts
+                       [some $i in 1 to (position() - 1)
+                        satisfies
+                        $lnAtts[$i]/name() eq ./name()]
+let $dummy := trace(count($lnAdups), 'Of these some are dups: ')
                    return ($lnAok,
 		       for $n in $lnAdups
                        return element ap:error {
@@ -6751,7 +6771,7 @@ a call to extract the tree.
 </p>
 <p>Parse-forest grammars require no post-processing.
 <scrap id="epi-ep-parse-forest-grammar"
-       name="Return a tree cursor">
+       name="Return a parse-forest grammar">
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() has result') 
 
