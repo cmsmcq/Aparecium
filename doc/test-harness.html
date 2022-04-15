@@ -393,6 +393,11 @@ directory name to allow the results of multiple test runs to be saved
 without interfering with each other.
 <div class="scrap"><span><a name="dr-setup">&#x3008; 5 Set up variables and options &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">let $catalog-index := 'bogons' (: which catalog to run? short name :)
+    (: bogons 439. 
+       test0 2s, test1 5s, hygiene 12s, zeroes 20s.  
+       misc 78s, gxxx 153s, wisp-A 100s.
+       test2 745s
+    :)
 
 let $invdir := "../../ixml/tests/",
     $apadir := "../../Aparecium/tests/",
@@ -419,21 +424,23 @@ indexing into the list.  It's easy to change the index.
 
       &lt;!-- local catalogs, mostly simple --&gt;
       &lt;!-- under 60 seconds (2.1, 4.8, 20.1, 12.4) --&gt;
-      &lt;catalog n="test0" path="{$apadir}test0.xml"/&gt;
-      &lt;catalog n="test1" path="{$apadir}test1.xml"/&gt;
-      &lt;catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/&gt;
-      &lt;catalog n="hygiene" path="{$itwdir}ixml-20220222/hygiene-tests.xml"/&gt;
+      &lt;catalog n="test0" path="{$apadir}test0.xml"/&gt;&lt;!-- 2 s --&gt;
+      &lt;catalog n="test1" path="{$apadir}test1.xml"/&gt;&lt;!-- 5 s --&gt;
+      &lt;catalog n="hygiene" path="{$itwdir}ixml-20220222/hygiene-tests.xml"/&gt;&lt;!-- 12 s --&gt;&gt;
+      &lt;catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/&gt;&lt;!-- 20 s --&gt;
 
-      &lt;!-- under 10 minutes --&gt;
-      &lt;!-- 78.1s --&gt;
-      &lt;catalog n="misc" path="{$apadir}misc-tests.xml"/&gt;
-      &lt;!-- embeds all the gxxx catalogs so they can be done in a single run --&gt;
-      &lt;!-- 153s --&gt;
+      &lt;!-- under 10 minutes --&gt;      
+      &lt;catalog n="misc" path="{$apadir}misc-tests.xml"/&gt;&lt;!-- 78.1s --&gt;
+      
+      &lt;!-- embeds all the gxxx catalogs so they can be done in a single run --&gt;      
       &lt;catalog n="gxxx"
-	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/&gt;
+	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/&gt;&lt;!-- 153s --&gt;
+
       &lt;catalog n="bogons" path="{$apadir}bogons-20220310.xml"/&gt;&lt;!-- 439 s --&gt;
 
       &lt;!-- under 1 hour () --&gt;
+      &lt;catalog n="test2" path="{$apadir}test2.xml"/&gt;&lt;!-- 745 s --&gt;
+
       &lt;!-- under 2 hours () --&gt;
       &lt;!-- under 5 hours () --&gt;
 
@@ -445,9 +452,8 @@ indexing into the list.  It's easy to change the index.
       
       &lt;!-- to be timed --&gt;
 
-      &lt;catalog n="test2" path="{$apadir}test2.xml"/&gt;&lt;!-- nnn s --&gt;
-
       &lt;!-- syntax error tests in ixml repo --&gt;
+      &lt;!-- 24s, --&gt;
       &lt;catalog n="syntax-cagt"
        path="{$invdir}syntax/catalog-as-grammar-tests.xml"/&gt;
       &lt;catalog n="syntax-caii"
@@ -1422,9 +1428,18 @@ then we pass the test.
              or $xml-grammar/self::no-parse
              or $xml-grammar/child::no-parse
              or $xml-grammar/descendant-or-self::ap:error
-	     [@id = ('ap:tbd05', 'ap:tbd06', 'ap:tbd08',
-             'ap:tbd09', 'ap:tbd11', 'ap:tbd12',
-	     'ap:tbd13', 'ap:tbd16')]
+	     [@id = ('ap:tbd04' (: error compiling G :),
+                     'ap:tbd05' (: compiled grammar flawed :), 
+                     'ap:tbd06' (: errors found :), 
+                     'ap:tbd07' (: syntax error :), 
+                     'ap:tbd08' (: ixml/* unknown :),
+                     'ap:tbd09' (: rule/* unknown :), 
+                     'ap:tbd11' (: non-xml name :), 
+                     'ap:tbd12' (: double def :),
+                     'ap:tbd13' (: undefined nt :),
+                     'ap:tbd15' (: unable to compile :),
+		     'ap:tbd16' (: unk char class :)
+		     )]
 	     (: maybe also 04, 07, 15? :)
              )
             )

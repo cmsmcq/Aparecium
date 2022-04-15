@@ -1,4 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
 <tc:test-catalog xmlns:tc="https://github.com/cmsmcq/ixml-tests"
+		 xmlns:ixml="http://invisiblexml.org/NS"
 		 name="Zeroes"
 		 release-date="2022-02-16"
 		 >
@@ -328,8 +330,11 @@
     </tc:test-case>
 
     <tc:test-case name="t-4x0">
+      <tc:created by="CMSMcQ" on="2022-02-16"/>
+      <tc:modified by="CMSMcQ" on="2022-04-12"
+		   change="add ambiguity flag to expected result"/>
       <tc:test-string>0000</tc:test-string>
-      <tc:result><tc:assert-xml> <n>0000</n> </tc:assert-xml></tc:result>
+      <tc:result><tc:assert-xml> <n ixml:state="ambiguous">0000</n> </tc:assert-xml></tc:result>
     </tc:test-case>    
   </tc:test-set>
 

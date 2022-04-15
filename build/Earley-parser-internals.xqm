@@ -137,7 +137,7 @@ declare function epi:earley-parse(
   }</Closure>
 
   let $high-water := $closure/item[1]/@to/number()
-  let $start := max((1, ($high-water - 30))),
+  let $start := max((1, (1 + $high-water - 30))),
       $end := min((string-length($I),
                    ($high-water + 30))),
       $cL := min(($high-water, 30)),
@@ -156,14 +156,21 @@ declare function epi:earley-parse(
   <no-parse xmlns:ixml="http://invisiblexml.org/NS" ixml:state="failed">
     <p>Sorry, no parse for this string and grammar.</p>
     <p>The parser gave up at character {$high-water}:
-        parsing succeed up through <q>{
+        parsing succeeded up through <q>{
           replace($sL,'
-','&#xA;')
+','&amp;#xA;')
         }</q>
         but failed on <q>{
           replace($sR, '
-', '&#xA;')
-        }</q></p>{
+', '&amp;#xA;')
+        }</q></p>
+    <p>Expecting one of: {
+        string-join(
+           for $ei in $mapResult('Closure')('to')($high-water)
+           for $sym in eri:lsymExpectedXEi($ei)[eri:fTerminal(.)]
+           return concat('"', eri:reXTerminal($sym), '"'),
+           ', ')
+        }</p>{
     if ($options?failure-dump eq 'no')
     then ()
     else if ($options?failure-dump eq 'closure')
@@ -742,18 +749,35 @@ else error(QName(
                    if ($nm0 ne $nm)
                    then attribute ap:gi { $nm0 }
                    else (),
-                   for $c in $ccc
-                   return epi:tree-from-pfg(
-                              $c, 
-                              'attribute',
-                              ()
-                   ),
-                   for $c in $ccc
+                   
+                   let $lnAtts := 
+                      for $c in $ccc
+                      return epi:tree-from-pfg(
+                                 $c, 
+                                 'attribute',
+                                 ()
+                      )
+                   let $lnAok := 
+                       $lnAtts
+                       [every $i in 1 to (position() - 1)
+                        satisfies
+                        $lnAtts[$i]/name() ne ./name()]
+	           let $lnAdups := $lnAtts[not(. = $lnAok)]
+                   return ($lnAok,
+		       for $n in $lnAdups
+                       return element ap:error {
+                          attribute id { "ap:tbd18" },
+                          $n,
+                          "Duplicate attribute name"
+                       })
+,
+                                      for $c in $ccc
                    return epi:tree-from-pfg(
                               $c, 
                               'content',
                               ()
                    )
+
                }
 
           else if (($nodetype = ('attribute'))

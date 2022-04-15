@@ -723,32 +723,102 @@ declare function ixi:match-length(
 
 (: ......................................................
    re X Terminal($t): return a regular expression, given 
-   a character-set terminal element.
+   a terminal element.
    :)
 declare function ixi:reXTerminal(
   $t as element() (: incl, excl, literal :)
 ) as xs:string {
-  (: given a terminal element, produce a regex :)
-  if ($t/self::literal) then
-    ixi:sceXS( ixi:string-value($t) )
+  if ($t/self::literal) 
+  then 
+      if (exists($t/@string))
+      then ixi:sceXS($t/@string)
+      else try { ixi:sceXS(
+                    codepoints-to-string(
+                       d2x:x2d($t/@hex)
+                    ) 
+                 )
+               } catch * {
+                  "[^\s\S]"
+               }
+
   else 
   let $le := $t/*,
-      $lsRegexbits := for $e in $le
-                      return if ($e/self::range)
-                        then                              ixi:sceXS($e/@from)
-		             || "-" || ixi:sceXS($e/@to)
+      $lsRegexbits := 
+          for $e in $le
+          return if ($e/self::range
+                    or $e/self::member/@from)
+                 then                       
+        let $cpFrom0 := 
+               if (matches($e/@from, 
+                           '^#[0-9a-fA-F]+$'))
+               then d2x:x2d(substring($e/@from, 2))
+               else string-to-codepoints(
+                       $e/@from/string()), 
+            $cpFrom := try {
+                  string-to-codepoints(
+                     codepoints-to-string(
+                        $cpFrom0))       
+               } catch * {
+                  (: bump it up to one of:
+                     #9, #D, #20, #E000, #10000 :)
+                  (9, 13, 32, 57344, 65536)
+                  [$cpFrom0 le .][1]
+               },
+            $sFrom := codepoints-to-string($cpFrom)
 
-                        else if ($e/self::literal) 
-                        then 
-                             ixi:sceXS($e/ixi:string-value($e)) 
+                      
+        let $cpTo0 :=
+               if (matches($e/@to, 
+                           '^#[0-9a-fA-F]+$'))
+               then d2x:x2d(substring($e/@to, 2))
+               else string-to-codepoints(
+                       $e/@to/string()), 
+            $cpTo := try {
+                  string-to-codepoints(
+                     codepoints-to-string(
+                        $cpTo0))       
+               } catch * {
+                  (: bump it down to one of:
+                     #10FFFF, #FFFD, #D7FF, #D, #A :)
+                  (1114111, 65533, 55295, 13, 10)
+                  [$cpTo0 ge .] [1]
+               },
+            $sTo := codepoints-to-string($cpTo)
 
-                        else if ($e/self::class)
-                        then ixi:catescXS($e/@code) 
-                        else () (: error :)
-  return if ($t/self::inclusion)
+                      return if (exists($cpFrom)
+                          and exists($cpTo)
+                          and ($cpFrom le $cpTo))
+                      then ixi:sceXS($sFrom)
+                           || "-"
+                           || ixi:sceXS($sTo)
+                      else ()
+
+                 else if ($e/self::literal
+                    or $e/self::member/@string
+                    or $e/self::member/@hex) 
+                 then 
+                             try {
+                                ixi:sceXS(
+                                   $e/ixi:string-value(
+                                     $e))
+                             } catch * {
+                                ()
+                             } 
+
+                 else if ($e/self::class
+                    or $e/self::member/@code)
+                 then ixi:catescXS($e/@code) 
+                 else () (: error :)
+  return if ($t/self::inclusion
+             and exists($lsRegexbits))
     then "[" || string-join($lsRegexbits,'') || "]"
-    else if ($t/self::exclusion)
+    else if ($t/self::exclusion
+             and exists($lsRegexbits))
     then "[^" || string-join($lsRegexbits,'') || "]"
+    else if ($t/self::inclusion)
+    then "[^\s\S]" (: empty inclusion matches nothing :)
+    else if ($t/self::exclusion)
+    then "[\s\S]" (: empty inclusion excludes nothing :)
     else "--error in reXTerminal--"
 };
 
@@ -890,7 +960,7 @@ declare function ixi:cMatchesIPT(
    * string-length, string-value, ...
    :)
 (: ......................................................
-   sce X S($s) : given a one-character string or hex
+   sce X S($s) : given a string or hex
    expression $s (e.g. from a character terminal), check
    to see if it's a hex expression (in which case expand
    and recur) or a magic character (in which case escape
@@ -901,8 +971,6 @@ declare function ixi:cMatchesIPT(
    N.B. this is more than strictly necessary for
    character class escapes, but it seems better to be
    more general.
-
-   To do: adjust to new representation of terminals.
    
 :)
 declare function ixi:sceXS(

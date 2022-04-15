@@ -100,6 +100,7 @@
 </fileDesc>
 <revisionDesc>
 <list>
+<item>2022-04-12 : CMSMcQ : try again to escape newlines in error message</item>
 <item>2022-03-10 : CMSMcQ : re-organize section on top-level
 interfaces; mention error cases explicitly</item>
 <item>2022-03-02? / 03-10 : CMSMcQ : writing parse-forest grammar
@@ -3805,19 +3806,49 @@ if (($nodetype = ('element', 'content'))
                    if ($nm0 ne $nm)
                    then attribute ap:gi { $nm0 }
                    else (),
-                   for $c in $ccc
-                   return epi:tree-from-pfg(
-                              $c, 
-                              'attribute',
-                              ()
-                   ),
+                   <ptr target="epi-tfgre-get-atts"/>,
+                   <ptr target="epi-tfgre-get-children"/>
+               }
+</scrap>
+</p>
+<p>Fetching the children is simple: we just recur on each
+child and return the results.
+<scrap id="epi-tfgre-get-children"
+       name="Create and serialize children">
                    for $c in $ccc
                    return epi:tree-from-pfg(
                               $c, 
                               'content',
                               ()
                    )
-               }
+</scrap>
+</p>
+<p>Fetching the attributes is a bit more complicated;
+it requires checking to make sure we are not
+being asked to serialize two attribute nodes with the same name.
+<scrap id="epi-tfgre-get-atts"
+       name="Collect and serialize attributes">
+
+                   let $lnAtts := 
+                      for $c in $ccc
+                      return epi:tree-from-pfg(
+                                 $c, 
+                                 'attribute',
+                                 ()
+                      )
+                   let $lnAok := 
+                       $lnAtts
+                       [every $i in 1 to (position() - 1)
+                        satisfies
+                        $lnAtts[$i]/name() ne ./name()]
+	           let $lnAdups := $lnAtts[not(. = $lnAok)]
+                   return ($lnAok,
+		       for $n in $lnAdups
+                       return element ap:error {
+                          attribute id { "ap:tbd18" },
+                          $n,
+                          "Duplicate attribute name"
+                       })
 </scrap>
 </p>
 
@@ -5107,54 +5138,195 @@ expression, given a terminal element.  Note that the regular
 expression will match one character (or none) in the input; we don't
 have terminal symbols with indeterminate length in the input.
 </p>
-<p>At the moment, this is only ever called with
-character sets (<gi>inclusion</gi> and <gi>exclusion</gi>,
-but I've added code to handle literals as well, just in case.
-</p>
-<p>To do:  make the code that compiles Gluschkov automata
-also calculate regexes for terminals, so that we're not
-doing it again and again.
+<p>This function is initially needed only for character sets
+(<gi>inclusion</gi> and <gi>exclusion</gi>), but let's make it handle
+literals as well, just in case.</p>
+<p>To do: make the compilation step do this once for all for each
+terminal, so that we're not doing it again and again.
 <scrap id="eri-sym-reXTerminal"
        name="Define reXTerminal(), regex from terminal">
 (: ......................................................
    re X Terminal($t): return a regular expression, given 
-   a character-set terminal element.
+   a terminal element.
    :)
 declare function ixi:reXTerminal(
   $t as element() (: incl, excl, literal :)
 ) as xs:string {
-  (: given a terminal element, produce a regex :)
-  if ($t/self::literal) then
-    ixi:sceXS( ixi:string-value($t) )
+  if ($t/self::literal) 
+  then <ptr target="eri-sym-reXT-literal"/>
   else 
   let $le := $t/*,
-      $lsRegexbits := for $e in $le
-                      return if ($e/self::range)
-                        then <ptr target="eri-sym-reXT-range"/>
-                        else if ($e/self::literal) 
-                        then <ptr target="eri-sym-reXT-lit"/>
-                        else if ($e/self::class)
-                        then ixi:catescXS($e/@code) 
-                        else () (: error :)
-  return if ($t/self::inclusion)
+      $lsRegexbits := 
+          for $e in $le
+          return if ($e/self::range
+                    or $e/self::member/@from)
+                 then <ptr target="eri-sym-reXT-range"/>
+                 else if ($e/self::literal
+                    or $e/self::member/@string
+                    or $e/self::member/@hex) 
+                 then <ptr target="eri-sym-reXT-lit"/>
+                 else if ($e/self::class
+                    or $e/self::member/@code)
+                 then ixi:catescXS($e/@code) 
+                 else () (: error :)
+  return if ($t/self::inclusion
+             and exists($lsRegexbits))
     then "[" || string-join($lsRegexbits,'') || "]"
-    else if ($t/self::exclusion)
+    else if ($t/self::exclusion
+             and exists($lsRegexbits))
     then "[^" || string-join($lsRegexbits,'') || "]"
+    else if ($t/self::inclusion)
+    then "[^\s\S]" (: empty inclusion matches nothing :)
+    else if ($t/self::exclusion)
+    then "[\s\S]" (: empty inclusion excludes nothing :)
     else "--error in reXTerminal--"
 };
 </scrap>
+We use <q><code>[\s\S]</code></q> and <q><code>[^\s\S]</code></q>
+as XPath representations of the empty inclusion and the empty
+exclusion, respectively.  Any pair of complementary character
+class escapes would work as well:  <q><code>\w\W</code></q>
+<q><code>\i\I</code></q>, etc.
 </p>
-<p>Ranges require special care.
+
+<p>An important wrinkle is that not every integer between #0000 and
+#10FFFF (0..1114111) can be turned into an XML character.  So we need
+to check that hex-encoded characters are in fact XML characters, and
+adapt the regular expression accordingly if they are not.
+</p>
+<p>A literal with a <att>string</att> attribute cannot contain a
+non-XML character: by the time we have a compiled grammar, we are
+looking at XDM instances and any non-XML characters will have caused
+failures earlier on.  So any <att>string</att> attribute just needs to
+be escaped.
+<scrap id="eri-sym-reXT-literal"
+       name="Make character-escaped string from literal">
+
+      if (exists($t/@string))
+      then ixi:sceXS($t/@string)
+</scrap>
+A hex value, on the other hand, must be checked.  For encoded
+terminals, a hex value denoting a non-XML character cannot match
+anything in the input and is therefore equivalent to a regular
+expression matching nothing (not to be confused with matching
+the empty string).  We'll use <q><code>[^\s\S]</code></q>
+for that case: since <q><code>\s</code></q> and <q><code>\S</code></q>
+are complements and together match every XML character,
+<q><code>[^\s\S]</code></q> will not match anything at all.
+<scrap prev="eri-sym-reXT-literal">
+      else try { ixi:sceXS(
+                    codepoints-to-string(
+                       d2x:x2d($t/@hex)
+                    ) 
+                 )
+               } catch * {
+                  "[^\s\S]"
+               }
+</scrap>
+</p>
+<p>For what it's worth, the original version of the code just
+given was too trusting:
+<q><code>ixi:sceXS( ixi:string-value($t) )</code></q>.
+When a hex-encoded literal referred to a non-XML character,
+things blew up.
+</p>
+<p>Ranges require special care, because if hex-encoded the range ends
+may involve non-XML characters.  If so, we find the nearest XML
+character guaranteed to produce the same rules on XML strings, and
+then build the range.  In the process, we may end up missing one or
+both ends of the range (if <att>from</att> is greater than #10FFFF or
+<att>to</att> is less than 9), or the two may move past each other
+(as they would for <q><code>[#10 - #1F]</code></q>); in that case,
+we return nothing at all.
 <scrap id="eri-sym-reXT-range"
        name="Make positive character group for range">
-                             ixi:sceXS($e/@from)
-		             || "-" || ixi:sceXS($e/@to)
+                      <ptr target="eri-sym-reXT-from"/>
+                      <ptr target="eri-sym-reXT-to"/>
+                      return if (exists($cpFrom)
+                          and exists($cpTo)
+                          and ($cpFrom le $cpTo))
+                      then ixi:sceXS($sFrom)
+                           || "-"
+                           || ixi:sceXS($sTo)
+                      else ()
 </scrap></p>
-<p>Literals require special care if they are hex-encoded.
+<p>
+To handle a non-XML <att>from</att> value, we bump it up to
+the next higher XML character, because that is where the effective
+range begins.  For example, if the range is specified as
+<q><code>[#00 - #FF]</code></q>, the lowest code point it can match
+is #09, the first XML character greater than #00.
+<scrap id="eri-sym-reXT-from"
+       name="Set $cpFrom, $sFrom to effective codepoint and string">
+
+        let $cpFrom0 := 
+               if (matches($e/@from, 
+                           '^#[0-9a-fA-F]+$'))
+               then d2x:x2d(substring($e/@from, 2))
+               else string-to-codepoints(
+                       $e/@from/string()), 
+            $cpFrom := try {
+                  string-to-codepoints(
+                     codepoints-to-string(
+                        $cpFrom0))       
+               } catch * {
+                  (: bump it up to one of:
+                     #9, #D, #20, #E000, #10000 :)
+                  (9, 13, 32, 57344, 65536)
+                  [$cpFrom0 le .][1]
+               },
+            $sFrom := codepoints-to-string($cpFrom)
+</scrap>
+The ranges allowed for XML characters are, in ixml notation,
+<q><code>[#9 - #A; #D; #20 - #D7FF; #E000 - #FFFD; #10000 -
+#10FFFF]</code></q>.  As may be seen, we simply find the lowest range
+whose starting point is above the non-XML code point.  <hi>(Strictly
+speaking, we should perhaps catch only error FOCH0001, to avoid making
+this adjustment for other unrelated errors.)</hi>
+</p>
+<p>
+Conversely, for the <att>to</att> value, we bump a non-XML
+codepoint down to the top of next range of XML characters.
+<scrap id="eri-sym-reXT-to"
+       name="Set $cpTo, $sTo to effective codepoint and string">
+
+        let $cpTo0 :=
+               if (matches($e/@to, 
+                           '^#[0-9a-fA-F]+$'))
+               then d2x:x2d(substring($e/@to, 2))
+               else string-to-codepoints(
+                       $e/@to/string()), 
+            $cpTo := try {
+                  string-to-codepoints(
+                     codepoints-to-string(
+                        $cpTo0))       
+               } catch * {
+                  (: bump it down to one of:
+                     #10FFFF, #FFFD, #D7FF, #D, #A :)
+                  (1114111, 65533, 55295, 13, 10)
+                  [$cpTo0 ge .] [1]
+               },
+            $sTo := codepoints-to-string($cpTo)
+</scrap>
+For range ends specified as literals, we engage in a little
+unnecessary work of turning them into code points and then
+back into strings.
+</p>
+<p>Literal character-set members also require special handling if they
+are hex-encoded.  If they are XML characters, they are treated
+normally; if they are not XML characters, they are dropped:  they
+cannot match anything in an inclusion, and they cannot exclude
+anything in an exclusion.
 <scrap id="eri-sym-reXT-lit"
        name="Make positive character group from literal">
 
-                             ixi:sceXS($e/ixi:string-value($e)) 
+                             try {
+                                ixi:sceXS(
+                                   $e/ixi:string-value(
+                                     $e))
+                             } catch * {
+                                ()
+                             } 
 </scrap>
 </p>
 </div>
@@ -5519,11 +5691,11 @@ declare function ixi:match-length(
 </p>
 <div id="ll-utils-strings">
 <head>Routines for strings and characters</head>
-<p>
+<p>The function <ident>sceXS()</ident>
 <scrap prev="eri-utils-and-misc"
        name="Define sceXS() to read range ends">
 (: ......................................................
-   sce X S($s) : given a one-character string or hex
+   sce X S($s) : given a string or hex
    expression $s (e.g. from a character terminal), check
    to see if it's a hex expression (in which case expand
    and recur) or a magic character (in which case escape
@@ -5534,8 +5706,6 @@ declare function ixi:match-length(
    N.B. this is more than strictly necessary for
    character class escapes, but it seems better to be
    more general.
-
-   To do: adjust to new representation of terminals.
    
 :)
 declare function ixi:sceXS(
@@ -6434,7 +6604,7 @@ the user asks for a verbose dump we provide it.
   }&lt;/Closure>
 
   let $high-water := $closure/item[1]/@to/number()
-  let $start := max((1, ($high-water - 30))),
+  let $start := max((1, (1 + $high-water - 30))),
       $end := min((string-length($I),
                    ($high-water + 30))),
       $cL := min(($high-water, 30)),
@@ -6453,12 +6623,19 @@ the user asks for a verbose dump we provide it.
   &lt;no-parse xmlns:ixml="http://invisiblexml.org/NS" ixml:state="failed">
     &lt;p>Sorry, no parse for this string and grammar.&lt;/p>
     &lt;p>The parser gave up at character {$high-water}:
-        parsing succeed up through &lt;q>{
-          replace($sL,'&#xA;','&amp;#xA;')
+        parsing succeeded up through &lt;q>{
+          replace($sL,'&#xA;','&amp;amp;#xA;')
         }&lt;/q>
         but failed on &lt;q>{
-          replace($sR, '&#xA;', '&amp;#xA;')
-        }&lt;/q>&lt;/p>{
+          replace($sR, '&#xA;', '&amp;amp;#xA;')
+        }&lt;/q>&lt;/p>
+    &lt;p>Expecting one of: {
+        string-join(
+           for $ei in $mapResult('Closure')('to')($high-water)
+           for $sym in eri:lsymExpectedXEi($ei)[eri:fTerminal(.)]
+           return concat('"', eri:reXTerminal($sym), '"'),
+           ', ')
+        }&lt;/p>{
     if ($options?failure-dump eq 'no')
     then ()
     else if ($options?failure-dump eq 'closure')
@@ -8280,7 +8457,6 @@ for the rule, plus a <gi>literal</gi> element for each text node.</p>
 <list>
 <item>On inputs over a few tens of characters, Aparecium is
 currently unreasonably slow.</item>
-<item></item>
 </list>
 </p>
 
@@ -8294,7 +8470,8 @@ currently unreasonably slow.</item>
 <item>In test catalog zeroes:<list>
 <item>zeroes-gone-bad / t-4x0 (test-catalog error, I guess:
 should expect an ambiguity label)</item>
-</list></item>
+</list>
+<hi>Cleared 12 April 2022.</hi></item>
 <item>In test set syntax-cagt (catalog as grammar tests):
 <list>
 <item>elem1 (duplicate attributes)</item>
@@ -8323,7 +8500,9 @@ should expect an ambiguity label)</item>
 <list>
 <item>grammar tests on grammars 02b, 02c, 02d (non-structural
 nonconformance of grammars)</item>
-</list></item>
+</list>
+<hi>Cleared March 2022.</hi>
+</item>
 </list>
 </p>
 <p>And to make myself feel better, here is a list of test sets

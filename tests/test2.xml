@@ -1,4 +1,5 @@
 <test-catalog xmlns="https://github.com/cmsmcq/ixml-tests"
+	      xmlns:ixml="http://invisiblexml.org/NS"	      
 	      name="Level point-five tests"
 	      release-date="2021-10-14"
 	      >
@@ -30,21 +31,21 @@
       <created by="CMSMcQ" on="2022-03-09"/>
       <test-string>a</test-string>
       <result><assert-xml>
-	<S xmlns="">a</S>
+	<S xmlns="" ixml:state="ambiguous">a</S>
       </assert-xml><assert-xml>
-	<S xmlns=""><S>a</S></S>
+	<S xmlns="" ixml:state="ambiguous"><S>a</S></S>
       </assert-xml><assert-xml>
-	<S xmlns=""><S><S>a</S></S></S>
+	<S xmlns="" ixml:state="ambiguous"><S><S>a</S></S></S>
       </assert-xml><assert-xml>
-	<S xmlns=""><S><S><S>a</S></S></S></S>
+	<S xmlns="" ixml:state="ambiguous"><S><S><S>a</S></S></S></S>
       </assert-xml><assert-xml>
-	<S xmlns=""><S><S><S><S>a</S></S></S></S></S>
+	<S xmlns="" ixml:state="ambiguous"><S><S><S><S>a</S></S></S></S></S>
       </assert-xml><assert-xml>
-	<S xmlns=""><S><S><S><S><S>a</S></S></S></S></S></S>
+	<S xmlns="" ixml:state="ambiguous"><S><S><S><S><S>a</S></S></S></S></S></S>
       </assert-xml><assert-xml>
-	<S xmlns=""><S><S><S><S><S><S>a</S></S></S></S></S></S></S>
+	<S xmlns="" ixml:state="ambiguous"><S><S><S><S><S><S>a</S></S></S></S></S></S></S>
       </assert-xml><assert-xml>
-	<S xmlns=""><S><S><S><S><S><S><S>a</S></S></S></S></S></S></S></S>
+	<S xmlns="" ixml:state="ambiguous"><S><S><S><S><S><S><S>a</S></S></S></S></S></S></S></S>
       </assert-xml></result>
     </test-case>
   </test-set>

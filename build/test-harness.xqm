@@ -395,9 +395,18 @@ declare function t:test-grammar(
              or $xml-grammar/self::no-parse
              or $xml-grammar/child::no-parse
              or $xml-grammar/descendant-or-self::ap:error
-	     [@id = ('ap:tbd05', 'ap:tbd06', 'ap:tbd08',
-             'ap:tbd09', 'ap:tbd11', 'ap:tbd12',
-	     'ap:tbd13', 'ap:tbd16')]
+	     [@id = ('ap:tbd04' (: error compiling G :),
+                     'ap:tbd05' (: compiled grammar flawed :), 
+                     'ap:tbd06' (: errors found :), 
+                     'ap:tbd07' (: syntax error :), 
+                     'ap:tbd08' (: ixml/* unknown :),
+                     'ap:tbd09' (: rule/* unknown :), 
+                     'ap:tbd11' (: non-xml name :), 
+                     'ap:tbd12' (: double def :),
+                     'ap:tbd13' (: undefined nt :),
+                     'ap:tbd15' (: unable to compile :),
+		     'ap:tbd16' (: unk char class :)
+		     )]
 	     (: maybe also 04, 07, 15? :)
              )
             )

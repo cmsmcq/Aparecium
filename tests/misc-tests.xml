@@ -158,6 +158,33 @@ M: 'm'; LDOE .
             ></B></A
 	  ></S>
 	</tc:assert-xml>
+	<tc:assert-xml>
+	  <S xmlns:ixml="http://invisiblexml.org/NS" ixml:state="ambiguous"
+	    ><A>a<B
+	    ><LDOE
+              ><M
+		><LDOE
+		  ><M>m</M
+		></LDOE
+              ></M
+	    ></LDOE
+	    ><A>a<B
+            ><LDOE
+              ><M
+		><LDOE
+                  ><M
+                    ><LDOE>l</LDOE
+                  ></M
+		></LDOE
+              ></M
+            ></LDOE
+            ><A>x</A
+          ></B
+	    ></A
+	  ></B
+	    ></A
+	  ></S>
+	</tc:assert-xml>
       </tc:result>
     </tc:test-case>
   </tc:test-set>

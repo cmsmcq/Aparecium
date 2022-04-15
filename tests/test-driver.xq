@@ -11,6 +11,11 @@ declare namespace db =
 declare option db:chop "false";
 
 let $catalog-index := 'bogons' (: which catalog to run? short name :)
+    (: bogons 439. 
+       test0 2s, test1 5s, hygiene 12s, zeroes 20s.  
+       misc 78s, gxxx 153s, wisp-A 100s.
+       test2 745s
+    :)
 
 let $invdir := "../../ixml/tests/",
     $apadir := "../../Aparecium/tests/",
@@ -28,21 +33,23 @@ let $invdir := "../../ixml/tests/",
 
       <!-- local catalogs, mostly simple -->
       <!-- under 60 seconds (2.1, 4.8, 20.1, 12.4) -->
-      <catalog n="test0" path="{$apadir}test0.xml"/>
-      <catalog n="test1" path="{$apadir}test1.xml"/>
-      <catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/>
-      <catalog n="hygiene" path="{$itwdir}ixml-20220222/hygiene-tests.xml"/>
+      <catalog n="test0" path="{$apadir}test0.xml"/><!-- 2 s -->
+      <catalog n="test1" path="{$apadir}test1.xml"/><!-- 5 s -->
+      <catalog n="hygiene" path="{$itwdir}ixml-20220222/hygiene-tests.xml"/><!-- 12 s -->>
+      <catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/><!-- 20 s -->
 
-      <!-- under 10 minutes -->
-      <!-- 78.1s -->
-      <catalog n="misc" path="{$apadir}misc-tests.xml"/>
-      <!-- embeds all the gxxx catalogs so they can be done in a single run -->
-      <!-- 153s -->
+      <!-- under 10 minutes -->      
+      <catalog n="misc" path="{$apadir}misc-tests.xml"/><!-- 78.1s -->
+      
+      <!-- embeds all the gxxx catalogs so they can be done in a single run -->      
       <catalog n="gxxx"
-	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/>
+	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/><!-- 153s -->
+
       <catalog n="bogons" path="{$apadir}bogons-20220310.xml"/><!-- 439 s -->
 
       <!-- under 1 hour () -->
+      <catalog n="test2" path="{$apadir}test2.xml"/><!-- 745 s -->
+
       <!-- under 2 hours () -->
       <!-- under 5 hours () -->
 
@@ -54,9 +61,8 @@ let $invdir := "../../ixml/tests/",
       
       <!-- to be timed -->
 
-      <catalog n="test2" path="{$apadir}test2.xml"/><!-- nnn s -->
-
       <!-- syntax error tests in ixml repo -->
+      <!-- 24s, -->
       <catalog n="syntax-cagt"
        path="{$invdir}syntax/catalog-as-grammar-tests.xml"/>
       <catalog n="syntax-caii"
