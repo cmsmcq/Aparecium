@@ -189,5 +189,34 @@ M: 'm'; LDOE .
     </tc:test-case>
   </tc:test-set>
 
+  <tc:test-set name="ambiguous-markings">
+    <tc:created on="2022-04-16" by="CMSMcQ"/>
+    <tc:ixml-grammar>
+      S = a; -a; ^a; @a.
+      a = 'a'
+    </tc:ixml-grammar>
+    <tc:grammar-test>
+      <tc:result>
+	<tc:assert-xml>
+	  <ixml
+	    ><rule name="S"
+	      ><alt><nonterminal name="a"/></alt
+	      ><alt><nonterminal name="a" mark="-"/></alt
+	      ><alt><nonterminal name="a" mark="^"/></alt
+	      ><alt><nonterminal name="a" mark="@"/></alt
+	    ></rule
+	  ></ixml>
+	</tc:assert-xml>
+      </tc:result>
+    </tc:grammar-test>
+    <tc:test-case name="a">
+      <tc:test-string>a</tc:test-string>
+      <tc:result>
+	<tc:assert-xml><S ixml:state="ambiguous"><a>a</a></S></tc:assert-xml>
+	<tc:assert-xml><S ixml:state="ambiguous">a</S></tc:assert-xml>
+	<tc:assert-xml><S ixml:state="ambiguous" a="a"/></tc:assert-xml>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
   
 </tc:test-catalog>
