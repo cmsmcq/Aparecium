@@ -8480,60 +8480,34 @@ currently unreasonably slow.</item>
 </list>
 </p>
 
-<p>Test-case failures (as of 17 Feb 22):
+<p>Test-case failures (as of 16 April 2022) include several
+occasioned by recent changes to the ixml specification grammar:
+
+<item>In test catalog ixml-all:
 <list>
-<item>In test catalog test2:
-<list>
-<item>test set ambiguity-1, test amb-1</item>
-</list>
-</item>
-<item>In test catalog zeroes:<list>
-<item>zeroes-gone-bad / t-4x0 (test-catalog error, I guess:
-should expect an ambiguity label)</item>
-</list>
-<hi>Cleared 12 April 2022.</hi></item>
-<item>In test set syntax-cagt (catalog as grammar tests):
-<list>
-<item>elem1 (duplicate attributes)</item>
-<item>illegal-class.ixml</item>
-<item>rule2 (more than one rule for a nonterminal)</item>
-<item>unused-rule (unreachable and undefined nonterminals)</item>
-<item>unused-rules (ditto)</item>
+<item>test set expr1, test expr1</item>
+<item>test set and test case hex-much-too-big (exception FOAR0002)</item>
+<item>test set and test case hex-too-big (exception FOCH0001)</item>
+<item>test set and test case hex-not-a-character (exception FOCH0001)</item>
+<item>test set and test case hex-surrogate (exception FOCH0001)</item>
+<item>grammar test comment</item>
+<item>grammar test repeat0</item>
+<item>grammar test repeat1</item>
+<item>grammar test sets</item>
 </list></item>
-<item>In test set ixml-corr:
-<list>
-<item>expr1:  exception in parsing XQDY0025</item>
-<item>hex3:  grammar compilation failed</item>
-<item>json:  grammar compilation failed</item>
-<item>range:  grammar compilation failed</item>
-<item>unicode-range1:  grammar compilation failed</item>
-<item>element-content</item>
-<item>range-comments</item>
-<item>ranges1</item>
-</list></item>
-<item>In test set ixml-ambi:
-<list>
-<item>date</item>
-</list></item>
+</p>
+<p>Old list from 17 February (needs to be re-checked):<list>
 
 <item>In test set wisps:
 <list>
-<item>grammar tests on grammars 02b, 02c, 02d (non-structural
-nonconformance of grammars)</item>
+<item>g06.c02 (pseudo-error: catalog missing this parse tree)</item>
+<item>g11c01 (pseudo-error:  catalog missing this parse tree)</item>
+<item>g11c02 (pseudo-error:  catalog missing this parse tree)</item>
+<item>g12.c05 (pseudo-error:  catalog missing this parse tree)</item>
 </list>
-<hi>Cleared March 2022.</hi>
 </item>
 </list>
 </p>
-<p>And to make myself feel better, here is a list of test sets
-with no failures:
-<list>
-<item>test0</item>
-<item>test1</item>
-<item>misc (as of 17 Feb 22)</item>
-<item>syntax-caii (catalog as instances in ixml)</item>
-<item>syntax-caix (catalog as instances in XML)</item>
-</list></p>
 <p>The test harness used is described in a separate document
 (<ptr target="test-harness"/>).</p>
 </div>
