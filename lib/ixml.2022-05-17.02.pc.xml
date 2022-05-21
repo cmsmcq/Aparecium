@@ -1,0 +1,3513 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="../../../gingersnap/src/ixml-html.xsl"?>
+<ixml xmlns:gt="http://blackmesatech.com/2020/grammartools"
+      gt:date="2022-05-20T19:22:02.644997-04:00"
+      gt:base-grammar="file:/home/cmsmcq/2022/github/Aparecium/lib/ixml.2022-05-17.01.inlined.xml"
+      gt:base-grammar-uri="file:/home/cmsmcq/2022/github/Aparecium/lib/ixml.2022-05-17.01.inlined.xml">
+   <comment>2022-05-20T19:22:02.644997-04:00: ixml-annotate-pc.xsl.</comment>
+   <comment>    Input: file:/home/cmsmcq/2022/github/Aparecium/lib/ixml.2022-05-17.01.inlined.xml</comment>
+   <comment>    Grammar augmented with @gt:recursive etc.</comment>
+   <comment>* 2022-05-20: hidden nonterminal inlined by ixml-inline-hidden-nonterminals.xsl *</comment>
+   <comment>version 2022-05-17</comment>
+   <rule name="ixml" gt:recursive="false" gt:referenced="false">
+      <alt><!--s-->
+         <alts>
+            <alt>
+               <repeat0>
+                  <alts>
+                     <alt><!--whitespace-->
+                        <alts>
+                           <alt>
+                              <inclusion tmark="-">
+                                 <member code="Zs"/>
+                              </inclusion>
+                           </alt>
+                           <alt><!--tab-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="9"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--lf-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="a"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--cr-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="d"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt>
+                        <nonterminal name="comment"/>
+                     </alt>
+                  </alts>
+               </repeat0>
+            </alt>
+         </alts>
+         <repeat1>
+            <nonterminal name="rule"/>
+            <sep><!--RS-->
+               <alts>
+                  <alt>
+                     <repeat1>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat1>
+                  </alt>
+               </alts>
+            </sep>
+         </repeat1>
+         <!--s-->
+         <alts>
+            <alt>
+               <repeat0>
+                  <alts>
+                     <alt><!--whitespace-->
+                        <alts>
+                           <alt>
+                              <inclusion tmark="-">
+                                 <member code="Zs"/>
+                              </inclusion>
+                           </alt>
+                           <alt><!--tab-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="9"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--lf-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="a"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--cr-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="d"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt>
+                        <nonterminal name="comment"/>
+                     </alt>
+                  </alts>
+               </repeat0>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="s"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <repeat0>
+            <alts>
+               <alt><!--whitespace-->
+                  <alts>
+                     <alt>
+                        <inclusion tmark="-">
+                           <member code="Zs"/>
+                        </inclusion>
+                     </alt>
+                     <alt><!--tab-->
+                        <alts>
+                           <alt>
+                              <literal tmark="-" hex="9"/>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt><!--lf-->
+                        <alts>
+                           <alt>
+                              <literal tmark="-" hex="a"/>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt><!--cr-->
+                        <alts>
+                           <alt>
+                              <literal tmark="-" hex="d"/>
+                           </alt>
+                        </alts>
+                     </alt>
+                  </alts>
+               </alt>
+               <alt>
+                  <nonterminal name="comment"/>
+               </alt>
+            </alts>
+         </repeat0>
+      </alt>
+   </rule>
+   <comment>Optional spacing</comment>
+   <rule mark="-"
+         name="RS"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <repeat1>
+            <alts>
+               <alt><!--whitespace-->
+                  <alts>
+                     <alt>
+                        <inclusion tmark="-">
+                           <member code="Zs"/>
+                        </inclusion>
+                     </alt>
+                     <alt><!--tab-->
+                        <alts>
+                           <alt>
+                              <literal tmark="-" hex="9"/>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt><!--lf-->
+                        <alts>
+                           <alt>
+                              <literal tmark="-" hex="a"/>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt><!--cr-->
+                        <alts>
+                           <alt>
+                              <literal tmark="-" hex="d"/>
+                           </alt>
+                        </alts>
+                     </alt>
+                  </alts>
+               </alt>
+               <alt>
+                  <nonterminal name="comment"/>
+               </alt>
+            </alts>
+         </repeat1>
+      </alt>
+   </rule>
+   <comment>Required spacing</comment>
+   <rule mark="-"
+         name="whitespace"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <inclusion tmark="-">
+            <member code="Zs"/>
+         </inclusion>
+      </alt>
+      <alt><!--tab-->
+         <alts>
+            <alt>
+               <literal tmark="-" hex="9"/>
+            </alt>
+         </alts>
+      </alt>
+      <alt><!--lf-->
+         <alts>
+            <alt>
+               <literal tmark="-" hex="a"/>
+            </alt>
+         </alts>
+      </alt>
+      <alt><!--cr-->
+         <alts>
+            <alt>
+               <literal tmark="-" hex="d"/>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="tab"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <literal tmark="-" hex="9"/>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="lf"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <literal tmark="-" hex="a"/>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="cr"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <literal tmark="-" hex="d"/>
+      </alt>
+   </rule>
+   <rule name="comment" gt:recursive="true">
+      <alt>
+         <literal tmark="-" string="{"/>
+         <repeat0>
+            <alts>
+               <alt><!--cchar-->
+                  <alts>
+                     <alt>
+                        <exclusion>
+                           <member string="{}"/>
+                        </exclusion>
+                     </alt>
+                  </alts>
+               </alt>
+               <alt>
+                  <nonterminal name="comment"/>
+               </alt>
+            </alts>
+         </repeat0>
+         <literal tmark="-" string="}"/>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="cchar"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <exclusion>
+            <member string="{}"/>
+         </exclusion>
+      </alt>
+   </rule>
+   <rule name="rule" gt:recursive="false">
+      <alt>
+         <option>
+            <alts>
+               <alt>
+                  <nonterminal name="mark"/>
+                  <!--s-->
+                  <alts>
+                     <alt>
+                        <repeat0>
+                           <alts>
+                              <alt><!--whitespace-->
+                                 <alts>
+                                    <alt>
+                                       <inclusion tmark="-">
+                                          <member code="Zs"/>
+                                       </inclusion>
+                                    </alt>
+                                    <alt><!--tab-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="9"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt><!--lf-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="a"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt><!--cr-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="d"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                 </alts>
+                              </alt>
+                              <alt>
+                                 <nonterminal name="comment"/>
+                              </alt>
+                           </alts>
+                        </repeat0>
+                     </alt>
+                  </alts>
+               </alt>
+            </alts>
+         </option>
+         <nonterminal name="name"/>
+         <!--s-->
+         <alts>
+            <alt>
+               <repeat0>
+                  <alts>
+                     <alt><!--whitespace-->
+                        <alts>
+                           <alt>
+                              <inclusion tmark="-">
+                                 <member code="Zs"/>
+                              </inclusion>
+                           </alt>
+                           <alt><!--tab-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="9"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--lf-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="a"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--cr-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="d"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt>
+                        <nonterminal name="comment"/>
+                     </alt>
+                  </alts>
+               </repeat0>
+            </alt>
+         </alts>
+         <inclusion tmark="-">
+            <member string="=:"/>
+         </inclusion>
+         <!--s-->
+         <alts>
+            <alt>
+               <repeat0>
+                  <alts>
+                     <alt><!--whitespace-->
+                        <alts>
+                           <alt>
+                              <inclusion tmark="-">
+                                 <member code="Zs"/>
+                              </inclusion>
+                           </alt>
+                           <alt><!--tab-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="9"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--lf-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="a"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--cr-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="d"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt>
+                        <nonterminal name="comment"/>
+                     </alt>
+                  </alts>
+               </repeat0>
+            </alt>
+         </alts>
+         <!--alts-->
+         <alts>
+            <alt>
+               <repeat1>
+                  <nonterminal name="alt"/>
+                  <sep>
+                     <alts>
+                        <alt>
+                           <inclusion tmark="-">
+                              <member string=";|"/>
+                           </inclusion>
+                           <!--s-->
+                           <alts>
+                              <alt>
+                                 <repeat0>
+                                    <alts>
+                                       <alt><!--whitespace-->
+                                          <alts>
+                                             <alt>
+                                                <inclusion tmark="-">
+                                                   <member code="Zs"/>
+                                                </inclusion>
+                                             </alt>
+                                             <alt><!--tab-->
+                                                <alts>
+                                                   <alt>
+                                                      <literal tmark="-" hex="9"/>
+                                                   </alt>
+                                                </alts>
+                                             </alt>
+                                             <alt><!--lf-->
+                                                <alts>
+                                                   <alt>
+                                                      <literal tmark="-" hex="a"/>
+                                                   </alt>
+                                                </alts>
+                                             </alt>
+                                             <alt><!--cr-->
+                                                <alts>
+                                                   <alt>
+                                                      <literal tmark="-" hex="d"/>
+                                                   </alt>
+                                                </alts>
+                                             </alt>
+                                          </alts>
+                                       </alt>
+                                       <alt>
+                                          <nonterminal name="comment"/>
+                                       </alt>
+                                    </alts>
+                                 </repeat0>
+                              </alt>
+                           </alts>
+                        </alt>
+                     </alts>
+                  </sep>
+               </repeat1>
+            </alt>
+         </alts>
+         <literal tmark="-" string="."/>
+      </alt>
+   </rule>
+   <rule mark="@" name="mark" gt:recursive="false">
+      <alt>
+         <inclusion>
+            <member string="@^-"/>
+         </inclusion>
+      </alt>
+   </rule>
+   <rule name="alts" gt:recursive="true">
+      <alt>
+         <repeat1>
+            <nonterminal name="alt"/>
+            <sep>
+               <alts>
+                  <alt>
+                     <inclusion tmark="-">
+                        <member string=";|"/>
+                     </inclusion>
+                     <!--s-->
+                     <alts>
+                        <alt>
+                           <repeat0>
+                              <alts>
+                                 <alt><!--whitespace-->
+                                    <alts>
+                                       <alt>
+                                          <inclusion tmark="-">
+                                             <member code="Zs"/>
+                                          </inclusion>
+                                       </alt>
+                                       <alt><!--tab-->
+                                          <alts>
+                                             <alt>
+                                                <literal tmark="-" hex="9"/>
+                                             </alt>
+                                          </alts>
+                                       </alt>
+                                       <alt><!--lf-->
+                                          <alts>
+                                             <alt>
+                                                <literal tmark="-" hex="a"/>
+                                             </alt>
+                                          </alts>
+                                       </alt>
+                                       <alt><!--cr-->
+                                          <alts>
+                                             <alt>
+                                                <literal tmark="-" hex="d"/>
+                                             </alt>
+                                          </alts>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt>
+                                    <nonterminal name="comment"/>
+                                 </alt>
+                              </alts>
+                           </repeat0>
+                        </alt>
+                     </alts>
+                  </alt>
+               </alts>
+            </sep>
+         </repeat1>
+      </alt>
+   </rule>
+   <rule name="alt" gt:recursive="true">
+      <alt>
+         <repeat0><!--term-->
+            <alts>
+               <alt><!--factor-->
+                  <alts>
+                     <alt><!--terminal-->
+                        <alts>
+                           <alt>
+                              <nonterminal name="literal"/>
+                           </alt>
+                           <alt><!--charset-->
+                              <alts>
+                                 <alt>
+                                    <nonterminal name="inclusion"/>
+                                 </alt>
+                                 <alt>
+                                    <nonterminal name="exclusion"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt>
+                        <nonterminal name="nonterminal"/>
+                     </alt>
+                     <alt>
+                        <literal tmark="-" string="("/>
+                        <!--s-->
+                        <alts>
+                           <alt>
+                              <repeat0>
+                                 <alts>
+                                    <alt><!--whitespace-->
+                                       <alts>
+                                          <alt>
+                                             <inclusion tmark="-">
+                                                <member code="Zs"/>
+                                             </inclusion>
+                                          </alt>
+                                          <alt><!--tab-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="9"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                          <alt><!--lf-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="a"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                          <alt><!--cr-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="d"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt>
+                                       <nonterminal name="comment"/>
+                                    </alt>
+                                 </alts>
+                              </repeat0>
+                           </alt>
+                        </alts>
+                        <nonterminal name="alts"/>
+                        <literal tmark="-" string=")"/>
+                        <!--s-->
+                        <alts>
+                           <alt>
+                              <repeat0>
+                                 <alts>
+                                    <alt><!--whitespace-->
+                                       <alts>
+                                          <alt>
+                                             <inclusion tmark="-">
+                                                <member code="Zs"/>
+                                             </inclusion>
+                                          </alt>
+                                          <alt><!--tab-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="9"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                          <alt><!--lf-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="a"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                          <alt><!--cr-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="d"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt>
+                                       <nonterminal name="comment"/>
+                                    </alt>
+                                 </alts>
+                              </repeat0>
+                           </alt>
+                        </alts>
+                     </alt>
+                  </alts>
+               </alt>
+               <alt>
+                  <nonterminal name="option"/>
+               </alt>
+               <alt>
+                  <nonterminal name="repeat0"/>
+               </alt>
+               <alt>
+                  <nonterminal name="repeat1"/>
+               </alt>
+            </alts>
+            <sep>
+               <alts>
+                  <alt>
+                     <literal tmark="-" string=","/>
+                     <!--s-->
+                     <alts>
+                        <alt>
+                           <repeat0>
+                              <alts>
+                                 <alt><!--whitespace-->
+                                    <alts>
+                                       <alt>
+                                          <inclusion tmark="-">
+                                             <member code="Zs"/>
+                                          </inclusion>
+                                       </alt>
+                                       <alt><!--tab-->
+                                          <alts>
+                                             <alt>
+                                                <literal tmark="-" hex="9"/>
+                                             </alt>
+                                          </alts>
+                                       </alt>
+                                       <alt><!--lf-->
+                                          <alts>
+                                             <alt>
+                                                <literal tmark="-" hex="a"/>
+                                             </alt>
+                                          </alts>
+                                       </alt>
+                                       <alt><!--cr-->
+                                          <alts>
+                                             <alt>
+                                                <literal tmark="-" hex="d"/>
+                                             </alt>
+                                          </alts>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt>
+                                    <nonterminal name="comment"/>
+                                 </alt>
+                              </alts>
+                           </repeat0>
+                        </alt>
+                     </alts>
+                  </alt>
+               </alts>
+            </sep>
+         </repeat0>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="term"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt><!--factor-->
+         <alts>
+            <alt><!--terminal-->
+               <alts>
+                  <alt>
+                     <nonterminal name="literal"/>
+                  </alt>
+                  <alt><!--charset-->
+                     <alts>
+                        <alt>
+                           <nonterminal name="inclusion"/>
+                        </alt>
+                        <alt>
+                           <nonterminal name="exclusion"/>
+                        </alt>
+                     </alts>
+                  </alt>
+               </alts>
+            </alt>
+            <alt>
+               <nonterminal name="nonterminal"/>
+            </alt>
+            <alt>
+               <literal tmark="-" string="("/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+               <nonterminal name="alts"/>
+               <literal tmark="-" string=")"/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+            </alt>
+         </alts>
+      </alt>
+      <alt>
+         <nonterminal name="option"/>
+      </alt>
+      <alt>
+         <nonterminal name="repeat0"/>
+      </alt>
+      <alt>
+         <nonterminal name="repeat1"/>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="factor"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt><!--terminal-->
+         <alts>
+            <alt>
+               <nonterminal name="literal"/>
+            </alt>
+            <alt><!--charset-->
+               <alts>
+                  <alt>
+                     <nonterminal name="inclusion"/>
+                  </alt>
+                  <alt>
+                     <nonterminal name="exclusion"/>
+                  </alt>
+               </alts>
+            </alt>
+         </alts>
+      </alt>
+      <alt>
+         <nonterminal name="nonterminal"/>
+      </alt>
+      <alt>
+         <literal tmark="-" string="("/>
+         <!--s-->
+         <alts>
+            <alt>
+               <repeat0>
+                  <alts>
+                     <alt><!--whitespace-->
+                        <alts>
+                           <alt>
+                              <inclusion tmark="-">
+                                 <member code="Zs"/>
+                              </inclusion>
+                           </alt>
+                           <alt><!--tab-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="9"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--lf-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="a"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--cr-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="d"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt>
+                        <nonterminal name="comment"/>
+                     </alt>
+                  </alts>
+               </repeat0>
+            </alt>
+         </alts>
+         <nonterminal name="alts"/>
+         <literal tmark="-" string=")"/>
+         <!--s-->
+         <alts>
+            <alt>
+               <repeat0>
+                  <alts>
+                     <alt><!--whitespace-->
+                        <alts>
+                           <alt>
+                              <inclusion tmark="-">
+                                 <member code="Zs"/>
+                              </inclusion>
+                           </alt>
+                           <alt><!--tab-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="9"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--lf-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="a"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--cr-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="d"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt>
+                        <nonterminal name="comment"/>
+                     </alt>
+                  </alts>
+               </repeat0>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule name="repeat0" gt:recursive="true">
+      <alt><!--factor-->
+         <alts>
+            <alt><!--terminal-->
+               <alts>
+                  <alt>
+                     <nonterminal name="literal"/>
+                  </alt>
+                  <alt><!--charset-->
+                     <alts>
+                        <alt>
+                           <nonterminal name="inclusion"/>
+                        </alt>
+                        <alt>
+                           <nonterminal name="exclusion"/>
+                        </alt>
+                     </alts>
+                  </alt>
+               </alts>
+            </alt>
+            <alt>
+               <nonterminal name="nonterminal"/>
+            </alt>
+            <alt>
+               <literal tmark="-" string="("/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+               <nonterminal name="alts"/>
+               <literal tmark="-" string=")"/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+            </alt>
+         </alts>
+         <alts>
+            <alt>
+               <literal tmark="-" string="*"/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+            </alt>
+            <alt>
+               <literal tmark="-" string="**"/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+               <nonterminal name="sep"/>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule name="repeat1" gt:recursive="true">
+      <alt><!--factor-->
+         <alts>
+            <alt><!--terminal-->
+               <alts>
+                  <alt>
+                     <nonterminal name="literal"/>
+                  </alt>
+                  <alt><!--charset-->
+                     <alts>
+                        <alt>
+                           <nonterminal name="inclusion"/>
+                        </alt>
+                        <alt>
+                           <nonterminal name="exclusion"/>
+                        </alt>
+                     </alts>
+                  </alt>
+               </alts>
+            </alt>
+            <alt>
+               <nonterminal name="nonterminal"/>
+            </alt>
+            <alt>
+               <literal tmark="-" string="("/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+               <nonterminal name="alts"/>
+               <literal tmark="-" string=")"/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+            </alt>
+         </alts>
+         <alts>
+            <alt>
+               <literal tmark="-" string="+"/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+            </alt>
+            <alt>
+               <literal tmark="-" string="++"/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+               <nonterminal name="sep"/>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule name="option" gt:recursive="true">
+      <alt><!--factor-->
+         <alts>
+            <alt><!--terminal-->
+               <alts>
+                  <alt>
+                     <nonterminal name="literal"/>
+                  </alt>
+                  <alt><!--charset-->
+                     <alts>
+                        <alt>
+                           <nonterminal name="inclusion"/>
+                        </alt>
+                        <alt>
+                           <nonterminal name="exclusion"/>
+                        </alt>
+                     </alts>
+                  </alt>
+               </alts>
+            </alt>
+            <alt>
+               <nonterminal name="nonterminal"/>
+            </alt>
+            <alt>
+               <literal tmark="-" string="("/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+               <nonterminal name="alts"/>
+               <literal tmark="-" string=")"/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+            </alt>
+         </alts>
+         <literal tmark="-" string="?"/>
+         <!--s-->
+         <alts>
+            <alt>
+               <repeat0>
+                  <alts>
+                     <alt><!--whitespace-->
+                        <alts>
+                           <alt>
+                              <inclusion tmark="-">
+                                 <member code="Zs"/>
+                              </inclusion>
+                           </alt>
+                           <alt><!--tab-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="9"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--lf-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="a"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--cr-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="d"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt>
+                        <nonterminal name="comment"/>
+                     </alt>
+                  </alts>
+               </repeat0>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule name="sep" gt:recursive="true">
+      <alt><!--factor-->
+         <alts>
+            <alt><!--terminal-->
+               <alts>
+                  <alt>
+                     <nonterminal name="literal"/>
+                  </alt>
+                  <alt><!--charset-->
+                     <alts>
+                        <alt>
+                           <nonterminal name="inclusion"/>
+                        </alt>
+                        <alt>
+                           <nonterminal name="exclusion"/>
+                        </alt>
+                     </alts>
+                  </alt>
+               </alts>
+            </alt>
+            <alt>
+               <nonterminal name="nonterminal"/>
+            </alt>
+            <alt>
+               <literal tmark="-" string="("/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+               <nonterminal name="alts"/>
+               <literal tmark="-" string=")"/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule name="nonterminal" gt:recursive="false">
+      <alt>
+         <option>
+            <alts>
+               <alt>
+                  <nonterminal name="mark"/>
+                  <!--s-->
+                  <alts>
+                     <alt>
+                        <repeat0>
+                           <alts>
+                              <alt><!--whitespace-->
+                                 <alts>
+                                    <alt>
+                                       <inclusion tmark="-">
+                                          <member code="Zs"/>
+                                       </inclusion>
+                                    </alt>
+                                    <alt><!--tab-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="9"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt><!--lf-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="a"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt><!--cr-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="d"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                 </alts>
+                              </alt>
+                              <alt>
+                                 <nonterminal name="comment"/>
+                              </alt>
+                           </alts>
+                        </repeat0>
+                     </alt>
+                  </alts>
+               </alt>
+            </alts>
+         </option>
+         <nonterminal name="name"/>
+         <!--s-->
+         <alts>
+            <alt>
+               <repeat0>
+                  <alts>
+                     <alt><!--whitespace-->
+                        <alts>
+                           <alt>
+                              <inclusion tmark="-">
+                                 <member code="Zs"/>
+                              </inclusion>
+                           </alt>
+                           <alt><!--tab-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="9"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--lf-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="a"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--cr-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="d"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt>
+                        <nonterminal name="comment"/>
+                     </alt>
+                  </alts>
+               </repeat0>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule mark="@" name="name" gt:recursive="false">
+      <alt><!--namestart-->
+         <alts>
+            <alt>
+               <inclusion>
+                  <member string="_"/>
+                  <member code="L"/>
+               </inclusion>
+            </alt>
+         </alts>
+         <repeat0><!--namefollower-->
+            <alts>
+               <alt><!--namestart-->
+                  <alts>
+                     <alt>
+                        <inclusion>
+                           <member string="_"/>
+                           <member code="L"/>
+                        </inclusion>
+                     </alt>
+                  </alts>
+               </alt>
+               <alt>
+                  <inclusion>
+                     <member string="-.·‿⁀"/>
+                     <member code="Nd"/>
+                     <member code="Mn"/>
+                  </inclusion>
+               </alt>
+            </alts>
+         </repeat0>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="namestart"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <inclusion>
+            <member string="_"/>
+            <member code="L"/>
+         </inclusion>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="namefollower"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt><!--namestart-->
+         <alts>
+            <alt>
+               <inclusion>
+                  <member string="_"/>
+                  <member code="L"/>
+               </inclusion>
+            </alt>
+         </alts>
+      </alt>
+      <alt>
+         <inclusion>
+            <member string="-.·‿⁀"/>
+            <member code="Nd"/>
+            <member code="Mn"/>
+         </inclusion>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="terminal"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <nonterminal name="literal"/>
+      </alt>
+      <alt><!--charset-->
+         <alts>
+            <alt>
+               <nonterminal name="inclusion"/>
+            </alt>
+            <alt>
+               <nonterminal name="exclusion"/>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule name="literal" gt:recursive="false">
+      <alt><!--quoted-->
+         <alts>
+            <alt>
+               <option>
+                  <alts>
+                     <alt>
+                        <nonterminal name="tmark"/>
+                        <!--s-->
+                        <alts>
+                           <alt>
+                              <repeat0>
+                                 <alts>
+                                    <alt><!--whitespace-->
+                                       <alts>
+                                          <alt>
+                                             <inclusion tmark="-">
+                                                <member code="Zs"/>
+                                             </inclusion>
+                                          </alt>
+                                          <alt><!--tab-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="9"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                          <alt><!--lf-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="a"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                          <alt><!--cr-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="d"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt>
+                                       <nonterminal name="comment"/>
+                                    </alt>
+                                 </alts>
+                              </repeat0>
+                           </alt>
+                        </alts>
+                     </alt>
+                  </alts>
+               </option>
+               <nonterminal name="string"/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+            </alt>
+         </alts>
+      </alt>
+      <alt><!--encoded-->
+         <alts>
+            <alt>
+               <option>
+                  <alts>
+                     <alt>
+                        <nonterminal name="tmark"/>
+                        <!--s-->
+                        <alts>
+                           <alt>
+                              <repeat0>
+                                 <alts>
+                                    <alt><!--whitespace-->
+                                       <alts>
+                                          <alt>
+                                             <inclusion tmark="-">
+                                                <member code="Zs"/>
+                                             </inclusion>
+                                          </alt>
+                                          <alt><!--tab-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="9"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                          <alt><!--lf-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="a"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                          <alt><!--cr-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="d"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt>
+                                       <nonterminal name="comment"/>
+                                    </alt>
+                                 </alts>
+                              </repeat0>
+                           </alt>
+                        </alts>
+                     </alt>
+                  </alts>
+               </option>
+               <literal tmark="-" string="#"/>
+               <nonterminal name="hex"/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="quoted"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <option>
+            <alts>
+               <alt>
+                  <nonterminal name="tmark"/>
+                  <!--s-->
+                  <alts>
+                     <alt>
+                        <repeat0>
+                           <alts>
+                              <alt><!--whitespace-->
+                                 <alts>
+                                    <alt>
+                                       <inclusion tmark="-">
+                                          <member code="Zs"/>
+                                       </inclusion>
+                                    </alt>
+                                    <alt><!--tab-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="9"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt><!--lf-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="a"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt><!--cr-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="d"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                 </alts>
+                              </alt>
+                              <alt>
+                                 <nonterminal name="comment"/>
+                              </alt>
+                           </alts>
+                        </repeat0>
+                     </alt>
+                  </alts>
+               </alt>
+            </alts>
+         </option>
+         <nonterminal name="string"/>
+         <!--s-->
+         <alts>
+            <alt>
+               <repeat0>
+                  <alts>
+                     <alt><!--whitespace-->
+                        <alts>
+                           <alt>
+                              <inclusion tmark="-">
+                                 <member code="Zs"/>
+                              </inclusion>
+                           </alt>
+                           <alt><!--tab-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="9"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--lf-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="a"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--cr-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="d"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt>
+                        <nonterminal name="comment"/>
+                     </alt>
+                  </alts>
+               </repeat0>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule mark="@" name="tmark" gt:recursive="false">
+      <alt>
+         <inclusion>
+            <member string="^-+"/>
+         </inclusion>
+      </alt>
+   </rule>
+   <rule mark="@" name="string" gt:recursive="false">
+      <alt>
+         <literal tmark="-" string="&#34;"/>
+         <repeat1><!--dchar-->
+            <alts>
+               <alt>
+                  <exclusion>
+                     <member string="&#34;"/>
+                     <member hex="a"/>
+                     <member hex="d"/>
+                  </exclusion>
+               </alt>
+               <alt>
+                  <literal string="&#34;"/>
+                  <literal tmark="-" string="&#34;"/>
+               </alt>
+            </alts>
+         </repeat1>
+         <literal tmark="-" string="&#34;"/>
+      </alt>
+      <alt>
+         <literal tmark="-" string="'"/>
+         <repeat1><!--schar-->
+            <alts>
+               <alt>
+                  <exclusion>
+                     <member string="'"/>
+                     <member hex="a"/>
+                     <member hex="d"/>
+                  </exclusion>
+               </alt>
+               <alt>
+                  <literal string="'"/>
+                  <literal tmark="-" string="'"/>
+               </alt>
+            </alts>
+         </repeat1>
+         <literal tmark="-" string="'"/>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="dchar"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <exclusion>
+            <member string="&#34;"/>
+            <member hex="a"/>
+            <member hex="d"/>
+         </exclusion>
+      </alt>
+      <alt>
+         <literal string="&#34;"/>
+         <literal tmark="-" string="&#34;"/>
+      </alt>
+   </rule>
+   <comment>all characters except line breaks; quotes must be doubled</comment>
+   <rule mark="-"
+         name="schar"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <exclusion>
+            <member string="'"/>
+            <member hex="a"/>
+            <member hex="d"/>
+         </exclusion>
+      </alt>
+      <alt>
+         <literal string="'"/>
+         <literal tmark="-" string="'"/>
+      </alt>
+   </rule>
+   <comment>all characters except line breaks; quotes must be doubled</comment>
+   <rule mark="-"
+         name="encoded"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <option>
+            <alts>
+               <alt>
+                  <nonterminal name="tmark"/>
+                  <!--s-->
+                  <alts>
+                     <alt>
+                        <repeat0>
+                           <alts>
+                              <alt><!--whitespace-->
+                                 <alts>
+                                    <alt>
+                                       <inclusion tmark="-">
+                                          <member code="Zs"/>
+                                       </inclusion>
+                                    </alt>
+                                    <alt><!--tab-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="9"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt><!--lf-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="a"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt><!--cr-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="d"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                 </alts>
+                              </alt>
+                              <alt>
+                                 <nonterminal name="comment"/>
+                              </alt>
+                           </alts>
+                        </repeat0>
+                     </alt>
+                  </alts>
+               </alt>
+            </alts>
+         </option>
+         <literal tmark="-" string="#"/>
+         <nonterminal name="hex"/>
+         <!--s-->
+         <alts>
+            <alt>
+               <repeat0>
+                  <alts>
+                     <alt><!--whitespace-->
+                        <alts>
+                           <alt>
+                              <inclusion tmark="-">
+                                 <member code="Zs"/>
+                              </inclusion>
+                           </alt>
+                           <alt><!--tab-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="9"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--lf-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="a"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--cr-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="d"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt>
+                        <nonterminal name="comment"/>
+                     </alt>
+                  </alts>
+               </repeat0>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule mark="@" name="hex" gt:recursive="false">
+      <alt>
+         <repeat1>
+            <inclusion>
+               <member from="0" to="9"/>
+               <member from="a" to="f"/>
+               <member from="A" to="F"/>
+            </inclusion>
+         </repeat1>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="charset"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <nonterminal name="inclusion"/>
+      </alt>
+      <alt>
+         <nonterminal name="exclusion"/>
+      </alt>
+   </rule>
+   <rule name="inclusion" gt:recursive="false">
+      <alt>
+         <option>
+            <alts>
+               <alt>
+                  <nonterminal name="tmark"/>
+                  <!--s-->
+                  <alts>
+                     <alt>
+                        <repeat0>
+                           <alts>
+                              <alt><!--whitespace-->
+                                 <alts>
+                                    <alt>
+                                       <inclusion tmark="-">
+                                          <member code="Zs"/>
+                                       </inclusion>
+                                    </alt>
+                                    <alt><!--tab-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="9"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt><!--lf-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="a"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt><!--cr-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="d"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                 </alts>
+                              </alt>
+                              <alt>
+                                 <nonterminal name="comment"/>
+                              </alt>
+                           </alts>
+                        </repeat0>
+                     </alt>
+                  </alts>
+               </alt>
+            </alts>
+         </option>
+         <!--set-->
+         <alts>
+            <alt>
+               <literal tmark="-" string="["/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+               <repeat0>
+                  <alts>
+                     <alt>
+                        <nonterminal name="member"/>
+                        <!--s-->
+                        <alts>
+                           <alt>
+                              <repeat0>
+                                 <alts>
+                                    <alt><!--whitespace-->
+                                       <alts>
+                                          <alt>
+                                             <inclusion tmark="-">
+                                                <member code="Zs"/>
+                                             </inclusion>
+                                          </alt>
+                                          <alt><!--tab-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="9"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                          <alt><!--lf-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="a"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                          <alt><!--cr-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="d"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt>
+                                       <nonterminal name="comment"/>
+                                    </alt>
+                                 </alts>
+                              </repeat0>
+                           </alt>
+                        </alts>
+                     </alt>
+                  </alts>
+                  <sep>
+                     <alts>
+                        <alt>
+                           <inclusion tmark="-">
+                              <member string=";|"/>
+                           </inclusion>
+                           <!--s-->
+                           <alts>
+                              <alt>
+                                 <repeat0>
+                                    <alts>
+                                       <alt><!--whitespace-->
+                                          <alts>
+                                             <alt>
+                                                <inclusion tmark="-">
+                                                   <member code="Zs"/>
+                                                </inclusion>
+                                             </alt>
+                                             <alt><!--tab-->
+                                                <alts>
+                                                   <alt>
+                                                      <literal tmark="-" hex="9"/>
+                                                   </alt>
+                                                </alts>
+                                             </alt>
+                                             <alt><!--lf-->
+                                                <alts>
+                                                   <alt>
+                                                      <literal tmark="-" hex="a"/>
+                                                   </alt>
+                                                </alts>
+                                             </alt>
+                                             <alt><!--cr-->
+                                                <alts>
+                                                   <alt>
+                                                      <literal tmark="-" hex="d"/>
+                                                   </alt>
+                                                </alts>
+                                             </alt>
+                                          </alts>
+                                       </alt>
+                                       <alt>
+                                          <nonterminal name="comment"/>
+                                       </alt>
+                                    </alts>
+                                 </repeat0>
+                              </alt>
+                           </alts>
+                        </alt>
+                     </alts>
+                  </sep>
+               </repeat0>
+               <literal tmark="-" string="]"/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule name="exclusion" gt:recursive="false">
+      <alt>
+         <option>
+            <alts>
+               <alt>
+                  <nonterminal name="tmark"/>
+                  <!--s-->
+                  <alts>
+                     <alt>
+                        <repeat0>
+                           <alts>
+                              <alt><!--whitespace-->
+                                 <alts>
+                                    <alt>
+                                       <inclusion tmark="-">
+                                          <member code="Zs"/>
+                                       </inclusion>
+                                    </alt>
+                                    <alt><!--tab-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="9"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt><!--lf-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="a"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt><!--cr-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="d"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                 </alts>
+                              </alt>
+                              <alt>
+                                 <nonterminal name="comment"/>
+                              </alt>
+                           </alts>
+                        </repeat0>
+                     </alt>
+                  </alts>
+               </alt>
+            </alts>
+         </option>
+         <literal tmark="-" string="~"/>
+         <!--s-->
+         <alts>
+            <alt>
+               <repeat0>
+                  <alts>
+                     <alt><!--whitespace-->
+                        <alts>
+                           <alt>
+                              <inclusion tmark="-">
+                                 <member code="Zs"/>
+                              </inclusion>
+                           </alt>
+                           <alt><!--tab-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="9"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--lf-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="a"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--cr-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="d"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt>
+                        <nonterminal name="comment"/>
+                     </alt>
+                  </alts>
+               </repeat0>
+            </alt>
+         </alts>
+         <!--set-->
+         <alts>
+            <alt>
+               <literal tmark="-" string="["/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+               <repeat0>
+                  <alts>
+                     <alt>
+                        <nonterminal name="member"/>
+                        <!--s-->
+                        <alts>
+                           <alt>
+                              <repeat0>
+                                 <alts>
+                                    <alt><!--whitespace-->
+                                       <alts>
+                                          <alt>
+                                             <inclusion tmark="-">
+                                                <member code="Zs"/>
+                                             </inclusion>
+                                          </alt>
+                                          <alt><!--tab-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="9"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                          <alt><!--lf-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="a"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                          <alt><!--cr-->
+                                             <alts>
+                                                <alt>
+                                                   <literal tmark="-" hex="d"/>
+                                                </alt>
+                                             </alts>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt>
+                                       <nonterminal name="comment"/>
+                                    </alt>
+                                 </alts>
+                              </repeat0>
+                           </alt>
+                        </alts>
+                     </alt>
+                  </alts>
+                  <sep>
+                     <alts>
+                        <alt>
+                           <inclusion tmark="-">
+                              <member string=";|"/>
+                           </inclusion>
+                           <!--s-->
+                           <alts>
+                              <alt>
+                                 <repeat0>
+                                    <alts>
+                                       <alt><!--whitespace-->
+                                          <alts>
+                                             <alt>
+                                                <inclusion tmark="-">
+                                                   <member code="Zs"/>
+                                                </inclusion>
+                                             </alt>
+                                             <alt><!--tab-->
+                                                <alts>
+                                                   <alt>
+                                                      <literal tmark="-" hex="9"/>
+                                                   </alt>
+                                                </alts>
+                                             </alt>
+                                             <alt><!--lf-->
+                                                <alts>
+                                                   <alt>
+                                                      <literal tmark="-" hex="a"/>
+                                                   </alt>
+                                                </alts>
+                                             </alt>
+                                             <alt><!--cr-->
+                                                <alts>
+                                                   <alt>
+                                                      <literal tmark="-" hex="d"/>
+                                                   </alt>
+                                                </alts>
+                                             </alt>
+                                          </alts>
+                                       </alt>
+                                       <alt>
+                                          <nonterminal name="comment"/>
+                                       </alt>
+                                    </alts>
+                                 </repeat0>
+                              </alt>
+                           </alts>
+                        </alt>
+                     </alts>
+                  </sep>
+               </repeat0>
+               <literal tmark="-" string="]"/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="set"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <literal tmark="-" string="["/>
+         <!--s-->
+         <alts>
+            <alt>
+               <repeat0>
+                  <alts>
+                     <alt><!--whitespace-->
+                        <alts>
+                           <alt>
+                              <inclusion tmark="-">
+                                 <member code="Zs"/>
+                              </inclusion>
+                           </alt>
+                           <alt><!--tab-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="9"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--lf-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="a"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--cr-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="d"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt>
+                        <nonterminal name="comment"/>
+                     </alt>
+                  </alts>
+               </repeat0>
+            </alt>
+         </alts>
+         <repeat0>
+            <alts>
+               <alt>
+                  <nonterminal name="member"/>
+                  <!--s-->
+                  <alts>
+                     <alt>
+                        <repeat0>
+                           <alts>
+                              <alt><!--whitespace-->
+                                 <alts>
+                                    <alt>
+                                       <inclusion tmark="-">
+                                          <member code="Zs"/>
+                                       </inclusion>
+                                    </alt>
+                                    <alt><!--tab-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="9"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt><!--lf-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="a"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                    <alt><!--cr-->
+                                       <alts>
+                                          <alt>
+                                             <literal tmark="-" hex="d"/>
+                                          </alt>
+                                       </alts>
+                                    </alt>
+                                 </alts>
+                              </alt>
+                              <alt>
+                                 <nonterminal name="comment"/>
+                              </alt>
+                           </alts>
+                        </repeat0>
+                     </alt>
+                  </alts>
+               </alt>
+            </alts>
+            <sep>
+               <alts>
+                  <alt>
+                     <inclusion tmark="-">
+                        <member string=";|"/>
+                     </inclusion>
+                     <!--s-->
+                     <alts>
+                        <alt>
+                           <repeat0>
+                              <alts>
+                                 <alt><!--whitespace-->
+                                    <alts>
+                                       <alt>
+                                          <inclusion tmark="-">
+                                             <member code="Zs"/>
+                                          </inclusion>
+                                       </alt>
+                                       <alt><!--tab-->
+                                          <alts>
+                                             <alt>
+                                                <literal tmark="-" hex="9"/>
+                                             </alt>
+                                          </alts>
+                                       </alt>
+                                       <alt><!--lf-->
+                                          <alts>
+                                             <alt>
+                                                <literal tmark="-" hex="a"/>
+                                             </alt>
+                                          </alts>
+                                       </alt>
+                                       <alt><!--cr-->
+                                          <alts>
+                                             <alt>
+                                                <literal tmark="-" hex="d"/>
+                                             </alt>
+                                          </alts>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt>
+                                    <nonterminal name="comment"/>
+                                 </alt>
+                              </alts>
+                           </repeat0>
+                        </alt>
+                     </alts>
+                  </alt>
+               </alts>
+            </sep>
+         </repeat0>
+         <literal tmark="-" string="]"/>
+         <!--s-->
+         <alts>
+            <alt>
+               <repeat0>
+                  <alts>
+                     <alt><!--whitespace-->
+                        <alts>
+                           <alt>
+                              <inclusion tmark="-">
+                                 <member code="Zs"/>
+                              </inclusion>
+                           </alt>
+                           <alt><!--tab-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="9"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--lf-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="a"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--cr-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="d"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt>
+                        <nonterminal name="comment"/>
+                     </alt>
+                  </alts>
+               </repeat0>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule name="member" gt:recursive="false">
+      <alt>
+         <nonterminal name="string"/>
+      </alt>
+      <alt>
+         <literal tmark="-" string="#"/>
+         <nonterminal name="hex"/>
+      </alt>
+      <alt><!--range-->
+         <alts>
+            <alt>
+               <nonterminal name="from"/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+               <literal tmark="-" string="-"/>
+               <!--s-->
+               <alts>
+                  <alt>
+                     <repeat0>
+                        <alts>
+                           <alt><!--whitespace-->
+                              <alts>
+                                 <alt>
+                                    <inclusion tmark="-">
+                                       <member code="Zs"/>
+                                    </inclusion>
+                                 </alt>
+                                 <alt><!--tab-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="9"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--lf-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="a"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                                 <alt><!--cr-->
+                                    <alts>
+                                       <alt>
+                                          <literal tmark="-" hex="d"/>
+                                       </alt>
+                                    </alts>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt>
+                              <nonterminal name="comment"/>
+                           </alt>
+                        </alts>
+                     </repeat0>
+                  </alt>
+               </alts>
+               <nonterminal name="to"/>
+            </alt>
+         </alts>
+      </alt>
+      <alt><!--class-->
+         <alts>
+            <alt>
+               <nonterminal name="code"/>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="range"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <nonterminal name="from"/>
+         <!--s-->
+         <alts>
+            <alt>
+               <repeat0>
+                  <alts>
+                     <alt><!--whitespace-->
+                        <alts>
+                           <alt>
+                              <inclusion tmark="-">
+                                 <member code="Zs"/>
+                              </inclusion>
+                           </alt>
+                           <alt><!--tab-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="9"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--lf-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="a"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--cr-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="d"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt>
+                        <nonterminal name="comment"/>
+                     </alt>
+                  </alts>
+               </repeat0>
+            </alt>
+         </alts>
+         <literal tmark="-" string="-"/>
+         <!--s-->
+         <alts>
+            <alt>
+               <repeat0>
+                  <alts>
+                     <alt><!--whitespace-->
+                        <alts>
+                           <alt>
+                              <inclusion tmark="-">
+                                 <member code="Zs"/>
+                              </inclusion>
+                           </alt>
+                           <alt><!--tab-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="9"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--lf-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="a"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                           <alt><!--cr-->
+                              <alts>
+                                 <alt>
+                                    <literal tmark="-" hex="d"/>
+                                 </alt>
+                              </alts>
+                           </alt>
+                        </alts>
+                     </alt>
+                     <alt>
+                        <nonterminal name="comment"/>
+                     </alt>
+                  </alts>
+               </repeat0>
+            </alt>
+         </alts>
+         <nonterminal name="to"/>
+      </alt>
+   </rule>
+   <rule mark="@" name="from" gt:recursive="false">
+      <alt><!--character-->
+         <alts>
+            <alt>
+               <literal tmark="-" string="&#34;"/>
+               <!--dchar-->
+               <alts>
+                  <alt>
+                     <exclusion>
+                        <member string="&#34;"/>
+                        <member hex="a"/>
+                        <member hex="d"/>
+                     </exclusion>
+                  </alt>
+                  <alt>
+                     <literal string="&#34;"/>
+                     <literal tmark="-" string="&#34;"/>
+                  </alt>
+               </alts>
+               <literal tmark="-" string="&#34;"/>
+            </alt>
+            <alt>
+               <literal tmark="-" string="'"/>
+               <!--schar-->
+               <alts>
+                  <alt>
+                     <exclusion>
+                        <member string="'"/>
+                        <member hex="a"/>
+                        <member hex="d"/>
+                     </exclusion>
+                  </alt>
+                  <alt>
+                     <literal string="'"/>
+                     <literal tmark="-" string="'"/>
+                  </alt>
+               </alts>
+               <literal tmark="-" string="'"/>
+            </alt>
+            <alt>
+               <literal string="#"/>
+               <nonterminal name="hex"/>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule mark="@" name="to" gt:recursive="false">
+      <alt><!--character-->
+         <alts>
+            <alt>
+               <literal tmark="-" string="&#34;"/>
+               <!--dchar-->
+               <alts>
+                  <alt>
+                     <exclusion>
+                        <member string="&#34;"/>
+                        <member hex="a"/>
+                        <member hex="d"/>
+                     </exclusion>
+                  </alt>
+                  <alt>
+                     <literal string="&#34;"/>
+                     <literal tmark="-" string="&#34;"/>
+                  </alt>
+               </alts>
+               <literal tmark="-" string="&#34;"/>
+            </alt>
+            <alt>
+               <literal tmark="-" string="'"/>
+               <!--schar-->
+               <alts>
+                  <alt>
+                     <exclusion>
+                        <member string="'"/>
+                        <member hex="a"/>
+                        <member hex="d"/>
+                     </exclusion>
+                  </alt>
+                  <alt>
+                     <literal string="'"/>
+                     <literal tmark="-" string="'"/>
+                  </alt>
+               </alts>
+               <literal tmark="-" string="'"/>
+            </alt>
+            <alt>
+               <literal string="#"/>
+               <nonterminal name="hex"/>
+            </alt>
+         </alts>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="character"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <literal tmark="-" string="&#34;"/>
+         <!--dchar-->
+         <alts>
+            <alt>
+               <exclusion>
+                  <member string="&#34;"/>
+                  <member hex="a"/>
+                  <member hex="d"/>
+               </exclusion>
+            </alt>
+            <alt>
+               <literal string="&#34;"/>
+               <literal tmark="-" string="&#34;"/>
+            </alt>
+         </alts>
+         <literal tmark="-" string="&#34;"/>
+      </alt>
+      <alt>
+         <literal tmark="-" string="'"/>
+         <!--schar-->
+         <alts>
+            <alt>
+               <exclusion>
+                  <member string="'"/>
+                  <member hex="a"/>
+                  <member hex="d"/>
+               </exclusion>
+            </alt>
+            <alt>
+               <literal string="'"/>
+               <literal tmark="-" string="'"/>
+            </alt>
+         </alts>
+         <literal tmark="-" string="'"/>
+      </alt>
+      <alt>
+         <literal string="#"/>
+         <nonterminal name="hex"/>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="class"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <nonterminal name="code"/>
+      </alt>
+   </rule>
+   <rule mark="@" name="code" gt:recursive="false">
+      <alt><!--capital-->
+         <alts>
+            <alt>
+               <inclusion>
+                  <member from="A" to="Z"/>
+               </inclusion>
+            </alt>
+         </alts>
+         <option><!--letter-->
+            <alts>
+               <alt>
+                  <inclusion>
+                     <member from="a" to="z"/>
+                  </inclusion>
+               </alt>
+            </alts>
+         </option>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="capital"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <inclusion>
+            <member from="A" to="Z"/>
+         </inclusion>
+      </alt>
+   </rule>
+   <rule mark="-"
+         name="letter"
+         gt:recursive="false"
+         gt:referenced="false"
+         gt:reachable="false">
+      <alt>
+         <inclusion>
+            <member from="a" to="z"/>
+         </inclusion>
+      </alt>
+   </rule>
+</ixml>

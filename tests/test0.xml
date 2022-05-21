@@ -22,7 +22,7 @@
     <description>
       <p>First task:  make it work using the grammar for ixml.</p>
     </description>
-    <vxml-grammar-ref href="../lib/ixml.2022-01-25.ixml.xml"/>
+    <vxml-grammar-ref href="../lib/ixml.2022-05-17.ixml.xml"/>
     
     <test-case name="t1i">
       <created by="CMSMcQ" on="2021-10-05"/>

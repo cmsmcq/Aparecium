@@ -10,7 +10,7 @@ declare namespace db =
 
 declare option db:chop "false";
 
-let $catalog-index := 'bogons' (: which catalog to run? short name :)
+let $catalog-index := 'misc' (: which catalog to run? short name :)
     (: bogons 439. 
        test0 2s, test1 5s, hygiene 12s, zeroes 20s.  
        misc 78s, gxxx 153s, wisp-A 100s.

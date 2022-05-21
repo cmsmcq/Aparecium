@@ -49,9 +49,9 @@ declare function epi:earley-parse(
                  'failure-dump': 'closure' }
       else $options
 
-  let $mapResult := (:stat ...prof:time( ... tats:)
+  let $mapResult := (:stat:) prof:time( (:tats:)
                     er:recognizeX($I, $G),
-                    (:stat ...'0a recognize(): '),... tats:)
+                    (:stat:) '0a recognize(): '),(:tats:)
 
       $meiClosure := $mapResult('Closure'),
       $leiCompletions := $mapResult('Completions')
@@ -62,9 +62,9 @@ declare function epi:earley-parse(
        then         let $dummy := eri:notrace((), 
                       'epi:earley-parse() has result') 
 
-        let $lpt := (:stat ...prof:time(... tats:)
+        let $lpt := (:stat:) prof:time((:tats:)
                     epi:all-trees($leiCompletions, $meiClosure, $I)
-                    (:stat ..., '0b making trees: ')... tats:)
+                    (:stat:) , '0b making trees: ')(:tats:)
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
         for $rpt at $npt in $lpt
@@ -84,9 +84,9 @@ declare function epi:earley-parse(
        then         let $dummy := eri:notrace((), 
                       'epi:earley-parse() has result') 
 
-        let $pfg := (:stat ...prof:time(... tats:)
+        let $pfg := (:stat:) prof:time((:tats:)
                     epi:parse-forest-grammar($leiCompletions, $meiClosure, $I)
-                    (:stat ..., '0b making pfg: ')... tats:)
+                    (:stat:) , '0b making pfg: ')(:tats:)
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a parse-forest grammart') 
         return $pfg
@@ -94,9 +94,9 @@ declare function epi:earley-parse(
        else (: default to any-tree :)
                     if ($options?tree-constructor eq 'direct')
         then 
-        let $lpt := (:stat ...prof:time(... tats:)
+        let $lpt := (:stat:) prof:time((:tats:)
                     epi:all-trees($leiCompletions, $meiClosure, $I)
-                    (:stat ..., '0b making trees: ')... tats:)
+                    (:stat:) , '0b making trees: ')(:tats:)
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
         for $rpt in $lpt[1]
@@ -107,12 +107,12 @@ declare function epi:earley-parse(
         else epi:astXparsetree($rpt, count($lpt))
 
         else 
-        let $pfg := (:stat ...prof:time(... tats:)
+        let $pfg := (:stat:) prof:time((:tats:)
                     epi:parse-forest-grammar($leiCompletions, $meiClosure, $I),
-                    (:stat ...'0b making pfg: '),... tats:)
-            $ast := (:stat ...prof:time(... tats:)
+                    (:stat:) '0b making pfg: '),(:tats:)
+            $ast := (:stat:) prof:time((:tats:)
                     epi:tree-from-pfg($pfg, 'document', ())
-                    (:stat ..., '0c extracting tree: ')... tats:)
+                    (:stat:) , '0c extracting tree: ')(:tats:)
 		    
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 

@@ -146,7 +146,7 @@
 <h1>An ixml parser for XSLT and XQuery</h1>
 <h3>C. M. Sperberg-McQueen</h3>
 <h3>Begun 16 August 2021<br />
-Last rev. 10 March 2022</h3>
+Last rev. 20 May 2022</h3>
 <div class="versionList">
 <p>Versions defined:</p>
 <ul>
@@ -269,10 +269,10 @@ predicates</a></li>
 <ul><!-- and a 3! -->
 <li>4.5.1. <a href="#ll-sym-match-length">The <i>match-length()</i>
 function</a></li>
-<li>4.5.2. <a href="#d3e3792">Making regular expressions from
+<li>4.5.2. <a href="#d3e3801">Making regular expressions from
 terminal symbols</a></li>
-<li>4.5.3. <a href="#d3e3914">Testing for symbol type</a></li>
-<li>4.5.4. <a href="#d3e3937">Matching symbols against rule
+<li>4.5.3. <a href="#d3e3923">Testing for symbol type</a></li>
+<li>4.5.4. <a href="#d3e3946">Matching symbols against rule
 indices</a></li>
 </ul>
 </li>
@@ -364,10 +364,10 @@ inserting them into that skeleton. Not everything landed where it
 ought in principle to have landed; the organization of the document
 suffered somewhat from that. As time permits, I hope to revise the
 document to make it easier to read and better organized.</div>
-<div class="Real-P">At this revision (10 March 2022), Aparecium
-works and passes the large majority of the tests available. (A list
-of test-case failures as of today is given <a href="#known-bugs">in
-an appendix</a>.) The current plans for further work are given
+<div class="Real-P">At this revision (20 May 2022), Aparecium works
+and passes the large majority of the tests available. (A list of
+test-case failures as of today is given <a href="#known-bugs">in an
+appendix</a>.) The current plans for further work are given
 <a href="#to-do">in a different appendix</a>.</div>
 <div class="div">
 <div class="quicknav"><span class="arrow">&nbsp;</span><span class=
@@ -1055,8 +1055,8 @@ declare variable $aparecium:options
       };
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e4225">Location of library 170</a>〉, 〈<a href=
-"#d3e4238">Location of ixml grammar 171</a>〉<br /></span>
+"#d3e4234">Location of library 170</a>〉, 〈<a href=
+"#d3e4247">Location of ixml grammar 171</a>〉<br /></span>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#d3e329">[File Aparecium.xqm] 1</a> 〉<br /></span></div>
 </div>
@@ -1185,11 +1185,11 @@ declare function aparecium:parse-string(
   $sI as xs:string,
   $sG as xs:string
 ) as element() {
-  let $cG := (:stat ...prof:time( ... tats:)
+  let $cG := (:stat:) prof:time( (:tats:)
              aparecium:compile-grammar-from-string($sG)
-             (:stat ..., 
+             (:stat:) , 
              'parse-string: compiling grammar from string:') 
-             ... tats:)
+             (:tats:)
              
   return 
     if ($cG/self::aparecium:error)
@@ -1198,9 +1198,9 @@ declare function aparecium:parse-string(
       "parse-string():  Error compiling grammar.",
       $cG      
     }
-    else (:stat ...prof:time( ... tats:)
+    else (:stat:) prof:time( (:tats:)
          aparecium:parse-string-with-compiled-grammar($sI, $cG)
-         (:stat ..., 'parse-string:  parsing input string:') ... tats:)
+         (:stat:) , 'parse-string:  parsing input string:') (:tats:)
 };
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
@@ -1237,16 +1237,16 @@ declare function aparecium:parse-string-with-compiled-grammar(
   $sI as xs:string,
   $cG as element(ixml)
 ) as element() {
-  let $cg-ok := (:stat ...prof:time( ... tats:)
+  let $cg-ok := (:stat:) prof:time( (:tats:)
                 aparecium:grammar-ok($cG)
-                (:stat ..., 'pswcg() calling grammar-ok():') ... tats:)
+                (:stat:) , 'pswcg() calling grammar-ok():') (:tats:)
 
   let $result := if ($cg-ok/self::ixml) 
-                 then (:stat ...prof:time( ... tats:)
+                 then (:stat:) prof:time( (:tats:)
                      earley:any-tree($sI, $cG) 
-                     (:stat ...
+                     (:stat:) 
                      , '0 Outer call to earley:any-tree(): ')
-                      ... tats:)
+                      (:tats:)
                  else element aparecium:error {
                    attribute id { "ap:tbd05" },
                    "Compiled grammar flawed:",
@@ -1724,21 +1724,24 @@ individual kinds of expressions.</div>
 <h5><a class="selflink" name="higl-ME-terminals" id=
 "higl-ME-terminals" href="#higl-ME-terminals">3.4.1.3.</a>
 Gluschkov automata for terminal symbols</h5>
-<div class="Real-P">The &lt;<em>range</em>&gt; and
-&lt;<em>class</em>&gt; elements are always children of
-&lt;<em>inclusion</em>&gt; or &lt;<em>exclusion</em>&gt;. They are
+<div class="Real-P">The &lt;<em>member</em>&gt; element is (and in
+older versions of the spec grammar the &lt;<em>range</em>&gt; and
+&lt;<em>class</em>&gt; elements are) always a child of
+&lt;<em>inclusion</em>&gt; or &lt;<em>exclusion</em>&gt;. It is
 thus internal to the basic symbol and need no decoration, but when
-the function handles the parent it will call itself recursively on
-them; they should be returned without change. The
-&lt;<em>literal</em>&gt; element falls into this category when it
-is a child of &lt;<em>inclusion</em>&gt; or
+the function handles the parent, the function will call itself
+recursively on the children; they should be returned without
+change. The &lt;<em>literal</em>&gt; element falls into this
+category when it is a child of &lt;<em>inclusion</em>&gt; or
 &lt;<em>exclusion</em>&gt;, but it does no harm to handle it
 separately.</div>
 <div class="Real-P">Since all we do is return the elements without
-change, the code is trivial.
+change, the code is trivial. <i>For now, we leave the code for
+&lt;<em>range</em>&gt; and &lt;<em>class</em>&gt; in place.</i>
 <div class="scrap"><span><a name="gl-ME-identity" id=
 "gl-ME-identity">〈 18 Handle leaf nodes 〉 ≡</a></span>
-<pre class="scrapbody">if ($E/self::range) then $E
+<pre class="scrapbody">if ($E/self::member) then $E
+else if ($E/self::range) then $E
 else if ($E/self::class) then $E
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
@@ -1986,7 +1989,7 @@ repetitions 〉 ≡</a></span>
            else $a
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e1335">Calculate follow-set for repetition with separator
+"#d3e1344">Calculate follow-set for repetition with separator
 25</a>〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#gl-ME-repeats-2013">Handle repetitions (v0.1) 22</a>
 〉 〈 <a href="#gl-ME-repeats">Handle repetitions 23</a>
@@ -2010,7 +2013,7 @@ as follows. We pre-calculate
 <li>for each position in <i>F</i> or <i>G</i>, its local name and
 its follow-set within <i>F</i> or <i>G</i>.</li>
 </ul>
-<div class="scrap"><span><a name="d3e1335" id="d3e1335">〈 25
+<div class="scrap"><span><a name="d3e1344" id="d3e1344">〈 25
 Calculate follow-set for repetition with separator [continues</a>
 <a href="#gl-ME-rep-follow">24 Calculate follow:* attributes for
 repetitions</a>] 〉 ≡</span>
@@ -2056,7 +2059,7 @@ nullable 〉 ≡</a></span>
              then gl:merge(($follow0, $firstG, $firstF))
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#d3e1335">Calculate follow-set for repetition with separator
+"#d3e1344">Calculate follow-set for repetition with separator
 25</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">If <i>p</i> is final in <i>F</i> and <i>G</i>
@@ -2070,7 +2073,7 @@ nullable 〉 ≡</a></span>
              then gl:merge(($follow0, $firstG))
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#d3e1335">Calculate follow-set for repetition with separator
+"#d3e1344">Calculate follow-set for repetition with separator
 25</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">If <i>p</i> is final in <i>G</i> and <i>F</i>
@@ -2086,7 +2089,7 @@ nullable 〉 ≡</a></span>
              then gl:merge(($follow0, $firstG, $firstF))
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#d3e1335">Calculate follow-set for repetition with separator
+"#d3e1344">Calculate follow-set for repetition with separator
 25</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">If <i>p</i> is final in <i>G</i> and <i>F</i>
@@ -2100,7 +2103,7 @@ nullable 〉 ≡</a></span>
              then gl:merge(($follow0, $firstF))
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#d3e1335">Calculate follow-set for repetition with separator
+"#d3e1344">Calculate follow-set for repetition with separator
 25</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">Finally, if none of the above are true, then
@@ -2113,7 +2116,7 @@ copy it out again.
 <pre class="scrapbody">             else string($a)
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#d3e1335">Calculate follow-set for repetition with separator
+"#d3e1344">Calculate follow-set for repetition with separator
 25</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">We have appealed to a little utility function
@@ -2555,14 +2558,14 @@ of formal languages (e.g. <a href="#GJ" title=
 non-productive nonterminals as <em>useless nonterminals</em> and
 treat them under the heading “Hygiene in context-free grammars”,
 together with an algorithm for cleaning up a grammar that contains
-them.[<a name="ref-to-d3e1720" href="#d3e1720" title=
+them.[<a name="ref-to-d3e1729" href="#d3e1729" title=
 " Note that the class of hygiene problems catalogued in formal language theory does not coincide exactly with the class of grammars ixml defines as non-conformin"
-id="ref-to-d3e1720">7</a>] The code in this section will (at user
+id="ref-to-d3e1729">7</a>] The code in this section will (at user
 option) detect these issues, warn the user (or raise an error), and
-clean up the grammar.[<a name="ref-to-d3e1731" href="#d3e1731"
+clean up the grammar.[<a name="ref-to-d3e1740" href="#d3e1740"
 title=
 " It is not essential to clean the grammar, but it will make the grammar smaller and in some cases will avoid useless work by the Earley parser. "
-id="ref-to-d3e1731">8</a>]</div>
+id="ref-to-d3e1740">8</a>]</div>
 <div class="Real-P">The user can <i>[will be able to]</i> control
 some of what happens here by setting the following options:
 <ul>
@@ -2586,7 +2589,7 @@ id="aparecium-other-default-options">〈 45 Other default options 〉
         'unproductive-symbols': 'silence',
 </pre>
 <span class="scrapcontinuations">Continued in 〈 <a href=
-"#d3e1779">46</a>〉<br /></span> <span class="scrapinbound">This
+"#d3e1788">46</a>〉<br /></span> <span class="scrapinbound">This
 code is used in 〈 <a href="#aparecium-variables">Variables (of
 interest only for maintainer) 9</a> 〉<br /></span></div>
 </div>
@@ -2594,7 +2597,7 @@ interest only for maintainer) 9</a> 〉<br /></span></div>
 control how pedantically Aparecium should adhere to the spec. The
 neutral term is “strict” conformance, but sometimes nothing but
 “<tt>pedantic</tt>” is going to feel satisfactory.
-<div class="scrap"><span><a name="d3e1779" id="d3e1779">〈 46
+<div class="scrap"><span><a name="d3e1788" id="d3e1788">〈 46
 [continues</a> <a href="#aparecium-other-default-options">45 Other
 default options</a>] 〉 ≡</span>
 <pre class="scrapbody">        'conformance': 'tolerant' 
@@ -2704,7 +2707,7 @@ has the attributes assigned by the compiler.
 "#ap-grok">The grammar-ok() function 47</a> 〉<br /></span></div>
 <i>The data flow has gotten confused. Let's leave this out for
 now.</i>
-<div class="scrap"><span><a name="d3e1853" id="d3e1853">〈 50 Check
+<div class="scrap"><span><a name="d3e1862" id="d3e1862">〈 50 Check
 for compiler attributes 〉 ≡</a></span>
 <pre class="scrapbody">  let $lee-comp := (
       for $r in $G/rule[not(@xml:id)
@@ -2727,9 +2730,9 @@ grammar for a nonterminal with a non-XML name to be serialized. We
 detect the problem statically: if a name is not castable as
 xs:NCName, then it must be marked as hidden, either on the
 &lt;<em>rule</em>&gt; element or on all references to it.[<a name=
-"ref-to-d3e1861" href="#d3e1861" title=
+"ref-to-d3e1870" href="#d3e1870" title=
 " Strictly speaking, a nonterminal which is only ever used in an attribute value can use any mark desired, since the mark is ignored. In this case, Aparecium wi"
-id="ref-to-d3e1861">9</a>]
+id="ref-to-d3e1870">9</a>]
 <div class="scrap"><span><a name="ap-grok-names" id=
 "ap-grok-names">〈 51 Check for non-XML names 〉 ≡</a></span>
 <pre class="scrapbody">  let $lee-names := (
@@ -3083,13 +3086,13 @@ the other function:
 
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e1980">Define recognizeX() 62</a>〉<br /></span> <span class=
+"#d3e1989">Define recognizeX() 62</a>〉<br /></span> <span class=
 "scrapinbound">This code is used in 〈 <a href="#Earley-rec">[File
 Earley-recognizer.xqm] 5</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">The <i>ix:recognizeX()</i> function (an
 extended recognizer, if you will)
-<div class="scrap"><span><a name="d3e1980" id="d3e1980">〈 62 Define
+<div class="scrap"><span><a name="d3e1989" id="d3e1989">〈 62 Define
 recognizeX() [continues</a> <a href="#er-recognize">61 Define
 recognize()</a>] 〉 ≡</span>
 <pre class="scrapbody">declare function ix:recognizeX(
@@ -3363,15 +3366,15 @@ item.</div>
 grammar rule for every possible realization of every completion
 item in the Earley set, but that would produce rules for matches
 that never made it into a successful parse.[<a name=
-"ref-to-d3e2157" href="#d3e2157" title=
+"ref-to-d3e2166" href="#d3e2166" title=
 " Since those rules would be a potentially informative description of the garden paths followed by the parser before they reached a dead end, they might be usefu"
-id="ref-to-d3e2157">10</a>]</div>
+id="ref-to-d3e2166">10</a>]</div>
 <div class="Real-P">Since we are given a completion item of the
 form (<i>x</i> <i>y</i> <i>N</i>
-<i>q</i><sub><i>f</i></sub>)[<a name="ref-to-d3e2173" href=
-"#d3e2173" title=
+<i>q</i><sub><i>f</i></sub>)[<a name="ref-to-d3e2182" href=
+"#d3e2182" title=
 "Here qf is any final state in the definition of N." id=
-"ref-to-d3e2173">11</a>] a simple way to handle the task is:
+"ref-to-d3e2182">11</a>] a simple way to handle the task is:
 <ul>
 <li>
 <div class="Real-P">Construct the production rule for
@@ -3387,9 +3390,9 @@ nonterminal.</div>
 <div class="Real-P">The first step will entail finding a sequence
 of completion items that correspond to a <em>satisfactory walk</em>
 through the right-hand side of the production rule for <i>N</i> in
-the base grammar.[<a name="ref-to-d3e2208" href="#d3e2208" title=
+the base grammar.[<a name="ref-to-d3e2217" href="#d3e2217" title=
 " I call it a satisfactory walk because (a) the sequence of nonterminals satisfies the constraints of the right-hand side, and (b) the walk is acceptable to the "
-id="ref-to-d3e2208">12</a>] That is a walk through the RHS
+id="ref-to-d3e2217">12</a>] That is a walk through the RHS
 <ul>
 <li>beginning in the start state <i>q</i><sub>0</sub>,</li>
 <li>ending in some final state <i>q</i><sub><i>f</i></sub>,
@@ -3402,9 +3405,9 @@ constructed, and those nonterminals will be written into into the
 right-hand side of the production rule, in the appropriate
 sequence. If there is more than one such walk through the rule for
 <i>N</i>, then <i>N</i> is ambiguous, and we want all of those
-walks.[<a name="ref-to-d3e2248" href="#d3e2248" title=
+walks.[<a name="ref-to-d3e2257" href="#d3e2257" title=
 "At the moment, there are some infinitely ambiguous sentences for which we will not in fact get all of the walks (informally, those involving infinite horizontal"
-id="ref-to-d3e2248">13</a>]</div>
+id="ref-to-d3e2257">13</a>]</div>
 <div class="Real-P">The second step can be handled by calling the
 same function we called to handle the completion we started with.
 Since in cases of ambiguity the same nonterminal may appear in more
@@ -3688,19 +3691,19 @@ The current implementation uses step lists with shared tails.</div>
 </ul>
 </div>
 <div class="Real-P">The basic plan is an iterative
-function[<a name="ref-to-d3e2555" href="#d3e2555" title=
+function[<a name="ref-to-d3e2564" href="#d3e2564" title=
 " By iterative function I mean a recursive function where recursion serves only to provide a looping construct. "
-id="ref-to-d3e2555">14</a>] which performs a breadth-first search
-and assembles the result.[<a name="ref-to-d3e2563" href="#d3e2563"
+id="ref-to-d3e2564">14</a>] which performs a breadth-first search
+and assembles the result.[<a name="ref-to-d3e2572" href="#d3e2572"
 title=
 " If we are not trying to return all walks but only a finite number of walks, a depth-first search might be better. But at the moment I am reacting, and possibl"
-id="ref-to-d3e2563">15</a>] We have an accumulator of some sort
+id="ref-to-d3e2572">15</a>] We have an accumulator of some sort
 that holds a set of walks found so far, each of which is either
 complete (it goes all the way to a final state in the right-hand
 side of <i>N</i>) or not, and either extensible or not.[<a name=
-"ref-to-d3e2573" href="#d3e2573" title=
+"ref-to-d3e2582" href="#d3e2582" title=
 "  In principle, a walk can be extended if the last state reached by the walk has follow states. But since right-hand sides in an EBNF can have cycles, we cut o"
-id="ref-to-d3e2573">16</a>] The result is complete when no walks
+id="ref-to-d3e2582">16</a>] The result is complete when no walks
 can be extended, or when we have found enough walks to go on with.
 <ul>
 <li>
@@ -4020,9 +4023,9 @@ lost. <i>To do: check for loops.</i>
 </div>
 <div class="Real-P">We stop when we have as many walks as are
 specified in the “<tt>tree-count</tt>” option, or when the queue is
-empty.[<a name="ref-to-d3e2780" href="#d3e2780" title=
+empty.[<a name="ref-to-d3e2789" href="#d3e2789" title=
 " If this is the only source of ambiguity in the parse, returning n walks will give us n trees. If there are multiple sources of ambiguity, the parse-forest gra"
-id="ref-to-d3e2780">17</a>]
+id="ref-to-d3e2789">17</a>]
 <div class="scrap"><span><a name="pfg-fw-if-done" id=
 "pfg-fw-if-done">〈 75 If we have all our walks, return 〉
 ≡</a></span>
@@ -4040,14 +4043,14 @@ id="ref-to-d3e2780">17</a>]
 <div class="Real-P">Otherwise, we attempt to extend each walk in
 the queue. To reduce the number of times we have to do a search in
 the Earley closure, we group the walks by their current position
-(here <i>x</i>),[<a name="ref-to-d3e2800" href="#d3e2800" title=
+(here <i>x</i>),[<a name="ref-to-d3e2809" href="#d3e2809" title=
 "Note that the current position is the from value for the starter step (a completion for the parent) but the to value for any other step."
-id="ref-to-d3e2800">18</a>] their follow state (here <i>qNext</i>),
+id="ref-to-d3e2809">18</a>] their follow state (here <i>qNext</i>),
 and the nonterminal (or terminal) we are seeking to match (here
-<i>N</i> and <i>T</i>[<a name="ref-to-d3e2815" href="#d3e2815"
+<i>N</i> and <i>T</i>[<a name="ref-to-d3e2824" href="#d3e2824"
 title=
 "Note that N and T are uniquely determined by qNext and thus redundant, but including them as grouping keys allows them to be referred to without subscripts."
-id="ref-to-d3e2815">19</a>]
+id="ref-to-d3e2824">19</a>]
 <div class="scrap"><span><a name="pfg-fw-set-new-queue" id=
 "pfg-fw-set-new-queue">〈 76 Set new queue by extending all walks in
 the queue 〉 ≡</a></span>
@@ -4071,8 +4074,8 @@ the queue 〉 ≡</a></span>
       group by $x, $qNext, $N, $T
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e2838">Find follow-on completion items 77</a>〉, 〈<a href=
-"#d3e2841">Extend the walk 78</a>〉<br /></span> <span class=
+"#d3e2847">Find follow-on completion items 77</a>〉, 〈<a href=
+"#d3e2850">Extend the walk 78</a>〉<br /></span> <span class=
 "scrapinbound">This code is used in 〈 <a href="#epi-find-walks">The
 find-walks() function 74</a> 〉<br /></span></div>
 We can now do a single search that will work for every walk that is
@@ -4087,7 +4090,7 @@ item.</li>
 </ul>
 And then we de-dup them: if any items differ only in their rule
 index, we take only one of them.
-<div class="scrap"><span><a name="d3e2838" id="d3e2838">〈 77 Find
+<div class="scrap"><span><a name="d3e2847" id="d3e2847">〈 77 Find
 follow-on completion items [continues</a> <a href=
 "#pfg-fw-set-new-queue">76 Set new queue by extending all walks in
 the queue</a>] 〉 ≡</span>
@@ -4113,7 +4116,7 @@ the queue</a>] 〉 ≡</span>
 
 </pre></div>
 For each such item, we extend the walk we started with:
-<div class="scrap"><span><a name="d3e2841" id="d3e2841">〈 78 Extend
+<div class="scrap"><span><a name="d3e2850" id="d3e2850">〈 78 Extend
 the walk [continues</a> <a href="#pfg-fw-set-new-queue">76 Set new
 queue by extending all walks in the queue</a>] 〉 ≡</span>
 <pre class="scrapbody">      for $i in $items
@@ -4267,13 +4270,13 @@ nonterminal 〉 ≡</a></span>
        return epi:rhs-from-walk($next-step, $I, $new-acc)
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e2912">Otherwise, something has gone very wrong
+"#d3e2921">Otherwise, something has gone very wrong
 84</a>〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#epi-rhs-from-walk">The rhs-from-walk() function
 80</a> 〉<br /></span></div>
 And as a catch-all, if we have a step but cannot treat it as a
 terminal or as a nonterminal, then we return an error.
-<div class="scrap"><span><a name="d3e2912" id="d3e2912">〈 84
+<div class="scrap"><span><a name="d3e2921" id="d3e2921">〈 84
 Otherwise, something has gone very wrong [continues</a> <a href=
 "#epi-rfw-nonterminal">83 If this step is a nonterminal, return a
 nonterminal</a>] 〉 ≡</span>
@@ -4302,10 +4305,10 @@ Saxon.</i></div>
 map describing one step and pointing to its predecessor; we are to
 return a sequence of the Earley items (they will all be
 completions) in that sequence, leaving out the one at the very end
-that represents the parent node.[<a name="ref-to-d3e2931" href=
-"#d3e2931" title=
+that represents the parent node.[<a name="ref-to-d3e2940" href=
+"#d3e2940" title=
 " Might it be faster to do this at the same time we generate the right-hand side from the walk?"
-id="ref-to-d3e2931">20</a>]</div>
+id="ref-to-d3e2940">20</a>]</div>
 <div class="Real-P">We do this by walking through the list step by
 step, pushing each item onto the front of the accumulator.
 <div class="scrap"><span><a name="epi-lei-from-walk" id=
@@ -4453,10 +4456,10 @@ grammar is ambiguous or not by looking for rules with multiple
 right-hand sides. Then we start serialization. To avoid producing a
 &lt;<em>Goal</em>&gt; element for the start-symbol introduced by
 the Earley recognizer, we start work with the nonterminal on the
-right-hand side of the first rule.[<a name="ref-to-d3e3038" href=
-"#d3e3038" title=
+right-hand side of the first rule.[<a name="ref-to-d3e3047" href=
+"#d3e3047" title=
 " Actually, Goal should carry mark=&quot;-&quot; in any case." id=
-"ref-to-d3e3038">21</a>] If the parse-forest grammar describes more
+"ref-to-d3e3047">21</a>] If the parse-forest grammar describes more
 than one tree, we should mark the tree we return with
 <tt>ixml:state="ambiguous"</tt>.
 <div class="scrap"><span><a name="epi-tfg-ixml" id="epi-tfg-ixml">〈
@@ -4496,7 +4499,7 @@ than one tree, we should mark the tree we return with
 <div class="Real-P">Another version of this code uses XQuery Update
 to inject the attribute. I took this out because Saxon PE and HE
 don't seem to support the update facility.
-<div class="scrap"><span><a name="d3e3056" id="d3e3056">〈 89
+<div class="scrap"><span><a name="d3e3065" id="d3e3065">〈 89
 Extract tree from ixml parse-forest grammar 〉 ≡</a></span>
 <pre class=
 "scrapbody">      let $f-ambig := exists($pfg//rule[count(alt) gt 1]),
@@ -4910,10 +4913,10 @@ predicates</a></li>
 <ul>
 <li>4.5.1. <a href="#ll-sym-match-length">The <i>match-length()</i>
 function</a></li>
-<li>4.5.2. <a href="#d3e3792">Making regular expressions from
+<li>4.5.2. <a href="#d3e3801">Making regular expressions from
 terminal symbols</a></li>
-<li>4.5.3. <a href="#d3e3914">Testing for symbol type</a></li>
-<li>4.5.4. <a href="#d3e3937">Matching symbols against rule
+<li>4.5.3. <a href="#d3e3923">Testing for symbol type</a></li>
+<li>4.5.4. <a href="#d3e3946">Matching symbols against rule
 indices</a></li>
 </ul>
 </li>
@@ -5061,11 +5064,11 @@ Earley items (constructors, extractors, etc.) 〉 ≡</a></span>
 <span class="scrapref">〈 <em class="scrapptr"><a href=
 "#eri-lei-advance-ei-sym-p">Define leiAdvanceEiSymP() 110</a></em> 〉</span></pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e3421">Extractors for Earley items 111</a>〉, 〈<a href=
-"#d3e3427">Extractors for Earley items 112</a>〉, 〈<a href=
-"#d3e3474">Predicates for Earley items 113</a>〉, 〈<a href=
-"#d3e3479">Define fExpectsN-Ei() 114</a>〉, 〈<a href=
-"#d3e3497">Define fScanrelEE() 115</a>〉, 〈<a href="#d3e3504">Define
+"#d3e3430">Extractors for Earley items 111</a>〉, 〈<a href=
+"#d3e3436">Extractors for Earley items 112</a>〉, 〈<a href=
+"#d3e3483">Predicates for Earley items 113</a>〉, 〈<a href=
+"#d3e3488">Define fExpectsN-Ei() 114</a>〉, 〈<a href=
+"#d3e3506">Define fScanrelEE() 115</a>〉, 〈<a href="#d3e3513">Define
 fAdvanceNrelEE() 116</a>〉, 〈<a href=
 "#eri-items-closure">Calculating the closure of an Earley set
 117</a>〉<br /></span> <span class="scrapinbound">This code is used
@@ -5113,7 +5116,7 @@ declare function ixi:eiMakePPRRi(
 };
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e3398">Define eiMakePPT() 109</a>〉<br /></span> <span class=
+"#d3e3407">Define eiMakePPT() 109</a>〉<br /></span> <span class=
 "scrapinbound">This code is used in 〈 <a href="#eri-items">Earley
 items (constructors, extractors, etc.) 107</a> 〉<br /></span></div>
 We provide the “<tt>sig</tt>” field to provide a simple way of
@@ -5123,7 +5126,7 @@ comparing Earley items for equality, and the “<tt>final</tt>” and
 “<tt>extensible</tt>” is actually used elsewhere.</i></div>
 <div class="Real-P">In special cases, we also make items for
 terminal symbols:
-<div class="scrap"><span><a name="d3e3398" id="d3e3398">〈 109
+<div class="scrap"><span><a name="d3e3407" id="d3e3407">〈 109
 Define eiMakePPT() [continues</a> <a href="#eri-make-p-p-r-ri">108
 Define eiMakePPRRi()</a>] 〉 ≡</span>
 <pre class=
@@ -5205,7 +5208,7 @@ href="#ll-items-extr">4.2.2.</a> Earley items - extractors</h4>
 <div class="Real-P">For the <em>to</em> and <em>from</em> pointers,
 the rule, and the rule's nonterminal, the extractor functions are
 very straightforward.
-<div class="scrap"><span><a name="d3e3421" id="d3e3421">〈 111
+<div class="scrap"><span><a name="d3e3430" id="d3e3430">〈 111
 Extractors for Earley items [continues</a> <a href="#eri-items">107
 Earley items (constructors, extractors, etc.)</a>] 〉 ≡</span>
 <pre class=
@@ -5257,7 +5260,7 @@ declare function ixi:nLhsXEi(
 </div>
 <div class="Real-P">To get the list of expected symbols, more work
 is needed.
-<div class="scrap"><span><a name="d3e3427" id="d3e3427">〈 112
+<div class="scrap"><span><a name="d3e3436" id="d3e3436">〈 112
 Extractors for Earley items [continues</a> <a href="#eri-items">107
 Earley items (constructors, extractors, etc.)</a>] 〉 ≡</span>
 <pre class=
@@ -5320,7 +5323,7 @@ Earley items?</li>
 </div>
 <div class="Real-P">There are several functions for asking whether
 an item is a completion.
-<div class="scrap"><span><a name="d3e3474" id="d3e3474">〈 113
+<div class="scrap"><span><a name="d3e3483" id="d3e3483">〈 113
 Predicates for Earley items [continues</a> <a href="#eri-items">107
 Earley items (constructors, extractors, etc.)</a>] 〉 ≡</span>
 <pre class=
@@ -5375,7 +5378,7 @@ declare function ixi:fFinalEi(
 </pre></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e3479" id="d3e3479">〈 114
+<div class="scrap"><span><a name="d3e3488" id="d3e3488">〈 114
 Define fExpectsN-Ei() [continues</a> <a href="#eri-items">107
 Earley items (constructors, extractors, etc.)</a>] 〉 ≡</span>
 <pre class=
@@ -5405,7 +5408,7 @@ And E2 = advance(E1, T) iff
 <li>else advance(E1, T) = empty set.</li>
 </ul>
 So:
-<div class="scrap"><span><a name="d3e3497" id="d3e3497">〈 115
+<div class="scrap"><span><a name="d3e3506" id="d3e3506">〈 115
 Define fScanrelEE() [continues</a> <a href="#eri-items">107 Earley
 items (constructors, extractors, etc.)</a>] 〉 ≡</span>
 <pre class=
@@ -5448,7 +5451,7 @@ declare function ixi:fScanrelEE(
 </pre></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e3504" id="d3e3504">〈 116
+<div class="scrap"><span><a name="d3e3513" id="d3e3513">〈 116
 Define fAdvanceNrelEE() [continues</a> <a href="#eri-items">107
 Earley items (constructors, extractors, etc.)</a>] 〉 ≡</span>
 <pre class=
@@ -5516,15 +5519,15 @@ extractors, etc.)</a>] 〉 ≡</span>
    :)
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e3523">Define earley-closure($lei, $I, $G) 118</a>〉, 〈<a href=
-"#d3e3542">Define earley-closure($pending, $accumulator, $I, $G)
-119</a>〉, 〈<a href="#d3e3653">Define earley-closure($pending,
+"#d3e3532">Define earley-closure($lei, $I, $G) 118</a>〉, 〈<a href=
+"#d3e3551">Define earley-closure($pending, $accumulator, $I, $G)
+119</a>〉, 〈<a href="#d3e3662">Define earley-closure($pending,
 $accumulator, $I, $G) 123</a>〉<br /></span></div>
 </div>
 <div class="Real-P">We will want an accumulator to hold the set, so
 the user's call to <i>earley-closure</i> merely initializes an
 accumulator and calls another function to do the work.
-<div class="scrap"><span><a name="d3e3523" id="d3e3523">〈 118
+<div class="scrap"><span><a name="d3e3532" id="d3e3532">〈 118
 Define earley-closure($lei, $I, $G) [continues</a> <a href=
 "#eri-items-closure">117 Calculating the closure of an Earley
 set</a>] 〉 ≡</span>
@@ -5579,7 +5582,7 @@ for improving speed. <i>TO DO: pluck that low-hanging
 fruit.</i></div>
 <div class="Real-P">The function has two cases: either we are done,
 or we are not yet done.
-<div class="scrap"><span><a name="d3e3542" id="d3e3542">〈 119
+<div class="scrap"><span><a name="d3e3551" id="d3e3551">〈 119
 Define earley-closure($pending, $accumulator, $I, $G)
 [continues</a> <a href="#eri-items-closure">117 Calculating the
 closure of an Earley set</a>] 〉 ≡</span>
@@ -5610,7 +5613,7 @@ Earley closure 〉 ≡</a></span>
   then $meiAccum
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#d3e3542">Define earley-closure($pending, $accumulator, $I, $G)
+"#d3e3551">Define earley-closure($pending, $accumulator, $I, $G)
 119</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">In the normal case, we have items to process.
@@ -5707,7 +5710,7 @@ taking 90% of the measured time.</div>
     $G)
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#d3e3542">Define earley-closure($pending, $accumulator, $I, $G)
+"#d3e3551">Define earley-closure($pending, $accumulator, $I, $G)
 119</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">When debugging this, it is helpful to have
@@ -5755,7 +5758,7 @@ and on ABNF.ixml (which ran 1675 seconds):
 </ul>
 That's only 27 seconds out of 1675 - where did that time all
 go?!</div>
-<div class="scrap"><span><a name="d3e3653" id="d3e3653">〈 123
+<div class="scrap"><span><a name="d3e3662" id="d3e3662">〈 123
 Define earley-closure($pending, $accumulator, $I, $G)
 [continues</a> <a href="#eri-items-closure">117 Calculating the
 closure of an Earley set</a>] 〉 ≡</span>
@@ -5903,15 +5906,15 @@ declare function ixi:augment-grammar(
 };
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e3690">Goal-symbol construction 126</a>〉, 〈<a href=
-"#d3e3697">Goal-symbol construction 127</a>〉<br /></span>
+"#d3e3699">Goal-symbol construction 126</a>〉, 〈<a href=
+"#d3e3706">Goal-symbol construction 127</a>〉<br /></span>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#eri-grammars">Grammars (constructors, extractors, etc.) 124</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">We have a small utility function for making a
 new goal symbol that differs from all existing symbols.
-<div class="scrap"><span><a name="d3e3690" id="d3e3690">〈 126
+<div class="scrap"><span><a name="d3e3699" id="d3e3699">〈 126
 Goal-symbol construction [continues</a> <a href=
 "#eri-grammars-constructors">125 Functions that construct or return
 grammars</a>] 〉 ≡</span>
@@ -5934,7 +5937,7 @@ declare function ixi:makeGoalsymbolG(
 </pre></div>
 </div>
 <div class="Real-P">And another utility for munging a given symbol.
-<div class="scrap"><span><a name="d3e3697" id="d3e3697">〈 127
+<div class="scrap"><span><a name="d3e3706" id="d3e3706">〈 127
 Goal-symbol construction [continues</a> <a href=
 "#eri-grammars-constructors">125 Functions that construct or return
 grammars</a>] 〉 ≡</span>
@@ -6145,10 +6148,10 @@ declare function ixi:lriStartstatesXR(
 <ul>
 <li>4.5.1. <a href="#ll-sym-match-length">The <i>match-length()</i>
 function</a></li>
-<li>4.5.2. <a href="#d3e3792">Making regular expressions from
+<li>4.5.2. <a href="#d3e3801">Making regular expressions from
 terminal symbols</a></li>
-<li>4.5.3. <a href="#d3e3914">Testing for symbol type</a></li>
-<li>4.5.4. <a href="#d3e3937">Matching symbols against rule
+<li>4.5.3. <a href="#d3e3923">Testing for symbol type</a></li>
+<li>4.5.4. <a href="#d3e3946">Matching symbols against rule
 indices</a></li>
 </ul>
 <div class="Real-P">A symbol is (represented by) an element: one of
@@ -6199,7 +6202,7 @@ string is not here but under Input, below.
 <div class="div">
 <div class="quicknav"><span class="arrow">&nbsp;</span><span class=
 "arrow"><a href="#ll-symbols">⏶</a></span><span class=
-"arrow"><a href="#d3e3792">⏵</a></span></div>
+"arrow"><a href="#d3e3801">⏵</a></span></div>
 <h4><a class="selflink" name="ll-sym-match-length" id=
 "ll-sym-match-length" href="#ll-sym-match-length">4.5.1.</a> The
 <i>match-length()</i> function</h4>
@@ -6232,9 +6235,9 @@ declare function ixi:match-length(
 <div class="quicknav"><span class="arrow"><a href=
 "#ll-sym-match-length">⏴</a></span><span class="arrow"><a href=
 "#ll-symbols">⏶</a></span><span class="arrow"><a href=
-"#d3e3914">⏵</a></span></div>
-<h4><a class="selflink" name="d3e3792" id="d3e3792" href=
-"#d3e3792">4.5.2.</a> Making regular expressions from terminal
+"#d3e3923">⏵</a></span></div>
+<h4><a class="selflink" name="d3e3801" id="d3e3801" href=
+"#d3e3801">4.5.2.</a> Making regular expressions from terminal
 symbols</h4>
 <div class="Real-P">The function <i>reXTerminal($t)</i> returns a
 regular expression, given a terminal element. Note that the regular
@@ -6288,7 +6291,7 @@ declare function ixi:reXTerminal(
              and exists($lsRegexbits))
     then "[^" || string-join($lsRegexbits,'') || "]"
     else if ($t/self::inclusion)
-    then "[^\s\S]" (: empty inclusion matches nothing :)
+    then "[^\i\I]" (: empty inclusion matches nothing :)
     else if ($t/self::exclusion)
     then "[\s\S]" (: empty inclusion excludes nothing :)
     else "--error in reXTerminal--"
@@ -6297,10 +6300,12 @@ declare function ixi:reXTerminal(
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#eri-symbols">Symbols (constructors, extractors, etc.) 131</a>
 〉<br /></span></div>
-We use “<tt>[\s\S]</tt>” and “<tt>[^\s\S]</tt>” as XPath
+We use “<tt>[\s\S]</tt>” and “<tt>[^\i\I]</tt>” as XPath
 representations of the empty inclusion and the empty exclusion,
 respectively. Any pair of complementary character class escapes
-would work as well: “<tt>\w\W</tt>” “<tt>\i\I</tt>”, etc.</div>
+would work as well: “<tt>\w\W</tt>” “<tt>\i\I</tt>”, etc. We will
+use a different pair each time we generate such a character class,
+to help make clear where that character class was generated.</div>
 <div class="Real-P">An important wrinkle is that not every integer
 between #0000 and #10FFFF (0..1114111) can be turned into an XML
 character. So we need to check that hex-encoded characters are in
@@ -6318,18 +6323,18 @@ literal 〉 ≡</a></span>
       then ixi:sceXS($t/@string)
 </pre>
 <span class="scrapcontinuations">Continued in 〈 <a href=
-"#d3e3857">135</a>〉<br /></span> <span class="scrapinbound">This
+"#d3e3866">135</a>〉<br /></span> <span class="scrapinbound">This
 code is used in 〈 <a href="#eri-sym-reXTerminal">Define
 reXTerminal(), regex from terminal 133</a> 〉<br /></span></div>
 A hex value, on the other hand, must be checked. For encoded
 terminals, a hex value denoting a non-XML character cannot match
 anything in the input and is therefore equivalent to a regular
 expression matching nothing (not to be confused with matching the
-empty string). We'll use “<tt>[^\s\S]</tt>” for that case: since
-“<tt>\s</tt>” and “<tt>\S</tt>” are complements and together match
-every XML character, “<tt>[^\s\S]</tt>” will not match anything at
+empty string). We'll use “<tt>[^\c\C]</tt>” for that case: since
+“<tt>\c</tt>” and “<tt>\C</tt>” are complements and together match
+every XML character, “<tt>[^\c\C]</tt>” will not match anything at
 all.
-<div class="scrap"><span><a name="d3e3857" id="d3e3857">〈 135
+<div class="scrap"><span><a name="d3e3866" id="d3e3866">〈 135
 [continues</a> <a href="#eri-sym-reXT-literal">134 Make
 character-escaped string from literal</a>] 〉 ≡</span>
 <pre class="scrapbody">      else try { ixi:sceXS(
@@ -6338,7 +6343,7 @@ character-escaped string from literal</a>] 〉 ≡</span>
                     ) 
                  )
                } catch * {
-                  "[^\s\S]"
+                  "[^\c\C]"
                }
 </pre></div>
 </div>
@@ -6463,11 +6468,11 @@ inclusion, and they cannot exclude anything in an exclusion.
 </div>
 <div class="div">
 <div class="quicknav"><span class="arrow"><a href=
-"#d3e3792">⏴</a></span><span class="arrow"><a href=
+"#d3e3801">⏴</a></span><span class="arrow"><a href=
 "#ll-symbols">⏶</a></span><span class="arrow"><a href=
-"#d3e3937">⏵</a></span></div>
-<h4><a class="selflink" name="d3e3914" id="d3e3914" href=
-"#d3e3914">4.5.3.</a> Testing for symbol type</h4>
+"#d3e3946">⏵</a></span></div>
+<h4><a class="selflink" name="d3e3923" id="d3e3923" href=
+"#d3e3923">4.5.3.</a> Testing for symbol type</h4>
 <div class="Real-P">The function <i>fTerminal()</i> returns true
 iff the argument is a terminal symbol. This version supports both
 my interpretation of the 2016 syntax (with element type
@@ -6514,10 +6519,10 @@ declare function ixi:fNonterminal(
 </div>
 <div class="div">
 <div class="quicknav"><span class="arrow"><a href=
-"#d3e3914">⏴</a></span><span class="arrow"><a href=
+"#d3e3923">⏴</a></span><span class="arrow"><a href=
 "#ll-symbols">⏶</a></span><span class="arrow">&nbsp;</span></div>
-<h4><a class="selflink" name="d3e3937" id="d3e3937" href=
-"#d3e3937">4.5.4.</a> Matching symbols against rule indices</h4>
+<h4><a class="selflink" name="d3e3946" id="d3e3946" href=
+"#d3e3946">4.5.4.</a> Matching symbols against rule indices</h4>
 <div class="Real-P">The function <i>fSymbolmatchRRiSym($r, $ri,
 $sym)</i> determines whether a symbol element $sym matches rule
 index $ri in rule $r. Equivalently: in the FSA for rule $r, does
@@ -6866,14 +6871,14 @@ module 〉 ≡</a></span>
    :)
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e4030">Define sceXS() to read range ends 149</a>〉, 〈<a href=
-"#d3e4036">Define catescXS() to build category escape 150</a>〉,
-〈<a href="#d3e4042">Define charXhex() to get character given hex
-expression 151</a>〉, 〈<a href="#d3e4048">Define string-length()
-152</a>〉, 〈<a href="#d3e4055">Define string-value() 153</a>〉,
-〈<a href="#d3e4068">Define s X ei() to build string form of Earley
-item 154</a>〉, 〈<a href="#d3e4074">Define eXei() to build 'item'
-element for Earley item 155</a>〉, 〈<a href="#d3e4080">Define
+"#d3e4039">Define sceXS() to read range ends 149</a>〉, 〈<a href=
+"#d3e4045">Define catescXS() to build category escape 150</a>〉,
+〈<a href="#d3e4051">Define charXhex() to get character given hex
+expression 151</a>〉, 〈<a href="#d3e4057">Define string-length()
+152</a>〉, 〈<a href="#d3e4064">Define string-value() 153</a>〉,
+〈<a href="#d3e4077">Define s X ei() to build string form of Earley
+item 154</a>〉, 〈<a href="#d3e4083">Define eXei() to build 'item'
+element for Earley item 155</a>〉, 〈<a href="#d3e4089">Define
 trace() function for debugging 156</a>〉<br /></span> <span class=
 "scrapinbound">This code is used in 〈 <a href="#d3e452">[File
 Earley-rec-internals.xqm] 7</a> 〉<br /></span></div>
@@ -6886,7 +6891,7 @@ Earley-rec-internals.xqm] 7</a> 〉<br /></span></div>
 "ll-utils-strings" href="#ll-utils-strings">4.7.1.</a> Routines for
 strings and characters</h4>
 <div class="Real-P">The function <i>sceXS()</i>
-<div class="scrap"><span><a name="d3e4030" id="d3e4030">〈 149
+<div class="scrap"><span><a name="d3e4039" id="d3e4039">〈 149
 Define sceXS() to read range ends [continues</a> <a href=
 "#eri-utils-and-misc">148 Utilities for recognizer internals
 module</a>] 〉 ≡</span>
@@ -6950,7 +6955,7 @@ declare function ixi:escapedstringXS(
 </pre></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e4036" id="d3e4036">〈 150
+<div class="scrap"><span><a name="d3e4045" id="d3e4045">〈 150
 Define catescXS() to build category escape [continues</a> <a href=
 "#eri-utils-and-misc">148 Utilities for recognizer internals
 module</a>] 〉 ≡</span>
@@ -6997,7 +7002,7 @@ declare function ixi:catescXS(
 </pre></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e4042" id="d3e4042">〈 151
+<div class="scrap"><span><a name="d3e4051" id="d3e4051">〈 151
 Define charXhex() to get character given hex expression
 [continues</a> <a href="#eri-utils-and-misc">148 Utilities for
 recognizer internals module</a>] 〉 ≡</span>
@@ -7021,7 +7026,7 @@ declare function ixi:charXhex(
 </pre></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e4048" id="d3e4048">〈 152
+<div class="scrap"><span><a name="d3e4057" id="d3e4057">〈 152
 Define string-length() [continues</a> <a href=
 "#eri-utils-and-misc">148 Utilities for recognizer internals
 module</a>] 〉 ≡</span>
@@ -7044,7 +7049,7 @@ declare function ixi:string-length(
 </pre></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e4055" id="d3e4055">〈 153
+<div class="scrap"><span><a name="d3e4064" id="d3e4064">〈 153
 Define string-value() [continues</a> <a href=
 "#eri-utils-and-misc">148 Utilities for recognizer internals
 module</a>] 〉 ≡</span>
@@ -7060,7 +7065,7 @@ module</a>] 〉 ≡</span>
    To do:  sanity check this, and delete if unnecessary.
    :)
 declare function ixi:string-value(
-  $q as element(literal)
+  $q as element() (: literal or member :)
 ) as xs:string {
   let $s := if ($q/@string)
             then string($q/@string)
@@ -7091,7 +7096,7 @@ routines</h4>
 little easier.</div>
 <div class="Real-P">First, a function to display an Earley item as
 a string.
-<div class="scrap"><span><a name="d3e4068" id="d3e4068">〈 154
+<div class="scrap"><span><a name="d3e4077" id="d3e4077">〈 154
 Define s X ei() to build string form of Earley item [continues</a>
 <a href="#eri-utils-and-misc">148 Utilities for recognizer
 internals module</a>] 〉 ≡</span>
@@ -7114,7 +7119,7 @@ declare function ixi:sXei(
 <div class="Real-P">Next, a function to build an XML element
 representing an Earley item. This is used less in tracing than in
 returning verbose results.
-<div class="scrap"><span><a name="d3e4074" id="d3e4074">〈 155
+<div class="scrap"><span><a name="d3e4083" id="d3e4083">〈 155
 Define eXei() to build 'item' element for Earley item
 [continues</a> <a href="#eri-utils-and-misc">148 Utilities for
 recognizer internals module</a>] 〉 ≡</span>
@@ -7144,7 +7149,7 @@ declare function ixi:eXei(
 for when we want debugging and tracing turned on, and one for when
 we want to turn it off globally. There probably should be better
 ways of turning tracing on and off.
-<div class="scrap"><span><a name="d3e4080" id="d3e4080">〈 156
+<div class="scrap"><span><a name="d3e4089" id="d3e4089">〈 156
 Define trace() function for debugging [continues</a> <a href=
 "#eri-utils-and-misc">148 Utilities for recognizer internals
 module</a>] 〉 ≡</span>
@@ -7171,11 +7176,11 @@ declare function ixi:trace(
 };
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#d3e4080">Define trace() function for debugging 156</a>
+"#d3e4089">Define trace() function for debugging 156</a>
 〉<br /></span></div>
 An alternative form also inserts asterisks, but in general that
 proves a little too busy.
-<div class="scrap"><span><a name="d3e4095" id="d3e4095">〈 158
+<div class="scrap"><span><a name="d3e4104" id="d3e4104">〈 158
 Starry trace() function 〉 ≡</a></span>
 <pre class="scrapbody">declare function ixi:trace(
   $x as item()?, 
@@ -7209,7 +7214,7 @@ declare function ixi:notrace(
 }; 
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#d3e4080">Define trace() function for debugging 156</a>
+"#d3e4089">Define trace() function for debugging 156</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">The dummy form of <i>trace()</i> does the same
@@ -7362,9 +7367,9 @@ declare function aparecium:parse-grammar-from-string(
   let $CGIG := doc($aparecium:ixml.gl.xml)/ixml,
       (: PG: parsed grammar :)
       $PG0 := aparecium:parse-string-with-compiled-grammar($G,$CGIG),
-      $PG := (:stat ...prof:time( ... tats:)
+      $PG := (:stat:) prof:time( (:tats:)
              aparecium:grammar-ok($PG0)
-             (:stat ..., 'pgfs() calling grammar-ok():') ... tats:)
+             (:stat:) , 'pgfs() calling grammar-ok():') (:tats:)
   return $PG
 };
 </pre>
@@ -7373,7 +7378,7 @@ declare function aparecium:parse-grammar-from-string(
 162</a> 〉<br /></span></div>
 The call to <i>grammar-ok()</i> replaces some earlier rudimentary
 checking, retained here for the moment in case it's needed.
-<div class="scrap"><span><a name="d3e4173" id="d3e4173">〈 165 Old
+<div class="scrap"><span><a name="d3e4182" id="d3e4182">〈 165 Old
 code for result 〉 ≡</a></span>
 <pre class="scrapbody">if ($PG/self::forest) 
       then trace($PG/ixml,
@@ -7451,9 +7456,9 @@ Define compile-grammar-from-xml() 〉 ≡</a></span>
 declare function aparecium:compile-grammar-from-xml(
   $xmlG as element()
 ) as element(ixml) {
-  let $G := (:stat ...prof:time( ... tats:)
+  let $G := (:stat:) prof:time( (:tats:)
             aparecium:grammar-ok($xmlG)
-            (:stat ..., 'cgfx() calling grammar-ok():') ... tats:)
+            (:stat:) , 'cgfx() calling grammar-ok():') (:tats:)
   return if ($G/self::ixml)
          then gluschkov:ME($xmlG)
          else element aparecium:error {
@@ -7531,7 +7536,7 @@ Maybe later. So we use global variables (sigh).</div>
 <div class="Real-P">It is embarrassing to move things around by
 changing these strings, but ... that's what currently happens.
 First, what directory are these things in?
-<div class="scrap"><span><a name="d3e4225" id="d3e4225">〈 170
+<div class="scrap"><span><a name="d3e4234" id="d3e4234">〈 170
 Location of library [continues</a> <a href="#aparecium-variables">9
 Variables (of interest only for maintainer)</a>] 〉 ≡</span>
 <pre class=
@@ -7546,21 +7551,23 @@ BaseX.)</div>
 grammar for ixml grammars? We have three forms: the ixml grammar,
 the ‘visible XML’ representation of the grammar, and the ‘compiled’
 representation, with annotations describing each RHS as an FSA.
-<div class="scrap"><span><a name="d3e4238" id="d3e4238">〈 171
+<div class="scrap"><span><a name="d3e4247" id="d3e4247">〈 171
 Location of ixml grammar [continues</a> <a href=
 "#aparecium-variables">9 Variables (of interest only for
 maintainer)</a>] 〉 ≡</span>
 <pre class=
 "scrapbody">declare variable $aparecium:ixml.ixml as xs:string
-  := $aparecium:libloc || '/ixml.2022-01-25.ixml';
+  := $aparecium:libloc || '/ixml.2022-05-17.ixml';
 
 declare variable $aparecium:ixml.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-01-25.ixml.xml';
+  := $aparecium:libloc || '/ixml.2022-05-17.ixml.inlined.xml.xml';
   
 declare variable $aparecium:ixml.gl.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-01-25.ixml.compiled.xml';  
+  := $aparecium:libloc || '/ixml.2022-05-17.ixml.inlined.compiled.xml';  
 </pre></div>
-</div>
+<i>It may be premature, but I'm using a pre-processed ixml grammar
+in which invisible nonterminals have been inlined. (See the
+Makefile for details of the pipeline.)</i></div>
 <div class="Real-P">Maintenance note: to move to a new version of
 the ixml grammar, the following steps should suffice:
 <ol>
@@ -7706,7 +7713,7 @@ don't bother to clean the grammar up (tbd; dunno yet).</div>
 <div class="Real-P">These are all intended to be user-facing; there
 will be corresponding functions internal to the module not intended
 to be called by the user.
-<div class="scrap"><span><a name="d3e4311" id="d3e4311">〈 172 [File
+<div class="scrap"><span><a name="d3e4322" id="d3e4322">〈 172 [File
 Earley-parser.xqm] 〉 ≡</a></span>
 <pre class=
 "scrapbody">(: Goal:  to return the set of parse trees recorded implicitly in the
@@ -7746,9 +7753,9 @@ declare function ep:all-trees(
 
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6222">Declare ep:alltrees() function (v. v0.2) 218</a>
+<a href="#d3e6208">Declare ep:alltrees() function (v. v0.2) 218</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
-<a href="#d3e4311">[File Earley-parser.xqm] 172</a>
+<a href="#d3e4322">[File Earley-parser.xqm] 172</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">The <i>anytree()</i> function similarly calls
@@ -7774,9 +7781,9 @@ declare function ep:any-tree(
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6227">Declare ep:anytree() function (v. v0.2) 219</a>
+<a href="#d3e6213">Declare ep:anytree() function (v. v0.2) 219</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
-<a href="#d3e4311">[File Earley-parser.xqm] 172</a>
+<a href="#d3e4322">[File Earley-parser.xqm] 172</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">The <i>tree-cursor()</i> function (not yet
@@ -7804,9 +7811,9 @@ there-were-no-trees from all-done-now signals.
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6233">Declare ep:tree-cursor() function (v. v0.2)
+<a href="#d3e6219">Declare ep:tree-cursor() function (v. v0.2)
 220</a> 〉<br /></span> <span class="scrapinbound">This code is used
-in 〈 <a href="#d3e4311">[File Earley-parser.xqm] 172</a>
+in 〈 <a href="#d3e4322">[File Earley-parser.xqm] 172</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">The idea of the <i>parse-forest-map()</i>
@@ -7834,9 +7841,9 @@ declare function ep:parse-forest-map(
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6240">Declare ep:parse-forest-map() function (v. v0.2)
+<a href="#d3e6226">Declare ep:parse-forest-map() function (v. v0.2)
 221</a> 〉<br /></span> <span class="scrapinbound">This code is used
-in 〈 <a href="#d3e4311">[File Earley-parser.xqm] 172</a>
+in 〈 <a href="#d3e4322">[File Earley-parser.xqm] 172</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">The <i>parse-forest-grammar()</i> function
@@ -7862,9 +7869,9 @@ declare function ep:parse-forest-grammar(
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6246">Declare ep:alltrees() function (v. v0.2) 222</a>
+<a href="#d3e6232">Declare ep:alltrees() function (v. v0.2) 222</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
-<a href="#d3e4311">[File Earley-parser.xqm] 172</a>
+<a href="#d3e4322">[File Earley-parser.xqm] 172</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">Let us pause for a moment to summarize the
@@ -7972,9 +7979,9 @@ declare function epi:earley-parse(
                  'failure-dump': 'closure' }
       else $options
 
-  let $mapResult := (:stat ...prof:time( ... tats:)
+  let $mapResult := (:stat:) prof:time( (:tats:)
                     er:recognizeX($I, $G),
-                    (:stat ...'0a recognize(): '),... tats:)
+                    (:stat:) '0a recognize(): '),(:tats:)
 
       $meiClosure := $mapResult('Closure'),
       $leiCompletions := $mapResult('Completions')
@@ -7988,7 +7995,7 @@ declare function epi:earley-parse(
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6252">Define earley-parse() (v. v0.2) 223</a>
+<a href="#d3e6238">Define earley-parse() (v. v0.2) 223</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#d3e382">[File Earley-parser-internals.xqm] 4</a>
 〉<br /></span></div>
@@ -8116,9 +8123,9 @@ then turn them into the required XML.
 <pre class="scrapbody">        let $dummy := eri:notrace((), 
                       'epi:earley-parse() has result') 
 
-        let $lpt := (:stat ...prof:time(... tats:)
+        let $lpt := (:stat:) prof:time((:tats:)
                     epi:all-trees($leiCompletions, $meiClosure, $I)
-                    (:stat ..., '0b making trees: ')... tats:)
+                    (:stat:) , '0b making trees: ')(:tats:)
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
         for $rpt at $npt in $lpt
@@ -8163,9 +8170,9 @@ then choose one.
 "epi-ep-any-direct">〈 183 Construct one tree directly 〉
 ≡</a></span>
 <pre class=
-"scrapbody">        let $lpt := (:stat ...prof:time(... tats:)
+"scrapbody">        let $lpt := (:stat:) prof:time((:tats:)
                     epi:all-trees($leiCompletions, $meiClosure, $I)
-                    (:stat ..., '0b making trees: ')... tats:)
+                    (:stat:) , '0b making trees: ')(:tats:)
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
         for $rpt in $lpt[1]
@@ -8185,12 +8192,12 @@ call to extract the tree.
 "epi-ep-any-via-pfg">〈 184 Construct one tree via
 parse-forest-grammar 〉 ≡</a></span>
 <pre class=
-"scrapbody">        let $pfg := (:stat ...prof:time(... tats:)
+"scrapbody">        let $pfg := (:stat:) prof:time((:tats:)
                     epi:parse-forest-grammar($leiCompletions, $meiClosure, $I),
-                    (:stat ...'0b making pfg: '),... tats:)
-            $ast := (:stat ...prof:time(... tats:)
+                    (:stat:) '0b making pfg: '),(:tats:)
+            $ast := (:stat:) prof:time((:tats:)
                     epi:tree-from-pfg($pfg, 'document', ())
-                    (:stat ..., '0c extracting tree: ')... tats:)
+                    (:stat:) , '0c extracting tree: ')(:tats:)
                     
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
@@ -8214,9 +8221,9 @@ post-processing.
 <pre class="scrapbody">        let $dummy := eri:notrace((), 
                       'epi:earley-parse() has result') 
 
-        let $pfg := (:stat ...prof:time(... tats:)
+        let $pfg := (:stat:) prof:time((:tats:)
                     epi:parse-forest-grammar($leiCompletions, $meiClosure, $I)
-                    (:stat ..., '0b making pfg: ')... tats:)
+                    (:stat:) , '0b making pfg: ')(:tats:)
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a parse-forest grammart') 
         return $pfg
@@ -8304,7 +8311,7 @@ declare function epi:all-trees(
 };
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e4596">Define auxiliary function for all-trees()
+"#d3e4607">Define auxiliary function for all-trees()
 189</a>〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#d3e382">[File Earley-parser-internals.xqm] 4</a>
 〉<br /></span></div>
@@ -8313,7 +8320,7 @@ in 〈 <a href="#d3e382">[File Earley-parser-internals.xqm] 4</a>
 is initially called for the item (0 $n Goal $q_final), but it's
 called again recursively, once for every completion relevant to the
 tree(s) we are constructing.
-<div class="scrap"><span><a name="d3e4596" id="d3e4596">〈 189
+<div class="scrap"><span><a name="d3e4607" id="d3e4607">〈 189
 Define auxiliary function for all-trees() [continues</a> <a href=
 "#epi-all-trees">188 Define all-trees()</a>] 〉 ≡</span>
 <pre class=
@@ -8358,7 +8365,7 @@ declare function epi:all-trees(
   )
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#d3e4596">Define auxiliary function for all-trees() 189</a>
+"#d3e4607">Define auxiliary function for all-trees() 189</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">Here, <tt>$Ec</tt> is the completion item for a
@@ -8393,7 +8400,7 @@ parse trees 〉 ≡</a></span>
     ()
   )</pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#d3e4596">Define auxiliary function for all-trees() 189</a>
+"#d3e4607">Define auxiliary function for all-trees() 189</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">Once we get the trees, we just return them.
@@ -8406,7 +8413,7 @@ parse trees 〉 ≡</a></span>
   return $parsetree 
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#d3e4596">Define auxiliary function for all-trees() 189</a>
+"#d3e4607">Define auxiliary function for all-trees() 189</a>
 〉<br /></span></div>
 </div>
 </div>
@@ -8672,7 +8679,7 @@ AST from the raw parse tree.
       and $Ecur('from') eq $pFrom)
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e4945">Construct an element holding the node sequence
+"#d3e4956">Construct an element holding the node sequence
 199</a>〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#epi-all-node-sequences">Define all-node-sequences()
 196</a> 〉<br /></span></div>
@@ -8688,7 +8695,7 @@ prediction of this nonterminal. We already have a little context
 information in the form of the vertical stack <tt>$leiVStack</tt>,
 the horizontal stack <tt>$leiHStack</tt>, and the node list
 <tt>$lnAcc</tt>. Let's examine the tops of those stacks.</i>
-<div class="scrap"><span><a name="d3e4945" id="d3e4945">〈 199
+<div class="scrap"><span><a name="d3e4956" id="d3e4956">〈 199
 Construct an element holding the node sequence [continues</a>
 <a href="#epi-ans-basecase">198 Handle base case: current item is
 initial</a>] 〉 ≡</span>
@@ -8716,7 +8723,7 @@ initial</a>] 〉 ≡</span>
 this. It used the nonterminal name as the GI for the element, and
 it tried to handle attributes first. Both of those should now be
 handled by the AST constructor.
-<div class="scrap"><span><a name="d3e4951" id="d3e4951">〈 200
+<div class="scrap"><span><a name="d3e4962" id="d3e4962">〈 200
 Construct an element holding the node sequence [continues</a>
 <a href="#epi-ans-basecase-2016"></a>] 〉 ≡</span>
 <pre class="scrapbody">  then 
@@ -9557,7 +9564,7 @@ lists.</div>
 <div class="div">
 <h3><a class="selflink" name="to-do-large" id="to-do-large" href=
 "#to-do-large"></a>Overall plans</h3>
-<div class="Real-P">At the moment (10 March 2022), the primary
+<div class="Real-P">At the moment (20 May 2022), the primary
 concerns are to improve performance and robustness.</div>
 <ul>
 <li>
@@ -9577,9 +9584,9 @@ be broken up to avoid blocking other work.</div>
 </li>
 <li>
 <div class="Real-P"><b>Brown Sugar</b> plan.[<a name=
-"ref-to-d3e5470" href="#d3e5470" title=
+"ref-to-d3e5481" href="#d3e5481" title=
 " So called because this is a dirty form of the sugar plan described below. "
-id="ref-to-d3e5470">22</a>] Quick and dirty ad-hoc tokenization
+id="ref-to-d3e5481">22</a>] Quick and dirty ad-hoc tokenization
 change for ixml grammar for ixml grammars. Hand-modify and
 hand-annotate the grammar, add support for those annotations.</div>
 <div class="Real-P">Note that the ixml grammar has both safe and
@@ -9880,8 +9887,8 @@ processor</li>
 </ul>
 </div>
 <div class="div">
-<h3><a class="selflink" name="d3e5890" id="d3e5890" href=
-"#d3e5890"></a>To-do list from Earley recognizer internals
+<h3><a class="selflink" name="d3e5901" id="d3e5901" href=
+"#d3e5901"></a>To-do list from Earley recognizer internals
 module</h3>
 <div class="Real-P">This module has a complicated enough to-do list
 of its own that I'll give it here for the moment instead of
@@ -10080,61 +10087,38 @@ nonterminal reference, one for the rule, plus a
 unreasonably slow.</li>
 </ul>
 </div>
-<div class="Real-P">Test-case failures (as of 17 Feb 22):
+<div class="Real-P">Test-case failures (as of 16 April 2022)
+include several occasioned by recent changes to the ixml
+specification grammar:
 <ul>
-<li>In test catalog test2:
+<li>In test catalog ixml-all:
 <ul>
-<li>test set ambiguity-1, test amb-1</li>
+<li>test set expr1, test expr1</li>
+<li>test set and test case hex-much-too-big (exception
+FOAR0002)</li>
+<li>test set and test case hex-too-big (exception FOCH0001)</li>
+<li>test set and test case hex-not-a-character (exception
+FOCH0001)</li>
+<li>test set and test case hex-surrogate (exception FOCH0001)</li>
+<li>grammar test comment</li>
+<li>grammar test repeat0</li>
+<li>grammar test repeat1</li>
+<li>grammar test sets</li>
 </ul>
 </li>
-<li>In test catalog zeroes:
-<ul>
-<li>zeroes-gone-bad / t-4x0 (test-catalog error, I guess: should
-expect an ambiguity label)</li>
-</ul>
-<i>Cleared 12 April 2022.</i></li>
-<li>In test set syntax-cagt (catalog as grammar tests):
-<ul>
-<li>elem1 (duplicate attributes)</li>
-<li>illegal-class.ixml</li>
-<li>rule2 (more than one rule for a nonterminal)</li>
-<li>unused-rule (unreachable and undefined nonterminals)</li>
-<li>unused-rules (ditto)</li>
-</ul>
-</li>
-<li>In test set ixml-corr:
-<ul>
-<li>expr1: exception in parsing XQDY0025</li>
-<li>hex3: grammar compilation failed</li>
-<li>json: grammar compilation failed</li>
-<li>range: grammar compilation failed</li>
-<li>unicode-range1: grammar compilation failed</li>
-<li>element-content</li>
-<li>range-comments</li>
-<li>ranges1</li>
-</ul>
-</li>
-<li>In test set ixml-ambi:
-<ul>
-<li>date</li>
-</ul>
-</li>
-<li>In test set wisps:
-<ul>
-<li>grammar tests on grammars 02b, 02c, 02d (non-structural
-nonconformance of grammars)</li>
-</ul>
-<i>Cleared March 2022.</i></li>
 </ul>
 </div>
-<div class="Real-P">And to make myself feel better, here is a list
-of test sets with no failures:
+<div class="Real-P">Old list from 17 February (needs to be
+re-checked):
 <ul>
-<li>test0</li>
-<li>test1</li>
-<li>misc (as of 17 Feb 22)</li>
-<li>syntax-caii (catalog as instances in ixml)</li>
-<li>syntax-caix (catalog as instances in XML)</li>
+<li>In test set wisps:
+<ul>
+<li>g06.c02 (pseudo-error: catalog missing this parse tree)</li>
+<li>g11c01 (pseudo-error: catalog missing this parse tree)</li>
+<li>g11c02 (pseudo-error: catalog missing this parse tree)</li>
+<li>g12.c05 (pseudo-error: catalog missing this parse tree)</li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="Real-P">The test harness used is described in a
@@ -10270,7 +10254,7 @@ higher-level functions, they have been rewritten. The code should
 be self-explanatory.</div>
 <div class="Real-P">At least, I hope it is, since I don't want to
 spend any time explaining it.
-<div class="scrap"><span><a name="d3e6224" id="d3e6224">〈 218
+<div class="scrap"><span><a name="d3e6210" id="d3e6210">〈 218
 Declare ep:alltrees() function 〉 (for version <em>v0.2</em>)
 ≡</a></span>
 <pre class=
@@ -10293,7 +10277,7 @@ declare function ep:all-trees(
 〉</span></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e6229" id="d3e6229">〈 219
+<div class="scrap"><span><a name="d3e6215" id="d3e6215">〈 219
 Declare ep:anytree() function 〉 (for version <em>v0.2</em>)
 ≡</a></span>
 <pre class=
@@ -10312,7 +10296,7 @@ declare function ep:any-tree(
 "#ep-anytree">Declare ep:any-tree() function 174</a> 〉</span></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e6235" id="d3e6235">〈 220
+<div class="scrap"><span><a name="d3e6221" id="d3e6221">〈 220
 Declare ep:tree-cursor() function 〉 (for version <em>v0.2</em>)
 ≡</a></span>
 <pre class="scrapbody">declare function ep:tree-cursor(
@@ -10327,7 +10311,7 @@ Declare ep:tree-cursor() function 〉 (for version <em>v0.2</em>)
 〉</span></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e6242" id="d3e6242">〈 221
+<div class="scrap"><span><a name="d3e6228" id="d3e6228">〈 221
 Declare ep:parse-forest-map() function 〉 (for version
 <em>v0.2</em>) ≡</a></span>
 <pre class=
@@ -10347,7 +10331,7 @@ declare function ep:parse-forest-map(
 176</a> 〉</span></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e6248" id="d3e6248">〈 222
+<div class="scrap"><span><a name="d3e6234" id="d3e6234">〈 222
 Declare ep:alltrees() function 〉 (for version <em>v0.2</em>)
 ≡</a></span>
 <pre class=
@@ -10373,7 +10357,7 @@ the code embeds some false assumptions about what that function
 does. Rather than unsnarl those assumptions, I rewrote things to
 use options, rather than higher-level functions, to control what
 gets returned (and other things).
-<div class="scrap"><span><a name="d3e6258" id="d3e6258">〈 223
+<div class="scrap"><span><a name="d3e6244" id="d3e6244">〈 223
 Define earley-parse() 〉 (for version <em>v0.2</em>) ≡</a></span>
 <pre class=
 "scrapbody">(: ******************************************************
@@ -10392,9 +10376,9 @@ declare function epi:earley-parse(
   ) as item()* 
 ) as item()* {
   let $dummy := eri:notrace((), 'epi:earley-parse() ...') 
-  let $mapResult := (:stat ...prof:time(... tats:)
+  let $mapResult := (:stat:) prof:time((:tats:)
                     er:recognizeX($I, $G), 
-                    (:stat ...'0a recognize(): '),... tats:)
+                    (:stat:) '0a recognize(): '),(:tats:)
 
       $meiClosure := $mapResult('Closure'),
       $leiCompletions := $mapResult('Completions')
@@ -10402,9 +10386,9 @@ declare function epi:earley-parse(
     then (: if we have a result, return each parse tree :)
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() has result') 
-        let $lpt := (:stat ...prof:time(... tats:)
+        let $lpt := (:stat:) prof:time((:tats:)
                     $f($leiCompletions, $meiClosure, $I (: , $G :) )
-                    (:stat ..., '0b making trees: ')... tats:)
+                    (:stat:) , '0b making trees: ')(:tats:)
         for $pt at $npt in $lpt
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
@@ -10580,7 +10564,7 @@ Aparecium.xqm]</a> 〉</li>
 <li>Earley-parser-internals.xqm: defined in 〈 <a href="#d3e382">4
 [File Earley-parser-internals.xqm]</a> 〉</li>
 <li>Earley-parser.xqm: defined in 〈 <a href="#d3e368">3 [File
-Earley-parser.xqm]</a> 〉 , 〈 <a href="#d3e4311">172 [File
+Earley-parser.xqm]</a> 〉 , 〈 <a href="#d3e4322">172 [File
 Earley-parser.xqm]</a> 〉</li>
 <li>Earley-rec-internals.xqm: defined in 〈 <a href="#d3e452">7
 [File Earley-rec-internals.xqm]</a> 〉</li>
@@ -10599,14 +10583,14 @@ Gluschkov.xqm]</a> 〉</li>
 <li><a href="#Earley-rec">[File Earley-recognizer.xqm] 5</a></li>
 <li><a href="#d3e452">[File Earley-rec-internals.xqm] 7</a></li>
 <li><a href="#d3e886">[File Gluschkov.xqm] 15</a></li>
-<li><a href="#d3e1779">46</a></li>
-<li><a href="#d3e3857">135</a></li>
-<li><a href="#d3e4311">[File Earley-parser.xqm] 172</a></li>
+<li><a href="#d3e1788">46</a></li>
+<li><a href="#d3e3866">135</a></li>
+<li><a href="#d3e4322">[File Earley-parser.xqm] 172</a></li>
 <li><a href="#pfg-fw-set-new-acc">Add satisfactory walks to the
 accumulator 79</a></li>
 <li><a href="#epi-ans-recnt-munge-mark">Adjust mark attribute on
 $nodeCh as needed 208</a></li>
-<li><a href="#d3e1335">Calculate follow-set for repetition with
+<li><a href="#d3e1344">Calculate follow-set for repetition with
 separator 25</a></li>
 <li><a href="#gl-ME-alt-follow">Calculate follow:* attributes for
 alt 35</a></li>
@@ -10618,7 +10602,7 @@ Earley set 117</a></li>
 53</a></li>
 <li><a href="#ap-grok-comp">Check for compiler attributes
 49</a></li>
-<li><a href="#d3e1853">Check for compiler attributes 50</a></li>
+<li><a href="#d3e1862">Check for compiler attributes 50</a></li>
 <li><a href="#epi-ans-loopcheck">Check for loops, which mean
 infinite ambiguity 197</a></li>
 <li><a href="#ap-grok-names">Check for non-XML names 51</a></li>
@@ -10634,9 +10618,9 @@ infinite ambiguity 197</a></li>
 52</a></li>
 <li><a href="#epi-tfgre-get-atts">Collect and serialize attributes
 94</a></li>
-<li><a href="#d3e4945">Construct an element holding the node
+<li><a href="#d3e4956">Construct an element holding the node
 sequence 199</a></li>
-<li><a href="#d3e4951">Construct an element holding the node
+<li><a href="#d3e4962">Construct an element holding the node
 sequence 200</a></li>
 <li><a href="#epi-ep-any-direct">Construct one tree directly
 183</a></li>
@@ -10646,23 +10630,23 @@ parse-forest-grammar 184</a></li>
 93</a></li>
 <li><a href="#ep-alltrees">Declare ep:all-trees() function
 173</a></li>
-<li><a href="#d3e6224">Declare ep:alltrees() function (v. v0.2)
+<li><a href="#d3e6210">Declare ep:alltrees() function (v. v0.2)
 218</a></li>
-<li><a href="#d3e6248">Declare ep:alltrees() function (v. v0.2)
+<li><a href="#d3e6234">Declare ep:alltrees() function (v. v0.2)
 222</a></li>
 <li><a href="#ep-anytree">Declare ep:any-tree() function
 174</a></li>
-<li><a href="#d3e6229">Declare ep:anytree() function (v. v0.2)
+<li><a href="#d3e6215">Declare ep:anytree() function (v. v0.2)
 219</a></li>
 <li><a href="#ep-parse-forest-grammar">Declare
 ep:parse-forest-grammar() function 177</a></li>
 <li><a href="#ep-parse-forest-map">Declare ep:parse-forest-map()
 function 176</a></li>
-<li><a href="#d3e6242">Declare ep:parse-forest-map() function (v.
+<li><a href="#d3e6228">Declare ep:parse-forest-map() function (v.
 v0.2) 221</a></li>
 <li><a href="#ep-tree-cursor">Declare ep:tree-cursor() function
 175</a></li>
-<li><a href="#d3e6235">Declare ep:tree-cursor() function (v. v0.2)
+<li><a href="#d3e6221">Declare ep:tree-cursor() function (v. v0.2)
 220</a></li>
 <li><a href="#epi-all-node-sequences">Define all-node-sequences()
 196</a></li>
@@ -10672,13 +10656,13 @@ v0.2) 221</a></li>
 from raw parse 211</a></li>
 <li><a href="#epi-attsXpt">Define attributesXpt() to collect
 attributes 215</a></li>
-<li><a href="#d3e4596">Define auxiliary function for all-trees()
+<li><a href="#d3e4607">Define auxiliary function for all-trees()
 189</a></li>
 <li><a href="#epi-avXpt">Define avXpt() to collect attribute value
 216</a></li>
-<li><a href="#d3e4036">Define catescXS() to build category escape
+<li><a href="#d3e4045">Define catescXS() to build category escape
 150</a></li>
-<li><a href="#d3e4042">Define charXhex() to get character given hex
+<li><a href="#d3e4051">Define charXhex() to get character given hex
 expression 151</a></li>
 <li><a href="#er-comp">Define comp() 60</a></li>
 <li><a href="#ap2-cgfs">Define compile-grammar-from-string()
@@ -10690,25 +10674,25 @@ expression 151</a></li>
 <li><a href="#epi-contentXpt">Define contentXpt() 217</a></li>
 <li><a href="#epi-docelXpt">Define doc-elementXpt() to make AST for
 document element 212</a></li>
-<li><a href="#d3e4074">Define eXei() to build 'item' element for
+<li><a href="#d3e4083">Define eXei() to build 'item' element for
 Earley item 155</a></li>
-<li><a href="#d3e3523">Define earley-closure($lei, $I, $G)
+<li><a href="#d3e3532">Define earley-closure($lei, $I, $G)
 118</a></li>
-<li><a href="#d3e3542">Define earley-closure($pending,
+<li><a href="#d3e3551">Define earley-closure($pending,
 $accumulator, $I, $G) 119</a></li>
-<li><a href="#d3e3653">Define earley-closure($pending,
+<li><a href="#d3e3662">Define earley-closure($pending,
 $accumulator, $I, $G) 123</a></li>
 <li><a href="#epi-earley-parse">Define earley-parse() 178</a></li>
-<li><a href="#d3e6258">Define earley-parse() (v. v0.2) 223</a></li>
+<li><a href="#d3e6244">Define earley-parse() (v. v0.2) 223</a></li>
 <li><a href="#eri-make-p-p-r-ri">Define eiMakePPRRi() 108</a></li>
-<li><a href="#d3e3398">Define eiMakePPT() 109</a></li>
+<li><a href="#d3e3407">Define eiMakePPT() 109</a></li>
 <li><a href="#epi-elXpt">Define elementXpt() to make AST for one
 element 214</a></li>
-<li><a href="#d3e3504">Define fAdvanceNrelEE() 116</a></li>
-<li><a href="#d3e3479">Define fExpectsN-Ei() 114</a></li>
+<li><a href="#d3e3513">Define fAdvanceNrelEE() 116</a></li>
+<li><a href="#d3e3488">Define fExpectsN-Ei() 114</a></li>
 <li><a href="#eri-sym-fNonterminal">Define fNonterminal()
 141</a></li>
-<li><a href="#d3e3497">Define fScanrelEE() 115</a></li>
+<li><a href="#d3e3506">Define fScanrelEE() 115</a></li>
 <li><a href="#eri-sym-fSymbolmatchRRiSym">Define
 fSymbolmatchRRiSym() 142</a></li>
 <li><a href="#eri-sym-fTerminal">Define fTerminal() 140</a></li>
@@ -10741,18 +10725,18 @@ parse-forest-grammar() 63</a></li>
 <li><a href="#eri-sym-reXTerminal">Define reXTerminal(), regex from
 terminal 133</a></li>
 <li><a href="#er-recognize">Define recognize() 61</a></li>
-<li><a href="#d3e1980">Define recognizeX() 62</a></li>
-<li><a href="#d3e4068">Define s X ei() to build string form of
+<li><a href="#d3e1989">Define recognizeX() 62</a></li>
+<li><a href="#d3e4077">Define s X ei() to build string form of
 Earley item 154</a></li>
 <li><a href="#er-scan">Define scan() 57</a></li>
 <li><a href="#er-scan-pfg">Define scan() (v. pfg) 58</a></li>
-<li><a href="#d3e4030">Define sceXS() to read range ends
+<li><a href="#d3e4039">Define sceXS() to read range ends
 149</a></li>
-<li><a href="#d3e4048">Define string-length() 152</a></li>
-<li><a href="#d3e4055">Define string-value() 153</a></li>
+<li><a href="#d3e4057">Define string-length() 152</a></li>
+<li><a href="#d3e4064">Define string-value() 153</a></li>
 <li><a href="#eri-trace-function">Define trace() function
 157</a></li>
-<li><a href="#d3e4080">Define trace() function for debugging
+<li><a href="#d3e4089">Define trace() function for debugging
 156</a></li>
 <li><a href="#eri-trace-dummy">Define trace() function for
 debugging 160</a></li>
@@ -10761,7 +10745,7 @@ debugging 160</a></li>
 <li><a href="#epi-tree-cursor">Define tree-cursor() 194</a></li>
 <li><a href="#eri-items">Earley items (constructors, extractors,
 etc.) 107</a></li>
-<li><a href="#d3e2841">Extend the walk 78</a></li>
+<li><a href="#d3e2850">Extend the walk 78</a></li>
 <li><a href="#epi-tfg-literal">Extract character data from literal
 element 102</a></li>
 <li><a href="#epi-tfg-alt">Extract sequence of nodes from alt
@@ -10772,12 +10756,12 @@ element 101</a></li>
 90</a></li>
 <li><a href="#epi-tfg-ixml">Extract tree from ixml parse-forest
 grammar 88</a></li>
-<li><a href="#d3e3056">Extract tree from ixml parse-forest grammar
+<li><a href="#d3e3065">Extract tree from ixml parse-forest grammar
 89</a></li>
-<li><a href="#d3e3421">Extractors for Earley items 111</a></li>
-<li><a href="#d3e3427">Extractors for Earley items 112</a></li>
+<li><a href="#d3e3430">Extractors for Earley items 111</a></li>
+<li><a href="#d3e3436">Extractors for Earley items 112</a></li>
 <li><a href="#eri-input-ext">Extractors for input 144</a></li>
-<li><a href="#d3e2838">Find follow-on completion items 77</a></li>
+<li><a href="#d3e2847">Find follow-on completion items 77</a></li>
 <li><a href="#epi-ans-recnt-lnodechild">Find parse trees for the
 child completions 206</a></li>
 <li><a href="#epi-ans-recnt-leiprev">Find the child completions for
@@ -10803,8 +10787,8 @@ information from grammars 128</a></li>
 39</a></li>
 <li><a href="#epi-all-trees-call-ans">Get the sequences, or rather
 raw parse trees 191</a></li>
-<li><a href="#d3e3690">Goal-symbol construction 126</a></li>
-<li><a href="#d3e3697">Goal-symbol construction 127</a></li>
+<li><a href="#d3e3699">Goal-symbol construction 126</a></li>
+<li><a href="#d3e3706">Goal-symbol construction 127</a></li>
 <li><a href="#eri-grammars">Grammars (constructors, extractors,
 etc.) 124</a></li>
 <li><a href="#gl-ME-alt">Handle alt elements 34</a></li>
@@ -10865,8 +10849,8 @@ a literal 82</a></li>
 earley-closure() 122</a></li>
 <li><a href="#epi-all-trees-for">Iterate over the list of
 completion items 190</a></li>
-<li><a href="#d3e4238">Location of ixml grammar 171</a></li>
-<li><a href="#d3e4225">Location of library 170</a></li>
+<li><a href="#d3e4247">Location of ixml grammar 171</a></li>
+<li><a href="#d3e4234">Location of library 170</a></li>
 <li><a href="#aparecium-main">Main interfaces for Aparecium
 8</a></li>
 <li><a href="#eri-sym-reXT-literal">Make character-escaped string
@@ -10881,12 +10865,12 @@ literal 139</a></li>
 top-level 2</a></li>
 <li><a href="#eri-items-closure-normal">Normal case for Earley
 closure 121</a></li>
-<li><a href="#d3e4173">Old code for result 165</a></li>
+<li><a href="#d3e4182">Old code for result 165</a></li>
 <li><a href="#aparecium-other-default-options">Other default
 options 45</a></li>
-<li><a href="#d3e2912">Otherwise, something has gone very wrong
+<li><a href="#d3e2921">Otherwise, something has gone very wrong
 84</a></li>
-<li><a href="#d3e3474">Predicates for Earley items 113</a></li>
+<li><a href="#d3e3483">Predicates for Earley items 113</a></li>
 <li><a href="#eri-inpred-pfg">Predicates for input: cMatchIPT() (v.
 pfg) 146</a></li>
 <li><a href="#eri-input-pred">Predicates for input: fMatchesIPT()
@@ -10941,7 +10925,7 @@ $ei 71</a></li>
 sequences for $ei 70</a></li>
 <li><a href="#pfg-fw-set-new-queue">Set new queue by extending all
 walks in the queue 76</a></li>
-<li><a href="#d3e4095">Starry trace() function 158</a></li>
+<li><a href="#d3e4104">Starry trace() function 158</a></li>
 <li><a href="#eri-symbols">Symbols (constructors, extractors, etc.)
 131</a></li>
 <li><a href="#eri-items-closure-termination">Terminating case for
@@ -11040,8 +11024,8 @@ distinguish between ‘<span>generates the empty string of symbols in
 (<i>nullable<sub>T</sub></i>). Here, <i>nullable</i> is just short
 for <i>nullable<sub>V</sub></i>.</div>
 </div>
-<div class="note">[<a name="d3e1720" id="d3e1720" href=
-"#ref-to-d3e1720">7</a>] Note that the class of hygiene problems
+<div class="note">[<a name="d3e1729" id="d3e1729" href=
+"#ref-to-d3e1729">7</a>] Note that the class of hygiene problems
 catalogued in formal language theory does not coincide exactly with
 the class of grammars ixml defines as non-conforming: nothing in
 the ixml spec appears to forbid unproductive nonterminals, or
@@ -11061,29 +11045,29 @@ multiple definitions, undefined nonterminals, unreachable
 nonterminals, and unproductive nonterminals as errors, as things
 eliciting warnings, or as things to be accepted silently.</div>
 </div>
-<div class="note">[<a name="d3e1731" id="d3e1731" href=
-"#ref-to-d3e1731">8</a>] It is not essential to clean the grammar,
+<div class="note">[<a name="d3e1740" id="d3e1740" href=
+"#ref-to-d3e1740">8</a>] It is not essential to clean the grammar,
 but it will make the grammar smaller and in some cases will avoid
 useless work by the Earley parser.</div>
-<div class="note">[<a name="d3e1861" id="d3e1861" href=
-"#ref-to-d3e1861">9</a>] Strictly speaking, a nonterminal which is
+<div class="note">[<a name="d3e1870" id="d3e1870" href=
+"#ref-to-d3e1870">9</a>] Strictly speaking, a nonterminal which is
 only ever used in an attribute value can use any mark desired,
 since the mark is ignored. In this case, Aparecium will flag an
 error even though the dynamic error case cannot arise.
 <div class="Real-P">Somehow, this does not worry me much.</div>
 </div>
-<div class="note">[<a name="d3e2157" id="d3e2157" href=
-"#ref-to-d3e2157">10</a>] Since those rules would be a potentially
+<div class="note">[<a name="d3e2166" id="d3e2166" href=
+"#ref-to-d3e2166">10</a>] Since those rules would be a potentially
 informative description of the garden paths followed by the parser
 before they reached a dead end, they might be useful as a
 grammar-debugging measure. But for now we are interested only in
 completions that actually play a role in a successful derivation of
 the input.</div>
-<div class="note">[<a name="d3e2173" id="d3e2173" href=
-"#ref-to-d3e2173">11</a>] Here <i>q</i><sub><i>f</i></sub> is any
+<div class="note">[<a name="d3e2182" id="d3e2182" href=
+"#ref-to-d3e2182">11</a>] Here <i>q</i><sub><i>f</i></sub> is any
 final state in the definition of <i>N</i>.</div>
-<div class="note">[<a name="d3e2208" id="d3e2208" href=
-"#ref-to-d3e2208">12</a>] I call it a <i>satisfactory</i> walk
+<div class="note">[<a name="d3e2217" id="d3e2217" href=
+"#ref-to-d3e2217">12</a>] I call it a <i>satisfactory</i> walk
 because (a) the sequence of nonterminals satisfies the constraints
 of the right-hand side, and (b) the walk is acceptable to the needs
 of further processing. And I need a short way to refer to the class
@@ -11094,8 +11078,8 @@ of walks I'm looking for.
 once. If the input grammar is BNF, any walk through any right-hand
 side will be a path. But we are working with EBNF.</div>
 </div>
-<div class="note">[<a name="d3e2248" id="d3e2248" href=
-"#ref-to-d3e2248">13</a>] At the moment, there are some infinitely
+<div class="note">[<a name="d3e2257" id="d3e2257" href=
+"#ref-to-d3e2257">13</a>] At the moment, there are some infinitely
 ambiguous sentences for which we will not in fact get all of the
 walks (informally, those involving infinite ‘horizontal’ ambiguity,
 as in “<tt>S = A*, 'a'. A = .</tt>”). Our inability to capture
@@ -11111,18 +11095,18 @@ repetition operators.</div>
 fact always want all the walks. Sometimes any one will do, with or
 without the knowledge that the sentence is ambiguous.</div>
 </div>
-<div class="note">[<a name="d3e2555" id="d3e2555" href=
-"#ref-to-d3e2555">14</a>] By <i>iterative function</i> I mean a
+<div class="note">[<a name="d3e2564" id="d3e2564" href=
+"#ref-to-d3e2564">14</a>] By <i>iterative function</i> I mean a
 recursive function where recursion serves only to provide a looping
 construct.</div>
-<div class="note">[<a name="d3e2563" id="d3e2563" href=
-"#ref-to-d3e2563">15</a>] If we are not trying to return all walks
+<div class="note">[<a name="d3e2572" id="d3e2572" href=
+"#ref-to-d3e2572">15</a>] If we are not trying to return all walks
 but only a finite number of walks, a depth-first search might be
 better. But at the moment I am reacting, and possibly
 over-reacting, against the problems in the depth-first
 implementation of the <i>all-node-sequences()</i> function.</div>
-<div class="note">[<a name="d3e2573" id="d3e2573" href=
-"#ref-to-d3e2573">16</a>] In principle, a walk can be extended if
+<div class="note">[<a name="d3e2582" id="d3e2582" href=
+"#ref-to-d3e2582">16</a>] In principle, a walk can be extended if
 the last state reached by the walk has follow states. But since
 right-hand sides in an EBNF can have cycles, we cut off any walk if
 its last state has already been visited more than <i>n</i> times.
@@ -11131,8 +11115,8 @@ loops; that's sufficient for all normal grammars. If we set
 <i>n</i> higher, then we traverse each loop at most <i>n</i> times;
 this may be interesting for people fascinated by ambiguity.</div>
 </div>
-<div class="note">[<a name="d3e2780" id="d3e2780" href=
-"#ref-to-d3e2780">17</a>] If this is the only source of ambiguity
+<div class="note">[<a name="d3e2789" id="d3e2789" href=
+"#ref-to-d3e2789">17</a>] If this is the only source of ambiguity
 in the parse, returning <i>n</i> walks will give us <i>n</i> trees.
 If there are multiple sources of ambiguity, the parse-forest
 grammar will generate more than <i>n</i> trees, but the cost of
@@ -11141,23 +11125,23 @@ the cost of keeping track of how many trees we could generate from
 the walks we have so far. It's worth remembering that ambiguities
 are not necessarily independent: having two two-way ambiguities
 does not guarantee four trees.</div>
-<div class="note">[<a name="d3e2800" id="d3e2800" href=
-"#ref-to-d3e2800">18</a>] Note that the current position is the
+<div class="note">[<a name="d3e2809" id="d3e2809" href=
+"#ref-to-d3e2809">18</a>] Note that the current position is the
 “<tt>from</tt>” value for the starter step (a completion for the
 parent) but the “<tt>to</tt>” value for any other step.</div>
-<div class="note">[<a name="d3e2815" id="d3e2815" href=
-"#ref-to-d3e2815">19</a>] Note that <i>N</i> and <i>T</i> are
+<div class="note">[<a name="d3e2824" id="d3e2824" href=
+"#ref-to-d3e2824">19</a>] Note that <i>N</i> and <i>T</i> are
 uniquely determined by <i>qNext</i> and thus redundant, but
 including them as grouping keys allows them to be referred to
 without subscripts.</div>
-<div class="note">[<a name="d3e2931" id="d3e2931" href=
-"#ref-to-d3e2931">20</a>] Might it be faster to do this at the same
+<div class="note">[<a name="d3e2940" id="d3e2940" href=
+"#ref-to-d3e2940">20</a>] Might it be faster to do this at the same
 time we generate the right-hand side from the walk?</div>
-<div class="note">[<a name="d3e3038" id="d3e3038" href=
-"#ref-to-d3e3038">21</a>] Actually, <i>Goal</i> should carry
+<div class="note">[<a name="d3e3047" id="d3e3047" href=
+"#ref-to-d3e3047">21</a>] Actually, <i>Goal</i> should carry
 “<tt>mark="-"</tt>” in any case.</div>
-<div class="note">[<a name="d3e5470" id="d3e5470" href=
-"#ref-to-d3e5470">22</a>] So called because this is a dirty form of
+<div class="note">[<a name="d3e5481" id="d3e5481" href=
+"#ref-to-d3e5481">22</a>] So called because this is a dirty form of
 the ‘sugar’ plan described below.</div>
 </div>
 </body>

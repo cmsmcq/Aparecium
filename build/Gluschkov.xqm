@@ -27,7 +27,8 @@ declare function gl:ME (
                           then gl:ME($c)
                           else $c,
       $ch := $children[self::element()]
-  return if ($E/self::range) then $E
+  return if ($E/self::member) then $E
+else if ($E/self::range) then $E
 else if ($E/self::class) then $E
 
   else if ($E/self::inclusion or $E/self::exclusion

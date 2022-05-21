@@ -75,11 +75,11 @@ declare function aparecium:parse-string(
   $sI as xs:string,
   $sG as xs:string
 ) as element() {
-  let $cG := (:stat ...prof:time( ... tats:)
+  let $cG := (:stat:) prof:time( (:tats:)
              aparecium:compile-grammar-from-string($sG)
-             (:stat ..., 
+             (:stat:) , 
              'parse-string: compiling grammar from string:') 
-             ... tats:)
+             (:tats:)
              
   return 
     if ($cG/self::aparecium:error)
@@ -88,9 +88,9 @@ declare function aparecium:parse-string(
       "parse-string():  Error compiling grammar.",
       $cG      
     }
-    else (:stat ...prof:time( ... tats:)
+    else (:stat:) prof:time( (:tats:)
          aparecium:parse-string-with-compiled-grammar($sI, $cG)
-         (:stat ..., 'parse-string:  parsing input string:') ... tats:)
+         (:stat:) , 'parse-string:  parsing input string:') (:tats:)
 };
 
 (: ......................................................
@@ -101,16 +101,16 @@ declare function aparecium:parse-string-with-compiled-grammar(
   $sI as xs:string,
   $cG as element(ixml)
 ) as element() {
-  let $cg-ok := (:stat ...prof:time( ... tats:)
+  let $cg-ok := (:stat:) prof:time( (:tats:)
                 aparecium:grammar-ok($cG)
-                (:stat ..., 'pswcg() calling grammar-ok():') ... tats:)
+                (:stat:) , 'pswcg() calling grammar-ok():') (:tats:)
 
   let $result := if ($cg-ok/self::ixml) 
-                 then (:stat ...prof:time( ... tats:)
+                 then (:stat:) prof:time( (:tats:)
                      earley:any-tree($sI, $cG) 
-                     (:stat ...
+                     (:stat:) 
                      , '0 Outer call to earley:any-tree(): ')
-                      ... tats:)
+                      (:tats:)
                  else element aparecium:error {
                    attribute id { "ap:tbd05" },
                    "Compiled grammar flawed:",
@@ -183,9 +183,9 @@ declare function aparecium:parse-grammar-from-string(
   let $CGIG := doc($aparecium:ixml.gl.xml)/ixml,
       (: PG: parsed grammar :)
       $PG0 := aparecium:parse-string-with-compiled-grammar($G,$CGIG),
-      $PG := (:stat ...prof:time( ... tats:)
+      $PG := (:stat:) prof:time( (:tats:)
              aparecium:grammar-ok($PG0)
-             (:stat ..., 'pgfs() calling grammar-ok():') ... tats:)
+             (:stat:) , 'pgfs() calling grammar-ok():') (:tats:)
   return $PG
 };
 
@@ -227,9 +227,9 @@ declare function aparecium:compile-grammar-from-string(
 declare function aparecium:compile-grammar-from-xml(
   $xmlG as element()
 ) as element(ixml) {
-  let $G := (:stat ...prof:time( ... tats:)
+  let $G := (:stat:) prof:time( (:tats:)
             aparecium:grammar-ok($xmlG)
-            (:stat ..., 'cgfx() calling grammar-ok():') ... tats:)
+            (:stat:) , 'cgfx() calling grammar-ok():') (:tats:)
   return if ($G/self::ixml)
          then gluschkov:ME($xmlG)
          else element aparecium:error {
@@ -430,11 +430,11 @@ declare variable $aparecium:options
 declare variable $aparecium:libloc as xs:string
   := '../lib';
 declare variable $aparecium:ixml.ixml as xs:string
-  := $aparecium:libloc || '/ixml.2022-01-25.ixml';
+  := $aparecium:libloc || '/ixml.2022-05-17.ixml';
 
 declare variable $aparecium:ixml.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-01-25.ixml.xml';
+  := $aparecium:libloc || '/ixml.2022-05-17.ixml.inlined.xml.xml';
   
 declare variable $aparecium:ixml.gl.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-01-25.ixml.compiled.xml';  
+  := $aparecium:libloc || '/ixml.2022-05-17.ixml.inlined.compiled.xml';  
 

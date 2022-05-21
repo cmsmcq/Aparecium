@@ -738,7 +738,7 @@ declare function ixi:reXTerminal(
                     ) 
                  )
                } catch * {
-                  "[^\s\S]"
+                  "[^\c\C]"
                }
 
   else 
@@ -816,7 +816,7 @@ declare function ixi:reXTerminal(
              and exists($lsRegexbits))
     then "[^" || string-join($lsRegexbits,'') || "]"
     else if ($t/self::inclusion)
-    then "[^\s\S]" (: empty inclusion matches nothing :)
+    then "[^\i\I]" (: empty inclusion matches nothing :)
     else if ($t/self::exclusion)
     then "[\s\S]" (: empty inclusion excludes nothing :)
     else "--error in reXTerminal--"
@@ -1096,7 +1096,7 @@ declare function ixi:string-length(
    To do:  sanity check this, and delete if unnecessary.
    :)
 declare function ixi:string-value(
-  $q as element(literal)
+  $q as element() (: literal or member :)
 ) as xs:string {
   let $s := if ($q/@string)
             then string($q/@string)

@@ -17,19 +17,19 @@
     </tc:description>
     
     <tc:ixml-grammar>
-bibtex: item+itemsep, s* .
+bibtex: item++itemsep, s* .
 itemsep: s+ .
 
 -item: comment ; entry .
 
 comment: -"%", cchar* .
 
-entry: -"@", @type, s*, -'{', s*, @citekey, fields?, s* -'}' .
+entry: -"@", @type, s*, -'{', s*, @citekey, fields?, s*, -'}' .
 
 type: -name .
 citekey: -name .
 
--fields: -',', field+fsep .
+-fields: -',', field++fsep .
 
 field: s*, name, s*, -'=', s*, value .
 value: quotedvalue; bracedvalue; atomicvalue .
@@ -193,7 +193,7 @@ M: 'm'; LDOE .
     <tc:created on="2022-04-16" by="CMSMcQ"/>
     <tc:ixml-grammar>
       S = a; -a; ^a; @a.
-      a = 'a'
+      a = 'a'.
     </tc:ixml-grammar>
     <tc:grammar-test>
       <tc:result>
@@ -205,6 +205,9 @@ M: 'm'; LDOE .
 	      ><alt><nonterminal name="a" mark="^"/></alt
 	      ><alt><nonterminal name="a" mark="@"/></alt
 	    ></rule
+	  ><rule name="a"
+	      ><alt><literal string="a"/></alt
+	      ></rule
 	  ></ixml>
 	</tc:assert-xml>
       </tc:result>

@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '10 March 2022' >
+<!ENTITY date.last.touched '20 May 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
-
-<!-- to turn debugging and statistics off -->
-<!ENTITY DEBUG  "(:debug ...">
-<!ENTITY GUBED  "... gubed:)">
-<!ENTITY STAT   "(:stat ...">
-<!ENTITY TATS   "... tats:)">
 
 <!-- to turn debugging and statistics on -->
 <!ENTITY DEBUG  "(:debug:)">
 <!ENTITY GUBED  "(:gubed:)">
 <!ENTITY STAT   "(:stat:) ">
 <!ENTITY TATS   "(:tats:)">
+
+<!-- to turn debugging and statistics off -->
+<!ENTITY DEBUG  "(:debug ...">
+<!ENTITY GUBED  "... gubed:)">
+<!ENTITY STAT   "(:stat ...">
+<!ENTITY TATS   "... tats:)">
 
 <!-- to turn debugging and statistics on -->
 <!ENTITY DEBUG  "">
@@ -1289,19 +1289,23 @@ expressions.</p>
 <div id="higl-ME-terminals">
 <head>Gluschkov automata for terminal symbols</head>
 
-<p>The <gi>range</gi> and <gi>class</gi> elements are always children
-of <gi>inclusion</gi> or <gi>exclusion</gi>.  They are thus internal
-to the basic symbol and need no decoration, but when the function
-handles the parent it will call itself recursively on them; they
-should be returned without change.  The <gi>literal</gi> element falls
-into this category when it is a child of <gi>inclusion</gi> or
-<gi>exclusion</gi>, but it does no harm to handle it separately.</p>
+<p>The <gi>member</gi> element is (and in older versions of the spec
+grammar the <gi>range</gi> and <gi>class</gi> elements are) always a
+child of <gi>inclusion</gi> or <gi>exclusion</gi>.  It is thus
+internal to the basic symbol and need no decoration, but when the
+function handles the parent, the function will call itself recursively
+on the children; they should be returned without change.  The
+<gi>literal</gi> element falls into this category when it is a child
+of <gi>inclusion</gi> or <gi>exclusion</gi>, but it does no harm to
+handle it separately.</p>
 
 <p>Since all we do is return the elements without change, the code is
-trivial.
+trivial.  <hi>For now, we leave the code for <gi>range</gi> and
+<gi>class</gi> in place.</hi>
 <scrap id="gl-ME-identity"
        name="Handle leaf nodes">
-if ($E/self::range) then $E
+if ($E/self::member) then $E
+else if ($E/self::range) then $E
 else if ($E/self::class) then $E
 </scrap>
 </p>
@@ -5196,17 +5200,18 @@ declare function ixi:reXTerminal(
              and exists($lsRegexbits))
     then "[^" || string-join($lsRegexbits,'') || "]"
     else if ($t/self::inclusion)
-    then "[^\s\S]" (: empty inclusion matches nothing :)
+    then "[^\i\I]" (: empty inclusion matches nothing :)
     else if ($t/self::exclusion)
     then "[\s\S]" (: empty inclusion excludes nothing :)
     else "--error in reXTerminal--"
 };
 </scrap>
-We use <q><code>[\s\S]</code></q> and <q><code>[^\s\S]</code></q>
-as XPath representations of the empty inclusion and the empty
-exclusion, respectively.  Any pair of complementary character
-class escapes would work as well:  <q><code>\w\W</code></q>
-<q><code>\i\I</code></q>, etc.
+We use <q><code>[\s\S]</code></q> and <q><code>[^\i\I]</code></q> as
+XPath representations of the empty inclusion and the empty exclusion,
+respectively.  Any pair of complementary character class escapes would
+work as well: <q><code>\w\W</code></q> <q><code>\i\I</code></q>, etc.
+We will use a different pair each time we generate such a character
+class, to help make clear where that character class was generated.
 </p>
 
 <p>An important wrinkle is that not every integer between #0000 and
@@ -5229,10 +5234,10 @@ A hex value, on the other hand, must be checked.  For encoded
 terminals, a hex value denoting a non-XML character cannot match
 anything in the input and is therefore equivalent to a regular
 expression matching nothing (not to be confused with matching
-the empty string).  We'll use <q><code>[^\s\S]</code></q>
-for that case: since <q><code>\s</code></q> and <q><code>\S</code></q>
+the empty string).  We'll use <q><code>[^\c\C]</code></q>
+for that case: since <q><code>\c</code></q> and <q><code>\C</code></q>
 are complements and together match every XML character,
-<q><code>[^\s\S]</code></q> will not match anything at all.
+<q><code>[^\c\C]</code></q> will not match anything at all.
 <scrap prev="eri-sym-reXT-literal">
       else try { ixi:sceXS(
                     codepoints-to-string(
@@ -5240,7 +5245,7 @@ are complements and together match every XML character,
                     ) 
                  )
                } catch * {
-                  "[^\s\S]"
+                  "[^\c\C]"
                }
 </scrap>
 </p>
@@ -5871,7 +5876,7 @@ declare function ixi:string-length(
    To do:  sanity check this, and delete if unnecessary.
    :)
 declare function ixi:string-value(
-  $q as element(literal)
+  $q as element() (: literal or member :)
 ) as xs:string {
   let $s := if ($q/@string)
             then string($q/@string)
@@ -6282,14 +6287,17 @@ an FSA.
 <scrap prev="aparecium-variables"
        name="Location of ixml grammar">
 declare variable $aparecium:ixml.ixml as xs:string
-  := $aparecium:libloc || '/ixml.2022-01-25.ixml';
+  := $aparecium:libloc || '/ixml.2022-05-17.ixml';
 
 declare variable $aparecium:ixml.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-01-25.ixml.xml';
+  := $aparecium:libloc || '/ixml.2022-05-17.ixml.inlined.xml.xml';
   
 declare variable $aparecium:ixml.gl.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-01-25.ixml.compiled.xml';  
+  := $aparecium:libloc || '/ixml.2022-05-17.ixml.inlined.compiled.xml';  
 </scrap>
+<hi>It may be premature, but I'm using a pre-processed ixml grammar
+in which invisible nonterminals have been inlined.  (See the Makefile
+for details of the pipeline.)</hi>
 </p>
 <p>Maintenance note: to move to a new version of the ixml grammar, the
 following steps should suffice:
@@ -8482,7 +8490,7 @@ currently unreasonably slow.</item>
 
 <p>Test-case failures (as of 16 April 2022) include several
 occasioned by recent changes to the ixml specification grammar:
-
+<list>
 <item>In test catalog ixml-all:
 <list>
 <item>test set expr1, test expr1</item>
@@ -8495,6 +8503,7 @@ occasioned by recent changes to the ixml specification grammar:
 <item>grammar test repeat1</item>
 <item>grammar test sets</item>
 </list></item>
+</list>
 </p>
 <p>Old list from 17 February (needs to be re-checked):<list>
 

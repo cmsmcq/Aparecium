@@ -1,44 +1,76 @@
 # Aparecium work plan
 
-2021-11-05
+2021-11-05, rev. 2022-04-18, 2022-05-21
 
 The current work plan for Aparecium is:
 
-* Better testing
+* Better test performance
 
-  * Make an improved test harness that
+  * Pass all tests in the ixml common test suite.
 
-    * reads test catalogs conforming to the [schema](https://github.com/cmsmcq/ixml-tests/blob/main/lib/test-catalog.rnc) in the [ixml-tests repository](https://github.com/cmsmcq/ixml-tests)
-    * runs the tests
-    * compares the produced output to the expected output
-    * produces a test report summarizing the results
+* Implementation independence
 
-    Translating to XSpec is one possible approach to this test harness, but my experiences with XSpec for XQuery testing have been a bit mixed.
+  * Make Aparecium work with Saxon.
 
-  * Run and pass the tests in [ixml-tests/tests-straw](https://github.com/cmsmcq/ixml-tests/tree/main/tests-straw) (all subdirectories).
+  * If possible in reasonable time, make Aparecium work with other processors or understand why it's not feasible.
+    * Mark Logic
+    * eXist-db
+    * FusionDB
 
-    Note that this may involve revising the test catalogs there to make them conform to the current schema.
+  (Note that Berkeley DB XML does not support Aparecium because it is XQuery 1.0 and does not support maps.  Supporting it and other 1.0 processors will require a new representation of items.)
 
 * Improve performance
 
-  * Add at least rudimentary support to SWeb (the literate programming system used here) for versioning of code.  (This is a pre-condition for the next item.)
-
   * Try to do something about the performance issues:  Measure. Think. Try something. Repeat.
 
-Current conjecture 1: Aparecium would do bettter if it had a lexical  
+Observation: Aparecium does better parsing with the spec grammar if
+the grammar is flattened by inlining all hidden nonterminals; I
+believe the reason is that it builds fewer items and has fewer items
+to manage.  On the group-maintained test suite, this improves run time
+by about a factor of four.
+
+Current conjecture 1:  Aparecium would do bettter if it  had a lexical
 scanner, or the equivalent (a get-token function that could consume in
-one step a sequence of input characters which will be serialized in
-the output as a single text node or attribute value).
+one step  a sequence of input  characters which will be  serialized in
+the output as a single text node or attribute value).  (Referred to in
+some descriptions as the Sugar, Bruno, and Brown Sugar optimizations.)
 
-Current conjecture 1: Aparecium would do bettter if it were easier to
-build a parse tree from the set of Earley items produced by the
-recognizer.  Better indexing, maybe?
+Conjecture 2: Aparecium would do bettter if it were easier to build a
+parse tree from the set of Earley items produced by the recognizer.
+Better indexing, maybe?
 
-* More testing
+Conjecture 3: On long grammars and long input, Aparecium would do
+bettter if it flattened the input grammar.  For some grammar/input
+pairs the extra cost of processing the grammar will outweigh any gain
+in the parsing of the input string; not clear where the break-even
+point lies.
+
+Conjecture 4: Optimizing the search for Earley items would improve
+performance.
+
+Conjecture 5: Inlining frequently called functions may help in some
+processors.  (It will not help if the processor already does this.)
+
+Conjecture 6: Direct construction of the parse tree will be faster
+than first constructing a parse-forest grammar and then a parse tree.
+(The parse forest grammar has roughly twice as many nodes as the parse
+tree it describes.)
+
+Conjecture 7: Using a recursive descent parser on input grammars will
+improve performance.
+
+
+* More testing, better testing
+
+  * Extend test schema to handle error codes.
+
+  * Clean up all tests in ixml-tests repository.  
 
   * Convert my backlog of tests from 2019 to the current test format, run them, pass them. 
 
   * Create a systematic set of negative test cases for the ixml grammar (input that does not conform to the ixml grammar for ixml grammars); work on error detection and error messages.
+
+  * Create test-coverage tools to measure positive and negative coverage according to various measures.
 
 * Improve the source
 
@@ -51,11 +83,18 @@ recognizer.  Better indexing, maybe?
 
   * Improve the layout and styling of SWeb documents.
 
-* Other XQuery engines: Make Aparecium work in eXist-db and Fusion-DB and possibly
-others.  (Right now eXist-db can't run Aparecium because they don't current accept a
-second argument to map:merge(), and Aparecium needs that.  There are workarounds ...)
+* Other XQuery engines: Make Aparecium work in eXist-db and Fusion-DB
+and possibly others.  (Right now eXist-db can't run Aparecium because
+they don't current accept a second argument to map:merge(), and
+Aparecium needs that.  There are workarounds ...)
 
 * Better collection of realistic and real grammars.
 
 * Sample applications.
+
+## Done
+
+* Better test harness that runs from the test catalog and produces a test report.
+
+* Rudimentary versioning support in SWeb.
 

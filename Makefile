@@ -95,3 +95,20 @@ lib/swebtohtml.xsl: /home/cmsmcq/blackmesatech.com/lib/swebtohtml.xsl
 
 lib/tltohtml.xsl: /home/cmsmcq/blackmesatech.com/lib/tltohtml.xsl
 	cp -p $< $@
+
+## Processing new version of ixml spec grammar
+## First, manually copy as ixml.yyyy-mm-dd.ixml.xml.
+
+## Then inline hidden nonterminals
+lib/ixml.%.01.inlined.xml: lib/ixml.%.ixml.xml
+	$(XSLT) $< ../Gingersnap/src/ixml-inline-hidden-nonterminals.xsl $@
+
+## Then annotate.
+lib/ixml.%.02.pc.xml: lib/ixml.%.01.inlined.xml
+	$(XSLT) $< ../Gingersnap/src/ixml-annotate-pc.xsl $@
+
+## Then remove unreachables.
+lib/ixml.%.03.clean.xml: lib/ixml.%.02.pc.xml
+	$(XSLT) $< ../Gingersnap/src/remove-unreachables.xsl $@
+
+## Then compile.  (command line would be nice.)

@@ -10,8 +10,8 @@
     /></alt
     ><alt
       ><inclusion
-        ><literal string="v"
-        /><literal string="aeiou"
+        ><member string="v"
+        /><member string="aeiou"
       /></inclusion
     ></alt
   ></rule

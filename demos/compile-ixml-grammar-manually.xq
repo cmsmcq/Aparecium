@@ -5,9 +5,9 @@ import module
     at "../build/Aparecium.xqm";
     
 
-let $basedir := '/Users/cmsmcq/github/2021/Aparecium',
+let $basedir := '/home/cmsmcq/2022/github/Aparecium',
     $libdir := $basedir || '/lib',
-    $fn := 'ixml.2021-09-14.ixml.xml',
+    $fn := 'ixml.2022-04-15.ixml.xml',
     $uri := 'file://' || $libdir || '/' || $fn
 let $xmlG := doc($uri)
 return aparecium:compile-grammar-from-xml($xmlG/ixml)

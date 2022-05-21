@@ -1,0 +1,600 @@
+<timing-data>
+  
+  <!-- 14 grammars with 0s < mean parsetime < 0.1s = 100 ms -->  
+  <grammar-result name="G101-positive" result="pass fail" n="8">
+    <mean-parsetime>0.02</mean-parsetime>
+    <min-parsetime>0.02</min-parsetime>
+    <max-parsetime>0.02</max-parsetime>
+    <range>0</range>
+    <times>0.02 0.02 0.02 0.02 0.02 0.02 0.02 0.02</times>
+    <uri>/tests/results-gxxx-2022-03-10T11:32:00.384/test-report.gxxx-test-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="name-with-spaces.ixml" result="pass fail" n="4">
+    <mean-parsetime>11.185</mean-parsetime>
+    <min-parsetime>7.41</min-parsetime>
+    <max-parsetime>14.73</max-parsetime>
+    <range>7.32</range>
+    <times>8.65 13.95 7.41 14.73</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="rule9.ixml" result="pass fail" n="4">
+    <mean-parsetime>28.697499999999998</mean-parsetime>
+    <min-parsetime>23.35</min-parsetime>
+    <max-parsetime>33.4</max-parsetime>
+    <range>10.049999999999997</range>
+    <times>23.35 31.78 26.26 33.40</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="rule8.ixml" result="pass fail" n="4">
+    <mean-parsetime>34.535</mean-parsetime>
+    <min-parsetime>26.89</min-parsetime>
+    <max-parsetime>46.11</max-parsetime>
+    <range>19.22</range>
+    <times>26.89 34.60 46.11 30.54</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="rule10.ixml" result="pass fail" n="4">
+    <mean-parsetime>49.8725</mean-parsetime>
+    <min-parsetime>44.94</min-parsetime>
+    <max-parsetime>59.28</max-parsetime>
+    <range>14.340000000000003</range>
+    <times>44.94 59.28 47.33 47.94</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.10" result="pass fail" n="4">
+    <mean-parsetime>60.155</mean-parsetime>
+    <min-parsetime>58.07</min-parsetime>
+    <max-parsetime>63.85</max-parsetime>
+    <range>5.780000000000001</range>
+    <times>63.85 60.11 58.07 58.59</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="hex2.ixml" result="pass fail" n="4">
+    <mean-parsetime>63.44499999999999</mean-parsetime>
+    <min-parsetime>51.81</min-parsetime>
+    <max-parsetime>74</max-parsetime>
+    <range>22.189999999999998</range>
+    <times>51.81 74.00 66.77 61.20</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.19" result="pass fail" n="4">
+    <mean-parsetime>82.91000000000001</mean-parsetime>
+    <min-parsetime>71.48</min-parsetime>
+    <max-parsetime>89.05</max-parsetime>
+    <range>17.569999999999993</range>
+    <times>87.56 83.55 89.05 71.48</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.08" result="pass fail" n="4">
+    <mean-parsetime>90.8075</mean-parsetime>
+    <min-parsetime>89.07</min-parsetime>
+    <max-parsetime>93.3</max-parsetime>
+    <range>4.230000000000004</range>
+    <times>91.00 89.86 93.30 89.07</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="rule.ixml" result="pass fail" n="4">
+    <mean-parsetime>92.16999999999999</mean-parsetime>
+    <min-parsetime>87.11</min-parsetime>
+    <max-parsetime>96.35</max-parsetime>
+    <range>9.239999999999995</range>
+    <times>87.11 96.35 90.97 94.25</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.07" result="pass" n="4">
+    <mean-parsetime>93.42</mean-parsetime>
+    <min-parsetime>90.95</min-parsetime>
+    <max-parsetime>95.59</max-parsetime>
+    <range>4.640000000000001</range>
+    <times>90.95 95.59 93.95 93.19</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="rule5.ixml" result="pass fail" n="4">
+    <mean-parsetime>94.5925</mean-parsetime>
+    <min-parsetime>80.72</min-parsetime>
+    <max-parsetime>124.38</max-parsetime>
+    <range>43.66</range>
+    <times>80.72 124.38 84.87 88.40</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="rule7.ixml" result="pass fail" n="4">
+    <mean-parsetime>96.7925</mean-parsetime>
+    <min-parsetime>81.26</min-parsetime>
+    <max-parsetime>110.71</max-parsetime>
+    <range>29.44999999999999</range>
+    <times>81.26 110.71 99.77 95.43</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="unterminated-comment.ixml" result="pass fail" n="4">
+    <mean-parsetime>97.99000000000001</mean-parsetime>
+    <min-parsetime>86.05</min-parsetime>
+    <max-parsetime>103.37</max-parsetime>
+    <range>17.320000000000007</range>
+    <times>86.05 102.57 103.37 99.97</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+
+  <!-- 48 grammars with 0.1s < mean parsetime < 1s = 1 000 ms-->
+  <grammar-result name="rule6.ixml" result="pass fail" n="4">
+    <mean-parsetime>111.195</mean-parsetime>
+    <min-parsetime>97.45</min-parsetime>
+    <max-parsetime>144.57</max-parsetime>
+    <range>47.11999999999999</range>
+    <times>100.16 144.57 97.45 102.60</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.15" result="pass fail" n="4">
+    <mean-parsetime>115.66499999999999</mean-parsetime>
+    <min-parsetime>109.16</min-parsetime>
+    <max-parsetime>119.5</max-parsetime>
+    <range>10.340000000000003</range>
+    <times>118.86 115.14 119.50 109.16</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="ambiguity-1" result="pass" n="6">
+    <mean-parsetime>116.04833333333333</mean-parsetime>
+    <min-parsetime>103.87</min-parsetime>
+    <max-parsetime>133</max-parsetime>
+    <range>29.129999999999995</range>
+    <times>119.44 104.72 133.00 103.87 106.21 129.05</times>
+    <uri>/tests/results-test2-2022-03-08T20:33:29.266/test-report.test2.xml</uri>
+  </grammar-result>
+  <grammar-result name="unterminated-comment1.ixml" result="pass fail" n="4">
+    <mean-parsetime>124.27250000000001</mean-parsetime>
+    <min-parsetime>104.97</min-parsetime>
+    <max-parsetime>134.81</max-parsetime>
+    <range>29.840000000000003</range>
+    <times>104.97 134.81 128.45 128.86</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.20" result="pass fail" n="4">
+    <mean-parsetime>132.39</mean-parsetime>
+    <min-parsetime>118.93</min-parsetime>
+    <max-parsetime>139.38</max-parsetime>
+    <range>20.44999999999999</range>
+    <times>138.53 139.38 132.72 118.93</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.05" result="pass fail" n="4">
+    <mean-parsetime>141.385</mean-parsetime>
+    <min-parsetime>131.3</min-parsetime>
+    <max-parsetime>150.12</max-parsetime>
+    <range>18.819999999999993</range>
+    <times>131.30 149.49 134.63 150.12</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="unterminated-comment2.ixml" result="pass fail" n="4">
+    <mean-parsetime>143.5775</mean-parsetime>
+    <min-parsetime>118.79</min-parsetime>
+    <max-parsetime>156.34</max-parsetime>
+    <range>37.55</range>
+    <times>118.79 156.34 149.67 149.51</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.17" result="pass fail" n="4">
+    <mean-parsetime>155.345</mean-parsetime>
+    <min-parsetime>137.4</min-parsetime>
+    <max-parsetime>161.64</max-parsetime>
+    <range>24.23999999999998</range>
+    <times>161.16 161.64 161.18 137.40</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.02d" result="fail" n="4">
+    <mean-parsetime>157.1</mean-parsetime>
+    <min-parsetime>155.86</min-parsetime>
+    <max-parsetime>158.85</max-parsetime>
+    <range>2.9899999999999807</range>
+    <times>156.73 156.96 155.86 158.85</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="bad-class" result="pass fail" n="5">
+    <mean-parsetime>172.14999999999998</mean-parsetime>
+    <min-parsetime>159.07</min-parsetime>
+    <max-parsetime>191.66</max-parsetime>
+    <range>32.59</range>
+    <times>159.07 168.68 168.27 173.07 191.66</times>
+    <uri>/tests/results-hygiene-2022-04-10T21:56:55.887/test-report.hygiene-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="rule3.ixml" result="pass fail" n="4">
+    <mean-parsetime>174.235</mean-parsetime>
+    <min-parsetime>157.86</min-parsetime>
+    <max-parsetime>184.24</max-parsetime>
+    <range>26.379999999999995</range>
+    <times>157.86 182.80 184.24 172.04</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="rule1.ixml" result="pass fail" n="4">
+    <mean-parsetime>174.8075</mean-parsetime>
+    <min-parsetime>157.67</min-parsetime>
+    <max-parsetime>194.23</max-parsetime>
+    <range>36.56</range>
+    <times>157.67 194.23 174.27 173.06</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="empty-string.ixml" result="pass fail" n="4">
+    <mean-parsetime>186.14</mean-parsetime>
+    <min-parsetime>161.75</min-parsetime>
+    <max-parsetime>198.19</max-parsetime>
+    <range>36.44</range>
+    <times>161.75 198.19 197.21 187.41</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.02c" result="fail" n="4">
+    <mean-parsetime>189.68</mean-parsetime>
+    <min-parsetime>176.46</min-parsetime>
+    <max-parsetime>199.57</max-parsetime>
+    <range>23.109999999999985</range>
+    <times>195.34 199.57 187.35 176.46</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.02b" result="fail" n="4">
+    <mean-parsetime>198.8975</mean-parsetime>
+    <min-parsetime>188.89</min-parsetime>
+    <max-parsetime>205.77</max-parsetime>
+    <range>16.880000000000024</range>
+    <times>205.10 205.77 195.83 188.89</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="elem2.ixml" result="pass fail" n="4">
+    <mean-parsetime>208.115</mean-parsetime>
+    <min-parsetime>197.84</min-parsetime>
+    <max-parsetime>217.12</max-parsetime>
+    <range>19.28</range>
+    <times>197.84 217.12 214.09 203.41</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="defn2.ixml" result="pass fail" n="4">
+    <mean-parsetime>209.01</mean-parsetime>
+    <min-parsetime>175.75</min-parsetime>
+    <max-parsetime>230.97</max-parsetime>
+    <range>55.22</range>
+    <times>175.75 226.89 230.97 202.43</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="defn8.ixml" result="pass fail" n="4">
+    <mean-parsetime>210.13</mean-parsetime>
+    <min-parsetime>174.46</min-parsetime>
+    <max-parsetime>256.99</max-parsetime>
+    <range>82.53</range>
+    <times>174.46 256.99 204.25 204.82</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="elem7.ixml" result="pass fail" n="4">
+    <mean-parsetime>213.98250000000002</mean-parsetime>
+    <min-parsetime>192.24</min-parsetime>
+    <max-parsetime>229.58</max-parsetime>
+    <range>37.34</range>
+    <times>192.24 229.58 221.07 213.04</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="elem6.ixml" result="pass fail" n="4">
+    <mean-parsetime>214.41249999999997</mean-parsetime>
+    <min-parsetime>186.77</min-parsetime>
+    <max-parsetime>231.74</max-parsetime>
+    <range>44.97</range>
+    <times>186.77 231.74 227.32 211.82</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="defn1.ixml" result="pass fail" n="4">
+    <mean-parsetime>217.5575</mean-parsetime>
+    <min-parsetime>187.28</min-parsetime>
+    <max-parsetime>247.04</max-parsetime>
+    <range>59.75999999999999</range>
+    <times>187.28 247.04 230.05 205.86</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="rule4.ixml" result="pass fail" n="4">
+    <mean-parsetime>221.91</mean-parsetime>
+    <min-parsetime>200.98</min-parsetime>
+    <max-parsetime>234.02</max-parsetime>
+    <range>33.04000000000002</range>
+    <times>200.98 234.02 231.66 220.98</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="elem5.ixml" result="pass fail" n="4">
+    <mean-parsetime>225.9375</mean-parsetime>
+    <min-parsetime>191.78</min-parsetime>
+    <max-parsetime>276.77</max-parsetime>
+    <range>84.98999999999998</range>
+    <times>191.78 222.98 276.77 212.22</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="defn6.ixml" result="pass fail" n="4">
+    <mean-parsetime>227.3825</mean-parsetime>
+    <min-parsetime>173.07</min-parsetime>
+    <max-parsetime>299.77</max-parsetime>
+    <range>126.69999999999999</range>
+    <times>173.07 299.77 231.51 205.18</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="defn9.ixml" result="pass fail" n="4">
+    <mean-parsetime>231.515</mean-parsetime>
+    <min-parsetime>184.49</min-parsetime>
+    <max-parsetime>293.28</max-parsetime>
+    <range>108.78999999999996</range>
+    <times>184.49 211.06 293.28 237.23</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="elem3.ixml" result="pass fail" n="4">
+    <mean-parsetime>234.60000000000002</mean-parsetime>
+    <min-parsetime>202.93</min-parsetime>
+    <max-parsetime>285.86</max-parsetime>
+    <range>82.93</range>
+    <times>202.93 285.86 226.27 223.34</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="defn5.ixml" result="pass fail" n="4">
+    <mean-parsetime>238.185</mean-parsetime>
+    <min-parsetime>180.12</min-parsetime>
+    <max-parsetime>302.52</max-parsetime>
+    <range>122.39999999999998</range>
+    <times>180.12 263.76 302.52 206.34</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="defn11.ixml" result="pass fail" n="4">
+    <mean-parsetime>242.435</mean-parsetime>
+    <min-parsetime>185.25</min-parsetime>
+    <max-parsetime>319.43</max-parsetime>
+    <range>134.18</range>
+    <times>185.25 260.56 319.43 204.50</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="defn10.ixml" result="pass fail" n="4">
+    <mean-parsetime>248.855</mean-parsetime>
+    <min-parsetime>183.8</min-parsetime>
+    <max-parsetime>306.25</max-parsetime>
+    <range>122.44999999999999</range>
+    <times>183.80 306.25 301.26 204.11</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="defn3.ixml" result="pass fail" n="4">
+    <mean-parsetime>249.43750000000003</mean-parsetime>
+    <min-parsetime>210.05</min-parsetime>
+    <max-parsetime>275.23</max-parsetime>
+    <range>65.18</range>
+    <times>210.05 275.23 268.89 243.58</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="elem4.ixml" result="pass fail" n="4">
+    <mean-parsetime>258.3625</mean-parsetime>
+    <min-parsetime>196.83</min-parsetime>
+    <max-parsetime>330.39</max-parsetime>
+    <range>133.55999999999997</range>
+    <times>196.83 330.39 287.02 219.21</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="expr10.ixml" result="pass fail" n="4">
+    <mean-parsetime>259.77500000000003</mean-parsetime>
+    <min-parsetime>202.17</min-parsetime>
+    <max-parsetime>329.3</max-parsetime>
+    <range>127.13000000000002</range>
+    <times>202.17 329.30 286.67 220.96</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="defn4.ixml" result="pass fail" n="4">
+    <mean-parsetime>261.825</mean-parsetime>
+    <min-parsetime>202</min-parsetime>
+    <max-parsetime>320.7</max-parsetime>
+    <range>118.69999999999999</range>
+    <times>202.00 320.70 279.53 245.07</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="class-range.ixml" result="pass fail" n="4">
+    <mean-parsetime>267.525</mean-parsetime>
+    <min-parsetime>238.83</min-parsetime>
+    <max-parsetime>287.71</max-parsetime>
+    <range>48.87999999999997</range>
+    <times>238.83 287.71 263.54 280.02</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.12" result="pass fail" n="4">
+    <mean-parsetime>267.93</mean-parsetime>
+    <min-parsetime>239.75</min-parsetime>
+    <max-parsetime>290.88</max-parsetime>
+    <range>51.129999999999995</range>
+    <times>269.41 290.88 271.68 239.75</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="multi-1" result="fail pass" n="17">
+    <mean-parsetime>270.0282352941177</mean-parsetime>
+    <min-parsetime>241.09</min-parsetime>
+    <max-parsetime>373.65</max-parsetime>
+    <range>132.55999999999997</range>
+    <times>268.74 256.20 241.09 267.55 260.89 373.65 258.33 261.25 272.19 283.03 263.08 265.24 268.47 263.81 266.29 259.29 261.38</times>
+    <uri>/tests/results-hygiene-2022-03-12T19:29:18.086/test-report.hygiene-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="unreachable-1" result="pass" n="17">
+    <mean-parsetime>272.29058823529414</mean-parsetime>
+    <min-parsetime>232.32</min-parsetime>
+    <max-parsetime>367.78</max-parsetime>
+    <range>135.45999999999998</range>
+    <times>252.67 255.47 232.32 259.40 255.01 258.05 255.60 256.03 275.03 361.62 276.52 262.99 257.22 367.78 284.28 259.85 259.10</times>
+    <uri>/tests/results-hygiene-2022-03-12T19:29:18.086/test-report.hygiene-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="vowels" result="pass" n="11">
+    <mean-parsetime>303.22909090909087</mean-parsetime>
+    <min-parsetime>237.76</min-parsetime>
+    <max-parsetime>439.51</max-parsetime>
+    <range>201.75</range>
+    <times>301.78 295.83 287.43 311.23 304.21 237.76 296.08 299.03 291.63 439.51 271.03</times>
+    <uri>/tests/results-test1-2022-03-08T20:33:07.559/test-report.test1.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.02" result="pass" n="4">
+    <mean-parsetime>320.60249999999996</mean-parsetime>
+    <min-parsetime>314.15</min-parsetime>
+    <max-parsetime>324.89</max-parsetime>
+    <range>10.740000000000009</range>
+    <times>322.34 321.03 314.15 324.89</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.06" result="pass fail" n="4">
+    <mean-parsetime>326.9775</mean-parsetime>
+    <min-parsetime>320.27</min-parsetime>
+    <max-parsetime>334.94</max-parsetime>
+    <range>14.670000000000016</range>
+    <times>326.44 326.26 334.94 320.27</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="illegal-class.ixml" result="fail pass" n="10">
+    <mean-parsetime>350.07000000000005</mean-parsetime>
+    <min-parsetime>224.05</min-parsetime>
+    <max-parsetime>447.25</max-parsetime>
+    <range>223.2</range>
+    <times>224.05 362.79 447.25 350.16 400.68 342.40 332.20 378.00 339.75 323.42</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="rule2.ixml" result="fail pass" n="10">
+    <mean-parsetime>377.429</mean-parsetime>
+    <min-parsetime>278.87</min-parsetime>
+    <max-parsetime>478.42</max-parsetime>
+    <range>199.55</range>
+    <times>278.87 456.41 366.74 478.42 403.63 361.05 375.77 373.62 344.24 335.54</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.01" result="pass" n="4">
+    <mean-parsetime>450.8175</mean-parsetime>
+    <min-parsetime>435.6</min-parsetime>
+    <max-parsetime>480.97</max-parsetime>
+    <range>45.370000000000005</range>
+    <times>440.53 480.97 446.17 435.60</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.14" result="pass fail" n="4">
+    <mean-parsetime>642.2925</mean-parsetime>
+    <min-parsetime>589.97</min-parsetime>
+    <max-parsetime>667.8</max-parsetime>
+    <range>77.82999999999993</range>
+    <times>667.80 643.71 667.69 589.97</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.16" result="pass fail" n="4">
+    <mean-parsetime>736.9675000000001</mean-parsetime>
+    <min-parsetime>697.69</min-parsetime>
+    <max-parsetime>754.1</max-parsetime>
+    <range>56.40999999999997</range>
+    <times>754.10 749.95 746.13 697.69</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="non-productive-1" result="pass" n="17">
+    <mean-parsetime>765.7088235294119</mean-parsetime>
+    <min-parsetime>631.63</min-parsetime>
+    <max-parsetime>868.26</max-parsetime>
+    <range>236.63</range>
+    <times>868.26 754.42 631.63 747.66 751.70 765.61 750.27 730.32 817.60 809.88 782.16 753.45 750.02 758.95 754.81 751.11 839.20</times>
+    <uri>/tests/results-hygiene-2022-03-12T19:29:18.086/test-report.hygiene-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="unused-rule.ixml" result="fail pass" n="10">
+    <mean-parsetime>845.5869999999999</mean-parsetime>
+    <min-parsetime>357.47</min-parsetime>
+    <max-parsetime>1142.77</max-parsetime>
+    <range>785.3</range>
+    <times>596.30 1142.77 357.47 1072.23 940.34 997.41 864.93 861.58 851.40 771.44</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.18" result="pass fail" n="4">
+    <mean-parsetime>845.9350000000001</mean-parsetime>
+    <min-parsetime>776.07</min-parsetime>
+    <max-parsetime>877.53</max-parsetime>
+    <range>101.45999999999992</range>
+    <times>865.86 864.28 877.53 776.07</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+
+  
+  <!-- 9 grammars with 1s < mean parsetime < 10s  = 10 000 ms -->
+  <grammar-result name="sample.grammar.13" result="pass fail" n="4">
+    <mean-parsetime>1003.9749999999999</mean-parsetime>
+    <min-parsetime>953.49</min-parsetime>
+    <max-parsetime>1030.08</max-parsetime>
+    <range>76.58999999999992</range>
+    <times>1027.94 1004.39 1030.08 953.49</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="unreachable-2" result="fail pass" n="17">
+    <mean-parsetime>1015.480588235294</mean-parsetime>
+    <min-parsetime>869.95</min-parsetime>
+    <max-parsetime>1215.45</max-parsetime>
+    <range>345.5</range>
+    <times>968.93 993.08 869.95 1024.53 967.93 967.07 982.84 987.57 1215.45 1102.89 1014.79 979.19 1201.60 983.77 986.10 1033.29 984.19</times>
+    <uri>/tests/results-hygiene-2022-03-12T19:29:18.086/test-report.hygiene-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="undefined-1" result="fail pass" n="17">
+    <mean-parsetime>1306.9411764705883</mean-parsetime>
+    <min-parsetime>1143.15</min-parsetime>
+    <max-parsetime>1460.6</max-parsetime>
+    <range>317.4499999999998</range>
+    <times>1274.94 1324.61 1143.15 1285.59 1300.09 1274.05 1278.34 1280.22 1451.90 1408.90 1262.30 1302.98 1290.66 1273.56 1292.29 1460.60 1313.82</times>
+    <uri>/tests/results-hygiene-2022-03-12T19:29:18.086/test-report.hygiene-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="unused-rules.ixml" result="fail pass" n="10">
+    <mean-parsetime>1396.731</mean-parsetime>
+    <min-parsetime>762.41</min-parsetime>
+    <max-parsetime>1775.63</max-parsetime>
+    <range>1013.2200000000001</range>
+    <times>992.84 1640.67 762.41 1471.09 1775.63 1482.88 1476.56 1622.34 1473.29 1269.60</times>
+    <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="non-productive-2" result="fail pass" n="17">
+    <mean-parsetime>1582.1276470588234</mean-parsetime>
+    <min-parsetime>1334</min-parsetime>
+    <max-parsetime>1742.11</max-parsetime>
+    <range>408.1099999999999</range>
+    <times>1555.52 1637.93 1334.00 1535.11 1606.96 1550.63 1558.54 1742.11 1559.69 1705.90 1587.39 1587.99 1584.44 1564.32 1572.94 1638.31 1574.39</times>
+    <uri>/tests/results-hygiene-2022-03-12T19:29:18.086/test-report.hygiene-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="non-productive-3" result="fail pass" n="17">
+    <mean-parsetime>1719.6894117647057</mean-parsetime>
+    <min-parsetime>1382.69</min-parsetime>
+    <max-parsetime>2017.65</max-parsetime>
+    <range>634.96</range>
+    <times>1670.50 1816.95 1382.69 1692.50 1745.48 1953.55 1701.32 1669.53 1661.24 1827.95 1687.16 1666.84 1713.09 1653.69 2017.65 1672.69 1701.89</times>
+    <uri>/tests/results-hygiene-2022-03-12T19:29:18.086/test-report.hygiene-tests.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.09" result="pass fail" n="4">
+    <mean-parsetime>2003.1474999999998</mean-parsetime>
+    <min-parsetime>1865.37</min-parsetime>
+    <max-parsetime>2149.95</max-parsetime>
+    <range>284.5799999999999</range>
+    <times>2149.95 1995.92 2001.35 1865.37</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.11" result="pass fail" n="4">
+    <mean-parsetime>2324.02</mean-parsetime>
+    <min-parsetime>2235.42</min-parsetime>
+    <max-parsetime>2462.66</max-parsetime>
+    <range>227.23999999999978</range>
+    <times>2235.42 2273.43 2324.57 2462.66</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  <grammar-result name="sample.grammar.04" result="pass fail" n="4">
+    <mean-parsetime>6580.1449999999995</mean-parsetime>
+    <min-parsetime>1.69</min-parsetime>
+    <max-parsetime>9407.49</max-parsetime>
+    <range>9405.8</range>
+    <times>9407.49 8389.42 8521.98 1.69</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+
+  <!-- 1 grammar with 10s < mean parsetime < 100s= 100 000 ms -->
+  <grammar-result name="sample.grammar.03" result="pass fail" n="4">
+    <mean-parsetime>11156.1875</mean-parsetime>
+    <min-parsetime>4.05</min-parsetime>
+    <max-parsetime>15188.29</max-parsetime>
+    <range>15184.240000000002</range>
+    <times>14843.71 14588.70 15188.29 4.05</times>
+    <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
+  </grammar-result>
+  
+  <!-- grammars with 100s < mean parsetime < 1 000s = 1 000 000 ms-->
+  <grammar-result name="a" result="pass fail" n="15">
+    <mean-parsetime>303012.1213333333</mean-parsetime>
+    <min-parsetime>47.29</min-parsetime>
+    <max-parsetime>993105.77</max-parsetime>
+    <range>993058.48</range>
+    <times>67.94 864239.85 54.39 52.96 56.67 816662.08 47.29 81.18 524591.22 521931.40 51.63 824071.56 86.51 993105.77 81.37</times>
+    <uri>/tests/results-test1-2022-03-08T20:33:07.559/test-report.test1.xml</uri>
+  </grammar-result>
+  
+  <!-- grammars with 1 000s < mean parsetime  -->
+
+</timing-data>
