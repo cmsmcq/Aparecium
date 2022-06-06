@@ -1,4 +1,4 @@
-<tc:test-catalog xmlns:tc="https://github.com/cmsmcq/ixml-tests"
+<tc:test-catalog xmlns:tc="https://github.com/invisibleXML/ixml/test-catalog"
                  xmlns:ixml="http://invisiblexml.org/NS"
 		 name="Miscellany"
 		 release-date="2022-02-17"
@@ -8,6 +8,297 @@
     in the community group and other sources.</tc:p>
   </tc:description>
 
+
+  <tc:test-set name="version-decl">
+    <tc:created by="MSM" on="2022-05-27"/>
+    <tc:ixml-grammar-ref href="version-decl.ixml"/>
+    <tc:grammar-test>
+      <tc:result>
+	<tc:assert-xml-ref href="version-decl.ixml.xml"/>
+      </tc:result>
+    </tc:grammar-test>
+    <tc:test-case name="empty">
+      <tc:test-string/>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>    
+    <tc:test-case name="abc">
+      <tc:test-string>abc😺</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns="">abc<done>😺</done></S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+    
+    <tc:test-case name="x0">
+      <tc:test-string>¿xx?</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+    <tc:test-case name="x1">
+      <tc:test-string>¿x.x?</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+    <tc:test-case name="y0">
+      <tc:test-string>¿yy?</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+    <tc:test-case name="y1">
+      <tc:test-string>¿y.y?</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+    <tc:test-case name="y2">
+      <tc:test-string>¿y..y?</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>    
+    <tc:test-case name="z0">
+      <tc:test-string>¡zz!</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns="">¡zz!</S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+    <tc:test-case name="z1">
+      <tc:test-string>¡z.z!</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>    
+    <tc:test-case name="w0">
+      <tc:test-string>¡ww!</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns="">¡ww!</S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+    <tc:test-case name="w1">
+      <tc:test-string>¡w.w!</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+    <tc:test-case name="w2">
+      <tc:test-string>¡w..w!</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="v0">
+      <tc:test-string>vv</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+    <tc:test-case name="v1">
+      <tc:test-string>v.v</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns="">v.v</S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+    <tc:test-case name="v2">
+      <tc:test-string>v..v</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+    <tc:test-case name="u0">
+      <tc:test-string>uu</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+    <tc:test-case name="u1">
+      <tc:test-string>u.u</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns="">u.u</S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+    <tc:test-case name="u2">
+      <tc:test-string>u..u</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns="">u..u</S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>    
+    <tc:test-case name="t0">
+      <tc:test-string>tt</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns="">tt</S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+    <tc:test-case name="t1">
+      <tc:test-string>t.t</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns="">t.t</S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+    <tc:test-case name="t2">
+      <tc:test-string>t..t</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>    
+    <tc:test-case name="s0">
+      <tc:test-string>ss</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns="">ss</S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+    <tc:test-case name="s1">
+      <tc:test-string>s.s</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns="">s.s</S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+    <tc:test-case name="s2">
+      <tc:test-string>s..s</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns="">s..s</S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+    
+  </tc:test-set>
+
+  <tc:test-set name="version-decl-two">
+    <tc:created by="MSM" on="2022-05-27"/>
+    <tc:ixml-grammar-ref href="version-decl.2.ixml"/>
+    <tc:grammar-test>
+      <tc:result>
+	<tc:assert-xml-ref href="version-decl-two.ixml.xml"/>
+      </tc:result>
+    </tc:grammar-test>
+    <tc:test-case name="empty">
+      <tc:test-string/>
+      <tc:result><tc:assert-xml><S xmlns=""/></tc:assert-xml></tc:result>
+    </tc:test-case>
+    <tc:test-case name="abc">
+      <tc:test-string>abc😺</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>    
+    <tc:test-case name="done">
+      <tc:test-string>done</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns="">done</S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>    
+    <tc:test-case name="overdone">
+      <tc:test-string>donetoomuch</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+    
+  </tc:test-set>
+
+  <tc:test-set name="whitespace-and-delimiters-inline">
+    <tc:created by="MSM" on="2022-05-30"/>
+    <tc:ixml-grammar>
+&#x9;S&#xD;={}a, b, c, d.&#xD;
+&#x9;a&#xA;=&#x20;'Don''t worry'&#xD;
+&#x9;      | 'Keep ''calm'''.&#xD;
+&#x9;b&#xD;={}[';,']?.&#xD;
+&#x9;&#x9;d = 'be ''happy''.'&#xD;
+        |{}; 'and carry on.'.{}c=#000000000000020.&#xD;
+    </tc:ixml-grammar>
+    <tc:grammar-test>
+      <tc:result><tc:assert-xml>
+	<ixml
+	  ><rule name="S"
+	    ><comment
+	    /><alt
+	      ><nonterminal name="a"
+	      /><nonterminal name="b"
+	      /><nonterminal name="c"
+	      /><nonterminal name="d"
+	    /></alt
+	  ></rule
+	  ><rule name="a"
+	    ><alt><literal string="Don't worry"/></alt
+	    ><alt><literal string="Keep 'calm'"/></alt
+	  ></rule
+	  ><rule name="b"
+	    ><comment
+	    /><alt><option><inclusion><member string=";,"/></inclusion></option></alt
+	  ></rule
+	  ><rule name="d"
+	    ><alt><literal string="be 'happy'."/></alt
+	    ><comment
+	    /><alt
+	    /><alt><literal string="and carry on."/></alt
+	  ></rule
+	  ><comment
+	  /><rule name="c"
+	    ><alt><literal hex="000000000000020"/></alt
+	  ></rule
+	></ixml>
+      </tc:assert-xml></tc:result>     
+    </tc:grammar-test>
+    <tc:test-case name="empty">
+      <tc:test-string/>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+    <tc:test-case name="wd1">
+      <tc:test-string>Don't worry, be 'happy'.</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns=""><a>Don't worry</a><b>,</b><c> </c><d>be 'happy'.</d></S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+    <tc:test-case name="wd2">
+      <tc:test-string>Don't worry and carry on.</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns=""><a>Don't worry</a><b></b><c> </c><d>and carry on.</d></S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+    <tc:test-case name="wd3">
+      <tc:test-string>Keep 'calm'; be 'happy'.</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns=""><a>Keep 'calm'</a><b>;</b><c> </c><d>be 'happy'.</d></S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case> 
+    
+  </tc:test-set>
+
+  <tc:test-set name="whitespace-and-delimiters-external">
+    <tc:created by="MSM" on="2022-05-30"/>
+    <tc:ixml-grammar-ref href="ws-and-delim.ixml"/>
+    <tc:grammar-test>
+      <tc:result><tc:assert-xml>
+	<ixml
+	  ><rule name="S"
+	    ><comment
+	    /><alt
+	      ><nonterminal name="a"
+	      /><nonterminal name="b"
+	      /><nonterminal name="c"
+	      /><nonterminal name="d"
+	    /></alt
+	  ></rule
+	  ><rule name="a"
+	    ><alt><literal string="Don't worry"/></alt
+	    ><alt><literal string="Keep 'calm'"/></alt
+	  ></rule
+	  ><rule name="b"
+	    ><comment
+	    /><alt><option><inclusion><member string=";,"/></inclusion></option></alt
+	  ></rule
+	  ><rule name="d"
+	    ><alt><literal string="be 'happy'."/></alt
+	    ><comment
+	    /><alt
+	    /><alt><literal string="and carry on."/></alt
+	  ></rule
+	  ><comment
+	  /><rule name="c"
+	    ><alt><literal hex="00000000020"/></alt
+	  ></rule
+	></ixml>
+      </tc:assert-xml></tc:result>     
+    </tc:grammar-test>
+    <tc:test-case name="empty">
+      <tc:test-string/>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+    <tc:test-case name="wd1">
+      <tc:test-string>Don't worry, be 'happy'.</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns=""><a>Don't worry</a><b>,</b><c> </c><d>be 'happy'.</d></S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+    <tc:test-case name="wd2">
+      <tc:test-string>Don't worry and carry on.</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns=""><a>Don't worry</a><b></b><c> </c><d>and carry on.</d></S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case>
+    <tc:test-case name="wd3">
+      <tc:test-string>Keep 'calm'; be 'happy'.</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns=""><a>Keep 'calm'</a><b>;</b><c> </c><d>be 'happy'.</d></S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case> 
+    
+  </tc:test-set>
+
+  <!--
   <tc:test-set name="bibtex">
     <tc:created by="CMSMcQ" on="2022-02-17"/>
     <tc:description>
@@ -188,6 +479,7 @@ M: 'm'; LDOE .
       </tc:result>
     </tc:test-case>
   </tc:test-set>
+  -->
 
   <tc:test-set name="ambiguous-markings">
     <tc:created on="2022-04-16" by="CMSMcQ"/>
@@ -219,6 +511,50 @@ M: 'm'; LDOE .
 	<tc:assert-xml><S ixml:state="ambiguous">a</S></tc:assert-xml>
 	<tc:assert-xml><S ixml:state="ambiguous" a="a"/></tc:assert-xml>
       </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+
+  <tc:test-set name="insertion-1">
+    <tc:created by="MSM" on="2022-05-30"/>
+    <tc:ixml-grammar>
+      S = +"\start", +#0a, number, +#0a, +"\end".
+      number = [Nd]+.
+    </tc:ixml-grammar>
+    <tc:grammar-test>
+      <tc:result>
+	<tc:assert-xml>
+	  <ixml
+	    ><rule name="S"
+	      ><alt
+		><insertion string="\start"
+		/><insertion hex="0a"
+		/><nonterminal name="number"
+		/><insertion hex="0a"
+		/><insertion string="\end"
+	      /></alt
+	    ></rule
+	    ><rule name="number"
+	      ><alt
+		><repeat1
+		  ><inclusion
+		    ><member code="Nd"
+		  /></inclusion
+		></repeat1
+	      ></alt
+	    ></rule
+	  ></ixml>
+	</tc:assert-xml>
+      </tc:result>
+    </tc:grammar-test>
+    <tc:test-case name="i1">
+      <tc:test-string/>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+    <tc:test-case name="i2">
+      <tc:test-string>42</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S>\start&#xA;<number>42</number>&#xA;\end</S>
+      </tc:assert-xml></tc:result>
     </tc:test-case>
   </tc:test-set>
   

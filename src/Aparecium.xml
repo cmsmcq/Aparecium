@@ -6,17 +6,17 @@
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
 
-<!-- to turn debugging and statistics on -->
-<!ENTITY DEBUG  "(:debug:)">
-<!ENTITY GUBED  "(:gubed:)">
-<!ENTITY STAT   "(:stat:) ">
-<!ENTITY TATS   "(:tats:)">
-
 <!-- to turn debugging and statistics off -->
 <!ENTITY DEBUG  "(:debug ...">
 <!ENTITY GUBED  "... gubed:)">
 <!ENTITY STAT   "(:stat ...">
 <!ENTITY TATS   "... tats:)">
+
+<!-- to turn debugging and statistics on -->
+<!ENTITY DEBUG  "(:debug:)">
+<!ENTITY GUBED  "(:gubed:)">
+<!ENTITY STAT   "(:stat:) ">
+<!ENTITY TATS   "(:tats:)">
 
 <!-- to turn debugging and statistics on -->
 <!ENTITY DEBUG  "">
@@ -426,6 +426,9 @@ import module namespace earley
 import module namespace gluschkov
    = "http://blackmesatech.com/2019/iXML/Gluschkov"
   at "Gluschkov.xqm";
+import module namespace d2x 
+   = 'http://blackmesatech.com/2019/iXML/d2x'
+  at "d2x.xqm";
   
 (: Quick hack for testing ... :)
 import module namespace ws
@@ -1278,6 +1281,7 @@ declare function gl:ME (
   else <ptr target="gl-ME-def"/>
   else <ptr target="gl-ME-rule"/>
   else <ptr target="gl-ME-comment"/>
+  else <ptr target="gl-ME-prolog"/>
   else <ptr target="gl-ME-ixml"/>
   else <ptr target="gl-ME-whahhh"/>
 };
@@ -1726,7 +1730,7 @@ if ($E/self::alt) then
                      @follow:*)),
        attribute xml:id { $id },
        attribute nullable { 
-         every $c in $ch
+         every $c in $ch except $E/comment
          satisfies (xs:boolean($c/@nullable) eq true())
        },
        attribute first { 
@@ -1910,6 +1914,15 @@ if ($E/self::comment) then
 </scrap>
 </p>
 
+<p>The <gi>prolog</gi> element is currently just for
+documentation; it requires no annotation.
+<scrap id="gl-ME-prolog"
+       name="Handle prolog elements">
+if ($E/self::prolog) then
+    $E
+</scrap>
+</p>
+
 <p>The <gi>ixml</gi> element also requires no
 annotation.
 <scrap id="gl-ME-ixml"
@@ -1946,6 +1959,8 @@ else &lt;error>Unexpected element {$E}&lt;/error></scrap>
 in principle be done either before or after compilation, but since
 we allow the user to supply a compiled grammar we do it after.</p>
 
+<div id="hi-ccg-what">
+<head>What is checked</head>
 <p>What is checked for in the grammar is pretty much the same in all
 cases, but what is done when problems are found depends in part on the
 user's options.
@@ -2072,6 +2087,10 @@ going to feel satisfactory.
 and <q>lax</q> (<q>loose</q>, <q>slipshod</q>).</hi>
 </p>
 
+</div>
+<div id="hi-ccg-gok">
+<head>The <ident>grammar-ok()</ident> function</head>
+
 <p>All of the grammar checking is managed by the Aparecium
 <ident>grammar-ok()</ident> function.  The basic plan is
 simple: we collect several lists of error elements
@@ -2087,19 +2106,22 @@ declare function aparecium:grammar-ok(
 ) as element() {
   if ($G/self::ixml)
   then 
-  let $dummy := trace($G/rule[1]/@name/string(),
-                'grammar-ok() called on grammar for: ')
+  let $dummy := () (: trace($G/rule[1]/@name/string(),
+                'grammar-ok() called on grammar for: ') :)
   <ptr target="ap-grok-str"/>
   <ptr target="ap-grok-comp"/>
   <ptr target="ap-grok-names"/>
   <ptr target="ap-grok-uniqdef"/>
   <ptr target="ap-grok-charclass"/>
+  <ptr target="ap-grok-hexref"/>
+  <ptr target="ap-grok-ranges"/>
   <ptr target="ap-grok-alldef"/>
   <ptr target="ap-grok-reach"/>
   <ptr target="ap-grok-prod"/>
   let $lee-all := ($lee-struc, $lee-comp,
                    $lee-names,  
                    $lee-uniqdef, $lee-charclass,
+                   $lee-hex, $lee-ranges,
                    $lee-alldef, 
                    $lee-reachable, $lee-productive)
   return if (empty($lee-all/self::aparecium:error))
@@ -2119,6 +2141,8 @@ declare function aparecium:grammar-ok(
 </scrap>
 </p>
 
+<div id="hi-ccg-gok-str">
+<head>Structural checks</head>
 <p>For now, our structural checks are rudimentary, more symbolic than
 real.  We have already checked that <ident>$G</ident> is an
 <gi>ixml</gi> element; here we check that all the children of
@@ -2129,7 +2153,7 @@ comments or pragmas.
        name="Check for structural problems">
   let $lee-struc := (
       let $le0 := $G/*
-          [not(self::rule or self::comment or self::pragma)]
+          [not(self::prolog or self::rule or self::comment or self::pragma)]
       for $e in $le0 
       return element aparecium:error {
         attribute id { "ap:tbd08" },
@@ -2177,6 +2201,11 @@ now.</hi>
   )
 </scrap>
 </p>
+</div>
+
+<div id="hi-ccg-gok-nonxml">
+<head>Checking for non-XML names</head>
+
 <p>The ixml spec makes it a dynamic error in the grammar
 for a nonterminal with a non-XML name to be serialized.
 We detect the problem statically:  if a name is not
@@ -2213,6 +2242,12 @@ error case cannot arise.</p>
   ) 
 </scrap>
 </p>
+
+</div>
+
+<div id="hi-ccg-gok-duprules">
+<head>Checking for multiple definitions</head>
+
 <p>The ixml spec requires that no nonterminal have
 two <gi>rule</gi> elements.  So we group by name and
 seek groups with count greater than one.
@@ -2239,6 +2274,11 @@ seek groups with count greater than one.
   )
 </scrap>
 </p>
+</div>
+
+<div id="hi-ccg-gok-classes">
+<head>Checking character classes</head>
+
 <p>In character sets, classes referred to must be
 classes listed in Unicode.  The XML representation of
 classes is changing, so this code will (for now)
@@ -2250,7 +2290,7 @@ check both forms.
                   $G//member/@code)
       let $nt := string($cc/ancestor::rule/@name)
       where not(matches($cc,
-                '^(L[ulmo]?'
+                '^(L[ultmo]?'
                 || '|M[nce]?'
                 || '|N[dlo]?'
                 || '|P[cdseifo]?'
@@ -2266,6 +2306,160 @@ check both forms.
   )
 </scrap>
 </p>
+</div>
+
+<div id="hi-ccg-gok-hex">
+<head>Checking hex literals</head>
+
+<p>In hex literals, the hex numeral must denote a number
+in the Unicode code point range (so 0 to x10FFFF = 1114111),
+which must not be 
+that of a Unicode surrogate code point (range xD800 (= 55,296) to xDFFF (= 57343))
+or
+that of a Unicode non-character (range xFDD0 to xFDEF = 64976 to 65007, also
+characters FFFE and FFFF in every plane).
+<scrap id="ap-grok-hexref"
+       name="Check hexadecimal character references">
+  let $lee-hex := (
+      for $hexref in ($G//literal/@hex,
+                  $G//member/@hex,
+                  $G//member/(@from | @to)
+                      [starts-with(., '#') 
+                      and string-length(.) gt 1]
+		  )
+      let $nt := string($hexref/ancestor::rule/@name),
+          $hexstring := if (starts-with($hexref, '#'))
+                        then substring($hexref, 2)
+                        else string($hexref),
+          $int := try { 
+                    d2x:x2d($hexstring) 
+                  } catch err:FOAR0002 {  
+                    -1 (: out of range, assume too big :)
+                  } catch * {  
+                    -2 (: who knows?  Assume bad hex :)
+                  }
+      return <ptr target="ap-grok-hexref-cases"/>
+</scrap>
+</p>
+<p>We should now be able to diagnose any errors and return
+the appropriate error element.  First we check for the value
+-1, which will be returned only if we caught error FOAR0002.
+<scrap id="ap-grok-hexref-cases"
+       name="Diagnose errors and return appropriate errors">
+        if ($int eq -1)
+        then element aparecium:error {
+             attribute id { "ixml:S07" },
+             "Hex value ", $hexstring, 
+             "in the definition of", $nt, 
+             "is too large. Entirely too large."
+	} 
+</scrap>
+</p>
+<p>Then we check for any other errors we encountered; I have
+no real idea what they might be, so diagnosing it as a bad
+hex value is kind of a stab in the dark.
+<scrap prev="ap-grok-hexref-cases"
+       name="Other error during hex-decimal conversion">
+        else if ($int eq -2)
+        then element aparecium:error {
+             attribute id { "ixml:S08" },
+             "Hex value ", $hexstring, 
+             "in the definition of", $nt, 
+             "cannot be converted to an integer."
+        } 
+</scrap></p>
+<p>From now on we are on firmer footing.  First, we check the range:
+Unicode code points lie between 0 and 1114111 inclusive.
+<scrap prev="ap-grok-hexref-cases"
+       name="Check range">
+        else if ($int lt 0 or $int gt 1114111)
+        then element aparecium:error {
+             attribute id { "ixml:S07" },
+             "Hex value ", $hexstring, 
+             "( = ", string($int), ")", 
+             "in the definition of", $nt,
+             "lies outside the Unicode range",
+	     "(0 to 1114111)."
+        } 
+</scrap></p>
+<p>Code points U+D800 to U+DBFF are starting characters for surrogate
+pairs, and U+DC00 to U+DFFF are ending characters for surrogates. 
+<scrap prev="ap-grok-hexref-cases"
+       name="Check for surrogate code points">
+        else if ($int ge 55296 and $int le 57343)
+              (: xD800 to xDFFFF :)
+        then element aparecium:error {
+             attribute id { "ixml:S08" },
+             "Hex value ", $hexstring, 
+             "( = ", string($int), ")", 
+             "in the definition of", $nt,
+             "is not a Unicode character",
+	     "(it is a surrogate code point)."
+        } 
+</scrap></p>
+
+<p>Code points FFFE and FFFF are non-characters in every code page;
+this has something to do with the BOM and ensuring there are no false
+positives in detecting the BOM.
+<scrap prev="ap-grok-hexref-cases"
+       name="Check for BOM and BOM-similar code points">
+        else if (ends-with(upper-case($hexstring), 'FFFF')
+             or  ends-with(upper-case($hexstring), 'FFFE'))
+        then element aparecium:error {
+             attribute id { "ixml:S08" },
+             "Hex value ", $hexstring, 
+             "( = ", string($int), ")", 
+             "in the definition of", $nt,
+             "is not a Unicode character",
+	     "(it is a non-character)."
+        }
+</scrap></p>
+<p>If none of the above apply, then we have found no error
+and return nothing.
+<scrap prev="ap-grok-hexref-cases"
+       name="No error found, return nothing">
+        else ()
+  )
+</scrap>
+</p>
+</div>
+
+<div id="hi-ccg-gok-range">
+<head>Checking ranges</head>
+
+<p>The spec forbids ranges in which the starting code point
+is greater than the closing code point.
+<scrap id="ap-grok-ranges"
+       name="Check ranges">
+  let $lee-ranges := (
+      for $ref in $G//member[@from and @to]
+      let $nt := string($ref/ancestor::rule[1]/@name),
+          $cp-from := if (string-length($ref/@from) eq 1)
+                      then string-to-codepoints($ref/@from)
+	              else d2x:x2d(substring($ref/@from, 2)),
+          $cp-to := if (string-length($ref/@to) eq 1)
+                    then string-to-codepoints($ref/@to)
+                    else d2x:x2d(substring($ref/@to, 2))
+      return if ($cp-to lt $cp-from)
+      then element aparecium:error {
+           attribute id { "ixml:S09" },
+           "Range", 
+           $ref/@from/string(), '-', $ref/@to/string(),
+           '(=', $cp-from, '-', $cp-to, ")",
+           "in the definition of",
+           $nt || " is not a good range.",
+           "(The end of the range must",
+           "be higher than the beginning." 
+      }
+      else ()
+  )
+</scrap>
+</p>
+</div>
+
+<div id="hi-ccg-gok-undef">
+<head>Checking for undefined nonterminals</head>
+
 <p>The spec forbids references to undefined
 nonterminals; here we group references by name
 and look each name up.
@@ -2284,6 +2478,11 @@ and look each name up.
   )
 </scrap>
 </p>
+</div>
+
+<div id="hi-ccg-gok-unreachable">
+<head>Checking for unreachable rules</head>
+
 <p>Unreachable nonterminals are not defined as an error
 by the ixml spec.  They should be detected and warnings
 should be issued, but for now we simply ignore them.
@@ -2292,6 +2491,10 @@ should be issued, but for now we simply ignore them.
   let $lee-reachable := ()
 </scrap>
 </p>
+</div>
+
+<div id="hi-ccg-gok-unprod">
+<head>Checking for unproductive nonterminals</head>
 <p>Unproductive nonterminals are not defined as an error
 by the ixml spec.  They should be detected and warnings
 should be issued, but for now we simply ignore them,
@@ -2304,6 +2507,8 @@ just as for unreachable nonterminals.
 <p>
 That code should clear the hygiene problems.
 </p>
+</div>
+</div>
 
 </div>
 </div>
@@ -3135,6 +3340,7 @@ appropriate expression on the right-hand side.
                    $r0/@mark,
                    if (empty($walks))
                    then element ap:error {
+		     attribute id { "ap:tbd21" },
                      element p { "make-pfg-rules here." },
                      element p { "find-walks() failed." },
                      element p { "Here is what I know." },
@@ -3519,6 +3725,7 @@ then we return an error.
   else 
 let $dummy := eri:trace($w('item'), 'rhs-from-walk:  item fell through!') return
        element ap:error {
+           attribute id { "ap:tbd22" },
            element p { 'Unexpected failure 83' },
            $acc,
            $w?state
@@ -3677,8 +3884,8 @@ the tree we return with <code>ixml:state="ambiguous"</code>.
                        /descendant-or-self::ap:error))
                     then element ap:error {
                            attribute ixml:state { "failed" },
-                           attribute id { "ap:tbd19" },
-                           attribute ap:desc { "ill-formed output" },
+                           attribute id { "ixml:D01" },
+                           attribute ap:desc { "Dynamic error: ill-formed output" },
                            $tree0
                          }
                     else $tree0
@@ -3821,7 +4028,8 @@ if (($nodetype = ('element', 'content'))
                  and ($mark eq '^'))
           then element { $nm } {
                    if ($nm0 ne $nm)
-                   then attribute ap:gi { $nm0 }
+                   then (attribute id { "ixml:D03"}, 
+                         attribute ap:gi { $nm0 })
                    else (),
                    <ptr target="epi-tfgre-get-atts"/>,
                    <ptr target="epi-tfgre-get-children"/>
@@ -3853,25 +4061,25 @@ being asked to serialize two attribute nodes with the same name.
                                  'attribute',
                                  ()
                       )
-let $dummy := trace(count($lnAtts), 'Gathering attributes, found #: ')
-let $dummy := trace($lnAtts, 'Gathering attributes, found these: ')
+let $dummy := eri:notrace(count($lnAtts), 'Gathering attributes, found #: ')
+let $dummy := eri:notrace($lnAtts, 'Gathering attributes, found these: ')
                    let $lnAok := 
                        $lnAtts
                        [every $i in 1 to (position() - 1)
                         satisfies
                         $lnAtts[$i]/name() ne ./name()]
-let $dummy := trace(count($lnAok), 'Of these some are OK: ')
+let $dummy := eri:notrace(count($lnAok), 'Of these some are OK: ')
 	           let $lnAdups := $lnAtts
                        [some $i in 1 to (position() - 1)
                         satisfies
                         $lnAtts[$i]/name() eq ./name()]
-let $dummy := trace(count($lnAdups), 'Of these some are dups: ')
+let $dummy := eri:notrace(count($lnAdups), 'Of these some are dups: ')
                    return ($lnAok,
 		       for $n in $lnAdups
                        return element ap:error {
-                          attribute id { "ap:tbd18" },
+                          attribute id { "ixml:D02" },
                           $n,
-                          "Duplicate attribute name"
+                          "Dynamic error: Duplicate attribute name"
                        })
 </scrap>
 </p>
@@ -3899,6 +4107,9 @@ if (($nodetype = ('attribute'))
                    , '')
                }
 </scrap>
+<hi>We should detect the case where $nm ne $nm0 and report it as
+dynamic error D03.  But it's not clear how best to report that.  (Perhaps
+checks on the PFG could detect this and other dynamic errors?)</hi>
 </p>
 
 <p>When the rule is marked <q><code>-</code></q> and
@@ -3952,6 +4163,7 @@ then something is wrong.  Say so.
 if (($nodetype = ('element'))
                  and ($mark = ('@')))
           then element ap:error {
+                 attribute id { "ixml:D05" },
                  attribute ap:desc {
                    "Attribute cannot be root.",
                    if ($nm ne $nm0)
@@ -3973,6 +4185,7 @@ if (($nodetype = ('element'))
                  }
                }
           else element ap:error {
+            attribute id { "ap:tbd20" },
             "Ran off a cliff, ",
             "I don't remember a thing. ",
             "Nodetype is '" || $nodetype || "'",
@@ -6287,13 +6500,13 @@ an FSA.
 <scrap prev="aparecium-variables"
        name="Location of ixml grammar">
 declare variable $aparecium:ixml.ixml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-17.ixml';
+  := $aparecium:libloc || '/ixml.2022-05-28.ixml';
 
 declare variable $aparecium:ixml.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-17.ixml.inlined.xml.xml';
+  := $aparecium:libloc || '/ixml.2022-05-28.01.inlined.xml';
   
 declare variable $aparecium:ixml.gl.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-17.ixml.inlined.compiled.xml';  
+  := $aparecium:libloc || '/ixml.2022-05-28.inlined.compiled.xml';  
 </scrap>
 <hi>It may be premature, but I'm using a pre-processed ixml grammar
 in which invisible nonterminals have been inlined.  (See the Makefile
@@ -7993,6 +8206,16 @@ desirable to pull the Recursive Descent task forward.  It will feel
 better worrying about vendor neutrality if the tool is actually
 useful.
 -->
+<p>Current complaints by Saxon, when attempting to run the test driver:
+<list>
+  <item>Namespace <q><code>prof</code></q> not declared (calls
+  to prof:time, prof:track).</item>
+  <item>Namespace <q><code>file</code></q> not declared (calls
+  to file:create-dir, file:write).</item>
+</list>
+Currently no complaint about xquery:eval, but that's presumably only a
+matter of time.
+</p>
 </item>
 
 <item><p><label>Brown Sugar</label> plan.<note place="foot">
@@ -8488,35 +8711,9 @@ currently unreasonably slow.</item>
 </list>
 </p>
 
-<p>Test-case failures (as of 16 April 2022) include several
-occasioned by recent changes to the ixml specification grammar:
-<list>
-<item>In test catalog ixml-all:
-<list>
-<item>test set expr1, test expr1</item>
-<item>test set and test case hex-much-too-big (exception FOAR0002)</item>
-<item>test set and test case hex-too-big (exception FOCH0001)</item>
-<item>test set and test case hex-not-a-character (exception FOCH0001)</item>
-<item>test set and test case hex-surrogate (exception FOCH0001)</item>
-<item>grammar test comment</item>
-<item>grammar test repeat0</item>
-<item>grammar test repeat1</item>
-<item>grammar test sets</item>
-</list></item>
-</list>
-</p>
-<p>Old list from 17 February (needs to be re-checked):<list>
-
-<item>In test set wisps:
-<list>
-<item>g06.c02 (pseudo-error: catalog missing this parse tree)</item>
-<item>g11c01 (pseudo-error:  catalog missing this parse tree)</item>
-<item>g11c02 (pseudo-error:  catalog missing this parse tree)</item>
-<item>g12.c05 (pseudo-error:  catalog missing this parse tree)</item>
-</list>
-</item>
-</list>
-</p>
+<p>As of 21 May 2022, Aparecium passes all tests in the ixml community
+group's test catalog.  This is likely to change when new tests covering
+insertions are added to the test set.</p>
 <p>The test harness used is described in a separate document
 (<ptr target="test-harness"/>).</p>
 </div>

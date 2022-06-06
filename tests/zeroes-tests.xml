@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<tc:test-catalog xmlns:tc="https://github.com/cmsmcq/ixml-tests"
+<tc:test-catalog xmlns:tc="https://github.com/invisibleXML/ixml/test-catalog"
 		 xmlns:ixml="http://invisiblexml.org/NS"
 		 name="Zeroes"
 		 release-date="2022-02-16"

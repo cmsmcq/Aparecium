@@ -1,4 +1,4 @@
-<test-catalog xmlns="https://github.com/cmsmcq/ixml-tests"
+<test-catalog xmlns="https://github.com/invisibleXML/ixml/test-catalog"
 	      name="Level zero tests"
 	      release-date="2021-10-05"	      
 	      >
