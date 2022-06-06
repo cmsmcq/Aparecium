@@ -112,3 +112,5 @@ lib/ixml.%.03.clean.xml: lib/ixml.%.02.pc.xml
 	$(XSLT) $< ../Gingersnap/src/remove-unreachables.xsl $@
 
 ## Then compile.  (command line would be nice.)
+lib/ixml.%.inlined.compiled.xml: lib/ixml.%.03.clean.xml
+	basex -o $@ -b file=$(realpath $<) lib/compile-grammar.xq
