@@ -1,27 +1,35 @@
 # Aparecium work plan
 
-2021-11-05, rev. 2022-04-18, 2022-05-21
+started 2021-11-05, most recent rev. 2022-06-05
 
 The current work plan for Aparecium is:
 
-* Better test performance
+* Improve test harness:
+  - eliminate processor dependency
 
-  * Pass all tests in the ixml common test suite.
-
-* Implementation independence
+* Implementation independence (Saxon)
 
   * Make Aparecium work with Saxon.
 
-  * If possible in reasonable time, make Aparecium work with other processors or understand why it's not feasible.
+* Add new functionality for insertions
+
+* Implementation independence (others)
+
+  * If possible in reasonable time, make Aparecium work with other
+    processors or understand why it's not feasible.
+  
     * Mark Logic
     * eXist-db
     * FusionDB
 
-  (Note that Berkeley DB XML does not support Aparecium because it is XQuery 1.0 and does not support maps.  Supporting it and other 1.0 processors will require a new representation of items.)
+  (Note that Berkeley DB XML does not support Aparecium because it is
+  XQuery 1.0 and does not support maps.  Supporting it and other 1.0
+  processors will require a new representation of items.)
 
 * Improve performance
 
-  * Try to do something about the performance issues:  Measure. Think. Try something. Repeat.
+  * Try to do something about the performance issues:
+    Measure. Think. Try something. Repeat.
 
 Observation: Aparecium does better parsing with the spec grammar if
 the grammar is flattened by inlining all hidden nonterminals; I
@@ -94,7 +102,13 @@ Aparecium needs that.  There are workarounds ...)
 
 ## Done
 
+Not complete, but I want to remind myself that some things do get
+done, sometimes.
+
 * Better test harness that runs from the test catalog and produces a test report.
 
 * Rudimentary versioning support in SWeb.
+
+* Better test performance: Pass all tests in the ixml common test
+  suite. (Milestone 21 May 2022.)
 
