@@ -5,29 +5,26 @@ Aparecium (the name comes from a spell in the Harry Potter
 books, which is used on invisible writing to make it visible)
 is a processor for invisible XML.  
 
-Eventually, Aparecium will be available in both XQuery and 
-XSLT forms; at this writing (November 2021) only XQuery is
-available.  The schedule for the XSLT version is 'real soon 
-now'.
+Eventually, Aparecium will be available in both XQuery and XSLT forms;
+at this writing (May 2022) only XQuery is available.  The schedule for
+the XSLT version is 'real soon now'.
 
 ## Current status
 
-In its current form, Aparecium is best regarded as a
-proof of concept implementation, or a toy.  There may be
-specialized situations in which it can be used in real 
-applications, but it's currently a bit fragile and very 
-slow.
+In its current form, Aparecium is best regarded as a proof of concept
+implementation, or a toy.  There may be situations in which it can be
+used in real applications, but it's currently too slow for most
+serious uses.
 
-For small inputs (say, under 100 characters), Aparecium works 
-reasonably well: that is, compiling a short grammar and using it
-to parse a short input string takes a second or so.
+For small inputs (say, under 100 characters), Aparecium works
+reasonably well: that is, compiling a short grammar and using it to
+parse a short input string takes a second or so.
 
-For inputs of a few hundred characters, compiling the grammar 
-and parsing input may take some tens of seconds.  
+For inputs of a few hundred characters, compiling the grammar and
+parsing input may take some tens of seconds.
 
-For grammars of a few thousand characters (like that for ixml
-itself), it currently takes tens of minutes to compile the
-grammar.  
+For grammars of a few thousand characters (like that for ixml itself),
+it currently takes tens of minutes to compile the grammar.
 
 ## How to use Aparecium to experiment with ixml
 
@@ -41,13 +38,6 @@ evaluates the current buffer; you may find it convenient to have it
 save the output to a file and open it in a buffer.  Then associate
 that transformation with file you want to work with, and click the
 "Run transformation" button to run the demo.  
-
-*(Note, 5 Nov 2021:  It appears that I have not yet found a system-independent way of 
-specifying the location of the Aparecium library.  What is in the code
-now appears to work with BaseX, but I am getting conflicting reports
-about Oxygen:  works for some people and not for others.  Adventurous 
-users may try updating the declaration of `$aparecium:libloc` 
-in Aparecium.xqm.)*
 
 There are several demos:
 
@@ -141,23 +131,17 @@ or the compiled version.
 
 * It needs more thorough testing.
 
-* Single-character Unicode class codes like `[L]` seem to work
-some of the time but not all of the time.  Or maybe they never
-work.  Two-character codes do seem to work, so if I write
-`[L]` and have trouble, I replace it with `[Ll; Lu; Lt; Lm; Lo]`,
-which amounts to the same thing.
-
 * If the input ixml grammar has syntax errors, the `parse-string()`
-function does not produce useful error diagnostics.  To debug 
-syntax errors in the input grammar, at the moment it's probably best to work
-with the `parse` option of `compile-a-grammar.xqm`.  That does not 
-help with semantic errors like references to undefined nonterminals,
-which Aparecium does not currently report.
+function does not produce useful error diagnostics.  To debug syntax
+errors in the input grammar, at the moment it's probably best to work
+with the `parse` option of `compile-a-grammar.xqm`.
 
-* If the input grammar is fine but the input is not grammatical,
-there are no error diagnostics to speak of; what you get is a
-dump of Aparecium's data structures.  Looking at the 'Closure`
-element in the result, you will see something like this:
+* If the input grammar is fine but the input is not grammatical, the
+error diagnostics are currently a bit rough.  In addition to an
+attempt at helpful information (where did the parse fail, what was
+expected), you also get a dump of Aparecium's data structures.
+(Helpful for me, not so helpful for you, perhaps.)  Looking at the
+'Closure` element in the result, you will see something like this:
 
 ```
     <Closure>

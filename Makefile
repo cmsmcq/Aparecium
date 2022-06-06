@@ -73,7 +73,7 @@ testharness: tests/test-driver.xq \
 		doc/test-harness.xhtml
 
 build/test-harness.xqm:  src/test-harness.xml
-	(cd tmp; $(XSLT) ../$< tangle.xsl zzz.tangle.out version='v2')
+	(cd tmp; $(XSLT) ../$< tangle.xsl zzz.tangle.out version='v3')
 	rsync --checksum tmp/test-harness.xqm build
 	rsync --checksum tmp/test-driver.xq tests
 

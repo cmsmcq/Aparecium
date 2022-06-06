@@ -9,6 +9,11 @@ import module namespace ap =
 "http://blackmesatech.com/2019/iXML/Aparecium"
 at "Aparecium.xqm";
 
+declare namespace file =
+"http://expath.org/ns/file";
+
+declare namespace xquery = "http://basex.org/modules/xquery";
+
 
 
 declare function t:run-tests(
@@ -25,7 +30,7 @@ declare function t:run-tests(
 
   return element tc:test-report {
     
-    attribute t:creator { "Aparecium test harness v2" },
+    attribute t:creator { "Aparecium test harness v3" },
     element tc:metadata {
       element tc:name {
         'Test results for ' || $catalog/@name
@@ -249,13 +254,15 @@ declare function t:run-test-set(
                       }
     let $grammar-test-result := 
         if (exists($gt))
-        then (copy $gtr := t:test-grammar($gt, 
+        then let $gtr0 := t:test-grammar($gt, 
                             $checked-xml-grammar, 
                             $options)
-             modify insert node $parsetime 
-                           into $gtr
-             return $gtr
-             )
+	     return element {name($gtr0)} {
+                 $parsetime,
+                 $gtr0/@* except $gtr0/@t:parsetime,
+                 $gtr0/child::node()
+             }
+
         else element tc:description {
                $parsetime,
                element tc:p {
@@ -492,12 +499,14 @@ declare function t:run-test-case(
 ) as element() {
     let $dummy := trace($test-case/@name/string(),
                       "Starting test case: ")
-  let $failure-string := ("󠁎󠁏󠁔"
-                      || "󠀠󠁆󠁏"
-                      || "󠁕󠁎󠁄"
-                         (: 'NOT FOUND' in tag block :),
-                         "𝍐",
-                         "�")[2]
+  let $failure-string := 
+        ("󠁎󠁏󠁔"
+         || "󠀠󠁆󠁏"
+         || "󠁕󠁎󠁄"
+             (: 'NOT FOUND' in tag block :),
+         "𝍐" (: Tetragram for failure :),
+         "�" (: U+FFFD :)
+        )[2]
 
     let $test-set-parent := $test-case/parent::tc:test-set,
         $test-set-grammar-host := $test-case/
@@ -565,6 +574,7 @@ declare function t:run-test-case(
                  }
 
   
+    
     let $prof-track := (
         function-lookup(
             QName('http://basex.org/modules/prof',
@@ -574,6 +584,13 @@ declare function t:run-test-case(
             map { 'time': '?', 'value': $items } 
         }
         )[1]
+
+    
+    let $xquery-eval := function-lookup(
+            QName('http://basex.org/modules/xquery',
+                  'eval'),
+            3)
+
 
     let $pt-plus := $prof-track(
         
@@ -592,6 +609,8 @@ declare function t:run-test-case(
 
         else try {
           
+          if (exists($xquery-eval))
+          then 
           let $query := "import module namespace aparecium
                 = 'http://blackmesatech.com/2019/iXML/Aparecium'
                 at '../build/Aparecium.xqm';
@@ -606,7 +625,14 @@ declare function t:run-test-case(
                             'timeout' : 
                             ($options/@timeout/number(), 600)[1]
                           }
-          return xquery:eval($query, $bindings, $options)
+          return $xquery-eval($query, $bindings, $options)
+
+          else 
+          ap:parse-string-with-compiled-grammar(
+            $input-string,
+            $G
+          )         
+
 
         } catch xquery:timeout {
           element tc:error {
@@ -707,7 +733,7 @@ declare function t:run-test-case(
                    attribute href { $grammar-name },
                    (: and let's write the file :)
                    file:write($options/@output-directory
-                             || '/' || $grammar-name,
+                             || $grammar-name,
                              $g0)
                  }
             else ()
@@ -732,7 +758,7 @@ declare function t:run-test-case(
                    attribute href { $fn },
                    (: and let's write the file :)
                    file:write($options/@output-directory
-                             || '/' || $fn,
+                             || $fn,
                              $input-string)
                  }
             else ()
@@ -776,7 +802,7 @@ declare function t:run-test-case(
                               attribute href {$fn},
                               file:write(
                                 $options/@output-directory
-                                || '/' || $fn,
+                                || $fn,
                                 $expectations
                               )
                             }
@@ -800,7 +826,7 @@ declare function t:run-test-case(
                     and ($result eq 'fail'))
                  then file:write(
                         $options/@output-directory
-                        || '/' || $fn,
+                        || $fn,
                         $parse-tree
                       )
                  else ()
@@ -824,7 +850,7 @@ declare function t:run-test-case(
                           attribute href {$fn},
                           file:write(
                             $options/@output-directory
-                            || '/' || $fn,
+                            || $fn,
                             $parse-tree
                           )
                         }
@@ -861,7 +887,7 @@ declare function t:run-test-case(
                            || '-test-result.xml',
                  $out := concat(
                          $options/@output-directory, 
-                         '/', $outfn)
+                         $outfn)
              return file:write(
                       $out, 
                       element tc:test-result {

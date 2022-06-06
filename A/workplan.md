@@ -1,32 +1,36 @@
 # Aparecium work plan
 
-started 2021-11-05, most recent rev. 2022-06-05
+started 2021-11-05, most recent rev. 2022-06-06
 
 The current work plan for Aparecium is:
 
-* Improve test harness:
-  - eliminate processor dependency
+* Add new functionality for insertions.
 
-* Implementation independence (Saxon)
+* Correct remaining test failures: improve handling of dynamic errors
+  and version mismatch.
 
-  * Make Aparecium work with Saxon.
+* Work to support more XQuery processors.
 
-* Add new functionality for insertions
+  Aparecium currently works with BaseX and Saxon (PE and EE).
 
-* Implementation independence (others)
-
-  * If possible in reasonable time, make Aparecium work with other
-    processors or understand why it's not feasible.
+  If possible in reasonable time (i.e. days rather than months), make
+  Aparecium work with other processors or understand why it's not
+  feasible.
   
-    * Mark Logic
     * eXist-db
     * FusionDB
+    * Mark Logic
+    * Saxon HE
 
-  (Note that Berkeley DB XML does not support Aparecium because it is
-  XQuery 1.0 and does not support maps.  Supporting it and other 1.0
-  processors will require a new representation of items.)
+  Note that Berkeley DB XML, XQilla, and Xidel do not support
+  Aparecium because they support XQuery 1.0 or XQuery 3.0, and thus
+  lack support for maps.  Making Aparecium work with them and other
+  1.0 or 3.0 processors will require a new representation of items.
+  That work is not in the plan at this time (but anyone who would like
+  to be able to use Aparecium with such a processor is welcome to
+  encourage me to add it to the plan).
 
-* Improve performance
+* Improve performance.
 
   * Try to do something about the performance issues:
     Measure. Think. Try something. Repeat.
@@ -68,33 +72,35 @@ Conjecture 7: Using a recursive descent parser on input grammars will
 improve performance.
 
 
-* More testing, better testing
-
-  * Extend test schema to handle error codes.
+* Do more testing, do better testing.
 
   * Clean up all tests in ixml-tests repository.  
 
-  * Convert my backlog of tests from 2019 to the current test format, run them, pass them. 
+  * Convert my backlog of tests from 2019 to the current test format,
+    run them, pass them.
 
-  * Create a systematic set of negative test cases for the ixml grammar (input that does not conform to the ixml grammar for ixml grammars); work on error detection and error messages.
+  * Create a systematic set of negative test cases for the ixml
+    grammar (input that does not conform to the ixml grammar for ixml
+    grammars); work on error detection and error messages.
 
   * Create test-coverage tools to measure positive and negative coverage according to various measures.
 
-* Improve the source
+* Improve the source code.
 
-  * Reorganize and rewrite the SWeb source for Aparecium.  Right now it's not a very good advertisement for literate programming.
+  * Reorganize and rewrite the SWeb source for Aparecium.  Right now
+    it's not a very good advertisement for literate programming.
 
   * Make Sweb support XSLT scraps, so that I can start writing the
-   XSLT version of Aparecium.
+    XSLT version of Aparecium.
 
   * Implement the remaining parts of the SWeb design.
 
   * Improve the layout and styling of SWeb documents.
 
-* Other XQuery engines: Make Aparecium work in eXist-db and Fusion-DB
-and possibly others.  (Right now eXist-db can't run Aparecium because
-they don't current accept a second argument to map:merge(), and
-Aparecium needs that.  There are workarounds ...)
+* More work to improve support for other XQuery engines.
+
+  Invest more time making Aparecium work in eXist-db, Fusion-DB, Mark
+  Logic, and Saxon HE.
 
 * Better collection of realistic and real grammars.
 
@@ -111,4 +117,7 @@ done, sometimes.
 
 * Better test performance: Pass all tests in the ixml common test
   suite. (Milestone 21 May 2022.)
+
+* Better implementation independence: make Aparecium (and the test
+  driver) work with Saxon.  (Milestone 6 June 2022.)
 

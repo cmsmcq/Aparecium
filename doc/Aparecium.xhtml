@@ -8139,7 +8139,7 @@ declare function ep:all-trees(
 
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6328">Declare ep:alltrees() function (v. v0.2) 227</a>
+<a href="#d3e6315">Declare ep:alltrees() function (v. v0.2) 227</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#d3e4442">[File Earley-parser.xqm] 181</a>
 〉<br /></span></div>
@@ -8167,7 +8167,7 @@ declare function ep:any-tree(
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6333">Declare ep:anytree() function (v. v0.2) 228</a>
+<a href="#d3e6320">Declare ep:anytree() function (v. v0.2) 228</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#d3e4442">[File Earley-parser.xqm] 181</a>
 〉<br /></span></div>
@@ -8197,7 +8197,7 @@ there-were-no-trees from all-done-now signals.
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6339">Declare ep:tree-cursor() function (v. v0.2)
+<a href="#d3e6326">Declare ep:tree-cursor() function (v. v0.2)
 229</a> 〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#d3e4442">[File Earley-parser.xqm] 181</a>
 〉<br /></span></div>
@@ -8227,7 +8227,7 @@ declare function ep:parse-forest-map(
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6346">Declare ep:parse-forest-map() function (v. v0.2)
+<a href="#d3e6333">Declare ep:parse-forest-map() function (v. v0.2)
 230</a> 〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#d3e4442">[File Earley-parser.xqm] 181</a>
 〉<br /></span></div>
@@ -8255,7 +8255,7 @@ declare function ep:parse-forest-grammar(
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6352">Declare ep:alltrees() function (v. v0.2) 231</a>
+<a href="#d3e6339">Declare ep:alltrees() function (v. v0.2) 231</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#d3e4442">[File Earley-parser.xqm] 181</a>
 〉<br /></span></div>
@@ -8381,7 +8381,7 @@ declare function epi:earley-parse(
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6358">Define earley-parse() (v. v0.2) 232</a>
+<a href="#d3e6345">Define earley-parse() (v. v0.2) 232</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#d3e382">[File Earley-parser-internals.xqm] 4</a>
 〉<br /></span></div>
@@ -9967,12 +9967,22 @@ and possibly 3.0, but not 3.1, which means they have no support for
 maps, which means they are not candidates for this work.</div>
 <div class="Real-P">Not an atomic task; time-consuming steps should
 be broken up to avoid blocking other work.</div>
+<div class="Real-P">Current complaints by Saxon, when attempting to
+run the test driver:
+<ul>
+<li>Namespace “<tt>prof</tt>” not declared (calls to prof:time,
+prof:track).</li>
+<li>Namespace “<tt>file</tt>” not declared (calls to
+file:create-dir, file:write).</li>
+</ul>
+Currently no complaint about xquery:eval, but that's presumably
+only a matter of time.</div>
 </li>
 <li>
 <div class="Real-P"><b>Brown Sugar</b> plan.[<a name=
-"ref-to-d3e5601" href="#d3e5601" title=
+"ref-to-d3e5616" href="#d3e5616" title=
 " So called because this is a dirty form of the sugar plan described below. "
-id="ref-to-d3e5601">22</a>] Quick and dirty ad-hoc tokenization
+id="ref-to-d3e5616">22</a>] Quick and dirty ad-hoc tokenization
 change for ixml grammar for ixml grammars. Hand-modify and
 hand-annotate the grammar, add support for those annotations.</div>
 <div class="Real-P">Note that the ixml grammar has both safe and
@@ -10273,8 +10283,8 @@ processor</li>
 </ul>
 </div>
 <div class="div">
-<h3><a class="selflink" name="d3e6021" id="d3e6021" href=
-"#d3e6021"></a>To-do list from Earley recognizer internals
+<h3><a class="selflink" name="d3e6036" id="d3e6036" href=
+"#d3e6036"></a>To-do list from Earley recognizer internals
 module</h3>
 <div class="Real-P">This module has a complicated enough to-do list
 of its own that I'll give it here for the moment instead of
@@ -10473,40 +10483,10 @@ nonterminal reference, one for the rule, plus a
 unreasonably slow.</li>
 </ul>
 </div>
-<div class="Real-P">Test-case failures (as of 16 April 2022)
-include several occasioned by recent changes to the ixml
-specification grammar:
-<ul>
-<li>In test catalog ixml-all:
-<ul>
-<li>test set expr1, test expr1</li>
-<li>test set and test case hex-much-too-big (exception
-FOAR0002)</li>
-<li>test set and test case hex-too-big (exception FOCH0001)</li>
-<li>test set and test case hex-not-a-character (exception
-FOCH0001)</li>
-<li>test set and test case hex-surrogate (exception FOCH0001)</li>
-<li>grammar test comment</li>
-<li>grammar test repeat0</li>
-<li>grammar test repeat1</li>
-<li>grammar test sets</li>
-</ul>
-</li>
-</ul>
-</div>
-<div class="Real-P">Old list from 17 February (needs to be
-re-checked):
-<ul>
-<li>In test set wisps:
-<ul>
-<li>g06.c02 (pseudo-error: catalog missing this parse tree)</li>
-<li>g11c01 (pseudo-error: catalog missing this parse tree)</li>
-<li>g11c02 (pseudo-error: catalog missing this parse tree)</li>
-<li>g12.c05 (pseudo-error: catalog missing this parse tree)</li>
-</ul>
-</li>
-</ul>
-</div>
+<div class="Real-P">As of 21 May 2022, Aparecium passes all tests
+in the ixml community group's test catalog. This is likely to
+change when new tests covering insertions are added to the test
+set.</div>
 <div class="Real-P">The test harness used is described in a
 separate document (<a href="#test-harness"></a>).</div>
 </div>
@@ -10640,7 +10620,7 @@ higher-level functions, they have been rewritten. The code should
 be self-explanatory.</div>
 <div class="Real-P">At least, I hope it is, since I don't want to
 spend any time explaining it.
-<div class="scrap"><span><a name="d3e6330" id="d3e6330">〈 227
+<div class="scrap"><span><a name="d3e6317" id="d3e6317">〈 227
 Declare ep:alltrees() function 〉 (for version <em>v0.2</em>)
 ≡</a></span>
 <pre class=
@@ -10663,7 +10643,7 @@ declare function ep:all-trees(
 〉</span></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e6335" id="d3e6335">〈 228
+<div class="scrap"><span><a name="d3e6322" id="d3e6322">〈 228
 Declare ep:anytree() function 〉 (for version <em>v0.2</em>)
 ≡</a></span>
 <pre class=
@@ -10682,7 +10662,7 @@ declare function ep:any-tree(
 "#ep-anytree">Declare ep:any-tree() function 183</a> 〉</span></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e6341" id="d3e6341">〈 229
+<div class="scrap"><span><a name="d3e6328" id="d3e6328">〈 229
 Declare ep:tree-cursor() function 〉 (for version <em>v0.2</em>)
 ≡</a></span>
 <pre class="scrapbody">declare function ep:tree-cursor(
@@ -10697,7 +10677,7 @@ Declare ep:tree-cursor() function 〉 (for version <em>v0.2</em>)
 〉</span></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e6348" id="d3e6348">〈 230
+<div class="scrap"><span><a name="d3e6335" id="d3e6335">〈 230
 Declare ep:parse-forest-map() function 〉 (for version
 <em>v0.2</em>) ≡</a></span>
 <pre class=
@@ -10717,7 +10697,7 @@ declare function ep:parse-forest-map(
 185</a> 〉</span></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e6354" id="d3e6354">〈 231
+<div class="scrap"><span><a name="d3e6341" id="d3e6341">〈 231
 Declare ep:alltrees() function 〉 (for version <em>v0.2</em>)
 ≡</a></span>
 <pre class=
@@ -10743,7 +10723,7 @@ the code embeds some false assumptions about what that function
 does. Rather than unsnarl those assumptions, I rewrote things to
 use options, rather than higher-level functions, to control what
 gets returned (and other things).
-<div class="scrap"><span><a name="d3e6364" id="d3e6364">〈 232
+<div class="scrap"><span><a name="d3e6351" id="d3e6351">〈 232
 Define earley-parse() 〉 (for version <em>v0.2</em>) ≡</a></span>
 <pre class=
 "scrapbody">(: ******************************************************
@@ -11023,23 +11003,23 @@ parse-forest-grammar 193</a></li>
 102</a></li>
 <li><a href="#ep-alltrees">Declare ep:all-trees() function
 182</a></li>
-<li><a href="#d3e6330">Declare ep:alltrees() function (v. v0.2)
+<li><a href="#d3e6317">Declare ep:alltrees() function (v. v0.2)
 227</a></li>
-<li><a href="#d3e6354">Declare ep:alltrees() function (v. v0.2)
+<li><a href="#d3e6341">Declare ep:alltrees() function (v. v0.2)
 231</a></li>
 <li><a href="#ep-anytree">Declare ep:any-tree() function
 183</a></li>
-<li><a href="#d3e6335">Declare ep:anytree() function (v. v0.2)
+<li><a href="#d3e6322">Declare ep:anytree() function (v. v0.2)
 228</a></li>
 <li><a href="#ep-parse-forest-grammar">Declare
 ep:parse-forest-grammar() function 186</a></li>
 <li><a href="#ep-parse-forest-map">Declare ep:parse-forest-map()
 function 185</a></li>
-<li><a href="#d3e6348">Declare ep:parse-forest-map() function (v.
+<li><a href="#d3e6335">Declare ep:parse-forest-map() function (v.
 v0.2) 230</a></li>
 <li><a href="#ep-tree-cursor">Declare ep:tree-cursor() function
 184</a></li>
-<li><a href="#d3e6341">Declare ep:tree-cursor() function (v. v0.2)
+<li><a href="#d3e6328">Declare ep:tree-cursor() function (v. v0.2)
 229</a></li>
 <li><a href="#epi-all-node-sequences">Define all-node-sequences()
 205</a></li>
@@ -11076,7 +11056,7 @@ $accumulator, $I, $G) 128</a></li>
 <li><a href="#d3e3782">Define earley-closure($pending,
 $accumulator, $I, $G) 132</a></li>
 <li><a href="#epi-earley-parse">Define earley-parse() 187</a></li>
-<li><a href="#d3e6364">Define earley-parse() (v. v0.2) 232</a></li>
+<li><a href="#d3e6351">Define earley-parse() (v. v0.2) 232</a></li>
 <li><a href="#eri-make-p-p-r-ri">Define eiMakePPRRi() 117</a></li>
 <li><a href="#d3e3527">Define eiMakePPT() 118</a></li>
 <li><a href="#epi-elXpt">Define elementXpt() to make AST for one
@@ -11540,8 +11520,8 @@ time we generate the right-hand side from the walk?</div>
 <div class="note">[<a name="d3e3165" id="d3e3165" href=
 "#ref-to-d3e3165">21</a>] Actually, <i>Goal</i> should carry
 “<tt>mark="-"</tt>” in any case.</div>
-<div class="note">[<a name="d3e5601" id="d3e5601" href=
-"#ref-to-d3e5601">22</a>] So called because this is a dirty form of
+<div class="note">[<a name="d3e5616" id="d3e5616" href=
+"#ref-to-d3e5616">22</a>] So called because this is a dirty form of
 the ‘sugar’ plan described below.</div>
 </div>
 </body>

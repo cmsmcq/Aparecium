@@ -134,6 +134,9 @@ at "../build/test-harness.xqm";
 declare namespace tc =
 "https://github.com/invisibleXML/ixml/test-catalog";
 
+declare namespace file =
+"http://expath.org/ns/file";
+
 declare namespace db =
 "http://basex.org/modules/db";
 
@@ -297,13 +300,17 @@ let $invdir := "../../cmsmcq-ixml/tests/",
     $apadir := "../../Aparecium/tests/",
     $ixtdir := "../../ixml-tests/tests-straw/",
     $itwdir := "../../ixml-tests/tests-wood/",
-    $outdir := resolve-uri($apadir || 'results-' 
-               || $catalog-index 
-               || '-'
-               || adjust-dateTime-to-timezone(
-                    current-dateTime(), () )
-               || '/',
-               static-base-uri() ),
+    $outdir := resolve-uri($apadir 
+                 || 'results' 
+                 || '/results-' 
+                 || $catalog-index 
+                 || '-'
+                 || adjust-dateTime-to-timezone(
+                      current-dateTime(), () )
+                 || '/'
+               ,
+                 static-base-uri() 
+               ),
 </scrap>
 </p>
 <p>Next, I'll make a list of catalogs, and choose the one I want by
@@ -1047,6 +1054,14 @@ and the attributes, strip the children.</hi>
         else $grammar-test-result
         ,
 </scrap>
+The use of <ident>file:write()</ident> means we need to declare
+that namespace:
+<scrap prev="lib-nsdecls"
+       name="Namespace declarations and imports, cont'd">
+
+declare namespace file =
+"http://expath.org/ns/file";
+</scrap>
 </p>
 
 <p>Before recurring on nested test sets and contained test cases, we
@@ -1172,6 +1187,37 @@ variable to record the information.
                            into $gtr
              return $gtr
              )
+        else element tc:description {
+               $parsetime,
+               element tc:p {
+                 "Grammar parse time: ",
+                 $nxg-plus?time
+               }              
+             }
+</scrap></p>
+
+<p>The code just given relies on support for the XQuery Update
+Facility; since some of the XQuery engines I want to use don't support
+XQUF, it needs to be re-written:
+<scrap corresp="lib-rts-grammar-test"
+       version="v3"
+       name="Set $grammar-test-result">
+
+    let $gt := $test-set/tc:grammar-test,
+        $parsetime := attribute t:parsetime {
+                        $nxg-plus?time
+                      }
+    let $grammar-test-result := 
+        if (exists($gt))
+        then let $gtr0 := t:test-grammar($gt, 
+                            $checked-xml-grammar, 
+                            $options)
+	     return element {name($gtr0)} {
+                 $parsetime,
+                 $gtr0/@* except $gtr0/@t:parsetime,
+                 $gtr0/child::node()
+             }
+
         else element tc:description {
                $parsetime,
                element tc:p {
@@ -1675,7 +1721,8 @@ formulation will be necessary.  (If push comes to shove, we can
 generate different modules for BaseX and Saxon, but it would be nicer
 to have them co-exist. <hi>See now <ptr target="testcaserunrun-alts"/> below.</hi>)</p>
 <p>So we need to declare the <ident>xquery</ident> namespace.
-<scrap prev="lib-nsdecls">
+<scrap prev="lib-nsdecls"
+       name="Namespace declarations and imports, cont'd">
 
 declare namespace xquery = "http://basex.org/modules/xquery";
 </scrap></p>
@@ -1883,7 +1930,7 @@ target="lib-rtc-parse-v3"/>.
 <scrap id="lib-rtcp-without-eval"
        name="Parse the input directly">
 
-          else ap:parse-string-with-compiled-grammar(
+          ap:parse-string-with-compiled-grammar(
             $input-string,
             $G
           )         
@@ -2108,7 +2155,9 @@ I want for a given run.
         10
       },
       attribute output-directory {
-        ($outdir)[1]
+        (
+          concat($outdir, file:create-dir($outdir))
+        )[1]
       },
       <ptr target="set-timeout-option"/>
     }
@@ -2116,6 +2165,15 @@ I want for a given run.
 <hi>N.B. In the current version of this test harness, not all of these
 options are actually supported.  And the grammar provided is the
 compiled grammar, not the grammar supplied by the user.</hi>
+</p>
+<p>The call to <ident>concat()</ident> in the value of the
+<att>output-directory</att> attribute is just a way to get the call to
+<ident>file:create-dir()</ident> into an expression which must be
+evaluated.  It contributes nothing to the value (the function returns
+an empty sequence), but my first attempts to call
+<ident>create-dir()</ident> were optimized out of existence by Saxon,
+because they involved assigning a value to a dummy variable which was
+never referred to again.
 </p>
 <p><hi>Note to future-self: if comparison of expected results to
 reported results becomes a burden, it may be worthwhile to offer a
@@ -2192,6 +2250,28 @@ let $report := copy $x-report := $report
                       after $x-report/tc:metadata
                return $x-report
 </scrap>
+However, for the sake of XQuery implementations which
+don't support XQUF, we rewrite this code.  Again, we rely
+on clean handling of identifier scopes.
+<scrap corresp="dr-insert-counts"
+       version="v3"
+       name="Insert result summary into $report">
+
+let $report := element {name($report)} {
+                 $report/@*,
+                 $report/tc:metadata[1]
+                     /preceding-sibling::node()
+                     /self::node(),
+                 $report/tc:metadata[1],
+                 $summary,
+                 $report/tc:metadata[1]
+                     /following-sibling::node()
+               }
+</scrap>
+The <code>/self::node()</code> step for the preceding siblings of the
+<gi>tc:metadata</gi> element is there to ensure that any preceding
+siblings come out in document order. (Because I can't be bothered to
+check to make sure whether it would come out right anyway.)
 </p>
 </div>
 
@@ -2270,7 +2350,7 @@ external, then we end up using the compiled grammar.
                    attribute href { $grammar-name },
                    (: and let's write the file :)
                    file:write($options/@output-directory
-                             || '/' || $grammar-name,
+                             || $grammar-name,
                              $g0)
                  }
             else ()
@@ -2309,7 +2389,7 @@ the <kw>inline-if-short</kw> option.
                    attribute href { $fn },
                    (: and let's write the file :)
                    file:write($options/@output-directory
-                             || '/' || $fn,
+                             || $fn,
                              $input-string)
                  }
             else ()
@@ -2380,7 +2460,7 @@ we serialize it externally.</item>
                               attribute href {$fn},
                               file:write(
                                 $options/@output-directory
-                                || '/' || $fn,
+                                || $fn,
                                 $expectations
                               )
                             }
@@ -2409,7 +2489,7 @@ conditional on failure of the test.
                     and ($result eq 'fail'))
                  then file:write(
                         $options/@output-directory
-                        || '/' || $fn,
+                        || $fn,
                         $parse-tree
                       )
                  else ()
@@ -2433,7 +2513,7 @@ conditional on failure of the test.
                           attribute href {$fn},
                           file:write(
                             $options/@output-directory
-                            || '/' || $fn,
+                            || $fn,
                             $parse-tree
                           )
                         }
@@ -2454,7 +2534,7 @@ result.
                            || '-test-result.xml',
                  $out := concat(
                          $options/@output-directory, 
-                         '/', $outfn)
+                         $outfn)
              return file:write(
                       $out, 
                       element tc:test-result {

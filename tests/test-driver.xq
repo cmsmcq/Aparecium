@@ -5,6 +5,9 @@ at "../build/test-harness.xqm";
 declare namespace tc =
 "https://github.com/invisibleXML/ixml/test-catalog";
 
+declare namespace file =
+"http://expath.org/ns/file";
+
 declare namespace db =
 "http://basex.org/modules/db";
 
@@ -21,13 +24,17 @@ let $invdir := "../../cmsmcq-ixml/tests/",
     $apadir := "../../Aparecium/tests/",
     $ixtdir := "../../ixml-tests/tests-straw/",
     $itwdir := "../../ixml-tests/tests-wood/",
-    $outdir := resolve-uri($apadir || 'results-' 
-               || $catalog-index 
-               || '-'
-               || adjust-dateTime-to-timezone(
-                    current-dateTime(), () )
-               || '/',
-               static-base-uri() ),
+    $outdir := resolve-uri($apadir 
+                 || 'results' 
+                 || '/results-' 
+                 || $catalog-index 
+                 || '-'
+                 || adjust-dateTime-to-timezone(
+                      current-dateTime(), () )
+                 || '/'
+               ,
+                 static-base-uri() 
+               ),
 
     $catalog-of-catalogs := <test-catalogs>
 
@@ -222,7 +229,9 @@ let $invdir := "../../cmsmcq-ixml/tests/",
         10
       },
       attribute output-directory {
-        ($outdir)[1]
+        (
+          concat($outdir, file:create-dir($outdir))
+        )[1]
       },
       
       attribute timeout { 600 }
@@ -262,10 +271,16 @@ let $summary := element tc:description {
                   $tc-summary
                 }
 
-let $report := copy $x-report := $report
-               modify insert node $summary
-                      after $x-report/tc:metadata
-               return $x-report
+let $report := element {name($report)} {
+                 $report/@*,
+                 $report/tc:metadata[1]
+                     /preceding-sibling::node()
+                     /self::node(),
+                 $report/tc:metadata[1],
+                 $summary,
+                 $report/tc:metadata[1]
+                     /following-sibling::node()
+               }
 
 
     
