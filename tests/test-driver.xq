@@ -3,21 +3,21 @@ import module namespace t =
 at "../build/test-harness.xqm";
 
 declare namespace tc =
-"https://github.com/cmsmcq/ixml-tests";
+"https://github.com/invisibleXML/ixml/test-catalog";
 
 declare namespace db =
 "http://basex.org/modules/db";
 
 declare option db:chop "false";
 
-let $catalog-index := 'misc' (: which catalog to run? short name :)
+let $catalog-index := 'bogons' (: which catalog to run? short name :)
     (: bogons 439. 
        test0 2s, test1 5s, hygiene 12s, zeroes 20s.  
        misc 78s, gxxx 153s, wisp-A 100s.
        test2 745s
     :)
 
-let $invdir := "../../ixml/tests/",
+let $invdir := "../../cmsmcq-ixml/tests/",
     $apadir := "../../Aparecium/tests/",
     $ixtdir := "../../ixml-tests/tests-straw/",
     $itwdir := "../../ixml-tests/tests-wood/",
@@ -63,6 +63,11 @@ let $invdir := "../../ixml/tests/",
 	       path="{$invdir}test-catalog.xml"/>
       
       <!-- to be timed -->
+      <catalog n="prolog" path="{$invdir}grammar-misc/prolog-tests.xml"/><!-- ? s -->
+      <catalog n="insert" path="{$invdir}grammar-misc/insertion-tests.xml"/><!-- ? s -->
+      
+      <catalog n="jl-insert-old" path="{$apadir}jl-insertion-test-catalog.xml"/><!-- ? s -->
+      <catalog n="jl-prolog-old" path="{$apadir}jl-prolog-test-catalog.xml"/><!-- ? s -->
 
       <!-- syntax error tests in ixml repo -->
       <!-- 24s, -->
@@ -72,14 +77,20 @@ let $invdir := "../../ixml/tests/",
        path="{$invdir}syntax/catalog-as-instance-tests-ixml.xml"/>
       <catalog n="syntax-caix"
        path="{$invdir}syntax/catalog-as-instance-tests-xml.xml"/>
+      <catalog n="syntax-correct"
+       path="{$invdir}syntax/catalog-of-correct-tests.xml"/>
 
       <!-- other tests in ixml repo -->
-      <catalog n="ixml-corr"
-	       path="{$invdir}correct/test-catalog.xml"/>
       <catalog n="ixml-ambi"
 	       path="{$invdir}ambiguous/test-catalog.xml"/>
+      <catalog n="ixml-corr"
+	       path="{$invdir}correct/test-catalog.xml"/>
       <catalog n="ixml-parse"
 	       path="{$invdir}parse/test-catalog.xml"/>
+      <catalog n="ixml-error"
+	       path="{$invdir}error/test-catalog.xml"/>
+      <catalog n="ixml-hygiene"
+	       path="{$invdir}hygiene/test-catalog.xml"/>
 
       <!-- ixml-ixml is slow -->
       <catalog n="ixml-ixml"

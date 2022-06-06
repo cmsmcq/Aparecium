@@ -1,11 +1,10 @@
 module namespace t =
 "http://blackmesatech.com/2022/iXML/test-harness";
 declare namespace tc =
-"https://github.com/cmsmcq/ixml-tests";
+"https://github.com/invisibleXML/ixml/test-catalog";
 
-declare namespace db =
-"http://basex.org/modules/db";
 
+declare namespace prof = "http://basex.org/modules/prof";
 import module namespace ap =
 "http://blackmesatech.com/2019/iXML/Aparecium"
 at "Aparecium.xqm";
@@ -117,9 +116,17 @@ declare function t:run-test-set(
                             $test-set/@name/string(),
                             "Starting test set: ")
           
-      let $nxg-plus := prof:track(
-          if ($test-set/tc:ixml-grammar)
-          then 
+      let $prof-track := (function-lookup(
+                         QName('http://basex.org/modules/prof',
+                               'track'),
+                         1),
+                         function($item) {
+                             map {'time':'?', 'value': $item}
+                         }
+                         )[1]
+      let $nxg-plus := $prof-track(
+               if ($test-set/tc:ixml-grammar)
+               then 
           try {
                 ap:parse-grammar-from-string(
                     $test-set/tc:ixml-grammar/string()
@@ -137,11 +144,11 @@ declare function t:run-test-set(
                }               
           }
 
-          else if ($test-set/tc:vxml-grammar)
-          then           $test-set/tc:vxml-grammar[1]/*
+               else if ($test-set/tc:vxml-grammar)
+               then           $test-set/tc:vxml-grammar[1]/*
 
-          else if ($test-set/tc:ixml-grammar-ref)
-          then 
+               else if ($test-set/tc:ixml-grammar-ref)
+               then 
           let $uri0 := $test-set/tc:ixml-grammar-ref
                            /@href/string(),
               $uri1 := base-uri($test-set),
@@ -167,8 +174,8 @@ declare function t:run-test-set(
                        text { "external ixml not found" }
                      }
  
-          else if ($test-set/tc:vxml-grammar-ref)
-          then 
+               else if ($test-set/tc:vxml-grammar-ref)
+               then 
           let $uri0 := $test-set/tc:vxml-grammar-ref
                            /@href/string(),
               $uri1 := base-uri($test-set),
@@ -194,17 +201,25 @@ declare function t:run-test-set(
                       }
           
 
-          else () (: no new grammar:  inherited, or none :)
+               else () (: no new grammar:  inherited, or none :)
           ),
           $new-xml-grammar := $nxg-plus?value
           
 
       
+      let $prof-time := function-lookup(
+              QName('http://basex.org/modules/prof',
+                    'time'),
+              2)
+
       let $checked-xml-grammar := 
-          if (exists($new-xml-grammar)) 
-          then prof:time(
+          if (exists($new-xml-grammar)
+              and exists($prof-time)) 
+          then $prof-time(
                   ap:grammar-ok($new-xml-grammar)
                , 'test-harness: checking XML grammar.')
+          else if (exists($new-xml-grammar))
+          then ap:grammar-ok($new-xml-grammar)
           else ()
 
       
@@ -440,7 +455,7 @@ declare function t:test-grammar(
            },
            element tc:description {
              element tc:p {
-               "Unexpected error in gramar parameter."
+               "Unexpected error in grammar parameter."
              }
 	   },
            element tc:app-info { $xml-grammar }
@@ -550,7 +565,17 @@ declare function t:run-test-case(
                  }
 
   
-    let $pt-plus := prof:track(
+    let $prof-track := (
+        function-lookup(
+            QName('http://basex.org/modules/prof',
+                  'track'),
+            1),
+        function($items) { 
+            map { 'time': '?', 'value': $items } 
+        }
+        )[1]
+
+    let $pt-plus := $prof-track(
         
         if ($input-string eq $failure-string)
         then ()
