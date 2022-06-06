@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '16 March 2022' >
+<!ENTITY date.last.touched '5 June 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
@@ -35,6 +35,7 @@ form of this document.</p>
 </fileDesc>
 <revisionDesc>
 <list>
+<item>2022-06-01 : CMSMcQ : Flip to new test-catalog namespace.</item>
 <item>2022-03-16 : CMSMcQ : record a to-do item:  the grammar
 preparation here should use standard functions, not roll its own.
 What were you thinking?</item>
@@ -61,6 +62,7 @@ lost in a disk crash</item>
 <version id="qd">Quick and dirty first cut</version>
 <version id="alt">Alternative formulations of some constructs</version>
 <version id="v2" fallback="qd">Version 2, with time monitoring</version>
+<version id="v3" fallback="v2">Version 3, work around implementation dependencies</version>
 </versionList>
 
 <divGen type="toc"/>
@@ -130,7 +132,7 @@ import module namespace t =
 at "../build/test-harness.xqm";
 
 declare namespace tc =
-"https://github.com/cmsmcq/ixml-tests";
+"https://github.com/invisibleXML/ixml/test-catalog";
 
 declare namespace db =
 "http://basex.org/modules/db";
@@ -167,20 +169,20 @@ module namespace t =
 <ref target="lib-functions">Function declarations ...</ref>
 </scrap></p>
 <p>Since the test catalogs we are processing use the
-ixml-tests namespace, we need to declare it.  We will also
+ixml-tests namespace, we need to declare it.<!--  We will also
 need the BaseX <ident>db</ident> namespace, in order to
 set the BaseX <ident>chop</ident> option to false.
 Or maybe we won't; BaseX doesn't like that option being
-set in a library module.
+set in a library module. -->
 <scrap id="lib-nsdecls"
        name="Namespace declarations and imports for library module">
 declare namespace tc =
-"https://github.com/cmsmcq/ixml-tests";
+"https://github.com/invisibleXML/ixml/test-catalog";
 
-declare namespace db =
+<!-- declare namespace db =
 "http://basex.org/modules/db";
 
-</scrap>
+--></scrap>
 </p>
 <p>We can look ahead to the set of functions we will define:
 <scrap id="lib-functions"
@@ -291,7 +293,7 @@ let $catalog-index := 'bogons' (: which catalog to run? short name :)
        test2 745s
     :)
 
-let $invdir := "../../ixml/tests/",
+let $invdir := "../../cmsmcq-ixml/tests/",
     $apadir := "../../Aparecium/tests/",
     $ixtdir := "../../ixml-tests/tests-straw/",
     $itwdir := "../../ixml-tests/tests-wood/",
@@ -343,6 +345,11 @@ indexing into the list.  It's easy to change the index.
 	       path="{$invdir}test-catalog.xml"/>
       
       &lt;!-- to be timed -->
+      &lt;catalog n="prolog" path="{$invdir}grammar-misc/prolog-tests.xml"/>&lt;!-- ? s -->
+      &lt;catalog n="insert" path="{$invdir}grammar-misc/insertion-tests.xml"/>&lt;!-- ? s -->
+      
+      &lt;catalog n="jl-insert-old" path="{$apadir}jl-insertion-test-catalog.xml"/>&lt;!-- ? s -->
+      &lt;catalog n="jl-prolog-old" path="{$apadir}jl-prolog-test-catalog.xml"/>&lt;!-- ? s -->
 
       &lt;!-- syntax error tests in ixml repo -->
       &lt;!-- 24s, -->
@@ -352,14 +359,20 @@ indexing into the list.  It's easy to change the index.
        path="{$invdir}syntax/catalog-as-instance-tests-ixml.xml"/>
       &lt;catalog n="syntax-caix"
        path="{$invdir}syntax/catalog-as-instance-tests-xml.xml"/>
+      &lt;catalog n="syntax-correct"
+       path="{$invdir}syntax/catalog-of-correct-tests.xml"/>
 
       &lt;!-- other tests in ixml repo -->
-      &lt;catalog n="ixml-corr"
-	       path="{$invdir}correct/test-catalog.xml"/>
       &lt;catalog n="ixml-ambi"
 	       path="{$invdir}ambiguous/test-catalog.xml"/>
+      &lt;catalog n="ixml-corr"
+	       path="{$invdir}correct/test-catalog.xml"/>
       &lt;catalog n="ixml-parse"
 	       path="{$invdir}parse/test-catalog.xml"/>
+      &lt;catalog n="ixml-error"
+	       path="{$invdir}error/test-catalog.xml"/>
+      &lt;catalog n="ixml-hygiene"
+	       path="{$invdir}hygiene/test-catalog.xml"/>
 
       &lt;!-- ixml-ixml is slow -->
       &lt;catalog n="ixml-ixml"
@@ -542,7 +555,7 @@ version into an attribute is to force the namespace declaration
 for the test-harness namespace onto the root element.)
 <scrap id="lib-rt-metadata" name="Supply basic metadata for the test report">
 
-    attribute t:creator { "Aparecium test harness v2" },
+    attribute t:creator { "Aparecium test harness v3" },
     element tc:metadata {
       element tc:name {
         'Test results for ' || $catalog/@name
@@ -751,29 +764,75 @@ straightforward:
           then <ptr target="lib-rts-ld-vxml-ref"/>
           else () (: no new grammar:  inherited, or none :)
 </scrap></p>
-<p>In version 2 of the test harness, we ask BaseX to keep track
-of the time taken, so we can record that in the test report.
+
+<p>In version 2 of the test harness, we wrap the above in a call to
+the BaseX <ident>prof:track()</ident> function, if it's available.
+This allows us to keep track of the time taken, so we can record that
+in the test report.
 <scrap corresp="lib-rts-g-new" version="v2"
        name="Set $new-xml-grammar">
 
       let $nxg-plus := prof:track(
-          if ($test-set/tc:ixml-grammar)
-          then <ptr target="lib-rts-ld-ixml"/>
-          else if ($test-set/tc:vxml-grammar)
-          then <ptr target="lib-rts-ld-vxml"/>
-          else if ($test-set/tc:ixml-grammar-ref)
-          then <ptr target="lib-rts-ld-ixml-ref"/> 
-          else if ($test-set/tc:vxml-grammar-ref)
-          then <ptr target="lib-rts-ld-vxml-ref"/>
-          else () (: no new grammar:  inherited, or none :)
+               if ($test-set/tc:ixml-grammar)
+               then <ptr target="lib-rts-ld-ixml"/>
+               else if ($test-set/tc:vxml-grammar)
+               then <ptr target="lib-rts-ld-vxml"/>
+               else if ($test-set/tc:ixml-grammar-ref)
+               then <ptr target="lib-rts-ld-ixml-ref"/> 
+               else if ($test-set/tc:vxml-grammar-ref)
+               then <ptr target="lib-rts-ld-vxml-ref"/>
+               else () (: no new grammar:  inherited, or none :)
+          ),
+          $new-xml-grammar := $nxg-plus?value
+          
+</scrap>
+Using <ident>prof:track()</ident> requires that we declare
+the <ident>prof</ident> namespace.
+<scrap prev="lib-nsdecls"
+       name="Namespace declarations and imports, cont'd">
+
+declare namespace prof = "http://basex.org/modules/prof";
+</scrap>
+</p>
+
+<p>In version 3 of the test harness, we supply an alternative code
+path for implementations in which the BaseX
+<ident>prof:track()</ident> function is not available.  We define the
+variable <ident>$prof-track</ident> to be either
+<ident>prof:track()</ident> or an alternative function that has the
+same interface but does not do any time tracking.
+<scrap corresp="lib-rts-g-new" version="v3"
+       name="Set $new-xml-grammar">
+
+      let $prof-track := (function-lookup(
+                         QName('http://basex.org/modules/prof',
+                               'track'),
+                         1),
+                         function($item) {
+                             map {'time':'?', 'value': $item}
+                         }
+                         )[1]
+      let $nxg-plus := $prof-track(
+               if ($test-set/tc:ixml-grammar)
+               then <ptr target="lib-rts-ld-ixml"/>
+               else if ($test-set/tc:vxml-grammar)
+               then <ptr target="lib-rts-ld-vxml"/>
+               else if ($test-set/tc:ixml-grammar-ref)
+               then <ptr target="lib-rts-ld-ixml-ref"/> 
+               else if ($test-set/tc:vxml-grammar-ref)
+               then <ptr target="lib-rts-ld-vxml-ref"/>
+               else () (: no new grammar:  inherited, or none :)
           ),
           $new-xml-grammar := $nxg-plus?value
           
 </scrap>
 </p>
-<p>Each of these needs to be done cautiously.  First is
-the inline ixml case.  We just wrap it in a try/catch
-and hope for the best.  (Quick and dirty, remember.)
+
+<p>Each branch of the <code>if</code> / <code>then</code> / <code>else
+if</code> sequence needs to be done cautiously.  First is the inline
+ixml case.  We just wrap it in a try/catch and hope for the best.
+(Quick and dirty, remember.)
+
 <scrap id="lib-rts-ld-ixml"
        name="Cautiously parse ixml grammar">
 
@@ -793,7 +852,9 @@ and hope for the best.  (Quick and dirty, remember.)
                  $err:column-number, ")"
                }               
           }
-</scrap></p>
+</scrap>
+</p>
+
 <p>In order to call the <ident>parse-grammar-from-string()</ident>
 function (and its relatives) in the Aparecium library, we are going to
 need to import that library:
@@ -872,6 +933,10 @@ covered here.
                       }
           
 </scrap></p>
+</div>
+
+<div id="grammar-checkout">
+<head>Check the grammar for conformance</head>
 
 <p>Once we have the new XML grammar, we need to check it for
 conformance.  Aparecium provides the <ident>ap:grammar-ok()</ident>
@@ -881,11 +946,19 @@ function, if we have a new grammar.
 <scrap id="lib-rts-vxml-grammar-check"
        name="Set $checked-xml-grammar">
 
+      let $prof-time := function-lookup(
+              QName('http://basex.org/modules/prof',
+                    'time'),
+              2)
+
       let $checked-xml-grammar := 
-          if (exists($new-xml-grammar)) 
-          then prof:time(
+          if (exists($new-xml-grammar)
+              and exists($prof-time)) 
+          then $prof-time(
                   ap:grammar-ok($new-xml-grammar)
                , 'test-harness: checking XML grammar.')
+          else if (exists($new-xml-grammar))
+          then ap:grammar-ok($new-xml-grammar)
           else ()
 </scrap>
 The older version, for reference:
@@ -905,6 +978,7 @@ The older version, for reference:
           }
 </scrap>
 </p>
+
 <p>
 If the new grammar is OK so far, we need to compile it.
 <scrap 
@@ -930,12 +1004,19 @@ If the new grammar is OK so far, we need to compile it.
       else $grammar
 </scrap>
 </p>
+
 <p>At this point, the code digresses to checking whether the user
 requested a grammar test or not; that is described in the next
 section.  Within the <ident>t:run-test-set()</ident> function,
 the effect of the grammar test is to set some variables.</p>
+
 <p>Then we return the <gi>test-set-results</gi> element, as shown
 above in <ptr target="lib-rts-do-inline"/>.</p>
+
+</div>
+
+<div id="grammar-write-test-result">
+<head>Write the grammar test results and recur</head>
 
 <p>We start by writing out the result of any grammar test, if
 one was request.  If the user has specified that results should be
@@ -985,7 +1066,14 @@ usable grammar.  First, we check for error signals in the
          },
          element tc:app-info { $checked-xml-grammar }
          )
-</scrap></p>
+</scrap>
+<hi>To do: Change this to keep going, but produce a
+<ident>not-a-grammar</ident> result for each test case.  Make this
+if/then/else sequence calculate a value for an
+<ident>$grammar-error-message</ident> variable.  Then in the instance
+test cases, if <code>exists($grammar-error-message)</code> then
+produce not-a-grammar output.</hi>
+</p>
 
 <p>Then, in a slightly paranoid way, we check that the
 grammar is actually an <gi>ixml</gi> element.<note place="foot">
@@ -1009,6 +1097,7 @@ finds a conformance error in the grammar.</p></note>
          )
 </scrap>
 </p>
+
 <p>We also check to make sure that we actually passed
 the grammar test.
 <scrap prev="lib-rts-abort"
@@ -1022,6 +1111,7 @@ the grammar test.
          }
 </scrap>
 </p>
+
 <p>If something went wrong in the compilation step, the
 compiled grammar will be an error element.
 <scrap prev="lib-rts-abort"
@@ -1037,6 +1127,7 @@ compiled grammar will be an error element.
          )
 </scrap>
 </p>
+
 <p>There may be other conditions we should be checking for;
 they should be inserted here.</p>
 </div>
@@ -1282,7 +1373,7 @@ have not tested for specifically in the grammar argument.
            },
            element tc:description {
              element tc:p {
-               "Unexpected error in gramar parameter."
+               "Unexpected error in grammar parameter."
              }
 	   },
            element tc:app-info { $xml-grammar }
@@ -1357,11 +1448,15 @@ failure.</item>
 </list>
 </item>
 </list>
+
 <hi>TO DO: find a simple way to do a comparison which ignores the
 presence or absence of an <att>ixml:state</att> attribute.</hi>
 </p>
 
-<p>The <ident>run-test-case()</ident> function ...
+<div id="testcases-running-f">
+<head>The <ident>run-test-case()</ident> function</head>
+<p>The <ident>run-test-case()</ident> function does the
+task described above, step by step.
 <scrap id="lib-run-test-case"
        name="The run-test-case() function">
 
@@ -1392,6 +1487,10 @@ declare function t:run-test-case(
 };
 </scrap>
 </p>
+</div>
+
+<div id="testcaserun-prep">
+<head>Gathering input and expectations</head>
 <p>If the input string is external, fetch it.  If we have a problem
 fetching it (i.e. if there is no text at that URI), we have a problem.
 We are expecting a string, and we can't return an error element.  And
@@ -1429,12 +1528,14 @@ not work; this is roughly analogous.
        name="Set some handy variables">
   let $dummy := trace($test-case/@name/string(),
                       "Starting test case: ")
-  let $failure-string := ("&#xE004E;&#xE004F;&#xE0054;"
-                      || "&#xE0020;&#xE0046;&#xE004F;"
-                      || "&#xE0055;&#xE004E;&#xE0044;"
-                         (: 'NOT FOUND' in tag block :),
-                         "&#x1D350;",
-                         "&#xFFFD;")[2]
+  let $failure-string := 
+        ("&#xE004E;&#xE004F;&#xE0054;"
+         || "&#xE0020;&#xE0046;&#xE004F;"
+         || "&#xE0055;&#xE004E;&#xE0044;"
+             (: 'NOT FOUND' in tag block :),
+         "&#x1D350;" (: Tetragram for failure :),
+         "&#xFFFD;" (: U+FFFD :)
+        )[2]
 </scrap>
 </p>
 
@@ -1476,12 +1577,20 @@ We need to be careful to ensure that the value of
                  }
 </scrap>
 </p>
+</div>
+
+<div id="testcaserun-runit">
+<head>Running the test case</head>
+
 <p>We have input string and expectations ready,
 or else we are holding error markers in their place.
 Time to run the test.</p>
 <p>The code for running the test has gone through
 several iterations, perhaps best understood in
 roughly chronological order.</p>
+
+<div id="testcaserunrun-plain">
+<head>First cut: just run it</head>
 <p>The initial version of the parser call was straightforward:
 <scrap corresp="lib-rtc-parse-with-timeout"
        version="alt"
@@ -1492,7 +1601,13 @@ roughly chronological order.</p>
           )
 </scrap>
 But that has some drawbacks, including occasional
-uncaught exceptions.  So we wrap it in a try/catch.
+uncaught exceptions.  </p>
+</div>
+
+<div id="testcaserunrun-try">
+<head>Second cut:  try/catch</head>
+<p>So we wrap it in a try/catch.
+That yields the next version.
 <scrap id="lib-rtc-parse"
        name="Set $parse-tree by parsing the test input string">
 
@@ -1520,6 +1635,7 @@ uncaught exceptions.  So we wrap it in a try/catch.
         }
 </scrap>
 </p>
+
 <p>Wrapping the call to the parse function in a try/catch expression
 helps with some problems, but not all.  It is embarrassing to admit it,
 but at the moment, there are some tests in the test suites that
@@ -1557,9 +1673,21 @@ specifying a maximum amount of time.
 get around to trying to run the test harness in Saxon, a different
 formulation will be necessary.  (If push comes to shove, we can
 generate different modules for BaseX and Saxon, but it would be nicer
-to have them co-exist.)</p>
-<p>In version 2, we modify the code for setting the variable
-<ident>$parse-tree</ident> to gather timing information as well.
+to have them co-exist. <hi>See now <ptr target="testcaserunrun-alts"/> below.</hi>)</p>
+<p>So we need to declare the <ident>xquery</ident> namespace.
+<scrap prev="lib-nsdecls">
+
+declare namespace xquery = "http://basex.org/modules/xquery";
+</scrap></p>
+
+</div>
+
+<div id="testcaserunrun-timing-data">
+<head>Gather timing information</head>
+
+<p>In the next version (v2), we modify the code for setting the
+variable <ident>$parse-tree</ident> to gather timing information as
+well, using the BaseX extension function <ident>prof:track()</ident>.
 <scrap corresp="lib-rtc-parse"
        version="v2"
        name="Set $parse-tree by parsing the test input string">
@@ -1607,8 +1735,8 @@ set the <ident>timeout</ident> option this way:
 
       attribute timeout { 600 }
 </scrap>
-
 </p>
+
 <p>The preliminary checks before parsing are for failures in fetching
 the input string or the expectations, or for a bad grammar.
 <scrap id="lib-rtc-parse-precheck"
@@ -1628,6 +1756,142 @@ the input string or the expectations, or for a bad grammar.
              }
 </scrap>
 </p>
+
+</div>
+
+<div id="testcaserunrun-alts">
+<head>Implementation-independent fallbacks</head>
+
+<p>The code given works but has an unfortunate dependency on BaseX,
+which works against the goal of making Aparecium work with other
+XQuery engines, since that goal requires running the test suite with
+those other engines.</p>
+
+<p>So in the next version (v3), we (attempt to) provide alternate code
+paths for processors with and without the <ident>prof:track()</ident>
+and <ident>xquery:eval()</ident> functions.  The overall structure of
+the code is very similar, but instead of calling
+<ident>prof:track()</ident> directly we call the value of a variable
+named <ident>$prof-track</ident>, whose value needs to be set up in
+advance, as does that of a variable unsurprisingly named
+<ident>$xquery-eval</ident>.
+
+<scrap corresp="lib-rtc-parse"
+       id="lib-rtc-parse-v3"
+       version="v3"
+       name="Set $parse-tree by parsing the test input string">
+
+    <ptr target="lib-rtc-parse-prof-track"/>
+    <ptr target="lib-rtc-parse-xquery-eval"/>
+
+    let $pt-plus := $prof-track(
+        <ptr target="lib-rtc-parse-precheck"/>
+        else try {
+          <ptr target="lib-rtc-parse-with-timeout"/>
+        } catch xquery:timeout {
+          element tc:error {
+              attribute id { "t:tbd19" },
+              "Parse function timed out at ",
+              ($options/@timeout/number(), 600)[1],
+	      " seconds."
+          }
+        } catch * {
+          element tc:error {
+              attribute id { "t:tbd16" },
+              "Parse function blew up. ",
+              $err:code, $err:value, 
+              " module: ",
+              $err:module, 
+              "(", $err:line-number, ",", 
+              $err:column-number, ")"
+          }
+        }
+        )
+    let $parse-tree := $pt-plus?value 
+</scrap>
+</p>
+
+<p>The variable <ident>$prof-track</ident> will hold either the BaseX
+<ident>prof:track()</ident> function or a dummy function that has
+the same interface but produces no useful timing information.
+<scrap id="lib-rtc-parse-prof-track"
+       name="Define $prof-track as implementation-dependent function">
+
+    let $prof-track := (
+        function-lookup(
+            QName('http://basex.org/modules/prof',
+                  'track'),
+            1),
+        function($items) { 
+            map { 'time': '?', 'value': $items } 
+        }
+        )[1]
+</scrap>
+</p>
+
+<p>The <ident>$xquery-eval</ident> variable, by contrast, does not
+have an alternate function: it either holds the
+<ident>xquery:eval()</ident> function or is empty.
+<scrap id="lib-rtc-parse-xquery-eval"
+       name="Define $xquery-eval-track as implementation-dependent function">
+
+    let $xquery-eval := function-lookup(
+            QName('http://basex.org/modules/xquery',
+                  'eval'),
+            3)
+</scrap>
+</p>
+
+<p>Using this variable, we can choose two ways to
+produce the parse tree.
+<scrap corresp="lib-rtc-parse-with-timeout"
+       version="v3"
+       name="Parse the input, maybe with a time limit">
+
+          if (exists($xquery-eval))
+          then <ptr target="lib-rtcp-with-eval"/>
+          else <ptr target="lib-rtcp-without-eval"/>
+</scrap></p>
+<p>If <ident>xquery:eval()</ident> is available, we
+use it; this code is the same as that for version v2.
+<scrap id="lib-rtcp-with-eval"
+       name="Parse the input using xquery:eval()">
+
+          let $query := "import module namespace aparecium
+                = 'http://blackmesatech.com/2019/iXML/Aparecium'
+                at '../build/Aparecium.xqm';
+                declare variable $s external;
+                declare variable $g external;
+                aparecium:parse-string-with-compiled-grammar($s, $g)",
+              $bindings := map {
+                             's' : $input-string,
+                             'g' : $G
+                           },
+              $options := map { 
+                            'timeout' : 
+                            ($options/@timeout/number(), 600)[1]
+                          }
+          return $xquery-eval($query, $bindings, $options)
+</scrap>
+</p>
+
+<p>If <ident>xquery:eval()</ident> is not available, we go back to a
+direct call to <ident>ap:parse-string-with-compiled-grammar()</ident>.
+We are however still wrapped in the try/catch of <ptr
+target="lib-rtc-parse-v3"/>.
+
+<scrap id="lib-rtcp-without-eval"
+       name="Parse the input directly">
+
+          else ap:parse-string-with-compiled-grammar(
+            $input-string,
+            $G
+          )         
+</scrap>
+</p>
+
+</div>
+</div>
 
 </div>
 
