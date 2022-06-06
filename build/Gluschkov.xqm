@@ -215,7 +215,7 @@ then let $gi := name($E)
                      @follow:*)),
        attribute xml:id { $id },
        attribute nullable { 
-         every $c in $ch
+         every $c in $ch except $E/comment
          satisfies (xs:boolean($c/@nullable) eq true())
        },
        attribute first { 
@@ -336,6 +336,9 @@ then let $gi := name($E)
 
 
   else if ($E/self::comment) then
+    $E
+
+  else if ($E/self::prolog) then
     $E
 
   else if ($E/self::ixml) then 

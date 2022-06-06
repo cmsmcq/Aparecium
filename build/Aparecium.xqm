@@ -18,6 +18,9 @@ import module namespace earley
 import module namespace gluschkov
    = "http://blackmesatech.com/2019/iXML/Gluschkov"
   at "Gluschkov.xqm";
+import module namespace d2x 
+   = 'http://blackmesatech.com/2019/iXML/d2x'
+  at "d2x.xqm";
   
 (: Quick hack for testing ... :)
 import module namespace ws
@@ -75,11 +78,11 @@ declare function aparecium:parse-string(
   $sI as xs:string,
   $sG as xs:string
 ) as element() {
-  let $cG := (:stat:) prof:time( (:tats:)
+  let $cG := (:stat ...prof:time( ... tats:)
              aparecium:compile-grammar-from-string($sG)
-             (:stat:) , 
+             (:stat ..., 
              'parse-string: compiling grammar from string:') 
-             (:tats:)
+             ... tats:)
              
   return 
     if ($cG/self::aparecium:error)
@@ -88,9 +91,9 @@ declare function aparecium:parse-string(
       "parse-string():  Error compiling grammar.",
       $cG      
     }
-    else (:stat:) prof:time( (:tats:)
+    else (:stat ...prof:time( ... tats:)
          aparecium:parse-string-with-compiled-grammar($sI, $cG)
-         (:stat:) , 'parse-string:  parsing input string:') (:tats:)
+         (:stat ..., 'parse-string:  parsing input string:') ... tats:)
 };
 
 (: ......................................................
@@ -101,16 +104,16 @@ declare function aparecium:parse-string-with-compiled-grammar(
   $sI as xs:string,
   $cG as element(ixml)
 ) as element() {
-  let $cg-ok := (:stat:) prof:time( (:tats:)
+  let $cg-ok := (:stat ...prof:time( ... tats:)
                 aparecium:grammar-ok($cG)
-                (:stat:) , 'pswcg() calling grammar-ok():') (:tats:)
+                (:stat ..., 'pswcg() calling grammar-ok():') ... tats:)
 
   let $result := if ($cg-ok/self::ixml) 
-                 then (:stat:) prof:time( (:tats:)
+                 then (:stat ...prof:time( ... tats:)
                      earley:any-tree($sI, $cG) 
-                     (:stat:) 
+                     (:stat ...
                      , '0 Outer call to earley:any-tree(): ')
-                      (:tats:)
+                      ... tats:)
                  else element aparecium:error {
                    attribute id { "ap:tbd05" },
                    "Compiled grammar flawed:",
@@ -183,9 +186,9 @@ declare function aparecium:parse-grammar-from-string(
   let $CGIG := doc($aparecium:ixml.gl.xml)/ixml,
       (: PG: parsed grammar :)
       $PG0 := aparecium:parse-string-with-compiled-grammar($G,$CGIG),
-      $PG := (:stat:) prof:time( (:tats:)
+      $PG := (:stat ...prof:time( ... tats:)
              aparecium:grammar-ok($PG0)
-             (:stat:) , 'pgfs() calling grammar-ok():') (:tats:)
+             (:stat ..., 'pgfs() calling grammar-ok():') ... tats:)
   return $PG
 };
 
@@ -227,9 +230,9 @@ declare function aparecium:compile-grammar-from-string(
 declare function aparecium:compile-grammar-from-xml(
   $xmlG as element()
 ) as element(ixml) {
-  let $G := (:stat:) prof:time( (:tats:)
+  let $G := (:stat ...prof:time( ... tats:)
             aparecium:grammar-ok($xmlG)
-            (:stat:) , 'cgfx() calling grammar-ok():') (:tats:)
+            (:stat ..., 'cgfx() calling grammar-ok():') ... tats:)
   return if ($G/self::ixml)
          then gluschkov:ME($xmlG)
          else element aparecium:error {
@@ -286,11 +289,11 @@ declare function aparecium:grammar-ok(
 ) as element() {
   if ($G/self::ixml)
   then 
-  let $dummy := trace($G/rule[1]/@name/string(),
-                'grammar-ok() called on grammar for: ')
+  let $dummy := () (: trace($G/rule[1]/@name/string(),
+                'grammar-ok() called on grammar for: ') :)
     let $lee-struc := (
       let $le0 := $G/*
-          [not(self::rule or self::comment or self::pragma)]
+          [not(self::prolog or self::rule or self::comment or self::pragma)]
       for $e in $le0 
       return element aparecium:error {
         attribute id { "ap:tbd08" },
@@ -358,7 +361,7 @@ declare function aparecium:grammar-ok(
                   $G//member/@code)
       let $nt := string($cc/ancestor::rule/@name)
       where not(matches($cc,
-                '^(L[ulmo]?'
+                '^(L[ultmo]?'
                 || '|M[nce]?'
                 || '|N[dlo]?'
                 || '|P[cdseifo]?'
@@ -371,6 +374,94 @@ declare function aparecium:grammar-ok(
         "in the definition of", $nt, 
         "is not known."
       }
+  )
+
+    let $lee-hex := (
+      for $hexref in ($G//literal/@hex,
+                  $G//member/@hex,
+                  $G//member/(@from | @to)
+                      [starts-with(., '#') 
+                      and string-length(.) gt 1]
+		  )
+      let $nt := string($hexref/ancestor::rule/@name),
+          $hexstring := if (starts-with($hexref, '#'))
+                        then substring($hexref, 2)
+                        else string($hexref),
+          $int := try { 
+                    d2x:x2d($hexstring) 
+                  } catch err:FOAR0002 {  
+                    -1 (: out of range, assume too big :)
+                  } catch * {  
+                    -2 (: who knows?  Assume bad hex :)
+                  }
+      return         if ($int eq -1)
+        then element aparecium:error {
+             attribute id { "ixml:S07" },
+             "Hex value ", $hexstring, 
+             "in the definition of", $nt, 
+             "is too large. Entirely too large."
+	} 
+        else if ($int eq -2)
+        then element aparecium:error {
+             attribute id { "ixml:S08" },
+             "Hex value ", $hexstring, 
+             "in the definition of", $nt, 
+             "cannot be converted to an integer."
+        } 
+        else if ($int lt 0 or $int gt 1114111)
+        then element aparecium:error {
+             attribute id { "ixml:S07" },
+             "Hex value ", $hexstring, 
+             "( = ", string($int), ")", 
+             "in the definition of", $nt,
+             "lies outside the Unicode range",
+	     "(0 to 1114111)."
+        } 
+        else if ($int ge 55296 and $int le 57343)
+              (: xD800 to xDFFFF :)
+        then element aparecium:error {
+             attribute id { "ixml:S08" },
+             "Hex value ", $hexstring, 
+             "( = ", string($int), ")", 
+             "in the definition of", $nt,
+             "is not a Unicode character",
+	     "(it is a surrogate code point)."
+        } 
+        else if (ends-with(upper-case($hexstring), 'FFFF')
+             or  ends-with(upper-case($hexstring), 'FFFE'))
+        then element aparecium:error {
+             attribute id { "ixml:S08" },
+             "Hex value ", $hexstring, 
+             "( = ", string($int), ")", 
+             "in the definition of", $nt,
+             "is not a Unicode character",
+	     "(it is a non-character)."
+        }
+        else ()
+  )
+
+
+    let $lee-ranges := (
+      for $ref in $G//member[@from and @to]
+      let $nt := string($ref/ancestor::rule[1]/@name),
+          $cp-from := if (string-length($ref/@from) eq 1)
+                      then string-to-codepoints($ref/@from)
+	              else d2x:x2d(substring($ref/@from, 2)),
+          $cp-to := if (string-length($ref/@to) eq 1)
+                    then string-to-codepoints($ref/@to)
+                    else d2x:x2d(substring($ref/@to, 2))
+      return if ($cp-to lt $cp-from)
+      then element aparecium:error {
+           attribute id { "ixml:S09" },
+           "Range", 
+           $ref/@from/string(), '-', $ref/@to/string(),
+           '(=', $cp-from, '-', $cp-to, ")",
+           "in the definition of",
+           $nt || " is not a good range.",
+           "(The end of the range must",
+           "be higher than the beginning." 
+      }
+      else ()
   )
 
     let $lee-alldef := (
@@ -392,6 +483,7 @@ declare function aparecium:grammar-ok(
   let $lee-all := ($lee-struc, $lee-comp,
                    $lee-names,  
                    $lee-uniqdef, $lee-charclass,
+                   $lee-hex, $lee-ranges,
                    $lee-alldef, 
                    $lee-reachable, $lee-productive)
   return if (empty($lee-all/self::aparecium:error))
@@ -430,11 +522,11 @@ declare variable $aparecium:options
 declare variable $aparecium:libloc as xs:string
   := '../lib';
 declare variable $aparecium:ixml.ixml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-17.ixml';
+  := $aparecium:libloc || '/ixml.2022-05-28.ixml';
 
 declare variable $aparecium:ixml.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-17.ixml.inlined.xml.xml';
+  := $aparecium:libloc || '/ixml.2022-05-28.01.inlined.xml';
   
 declare variable $aparecium:ixml.gl.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-17.ixml.inlined.compiled.xml';  
+  := $aparecium:libloc || '/ixml.2022-05-28.inlined.compiled.xml';  
 
