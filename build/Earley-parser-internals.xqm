@@ -49,9 +49,9 @@ declare function epi:earley-parse(
                  'failure-dump': 'closure' }
       else $options
 
-  let $mapResult := (:stat:) prof:time( (:tats:)
+  let $mapResult := (:stat ...prof:time( ... tats:)
                     er:recognizeX($I, $G),
-                    (:stat:) '0a recognize(): '),(:tats:)
+                    (:stat ...'0a recognize(): '),... tats:)
 
       $meiClosure := $mapResult('Closure'),
       $leiCompletions := $mapResult('Completions')
@@ -62,9 +62,9 @@ declare function epi:earley-parse(
        then         let $dummy := eri:notrace((), 
                       'epi:earley-parse() has result') 
 
-        let $lpt := (:stat:) prof:time((:tats:)
+        let $lpt := (:stat ...prof:time(... tats:)
                     epi:all-trees($leiCompletions, $meiClosure, $I)
-                    (:stat:) , '0b making trees: ')(:tats:)
+                    (:stat ..., '0b making trees: ')... tats:)
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
         for $rpt at $npt in $lpt
@@ -84,9 +84,9 @@ declare function epi:earley-parse(
        then         let $dummy := eri:notrace((), 
                       'epi:earley-parse() has result') 
 
-        let $pfg := (:stat:) prof:time((:tats:)
+        let $pfg := (:stat ...prof:time(... tats:)
                     epi:parse-forest-grammar($leiCompletions, $meiClosure, $I)
-                    (:stat:) , '0b making pfg: ')(:tats:)
+                    (:stat ..., '0b making pfg: ')... tats:)
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a parse-forest grammart') 
         return $pfg
@@ -94,9 +94,9 @@ declare function epi:earley-parse(
        else (: default to any-tree :)
                     if ($options?tree-constructor eq 'direct')
         then 
-        let $lpt := (:stat:) prof:time((:tats:)
+        let $lpt := (:stat ...prof:time(... tats:)
                     epi:all-trees($leiCompletions, $meiClosure, $I)
-                    (:stat:) , '0b making trees: ')(:tats:)
+                    (:stat ..., '0b making trees: ')... tats:)
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
         for $rpt in $lpt[1]
@@ -107,12 +107,12 @@ declare function epi:earley-parse(
         else epi:astXparsetree($rpt, count($lpt))
 
         else 
-        let $pfg := (:stat:) prof:time((:tats:)
+        let $pfg := (:stat ...prof:time(... tats:)
                     epi:parse-forest-grammar($leiCompletions, $meiClosure, $I),
-                    (:stat:) '0b making pfg: '),(:tats:)
-            $ast := (:stat:) prof:time((:tats:)
+                    (:stat ...'0b making pfg: '),... tats:)
+            $ast := (:stat ...prof:time(... tats:)
                     epi:tree-from-pfg($pfg, 'document', ())
-                    (:stat:) , '0c extracting tree: ')(:tats:)
+                    (:stat ..., '0c extracting tree: ')... tats:)
 		    
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
@@ -375,6 +375,7 @@ declare function epi:make-pfg-rules(
                    $r0/@mark,
                    if (empty($walks))
                    then element ap:error {
+		     attribute id { "ap:tbd21" },
                      element p { "make-pfg-rules here." },
                      element p { "find-walks() failed." },
                      element p { "Here is what I know." },
@@ -617,6 +618,7 @@ declare function epi:rhs-from-walk(
   else 
 let $dummy := eri:trace($w('item'), 'rhs-from-walk:  item fell through!') return
        element ap:error {
+           attribute id { "ap:tbd22" },
            element p { 'Unexpected failure 83' },
            $acc,
            $w?state
@@ -681,8 +683,8 @@ declare function epi:tree-from-pfg(
                        /descendant-or-self::ap:error))
                     then element ap:error {
                            attribute ixml:state { "failed" },
-                           attribute id { "ap:tbd19" },
-                           attribute ap:desc { "ill-formed output" },
+                           attribute id { "ixml:D01" },
+                           attribute ap:desc { "Dynamic error: ill-formed output" },
                            $tree0
                          }
                     else $tree0
@@ -760,7 +762,8 @@ else error(QName(
                  and ($mark eq '^'))
           then element { $nm } {
                    if ($nm0 ne $nm)
-                   then attribute ap:gi { $nm0 }
+                   then (attribute id { "ixml:D03"}, 
+                         attribute ap:gi { $nm0 })
                    else (),
                    
                    let $lnAtts := 
@@ -770,25 +773,25 @@ else error(QName(
                                  'attribute',
                                  ()
                       )
-let $dummy := trace(count($lnAtts), 'Gathering attributes, found #: ')
-let $dummy := trace($lnAtts, 'Gathering attributes, found these: ')
+let $dummy := eri:notrace(count($lnAtts), 'Gathering attributes, found #: ')
+let $dummy := eri:notrace($lnAtts, 'Gathering attributes, found these: ')
                    let $lnAok := 
                        $lnAtts
                        [every $i in 1 to (position() - 1)
                         satisfies
                         $lnAtts[$i]/name() ne ./name()]
-let $dummy := trace(count($lnAok), 'Of these some are OK: ')
+let $dummy := eri:notrace(count($lnAok), 'Of these some are OK: ')
 	           let $lnAdups := $lnAtts
                        [some $i in 1 to (position() - 1)
                         satisfies
                         $lnAtts[$i]/name() eq ./name()]
-let $dummy := trace(count($lnAdups), 'Of these some are dups: ')
+let $dummy := eri:notrace(count($lnAdups), 'Of these some are dups: ')
                    return ($lnAok,
 		       for $n in $lnAdups
                        return element ap:error {
-                          attribute id { "ap:tbd18" },
+                          attribute id { "ixml:D02" },
                           $n,
-                          "Duplicate attribute name"
+                          "Dynamic error: Duplicate attribute name"
                        })
 ,
                                       for $c in $ccc
@@ -845,6 +848,7 @@ let $dummy := trace(count($lnAdups), 'Of these some are dups: ')
           else if (($nodetype = ('element'))
                  and ($mark = ('@')))
           then element ap:error {
+                 attribute id { "ixml:D05" },
                  attribute ap:desc {
                    "Attribute cannot be root.",
                    if ($nm ne $nm0)
@@ -866,6 +870,7 @@ let $dummy := trace(count($lnAdups), 'Of these some are dups: ')
                  }
                }
           else element ap:error {
+            attribute id { "ap:tbd20" },
             "Ran off a cliff, ",
             "I don't remember a thing. ",
             "Nodetype is '" || $nodetype || "'",
