@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '5 June 2022' >
+<!ENTITY date.last.touched '6 June 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
@@ -35,6 +35,7 @@ form of this document.</p>
 </fileDesc>
 <revisionDesc>
 <list>
+<item>2022-06-01/2022-06-06 : CMSMcQ : get Aparecium and test driver to work in Saxon in Oxygen</item>
 <item>2022-06-01 : CMSMcQ : Flip to new test-catalog namespace.</item>
 <item>2022-03-16 : CMSMcQ : record a to-do item:  the grammar
 preparation here should use standard functions, not roll its own.

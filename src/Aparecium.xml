@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '20 May 2022' >
+<!ENTITY date.last.touched '6 June 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
@@ -100,6 +100,8 @@
 </fileDesc>
 <revisionDesc>
 <list>
+<item>2022-06-01 : CMSMcQ : work on version mismatch warning</item>
+<item>2022-06-01/2022-06-06 : CMSMcQ : get Aparecium and test driver to work in Saxon in Oxygen</item>
 <item>2022-04-12 : CMSMcQ : try again to escape newlines in error message</item>
 <item>2022-03-10 : CMSMcQ : re-organize section on top-level
 interfaces; mention error cases explicitly</item>
@@ -296,26 +298,25 @@ empty string, which vary both in depth and in width.</p>
 For historical reasons, there are two work flows.
 <list>
 <item>
-<p>In the original flow, Aparecium extracts raw parse trees direct
-from the Earley set.  It attempts to identify and return
-<emph>all</emph> the parse trees for the sentence, except that it
-uses simple forms of loop detection to avoid attempting to produce
+<p>In the original flow, Aparecium extracts <soCalled>raw</soCalled>
+parse trees direct from the Earley set.  It attempts to identify and
+return <emph>all</emph> the parse trees for the sentence, except that
+it uses simple forms of loop detection to avoid attempting to produce
 an infinite number of trees.</p>
 </item>
 <item>
-<p>A second function then simplifies the raw parse trees as
-specified in the annotation of the ixml grammar, in order to produce
-the XML output (sometimes referred to here as an abtract syntax tree
-or AST).</p>
+<p>A second function then simplifies the <soCalled>raw</soCalled>
+parse trees as specified in the annotation of the ixml grammar, in
+order to produce the XML output (sometimes referred to here as an
+abtract syntax tree or AST).</p>
 </item>
 </list>
 A second flow works differently.
 <list>
 <item>
 <p>From the Earley set, the second flow extracts a parse-forest
-grammar extract a parse-forest grammar representing all parse trees
-for the sentence.  (Well, almost all: here, too, loop detection is
-used to keep the task finite.)</p>
+grammar representing all parse trees for the sentence.  (Well, almost
+all.  Here, too, loop detection is used to keep the task finite.)</p>
 <p>Parse-forest grammars have the convenient property that they can
 concisely describe more than one parse tree over the given input,
 even infinite trees.  It is relatively straightforward to tell by
@@ -6766,7 +6767,7 @@ functions.</p>
 <head>The <ident>earley-parse()</ident> function</head>
 <p>The function <ident>earley-parse()</ident> runs the Earley
 recognizer on the input and returns results as specified
-by the user.  
+by the user.
 <scrap id="epi-earley-parse"
        name="Define earley-parse()">
 (: ******************************************************
@@ -6795,12 +6796,19 @@ declare function epi:earley-parse(
       $meiClosure := $mapResult('Closure'),
       $leiCompletions := $mapResult('Completions')
 
-  return 
-  <ptr target="epi-ep-success"/>
-  else <ptr target="epi-ep-failure"/>
-        
+  let $leResults0 := if ($mapResult('Result'))
+      then <ptr target="epi-ep-success"/>
+      else <ptr target="epi-ep-failure"/>
+
+  let $leResults := <ptr target="epi-ep-versioncheck"/>
+
+  return $leResults
 };
 </scrap>
+The return type of the function is unhelpfully loose, because the
+results may take very different forms (see further below).
+</p>
+<p>
 An earlier version of <ident>earley-parse()</ident> that used
 higher-level functions is reproduced in <ref target="obs-hlf" >an
 appendix</ref>.  In order to support engines that do not implement
@@ -6812,8 +6820,7 @@ will have a <q><code>Result</code></q> value.  How we return
 it depends on what option the user specified.
 <scrap id="epi-ep-success"
        name="If we have a parse result, return it">
-  if ($mapResult('Result'))
-  then if ($options?return = 'all-trees')
+       if ($options?return = 'all-trees')
        then <ptr target="epi-ep-all-trees"/>
        else if ($options?return = 'tree-cursor')
        then <ptr target="epi-ep-tree-cursor"/>
@@ -6824,7 +6831,30 @@ it depends on what option the user specified.
        else (: default to any-tree :)
             <ptr target="epi-ep-any-tree"/>
 </scrap>
+The results returned may vary widely in type.
+<list>
+<item><p>If the <kw>return</kw> option has the value
+<q><kw>all-trees</kw></q>, the function returns a sequence of elements
+with unpredictable names (if <kw>tree-form</kw> is <q><kw>raw</kw></q>
+they will all be named <gi>nt</gi>, but normally they will all have
+the grammar's start symbol as their element name).</p></item>
+<item><p>If <kw>return</kw> is <q><kw>tree-cursor</kw></q>, the
+function will (eventually, when tree cursors are implemented) return
+pair consisting of an XML element (the parse tree) and a
+function.</p></item>
+<item><p>If <kw>return</kw> is <q><kw>parse-forest-map</kw></q>,
+the return value is a map.</p></item>
+<item><p>If <kw>return</kw> is <q><kw>parse-forest-grammar</kw></q>,
+the function returns an <gi>ixml</gi> element.</p></item>
+<item><p>If parsing fails, regardless of the <kw>return</kw> value,
+the function returns a <gi>no-parse</gi> element.
+<hi>To do: move this to the Aparecium namespace, so that it
+cannot collide with a user-specified name.</hi></p></item>
+</list>
 </p>
+
+<div id="sec-epi-ep-failure">
+<head>Handling parsing failures in <ident>earley-parse()</ident></head>
 <p>But first, let's talk about the failure case.
 As P.J. Brown points out, in real life the failure case
 is much more common that the <soCalled>success</soCalled> case, so
@@ -6865,10 +6895,10 @@ the user asks for a verbose dump we provide it.
     &lt;p>Sorry, no parse for this string and grammar.&lt;/p>
     &lt;p>The parser gave up at character {$high-water}:
         parsing succeeded up through &lt;q>{
-          replace($sL,'&#xA;','&amp;amp;#xA;')
+          replace($sL,'&amp;#xA;','&amp;amp;#xA;')
         }&lt;/q>
         but failed on &lt;q>{
-          replace($sR, '&#xA;', '&amp;amp;#xA;')
+          replace($sR, '&amp;#xA;', '&amp;amp;#xA;')
         }&lt;/q>&lt;/p>
     &lt;p>Expecting one of: {
         string-join(
@@ -6902,6 +6932,17 @@ the user asks for a verbose dump we provide it.
 Further work is needed here, I think (but this is
 better than it used to be).
 </p>
+<p>In a related vein (it's not necessary a failure case but it is a
+potentially useful diagnostic), we also flag the results with a
+<code>version-mismatch</code> token in the <att>ixml:state</att>
+attribute, if the input grammar specifies a version number not known
+to Aparecium. See below (section <ptr target="sec-epi-ep-versioncheck"
+type="secref"/>).
+</p>
+</div>
+
+<div id="sec-epi-ep-success">
+<head>Success cases in <ident>earley-parse()</ident></head>
 <p>Now back to the success cases.
 </p>
 <p>If the user asks for <q><kw>all-trees</kw></q>,
@@ -7017,8 +7058,55 @@ yet.
   &lt;parse-forest-map-not-available/>
 </scrap>
 </p>
-
 </div>
+
+<div id="sec-epi-ep-versioncheck">
+<head>Checking the ixml version number</head>
+
+<p>The <ident>early-parse()</ident> function is as good a place as we
+seem to have, for checking that the version number specified on an
+ixml grammar is in fact known to the processor.  It makes no
+difference for processing: Aparecium only knows ixml version 1.0 and
+we will use ixml 1.0 no matter what the input says.  The spec requires
+it (otherwise no new version will ever succeed, since deployed parsers
+will refuse to try to handle it).</p>
+<p>But if the input grammar specifies a version string other than
+<q><code>1.0</code></q>, we should inject an <att>ixml:state</att>
+attribute on the root element with the value
+<q><code>version-mismatch</code></q>.  If the result already has an
+<att>ixml:state</att> attribute, then we add the
+<code>version-mismatch</code> token to its value.</p>
+<p>We do this by checking the results, before we return them.
+<scrap id="epi-ep-versioncheck"
+       name="Check results for version mismatch">
+if ( ($G/prolog/version/@string
+           /string(), "1.0")[1] eq "1.0")
+      then $leResults0
+      else for $item in $leResults0
+           return if ($item instance of element())
+           then element {name($item)} {
+                  ($item/@* except 
+                    ($item/@ixml:state,
+                     $item/@ap:version-string,
+                     $item/@ap:version-used)),
+                  attribute ixml:state {
+                    $item/@ixml:state/string(),
+                    'version-mismatch'
+                  },
+                  attribute ap:version-string {
+                    string($G/prolog/version/@string)
+                  },
+                  attribute ap:version-used {
+                    "1.0"
+                  },
+                  $item/child::node()
+                }
+           else $item
+</scrap> 
+</p>
+</div>
+</div>
+
 <div id="epi-tree-returns">
 <head>Functions to return one or more trees</head>
 

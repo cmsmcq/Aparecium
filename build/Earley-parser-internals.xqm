@@ -56,9 +56,8 @@ declare function epi:earley-parse(
       $meiClosure := $mapResult('Closure'),
       $leiCompletions := $mapResult('Completions')
 
-  return 
-    if ($mapResult('Result'))
-  then if ($options?return = 'all-trees')
+  let $leResults0 := if ($mapResult('Result'))
+      then        if ($options?return = 'all-trees')
        then         let $dummy := eri:notrace((), 
                       'epi:earley-parse() has result') 
 
@@ -127,7 +126,7 @@ declare function epi:earley-parse(
 
 
 
-  else  (: otherwise, send an apology and explanation :)
+      else  (: otherwise, send an apology and explanation :)
   let $closure := <Closure>{
       let $mei := $mapResult('Closure')
       for $n in map:keys($mei('to'))
@@ -157,12 +156,10 @@ declare function epi:earley-parse(
     <p>Sorry, no parse for this string and grammar.</p>
     <p>The parser gave up at character {$high-water}:
         parsing succeeded up through <q>{
-          replace($sL,'
-','&amp;#xA;')
+          replace($sL,'&#xA;','&amp;#xA;')
         }</q>
         but failed on <q>{
-          replace($sR, '
-', '&amp;#xA;')
+          replace($sR, '&#xA;', '&amp;#xA;')
         }</q></p>
     <p>Expecting one of: {
         string-join(
@@ -193,7 +190,24 @@ declare function epi:earley-parse(
     else ()
   }</no-parse>
 
-        
+
+  let $leResults := if ( ($G/prolog/version/@string
+           /string(), "1.0")[1] eq "1.0")
+      then $leResults0
+      else for $item in $leResults0
+           return if ($item instance of element())
+           then element {name($item)} {
+                  ($item/@* except $item/@ixml:state),
+                  attribute ixml:state {
+                    $item/@ixml:state/string(),
+                    'version-mismatch'
+                  },
+                  $item/child::node()
+                }
+           else $item
+
+
+  return $leResults
 };
 
 (: ******************************************************
