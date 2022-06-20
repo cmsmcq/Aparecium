@@ -359,7 +359,7 @@
 		   <xsl:value-of select="@id"/>
 		 </xsl:when>
 		 <xsl:otherwise>
-		   <xsl:value-of select="generate-id(..)"/>
+		   <xsl:value-of select="generate-id(.)"/>
 		 </xsl:otherwise>
 	       </xsl:choose>
 	     </xsl:attribute>
@@ -421,7 +421,7 @@
 		<xsl:value-of select="@id"/>
 	      </xsl:when>
 	      <xsl:otherwise>
-		<xsl:value-of select="generate-id(..)"/>
+		<xsl:value-of select="generate-id(.)"/>
 	      </xsl:otherwise>
 	    </xsl:choose>
 	  </xsl:attribute>
