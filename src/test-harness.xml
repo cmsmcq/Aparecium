@@ -441,6 +441,11 @@ indexing into the list.  It's easy to change the index.
 	       path="{$ixtdir}ixml/ixml.test-catalog.pos.xml"/>
 
       &lt;!--  wisps test set (currently in progress) -->
+      &lt;catalog n="misc-001"
+	       path="{$invdir}misc/misc-001-020-catalog.xml"/>
+      &lt;catalog n="misc-021"
+	       path="{$invdir}misc/misc-021-040-catalog.xml"/>
+         
       &lt;catalog n="wisp-A"
 	       path="{$ixtdir}wisps/wisps-001-020-catalog.xml"/>
       &lt;catalog n="wisp-B"
@@ -1114,8 +1119,10 @@ finds a conformance error in the grammar.</p></note>
 </scrap>
 </p>
 
-<p>We also check to make sure that we actually passed
-the grammar test.
+<p>We could also check to make sure that we actually passed
+the grammar test.  Indeed, we did so at one point.  But
+that is really orthogonal to whether we have a grammar to
+work with.
 <scrap prev="lib-rts-abort"
        name="If we failed the grammar test, stop now">
     else if ($grammar-test-result/@result ne 'pass')

@@ -158,6 +158,11 @@ let $invdir := "../../cmsmcq-ixml/tests/",
 	       path="{$ixtdir}ixml/ixml.test-catalog.pos.xml"/>
 
       <!--  wisps test set (currently in progress) -->
+      <catalog n="misc-001"
+	       path="{$invdir}misc/misc-001-020-catalog.xml"/>
+      <catalog n="misc-021"
+	       path="{$invdir}misc/misc-021-040-catalog.xml"/>
+         
       <catalog n="wisp-A"
 	       path="{$ixtdir}wisps/wisps-001-020-catalog.xml"/>
       <catalog n="wisp-B"
