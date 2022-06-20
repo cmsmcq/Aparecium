@@ -314,10 +314,11 @@ syntax tree from the raw parse tree</a></li>
 </li>
 <li>A. <a href="#references">References</a></li>
 <li>B. <a href="#to-do">To do</a></li>
-<li>C. <a href="#known-bugs">Known bugs and test failures</a></li>
-<li>D. <a href="#change-logs">Change logs</a></li>
-<li>E. <a href="#obsolete">Older versions of some code</a></li>
-<li>F. <a href="#indices">Indices</a></li>
+<li>C. <a href="#known-limits">Known limitations</a></li>
+<li>D. <a href="#known-bugs">Known bugs and test failures</a></li>
+<li>E. <a href="#change-logs">Change logs</a></li>
+<li>F. <a href="#obsolete">Older versions of some code</a></li>
+<li>G. <a href="#indices">Indices</a></li>
 </ul>
 <hr />
 <div class="epigraph" style=
@@ -775,7 +776,10 @@ Earley-parser.xqm] 〉 ≡</a></span>
 import module namespace epi =
 "http://blackmesatech.com/2019/iXML/Earley-parser-internals"
 at "Earley-parser-internals.xqm";
-  
+
+declare namespace ap = 
+"http://blackmesatech.com/2019/iXML/Aparecium";
+
 </pre></div>
 </div>
 </div>
@@ -1630,6 +1634,9 @@ at "Earley-rec-internals.xqm";
 
 declare namespace follow =
 "http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
+
+declare namespace ap = 
+"http://blackmesatech.com/2019/iXML/Aparecium";
 
 declare variable $gl:follow-ns :=
 "http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
@@ -2523,10 +2530,29 @@ ladder, we handle unexpected elements.
 <div class="scrap"><span><a name="gl-ME-whahhh" id="gl-ME-whahhh">〈
 45 Handle unexpected elements 〉 ≡</a></span>
 <pre class="scrapbody">if ($E/self::option or $E/self::sep)
-then &lt;error&gt;Element {name($E)} with unexpected content: {$E}&lt;/error&gt;
+then element ap:error {
+       attribute id {"ap:tbd35"},
+       element desc {
+         "Element {name($E)} with unexpected content:"
+       },
+       $E
+     }
 else if ($E/(self::repeat1 or self::repeat0))
-then &lt;error&gt;Element {name($E)} with unexpected content: {$E}&lt;/error&gt;
-else &lt;error&gt;Unexpected element {$E}&lt;/error&gt;</pre>
+then element ap:error {
+       attribute id {"ap:tbd36"},
+       element desc {
+         "Element {name($E)} with unexpected content:"
+       },
+       $E
+     }
+else element ap:error {
+       attribute id {"ap:tbd37"},
+       element desc {
+         "Element {name($E)} was unexpected:"
+       },
+       $E
+     }
+</pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#gl-ME">Define function gl:ME() 17</a> 〉<br /></span></div>
 </div>
@@ -2820,8 +2846,16 @@ and all the children of &lt;<em>rule</em>&gt; elements are
         attribute id { "ap:tbd09" },
         "Unexpected " || $e/name() 
         || " element as child of rule."
-      }
+      },
 
+      let $le0 := $G/rule/descendant::insertion
+      for $e in $le0 
+      return element aparecium:error {
+        attribute id { "ap:tbd38" },
+        "Sorry!  Aparecium does not currently support "
+        || "grammars with insertions."
+      }
+      
   )
       
 </pre>
@@ -3067,7 +3101,8 @@ value -1, which will be returned only if we caught error FOAR0002.
 errors 〉 ≡</a></span>
 <pre class="scrapbody">        if ($int eq -1)
         then element aparecium:error {
-             attribute id { "ixml:S07" },
+             attribute id { "ap:tbd18" },
+             attribute code { "ixml:S07" },
              "Hex value ", $hexstring, 
              "in the definition of", $nt, 
              "is too large. Entirely too large."
@@ -3092,7 +3127,8 @@ error during hex-decimal conversion [continues</a> <a href=
 errors</a>] 〉 ≡</span>
 <pre class="scrapbody">        else if ($int eq -2)
         then element aparecium:error {
-             attribute id { "ixml:S08" },
+             attribute id { "ap:tbd19" },
+             attribute code { "ixml:S08" },
              "Hex value ", $hexstring, 
              "in the definition of", $nt, 
              "cannot be converted to an integer."
@@ -3108,7 +3144,8 @@ errors and return appropriate errors</a>] 〉 ≡</span>
 <pre class=
 "scrapbody">        else if ($int lt 0 or $int gt 1114111)
         then element aparecium:error {
-             attribute id { "ixml:S07" },
+             attribute id { "ap:tbd26" },
+             attribute code { "ixml:S07" },
              "Hex value ", $hexstring, 
              "( = ", string($int), ")", 
              "in the definition of", $nt,
@@ -3128,7 +3165,8 @@ errors</a>] 〉 ≡</span>
 "scrapbody">        else if ($int ge 55296 and $int le 57343)
               (: xD800 to xDFFFF :)
         then element aparecium:error {
-             attribute id { "ixml:S08" },
+             attribute id { "ap:tbd27" },
+             attribute code { "ixml:S08" },
              "Hex value ", $hexstring, 
              "( = ", string($int), ")", 
              "in the definition of", $nt,
@@ -3148,7 +3186,8 @@ errors</a>] 〉 ≡</span>
 "scrapbody">        else if (ends-with(upper-case($hexstring), 'FFFF')
              or  ends-with(upper-case($hexstring), 'FFFE'))
         then element aparecium:error {
-             attribute id { "ixml:S08" },
+             attribute id { "ap:tbd28" },
+             attribute code { "ixml:S08" },
              "Hex value ", $hexstring, 
              "( = ", string($int), ")", 
              "in the definition of", $nt,
@@ -3191,14 +3230,15 @@ code point is greater than the closing code point.
                     else d2x:x2d(substring($ref/@to, 2))
       return if ($cp-to lt $cp-from)
       then element aparecium:error {
-           attribute id { "ixml:S09" },
+           attribute id { "ap:tbd29" },
+           attribute code { "ixml:S09" },
            "Range", 
            $ref/@from/string(), '-', $ref/@to/string(),
            '(=', $cp-from, '-', $cp-to, ")",
            "in the definition of",
            $nt || " is not a good range.",
            "(The end of the range must",
-           "be higher than the beginning." 
+           "be higher than the beginning.)" 
       }
       else ()
   )
@@ -3227,6 +3267,7 @@ up.
       return if (empty($G/rule[@name eq $nt]))
       then element aparecium:error {
         attribute id { "ap:tbd13" },
+        attribute code { "ixml:S02" },
         $nt || " is referred to but not defined." 
       }
       else ()
@@ -3920,6 +3961,7 @@ of rules in an enclosing error element.
 element 〉 ≡</a></span>
 <pre class="scrapbody">    if ($rules/self::ap:error)
     then element ap:error {
+           attribute id { "ap:tbd30" },
            element comment {
              "Failure generating PFG. ",
              "Sorry!" 
@@ -4254,7 +4296,7 @@ right-hand side.
                    if (empty($walks))
                    then element ap:error {
                      attribute id { "ap:tbd21" },
-                     element p { "make-pfg-rules here." },
+                     element p { "In make-pfg-rules, " },
                      element p { "find-walks() failed." },
                      element p { "Here is what I know." },
                      element dump { 
@@ -4704,8 +4746,8 @@ nonterminal</a>] 〉 ≡</span>
 <pre class="scrapbody">  else 
 let $dummy := eri:trace($w('item'), 'rhs-from-walk:  item fell through!') return
        element ap:error {
-           attribute id { "ap:tbd22" },
-           element p { 'Unexpected failure 83' },
+           attribute id { "ap:tbd25" },
+           element p { 'Unexpected disaster 83' },
            $acc,
            $w?state
        }
@@ -4897,7 +4939,8 @@ than one tree, we should mark the tree we return with
                        /descendant-or-self::ap:error))
                     then element ap:error {
                            attribute ixml:state { "failed" },
-                           attribute id { "ixml:D01" },
+                           attribute id { "ap:tbd31" },
+                           attribute code { "ixml:D01" },
                            attribute ap:desc { "Dynamic error: ill-formed output" },
                            $tree0
                          }
@@ -5119,7 +5162,8 @@ let $dummy := eri:notrace(count($lnAdups), 'Of these some are dups: ')
                    return ($lnAok,
                        for $n in $lnAdups
                        return element ap:error {
-                          attribute id { "ixml:D02" },
+                          attribute id { "ap:tbd32" },
+                          attribute code { "ixml:D02" },
                           $n,
                           "Dynamic error: Duplicate attribute name"
                        })
@@ -5220,7 +5264,8 @@ specified, then something is wrong. Say so.
 <pre class="scrapbody">if (($nodetype = ('element'))
                  and ($mark = ('@')))
           then element ap:error {
-                 attribute id { "ixml:D05" },
+                 attribute id { "ap:tbd33" },
+                 attribute code { "ixml:D05" },
                  attribute ap:desc {
                    "Attribute cannot be root.",
                    if ($nm ne $nm0)
@@ -8192,7 +8237,7 @@ declare function ep:all-trees(
 
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6455">Declare ep:alltrees() function (v. v0.2) 229</a>
+<a href="#d3e6482">Declare ep:alltrees() function (v. v0.2) 229</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#d3e4470">[File Earley-parser.xqm] 182</a>
 〉<br /></span></div>
@@ -8209,18 +8254,31 @@ declare function ep:any-tree(
   $I as item() (: INPUT :),
   $G as item() (: GRAMMAR :)
 ) as element()? {
-  epi:earley-parse($I, $G, 
-      map { 'return': 'any-tree',
-            'tree-count': 1,
-            'ambiguity-test': true(),
-            'failure-dump': 'closure',
-            'tree-constructor': 'pfg'
-      }
-  )
+  let $result := epi:earley-parse($I, $G, 
+                    map { 'return': 'any-tree',
+                          'tree-count': 1,
+                          'ambiguity-test': true(),
+                          'failure-dump': 'closure',
+                          'tree-constructor': 'pfg'
+                        }
+                 )
+  return if (count($result) eq 1) 
+         then $result
+         else if (empty($result))
+         then element ap:error {
+           attribute id { "ap:tbd23" },
+           "Earley-parse returned nothing." 
+         }
+         else element ap:error {
+           attribute id { "ap:tbd34" },
+           attribute code { "ixml:D06" },
+           element ap:desc { "No root element." },
+           $result
+         }
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6460">Declare ep:anytree() function (v. v0.2) 230</a>
+<a href="#d3e6487">Declare ep:anytree() function (v. v0.2) 230</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#d3e4470">[File Earley-parser.xqm] 182</a>
 〉<br /></span></div>
@@ -8250,7 +8308,7 @@ there-were-no-trees from all-done-now signals.
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6466">Declare ep:tree-cursor() function (v. v0.2)
+<a href="#d3e6493">Declare ep:tree-cursor() function (v. v0.2)
 231</a> 〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#d3e4470">[File Earley-parser.xqm] 182</a>
 〉<br /></span></div>
@@ -8280,7 +8338,7 @@ declare function ep:parse-forest-map(
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6473">Declare ep:parse-forest-map() function (v. v0.2)
+<a href="#d3e6500">Declare ep:parse-forest-map() function (v. v0.2)
 232</a> 〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#d3e4470">[File Earley-parser.xqm] 182</a>
 〉<br /></span></div>
@@ -8308,7 +8366,7 @@ declare function ep:parse-forest-grammar(
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6479">Declare ep:alltrees() function (v. v0.2) 233</a>
+<a href="#d3e6506">Declare ep:alltrees() function (v. v0.2) 233</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#d3e4470">[File Earley-parser.xqm] 182</a>
 〉<br /></span></div>
@@ -8456,7 +8514,7 @@ declare function epi:earley-parse(
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6489">Define earley-parse() (v. v0.2) 234</a>
+<a href="#d3e6516">Define earley-parse() (v. v0.2) 234</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#d3e389">[File Earley-parser-internals.xqm] 4</a>
 〉<br /></span></div>
@@ -8570,7 +8628,7 @@ verbose dump we provide it.
                     else '...'
              )
   return     
-  &lt;no-parse xmlns:ixml="http://invisiblexml.org/NS" ixml:state="failed"&gt;
+  &lt;ap:no-parse xmlns:ixml="http://invisiblexml.org/NS" ixml:state="failed"&gt;
     &lt;p&gt;Sorry, no parse for this string and grammar.&lt;/p&gt;
     &lt;p&gt;The parser gave up at character {$high-water}:
         parsing succeeded up through &lt;q&gt;{
@@ -8606,7 +8664,7 @@ verbose dump we provide it.
     &lt;grammar&gt;{(: 'Omitted.' :) $mapResult('Grammar') }&lt;/grammar&gt;
     &lt;/dump&gt;
     else ()
-  }&lt;/no-parse&gt;
+  }&lt;/ap:no-parse&gt;
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#epi-earley-parse">Define earley-parse() 188</a>
@@ -9786,7 +9844,8 @@ raw parse 〉 ≡</a></span>
 ) as node()* {
   if (empty($E/nt)) 
   then
-      element error {
+      element ap:error {
+          attribute id { "ap:tbd24" },
           text {
               "Parse tree had wrapper",
               "but no content."
@@ -10662,24 +10721,61 @@ nonterminal reference, one for the rule, plus a
 </div>
 </div>
 <div class="div">
-<h2><a class="selflink" name="known-bugs" id="known-bugs" href=
-"#known-bugs">C.</a> Known bugs and test failures</h2>
-<div class="Real-P">Known bugs and shortcomings:
+<h2><a class="selflink" name="known-limits" id="known-limits" href=
+"#known-limits">C.</a> Known limitations</h2>
+<div class="Real-P">Apart from bugs and test failures (on which see
+<a href="#known-bugs">below</a>), the known limitations and
+non-conformant behavior of Aparecium are these.
 <ul>
-<li>On inputs over a few tens of characters, Aparecium is currently
-unreasonably slow.</li>
+<li>
+<div class="Real-P">On inputs over a few tens or hundreds of
+characters, Aparecium is currently unreasonably slow.</div>
+<div class="Real-P">It is hoped that performance will improve in
+future versions.</div>
+</li>
+<li>
+<div class="Real-P">The ixml specification says that nonterminals
+which are not XML names must not be serialized (if they are, it
+leads to a dynamic error); Aparecium requires that nonterminal
+symbols to be XML non-colonized names (NCNames), whether they are
+marked hidden or not, whether they are serialized or not.</div>
+<div class="Real-P">This is unlikely to change in the foreseeable
+future, as allowing nonterminals which are not NCNames will require
+non-trivial rewrites of existing code.</div>
+</li>
+<li>
+<div class="Real-P">Aparecium does not currently support
+insertions.</div>
+<div class="Real-P">This deficiency is expected to be remedied in
+the near future.</div>
+</li>
 </ul>
 </div>
-<div class="Real-P">As of 21 May 2022, Aparecium passes all tests
-in the ixml community group's test catalog. This is likely to
-change when new tests covering insertions are added to the test
-set.</div>
+</div>
+<div class="div">
+<h2><a class="selflink" name="known-bugs" id="known-bugs" href=
+"#known-bugs">D.</a> Known bugs and test failures</h2>
+<div class="Real-P">As of June 2022, Aparecium passes almost all
+tests in the ixml community group's test catalog. The exceptions
+are:
+<ul>
+<li>
+<div class="Real-P">On some tests involving dynamic errors,
+Aparecium fails with an uncaught exception instead of returning a
+result with a diagnostic message.</div>
+</li>
+<li>
+<div class="Real-P">Aparecium fails all tests involving textual
+insertions.</div>
+</li>
+</ul>
+</div>
 <div class="Real-P">The test harness used is described in a
 separate document (<a href="#test-harness"></a>).</div>
 </div>
 <div class="div">
 <h2><a class="selflink" name="change-logs" id="change-logs" href=
-"#change-logs">D.</a> Change logs</h2>
+"#change-logs">E.</a> Change logs</h2>
 <div class="div">
 <h3><a class="selflink" name="logs-v0.2" id="logs-v0.2" href=
 "#logs-v0.2"></a>Change log for version 0.2</h3>
@@ -10791,7 +10887,7 @@ in an Earley parser.</li>
 </div>
 <div class="div">
 <h2><a class="selflink" name="obsolete" id="obsolete" href=
-"#obsolete">E.</a> Older versions of some code</h2>
+"#obsolete">F.</a> Older versions of some code</h2>
 <div class="Real-P">Some portions of v0.2 have been made obsolete.
 In some cases, changes have been made directly in the code; in
 others, scraps have been replaced but the old scraps have been
@@ -10807,7 +10903,7 @@ higher-level functions, they have been rewritten. The code should
 be self-explanatory.</div>
 <div class="Real-P">At least, I hope it is, since I don't want to
 spend any time explaining it.
-<div class="scrap"><span><a name="d3e6455" id="d3e6455">〈 229
+<div class="scrap"><span><a name="d3e6482" id="d3e6482">〈 229
 Declare ep:alltrees() function 〉 (for version <em>v0.2</em>)
 ≡</a></span>
 <pre class=
@@ -10830,7 +10926,7 @@ declare function ep:all-trees(
 〉</span></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e6460" id="d3e6460">〈 230
+<div class="scrap"><span><a name="d3e6487" id="d3e6487">〈 230
 Declare ep:anytree() function 〉 (for version <em>v0.2</em>)
 ≡</a></span>
 <pre class=
@@ -10849,7 +10945,7 @@ declare function ep:any-tree(
 "#ep-anytree">Declare ep:any-tree() function 184</a> 〉</span></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e6466" id="d3e6466">〈 231
+<div class="scrap"><span><a name="d3e6493" id="d3e6493">〈 231
 Declare ep:tree-cursor() function 〉 (for version <em>v0.2</em>)
 ≡</a></span>
 <pre class="scrapbody">declare function ep:tree-cursor(
@@ -10864,7 +10960,7 @@ Declare ep:tree-cursor() function 〉 (for version <em>v0.2</em>)
 〉</span></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e6473" id="d3e6473">〈 232
+<div class="scrap"><span><a name="d3e6500" id="d3e6500">〈 232
 Declare ep:parse-forest-map() function 〉 (for version
 <em>v0.2</em>) ≡</a></span>
 <pre class=
@@ -10884,7 +10980,7 @@ declare function ep:parse-forest-map(
 186</a> 〉</span></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e6479" id="d3e6479">〈 233
+<div class="scrap"><span><a name="d3e6506" id="d3e6506">〈 233
 Declare ep:alltrees() function 〉 (for version <em>v0.2</em>)
 ≡</a></span>
 <pre class=
@@ -10910,7 +11006,7 @@ the code embeds some false assumptions about what that function
 does. Rather than unsnarl those assumptions, I rewrote things to
 use options, rather than higher-level functions, to control what
 gets returned (and other things).
-<div class="scrap"><span><a name="d3e6489" id="d3e6489">〈 234
+<div class="scrap"><span><a name="d3e6516" id="d3e6516">〈 234
 Define earley-parse() 〉 (for version <em>v0.2</em>) ≡</a></span>
 <pre class=
 "scrapbody">(: ******************************************************
@@ -11108,7 +11204,7 @@ then
 </div>
 <div class="div">
 <h2><a class="selflink" name="indices" id="indices" href=
-"#indices">F.</a> Indices</h2>
+"#indices">G.</a> Indices</h2>
 <div>
 <h2>Index of file names</h2>
 <ul>
@@ -11194,23 +11290,23 @@ parse-forest-grammar 194</a></li>
 103</a></li>
 <li><a href="#ep-alltrees">Declare ep:all-trees() function
 183</a></li>
-<li><a href="#d3e6455">Declare ep:alltrees() function (v. v0.2)
+<li><a href="#d3e6482">Declare ep:alltrees() function (v. v0.2)
 229</a></li>
-<li><a href="#d3e6479">Declare ep:alltrees() function (v. v0.2)
+<li><a href="#d3e6506">Declare ep:alltrees() function (v. v0.2)
 233</a></li>
 <li><a href="#ep-anytree">Declare ep:any-tree() function
 184</a></li>
-<li><a href="#d3e6460">Declare ep:anytree() function (v. v0.2)
+<li><a href="#d3e6487">Declare ep:anytree() function (v. v0.2)
 230</a></li>
 <li><a href="#ep-parse-forest-grammar">Declare
 ep:parse-forest-grammar() function 187</a></li>
 <li><a href="#ep-parse-forest-map">Declare ep:parse-forest-map()
 function 186</a></li>
-<li><a href="#d3e6473">Declare ep:parse-forest-map() function (v.
+<li><a href="#d3e6500">Declare ep:parse-forest-map() function (v.
 v0.2) 232</a></li>
 <li><a href="#ep-tree-cursor">Declare ep:tree-cursor() function
 185</a></li>
-<li><a href="#d3e6466">Declare ep:tree-cursor() function (v. v0.2)
+<li><a href="#d3e6493">Declare ep:tree-cursor() function (v. v0.2)
 231</a></li>
 <li><a href="#epi-all-node-sequences">Define all-node-sequences()
 207</a></li>
@@ -11247,7 +11343,7 @@ $accumulator, $I, $G) 129</a></li>
 <li><a href="#d3e3810">Define earley-closure($pending,
 $accumulator, $I, $G) 133</a></li>
 <li><a href="#epi-earley-parse">Define earley-parse() 188</a></li>
-<li><a href="#d3e6489">Define earley-parse() (v. v0.2) 234</a></li>
+<li><a href="#d3e6516">Define earley-parse() (v. v0.2) 234</a></li>
 <li><a href="#eri-make-p-p-r-ri">Define eiMakePPRRi() 118</a></li>
 <li><a href="#d3e3555">Define eiMakePPT() 119</a></li>
 <li><a href="#epi-elXpt">Define elementXpt() to make AST for one

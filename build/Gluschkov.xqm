@@ -16,6 +16,9 @@ at "Earley-rec-internals.xqm";
 declare namespace follow =
 "http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
 
+declare namespace ap = 
+"http://blackmesatech.com/2019/iXML/Aparecium";
+
 declare variable $gl:follow-ns :=
 "http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
 
@@ -351,10 +354,29 @@ then let $gi := name($E)
     }
 
   else if ($E/self::option or $E/self::sep)
-then <error>Element {name($E)} with unexpected content: {$E}</error>
+then element ap:error {
+       attribute id {"ap:tbd35"},
+       element desc {
+         "Element {name($E)} with unexpected content:"
+       },
+       $E
+     }
 else if ($E/(self::repeat1 or self::repeat0))
-then <error>Element {name($E)} with unexpected content: {$E}</error>
-else <error>Unexpected element {$E}</error>
+then element ap:error {
+       attribute id {"ap:tbd36"},
+       element desc {
+         "Element {name($E)} with unexpected content:"
+       },
+       $E
+     }
+else element ap:error {
+       attribute id {"ap:tbd37"},
+       element desc {
+         "Element {name($E)} was unexpected:"
+       },
+       $E
+     }
+
 };
 
 declare function gl:merge(

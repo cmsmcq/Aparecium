@@ -378,7 +378,8 @@ declare function t:test-grammar(
                     }
         else if ($e0/self::tc:assert-xml/ixml)
         then $e0/ixml
-        else $e0 (: assert-not-a-{grammar,sentence} :)
+        else $e0 (: assert-not-a-{grammar,sentence}
+                    or assert-dynamic-error :)
 
   
   return element tc:grammar-result {
@@ -778,16 +779,18 @@ declare function t:run-test-case(
                 $kwE := $options/@files-on-failure,
                 $fn  := $test-case-ID || '.expected.xml'
 
-            return 
-            if ($result eq 'fail')
+            return if ($expectations
+                      [self::tc:assert-not-a-sentence
+                      or
+                      self::tc:assert-not-a-grammar
+                      or
+                      self::tc:assert-dynamic-error
+                      ])
+            then $expectations
+ 
+            else if ($result eq 'fail')
 
-            then if ($expectations
-                     [self::tc:assert-not-a-sentence
-                     or
-                     self::tc:assert-not-a-grammar])
-                 then $expectations
-
-                 else ( 
+            then ( 
                       if ($kwD = ('inline',
                                   'inline-if-short'))
                       then element tc:assert-xml {
@@ -807,9 +810,9 @@ declare function t:run-test-case(
                               )
                             }
                       else () (: unknown option, bag it :)
-                      )
+                 )
 
-            else () (: $result ne 'fail' :)            
+            else element tc:assert-xml { "..." } (: $result ne 'fail' :)            
 ,
               
             let $kwD := $options/@reported-result,

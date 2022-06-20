@@ -308,8 +308,16 @@ declare function aparecium:grammar-ok(
         attribute id { "ap:tbd09" },
         "Unexpected " || $e/name() 
         || " element as child of rule."
-      }
+      },
 
+      let $le0 := $G/rule/descendant::insertion
+      for $e in $le0 
+      return element aparecium:error {
+        attribute id { "ap:tbd38" },
+        "Sorry!  Aparecium does not currently support "
+        || "grammars with insertions."
+      }
+      
   )
       
 
@@ -403,21 +411,24 @@ declare function aparecium:grammar-ok(
                   }
       return         if ($int eq -1)
         then element aparecium:error {
-             attribute id { "ixml:S07" },
+             attribute id { "ap:tbd18" },
+             attribute code { "ixml:S07" },
              "Hex value ", $hexstring, 
              "in the definition of", $nt, 
              "is too large. Entirely too large."
 	} 
         else if ($int eq -2)
         then element aparecium:error {
-             attribute id { "ixml:S08" },
+             attribute id { "ap:tbd19" },
+             attribute code { "ixml:S08" },
              "Hex value ", $hexstring, 
              "in the definition of", $nt, 
              "cannot be converted to an integer."
         } 
         else if ($int lt 0 or $int gt 1114111)
         then element aparecium:error {
-             attribute id { "ixml:S07" },
+             attribute id { "ap:tbd26" },
+             attribute code { "ixml:S07" },
              "Hex value ", $hexstring, 
              "( = ", string($int), ")", 
              "in the definition of", $nt,
@@ -427,7 +438,8 @@ declare function aparecium:grammar-ok(
         else if ($int ge 55296 and $int le 57343)
               (: xD800 to xDFFFF :)
         then element aparecium:error {
-             attribute id { "ixml:S08" },
+             attribute id { "ap:tbd27" },
+             attribute code { "ixml:S08" },
              "Hex value ", $hexstring, 
              "( = ", string($int), ")", 
              "in the definition of", $nt,
@@ -437,7 +449,8 @@ declare function aparecium:grammar-ok(
         else if (ends-with(upper-case($hexstring), 'FFFF')
              or  ends-with(upper-case($hexstring), 'FFFE'))
         then element aparecium:error {
-             attribute id { "ixml:S08" },
+             attribute id { "ap:tbd28" },
+             attribute code { "ixml:S08" },
              "Hex value ", $hexstring, 
              "( = ", string($int), ")", 
              "in the definition of", $nt,
@@ -459,14 +472,15 @@ declare function aparecium:grammar-ok(
                     else d2x:x2d(substring($ref/@to, 2))
       return if ($cp-to lt $cp-from)
       then element aparecium:error {
-           attribute id { "ixml:S09" },
+           attribute id { "ap:tbd29" },
+           attribute code { "ixml:S09" },
            "Range", 
            $ref/@from/string(), '-', $ref/@to/string(),
            '(=', $cp-from, '-', $cp-to, ")",
            "in the definition of",
            $nt || " is not a good range.",
            "(The end of the range must",
-           "be higher than the beginning." 
+           "be higher than the beginning.)" 
       }
       else ()
   )
@@ -478,6 +492,7 @@ declare function aparecium:grammar-ok(
       return if (empty($G/rule[@name eq $nt]))
       then element aparecium:error {
         attribute id { "ap:tbd13" },
+        attribute code { "ixml:S02" },
         $nt || " is referred to but not defined." 
       }
       else ()

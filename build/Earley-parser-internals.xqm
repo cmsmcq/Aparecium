@@ -152,7 +152,7 @@ declare function epi:earley-parse(
                     else '...'
              )
   return     
-  <no-parse xmlns:ixml="http://invisiblexml.org/NS" ixml:state="failed">
+  <ap:no-parse xmlns:ixml="http://invisiblexml.org/NS" ixml:state="failed">
     <p>Sorry, no parse for this string and grammar.</p>
     <p>The parser gave up at character {$high-water}:
         parsing succeeded up through <q>{
@@ -188,7 +188,7 @@ declare function epi:earley-parse(
     <grammar>{(: 'Omitted.' :) $mapResult('Grammar') }</grammar>
     </dump>
     else ()
-  }</no-parse>
+  }</ap:no-parse>
 
 
   let $leResults := if ( ($G/prolog/version/@string
@@ -320,6 +320,7 @@ declare function epi:parse-forest-grammar(
     (: if we got an error back, pass it along :)
         if ($rules/self::ap:error)
     then element ap:error {
+           attribute id { "ap:tbd30" },
            element comment {
              "Failure generating PFG. ",
              "Sorry!" 
@@ -399,7 +400,7 @@ declare function epi:make-pfg-rules(
                    if (empty($walks))
                    then element ap:error {
 		     attribute id { "ap:tbd21" },
-                     element p { "make-pfg-rules here." },
+                     element p { "In make-pfg-rules, " },
                      element p { "find-walks() failed." },
                      element p { "Here is what I know." },
                      element dump { 
@@ -641,8 +642,8 @@ declare function epi:rhs-from-walk(
   else 
 let $dummy := eri:trace($w('item'), 'rhs-from-walk:  item fell through!') return
        element ap:error {
-           attribute id { "ap:tbd22" },
-           element p { 'Unexpected failure 83' },
+           attribute id { "ap:tbd25" },
+           element p { 'Unexpected disaster 83' },
            $acc,
            $w?state
        }
@@ -706,7 +707,8 @@ declare function epi:tree-from-pfg(
                        /descendant-or-self::ap:error))
                     then element ap:error {
                            attribute ixml:state { "failed" },
-                           attribute id { "ixml:D01" },
+                           attribute id { "ap:tbd31" },
+                           attribute code { "ixml:D01" },
                            attribute ap:desc { "Dynamic error: ill-formed output" },
                            $tree0
                          }
@@ -812,7 +814,8 @@ let $dummy := eri:notrace(count($lnAdups), 'Of these some are dups: ')
                    return ($lnAok,
 		       for $n in $lnAdups
                        return element ap:error {
-                          attribute id { "ixml:D02" },
+                          attribute id { "ap:tbd32" },
+                          attribute code { "ixml:D02" },
                           $n,
                           "Dynamic error: Duplicate attribute name"
                        })
@@ -871,7 +874,8 @@ let $dummy := eri:notrace(count($lnAdups), 'Of these some are dups: ')
           else if (($nodetype = ('element'))
                  and ($mark = ('@')))
           then element ap:error {
-                 attribute id { "ixml:D05" },
+                 attribute id { "ap:tbd33" },
+                 attribute code { "ixml:D05" },
                  attribute ap:desc {
                    "Attribute cannot be root.",
                    if ($nm ne $nm0)
@@ -1139,7 +1143,8 @@ declare function epi:astXparsetree(
 ) as node()* {
   if (empty($E/nt)) 
   then
-      element error {
+      element ap:error {
+          attribute id { "ap:tbd24" },
           text {
               "Parse tree had wrapper",
               "but no content."

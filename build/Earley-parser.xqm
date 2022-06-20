@@ -6,7 +6,10 @@ module namespace ep =
 import module namespace epi =
 "http://blackmesatech.com/2019/iXML/Earley-parser-internals"
 at "Earley-parser-internals.xqm";
-  
+
+declare namespace ap = 
+"http://blackmesatech.com/2019/iXML/Aparecium";
+
 
 (: Goal:  to return the set of parse trees recorded implicitly in the
    Earley closure.
@@ -34,14 +37,27 @@ declare function ep:any-tree(
   $I as item() (: INPUT :),
   $G as item() (: GRAMMAR :)
 ) as element()? {
-  epi:earley-parse($I, $G, 
-      map { 'return': 'any-tree',
-            'tree-count': 1,
-            'ambiguity-test': true(),
-            'failure-dump': 'closure',
-            'tree-constructor': 'pfg'
-      }
-  )
+  let $result := epi:earley-parse($I, $G, 
+                    map { 'return': 'any-tree',
+                          'tree-count': 1,
+                          'ambiguity-test': true(),
+                          'failure-dump': 'closure',
+                          'tree-constructor': 'pfg'
+                        }
+                 )
+  return if (count($result) eq 1) 
+         then $result
+         else if (empty($result))
+         then element ap:error {
+           attribute id { "ap:tbd23" },
+           "Earley-parse returned nothing." 
+	 }
+         else element ap:error {
+           attribute id { "ap:tbd34" },
+           attribute code { "ixml:D06" },
+           element ap:desc { "No root element." },
+           $result
+	 }
 };
 
 
