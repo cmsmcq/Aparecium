@@ -485,7 +485,11 @@ indexing into the list.  It's easy to change the index.
       &lt;catalog n="ixml-error"
 	       path="{$invdir}error/test-catalog.xml"/&gt;
       &lt;catalog n="ixml-hygiene"
-	       path="{$invdir}hygiene/test-catalog.xml"/&gt;
+	       path="{$invdir}grammar-misc/test-catalog.xml"/&gt;
+      &lt;catalog n="ixml-prolog"
+	       path="{$invdir}grammar-misc/test-catalog.xml"/&gt;
+      &lt;catalog n="ixml-insertion"
+	       path="{$invdir}grammar-misc/test-catalog.xml"/&gt;
 
       &lt;!-- ixml-ixml is slow --&gt;
       &lt;catalog n="ixml-ixml"
@@ -1305,8 +1309,10 @@ grammar is actually an &lt;<em>ixml</em>&gt; element.[<a name="ref-to-d3e656" hr
 
 </div>
 
-<div class="Real-P">We also check to make sure that we actually passed
-the grammar test.
+<div class="Real-P">We could also check to make sure that we actually passed
+the grammar test.  Indeed, we did so at one point.  But
+that is really orthogonal to whether we have a grammar to
+work with.
 <div class="scrap"><span><a name="d3e669">&#x3008; 34 If we failed the grammar test, stop now [continues <a href="#lib-rts-abort">32 If grammar is bad, stop now</a>]  &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">    else if ($grammar-test-result/@result ne 'pass')
     then element tc:description {

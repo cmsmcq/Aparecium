@@ -554,7 +554,11 @@ List of available test-catalog files [continues</a> <a href=
       &lt;catalog n="ixml-error"
                path="{$invdir}error/test-catalog.xml"/&gt;
       &lt;catalog n="ixml-hygiene"
-               path="{$invdir}hygiene/test-catalog.xml"/&gt;
+               path="{$invdir}grammar-misc/test-catalog.xml"/&gt;
+      &lt;catalog n="ixml-prolog"
+               path="{$invdir}grammar-misc/test-catalog.xml"/&gt;
+      &lt;catalog n="ixml-insertion"
+               path="{$invdir}grammar-misc/test-catalog.xml"/&gt;
 
       &lt;!-- ixml-ixml is slow --&gt;
       &lt;catalog n="ixml-ixml"
@@ -1437,8 +1441,10 @@ grammar is not good, stop now [continues</a> <a href=
          )
 </pre></div>
 </div>
-<div class="Real-P">We also check to make sure that we actually
-passed the grammar test.
+<div class="Real-P">We could also check to make sure that we
+actually passed the grammar test. Indeed, we did so at one point.
+But that is really orthogonal to whether we have a grammar to work
+with.
 <div class="scrap"><span><a name="d3e669" id="d3e669">〈 34 If we
 failed the grammar test, stop now [continues</a> <a href=
 "#lib-rts-abort">32 If grammar is bad, stop now</a>] 〉 ≡</span>

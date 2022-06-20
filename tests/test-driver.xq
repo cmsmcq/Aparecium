@@ -97,7 +97,11 @@ let $invdir := "../../cmsmcq-ixml/tests/",
       <catalog n="ixml-error"
 	       path="{$invdir}error/test-catalog.xml"/>
       <catalog n="ixml-hygiene"
-	       path="{$invdir}hygiene/test-catalog.xml"/>
+	       path="{$invdir}grammar-misc/test-catalog.xml"/>
+      <catalog n="ixml-prolog"
+	       path="{$invdir}grammar-misc/test-catalog.xml"/>
+      <catalog n="ixml-insertion"
+	       path="{$invdir}grammar-misc/test-catalog.xml"/>
 
       <!-- ixml-ixml is slow -->
       <catalog n="ixml-ixml"

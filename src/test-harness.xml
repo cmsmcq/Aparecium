@@ -380,7 +380,11 @@ indexing into the list.  It's easy to change the index.
       &lt;catalog n="ixml-error"
 	       path="{$invdir}error/test-catalog.xml"/>
       &lt;catalog n="ixml-hygiene"
-	       path="{$invdir}hygiene/test-catalog.xml"/>
+	       path="{$invdir}grammar-misc/test-catalog.xml"/>
+      &lt;catalog n="ixml-prolog"
+	       path="{$invdir}grammar-misc/test-catalog.xml"/>
+      &lt;catalog n="ixml-insertion"
+	       path="{$invdir}grammar-misc/test-catalog.xml"/>
 
       &lt;!-- ixml-ixml is slow -->
       &lt;catalog n="ixml-ixml"
