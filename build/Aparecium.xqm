@@ -324,16 +324,23 @@ declare function aparecium:grammar-ok(
           $rmarks := distinct-values(
 	      for $ref in $references
               return string($ref/@mark)
-          )
-      where (( ($mark = ('^', '@', ''))
+          ),
+          $is-hidden := (( ($mark = ('^', '@', ''))
                and ($rmarks = ('^', '@', '')) )
             or ( ($mark eq '-')
                and ($rmarks = ('^', '@')) ))
-      return element aparecium:error {
+      return if ($is-hidden)
+          then element aparecium:error {
+               attribute id { "ap:tbd22" },
+               $nt || " is not allowed as an XML name."
+               || " Aparecium does not support nonterminals"
+               || " which are not XML names, even when hidden."
+          }
+          else element aparecium:error {
                attribute id { "ap:tbd11" },
                $nt || " is not allowed as an XML name."
                || " It must be marked as hidden."
-             }
+          }
   ) 
 
     let $lee-uniqdef := (

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '6 June 2022' >
+<!ENTITY date.last.touched '19 June 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
@@ -2219,8 +2219,8 @@ desired, since the mark is ignored.  In this case,
 Aparecium will flag an error even though the dynamic
 error case cannot arise.</p>
 <p>Somehow, this does not worry me much.</p></note>
-<scrap id="ap-grok-names"
-       name="Check for non-XML names">
+<scrap id="ap-grok-names-conformance"
+       name="Check for non-XML names (strict conformance)">
   let $lee-names := (
       for $r in $G/rule
                 [not(@name castable as xs:NCName)]
@@ -2241,7 +2241,51 @@ error case cannot arise.</p>
                || " It must be marked as hidden."
              }
   ) 
+</scrap></p>
+<p>The only problem with the code just given is that
+when Aparecium compiles a grammar it adds attributes in
+which nonterminal symbols are used as NCNames.  So in fact
+we need to signal an error on <emph>all</emph> non-NCName
+nonterminals, not just those which are not hidden.
+<scrap id="ap-grok-names"
+       name="Check for non-XML names">
+  let $lee-names := (
+      for $r in $G/rule
+                [not(@name castable as xs:NCName)]
+      let $nt := $r/@name/string(),
+          $mark := string($r/@mark),
+          $references := $G//nonterminal[@name eq $nt],
+          $rmarks := distinct-values(
+	      for $ref in $references
+              return string($ref/@mark)
+          ),
+          $is-hidden := (( ($mark = ('^', '@', ''))
+               and ($rmarks = ('^', '@', '')) )
+            or ( ($mark eq '-')
+               and ($rmarks = ('^', '@')) ))
+      return if ($is-hidden)
+          then element aparecium:error {
+               attribute id { "ap:tbd22" },
+               $nt || " is not allowed as an XML name."
+               || " Aparecium does not support nonterminals"
+               || " which are not XML names, even when hidden."
+          }
+          else element aparecium:error {
+               attribute id { "ap:tbd11" },
+               $nt || " is not allowed as an XML name."
+               || " It must be marked as hidden."
+          }
+  ) 
 </scrap>
+This is stricter than is warranted by the spec, so it's non-conforming
+behavior.  It can be changed to conformant behavior only when
+the form of compiled grammars is changed.<note place="foot">
+<p>Two possible changes would allow Aparecium to be more conformant on
+this point: (1) using <gi>follow:info</gi> elements with
+<att>state</att> and <att>follow</att> attributes instead of
+<att>follow:nt</att> attributes, or (2) representing the compiled
+grammar as a map, not an XML document.</p>
+</note>
 </p>
 
 </div>
