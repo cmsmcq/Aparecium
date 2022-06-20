@@ -197,10 +197,19 @@ declare function epi:earley-parse(
       else for $item in $leResults0
            return if ($item instance of element())
            then element {name($item)} {
-                  ($item/@* except $item/@ixml:state),
+                  ($item/@* except 
+                    ($item/@ixml:state,
+                     $item/@ap:version-string,
+                     $item/@ap:version-used)),
                   attribute ixml:state {
                     $item/@ixml:state/string(),
                     'version-mismatch'
+                  },
+                  attribute ap:version-string {
+                    string($G/prolog/version/@string)
+                  },
+                  attribute ap:version-used {
+                    "1.0"
                   },
                   $item/child::node()
                 }
@@ -369,10 +378,10 @@ declare function epi:make-pfg-rules(
                 )
 
    let $dummy := if (count($walks) gt 1)
-                 then (eri:trace(count($walks), 'Find-walks found # walks'
+                 then (eri:notrace(count($walks), 'Find-walks found # walks'
                        || ' for ' || eri:sXei($ei)),
                      for $w at $walknum in $walks 
-                     return eri:trace($w, 'Walk no. ' || $walknum || ' is:'))
+                     return eri:notrace($w, 'Walk no. ' || $walknum || ' is:'))
                  else ()
 
     let $rule := element rule {

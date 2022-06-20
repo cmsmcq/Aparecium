@@ -831,21 +831,21 @@ declare namespace map =
 <span class="scrapref">〈 <em class="scrapptr"><a href=
 "#epi-earley-parse">Define earley-parse() 187</a></em> 〉</span>
 <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-all-trees">Define all-trees() 199</a></em> 〉</span>
+"#epi-all-trees">Define all-trees() 198</a></em> 〉</span>
 <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-any-tree">Define any-tree() 204</a></em> 〉</span>
+"#epi-any-tree">Define any-tree() 203</a></em> 〉</span>
 <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-tree-cursor">Define tree-cursor() 205</a></em> 〉</span>
+"#epi-tree-cursor">Define tree-cursor() 204</a></em> 〉</span>
 <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-parse-forest-map">Define parse-forest-map() 206</a></em> 〉</span>
+"#epi-parse-forest-map">Define parse-forest-map() 205</a></em> 〉</span>
 <span class="scrapref">〈 <em class="scrapptr"><a href=
 "#epi-parse-forest-grammar">Define parse-forest-grammar() 72</a></em> 〉</span>
 <span class="scrapref">〈 <em class="scrapptr"><a href=
 "#epi-tree-from-pfg">The epi:tree-from-pfg() function 96</a></em> 〉</span>
 <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-all-node-sequences">Define all-node-sequences() 207</a></em> 〉</span>
+"#epi-all-node-sequences">Define all-node-sequences() 206</a></em> 〉</span>
 <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-astXparsetree">Define astXparsetree() to make AST from raw parse 222</a></em> 〉</span></pre></div>
+"#epi-astXparsetree">Define astXparsetree() to make AST from raw parse 221</a></em> 〉</span></pre></div>
 </div>
 </div>
 <div class="div">
@@ -4162,10 +4162,10 @@ $ei 〉 ≡</a></span>
                 )
 
    let $dummy := if (count($walks) gt 1)
-                 then (eri:trace(count($walks), 'Find-walks found # walks'
+                 then (eri:notrace(count($walks), 'Find-walks found # walks'
                        || ' for ' || eri:sXei($ei)),
                      for $w at $walknum in $walks 
-                     return eri:trace($w, 'Walk no. ' || $walknum || ' is:'))
+                     return eri:notrace($w, 'Walk no. ' || $walknum || ' is:'))
                  else ()
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
@@ -8148,7 +8148,7 @@ declare function ep:all-trees(
 
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6441">Declare ep:alltrees() function (v. v0.2) 229</a>
+<a href="#d3e6432">Declare ep:alltrees() function (v. v0.2) 228</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#d3e4449">[File Earley-parser.xqm] 181</a>
 〉<br /></span></div>
@@ -8176,7 +8176,7 @@ declare function ep:any-tree(
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6446">Declare ep:anytree() function (v. v0.2) 230</a>
+<a href="#d3e6437">Declare ep:anytree() function (v. v0.2) 229</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#d3e4449">[File Earley-parser.xqm] 181</a>
 〉<br /></span></div>
@@ -8206,8 +8206,8 @@ there-were-no-trees from all-done-now signals.
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6452">Declare ep:tree-cursor() function (v. v0.2)
-231</a> 〉<br /></span> <span class="scrapinbound">This code is used
+<a href="#d3e6443">Declare ep:tree-cursor() function (v. v0.2)
+230</a> 〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#d3e4449">[File Earley-parser.xqm] 181</a>
 〉<br /></span></div>
 </div>
@@ -8236,8 +8236,8 @@ declare function ep:parse-forest-map(
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6459">Declare ep:parse-forest-map() function (v. v0.2)
-232</a> 〉<br /></span> <span class="scrapinbound">This code is used
+<a href="#d3e6450">Declare ep:parse-forest-map() function (v. v0.2)
+231</a> 〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#d3e4449">[File Earley-parser.xqm] 181</a>
 〉<br /></span></div>
 </div>
@@ -8264,7 +8264,7 @@ declare function ep:parse-forest-grammar(
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6465">Declare ep:alltrees() function (v. v0.2) 233</a>
+<a href="#d3e6456">Declare ep:alltrees() function (v. v0.2) 232</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#d3e4449">[File Earley-parser.xqm] 181</a>
 〉<br /></span></div>
@@ -8412,7 +8412,7 @@ declare function epi:earley-parse(
 };
 </pre>
 <span class="scrapinbound">Other versions of this code are in 〈
-<a href="#d3e6471">Define earley-parse() (v. v0.2) 234</a>
+<a href="#d3e6462">Define earley-parse() (v. v0.2) 233</a>
 〉<br /></span> <span class="scrapinbound">This code is used in 〈
 <a href="#d3e389">[File Earley-parser-internals.xqm] 4</a>
 〉<br /></span></div>
@@ -8748,8 +8748,7 @@ string other than “<tt>1.0</tt>”, we should inject an
 <em>ixml:state</em> attribute, then we add the
 <tt>version-mismatch</tt> token to its value.</div>
 <div class="Real-P">We do this by checking the results, before we
-return them.</div>
-<div class="Real-P">Er, this fails.
+return them.
 <div class="scrap"><span><a name="epi-ep-versioncheck" id=
 "epi-ep-versioncheck">〈 197 Check results for version mismatch 〉
 ≡</a></span>
@@ -8759,10 +8758,19 @@ return them.</div>
       else for $item in $leResults0
            return if ($item instance of element())
            then element {name($item)} {
-                  ($item/@* except $item/@ixml:state),
+                  ($item/@* except 
+                    ($item/@ixml:state,
+                     $item/@ap:version-string,
+                     $item/@ap:version-used)),
                   attribute ixml:state {
                     $item/@ixml:state/string(),
                     'version-mismatch'
+                  },
+                  attribute ap:version-string {
+                    string($G/prolog/version/@string)
+                  },
+                  attribute ap:version-used {
+                    "1.0"
                   },
                   $item/child::node()
                 }
@@ -8771,31 +8779,6 @@ return them.</div>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#epi-earley-parse">Define earley-parse() 187</a>
 〉<br /></span></div>
-</div>
-<div class="Real-P">The following did not work. Or maybe it would,
-now.
-<div class="scrap"><span><a name="xxx-epi-ep-versioncheck" id=
-"xxx-epi-ep-versioncheck">〈 198 Check results for version mismatch
-〉 ≡</a></span>
-<pre class="scrapbody">if ( ($G/prolog/version/@string
-           /string(), "1.0")[1] eq "1.0")
-      then $leResults0
-      else for $item in $leResults0
-           return typeswitch ($item)
-             case element() 
-                  return element {name($item)} {
-                    ($item/@* 
-                      except $item/@ixml:state),
-                    attribute ixml:state {
-                      $item/@ixml:state/string(),
-                      'version-mismatch'
-                    },
-                    $item/child::node()
-                  }
-             default return $item
-             </pre>
-<span class="scrapinbound">This code is not used
-elsewhere.<br /></span></div>
 </div>
 </div>
 </div>
@@ -8837,7 +8820,7 @@ nonterminal <tt>$n</tt>.</div>
 stack (to prevent looping on infinite sets of trees with unbounded
 vertical depth) and calls an auxiliary function to do the work.
 <div class="scrap"><span><a name="epi-all-trees" id=
-"epi-all-trees">〈 199 Define all-trees() 〉 ≡</a></span>
+"epi-all-trees">〈 198 Define all-trees() 〉 ≡</a></span>
 <pre class=
 "scrapbody">(: ******************************************************
    all-trees($Closure, $Ec, $I, $G):  
@@ -8857,8 +8840,8 @@ declare function epi:all-trees(
 };
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e4853">Define auxiliary function for all-trees()
-200</a>〉<br /></span> <span class="scrapinbound">This code is used
+"#d3e4844">Define auxiliary function for all-trees()
+199</a>〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#d3e389">[File Earley-parser-internals.xqm] 4</a>
 〉<br /></span></div>
 </div>
@@ -8866,9 +8849,9 @@ in 〈 <a href="#d3e389">[File Earley-parser-internals.xqm] 4</a>
 is initially called for the item (0 $n Goal $q_final), but it's
 called again recursively, once for every completion relevant to the
 tree(s) we are constructing.
-<div class="scrap"><span><a name="d3e4853" id="d3e4853">〈 200
+<div class="scrap"><span><a name="d3e4844" id="d3e4844">〈 199
 Define auxiliary function for all-trees() [continues</a> <a href=
-"#epi-all-trees">199 Define all-trees()</a>] 〉 ≡</span>
+"#epi-all-trees">198 Define all-trees()</a>] 〉 ≡</span>
 <pre class=
 "scrapbody">(: ******************************************************
    all-trees#5:  auxiliary function (more args, does the 
@@ -8885,18 +8868,18 @@ declare function epi:all-trees(
   (: $G as element(ixml) :)
 ) as element()* {
   <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-all-trees-for">Iterate over the list of completion items 201</a></em> 〉</span>
+"#epi-all-trees-for">Iterate over the list of completion items 200</a></em> 〉</span>
   <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-all-trees-call-ans">Get the sequences, or rather raw parse trees 202</a></em> 〉</span>
+"#epi-all-trees-call-ans">Get the sequences, or rather raw parse trees 201</a></em> 〉</span>
   <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-all-trees-return-trees">Return the raw parse trees 203</a></em> 〉</span>
+"#epi-all-trees-return-trees">Return the raw parse trees 202</a></em> 〉</span>
 }; 
 </pre></div>
 </div>
 <div class="Real-P">For every original completion item in
 <tt>$leiCompletions</tt>, return parse trees for its nonterminal.
 <div class="scrap"><span><a name="epi-all-trees-for" id=
-"epi-all-trees-for">〈 201 Iterate over the list of completion items
+"epi-all-trees-for">〈 200 Iterate over the list of completion items
 〉 ≡</a></span>
 <pre class="scrapbody">  for $Ec at $nEc in $leiCompletions
              [not(
@@ -8911,7 +8894,7 @@ declare function epi:all-trees(
   )
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#d3e4853">Define auxiliary function for all-trees() 200</a>
+"#d3e4844">Define auxiliary function for all-trees() 199</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">Here, <tt>$Ec</tt> is the completion item for a
@@ -8933,7 +8916,7 @@ will wrap them up in elements (of type &lt;<em>nt</em>&gt;). So in
 fact when we get the sequences back, they will already be wrapped
 up in the element; all we need to do is return them.
 <div class="scrap"><span><a name="epi-all-trees-call-ans" id=
-"epi-all-trees-call-ans">〈 202 Get the sequences, or rather raw
+"epi-all-trees-call-ans">〈 201 Get the sequences, or rather raw
 parse trees 〉 ≡</a></span>
 <pre class="scrapbody">  let $parsetrees := epi:all-node-sequences(
     $Ec,
@@ -8946,12 +8929,12 @@ parse trees 〉 ≡</a></span>
     ()
   )</pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#d3e4853">Define auxiliary function for all-trees() 200</a>
+"#d3e4844">Define auxiliary function for all-trees() 199</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">Once we get the trees, we just return them.
 <div class="scrap"><span><a name="epi-all-trees-return-trees" id=
-"epi-all-trees-return-trees">〈 203 Return the raw parse trees 〉
+"epi-all-trees-return-trees">〈 202 Return the raw parse trees 〉
 ≡</a></span>
 <pre class="scrapbody">  for $parsetree in $parsetrees
   let $dummy := eri:notrace($parsetree,
@@ -8959,7 +8942,7 @@ parse trees 〉 ≡</a></span>
   return $parsetree 
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#d3e4853">Define auxiliary function for all-trees() 200</a>
+"#d3e4844">Define auxiliary function for all-trees() 199</a>
 〉<br /></span></div>
 </div>
 </div>
@@ -8974,7 +8957,7 @@ function</h5>
 <div class="Real-P">If the user wants an arbitrary tree -- well,
 for now they are out of luck.
 <div class="scrap"><span><a name="epi-any-tree" id="epi-any-tree">〈
-204 Define any-tree() 〉 ≡</a></span>
+203 Define any-tree() 〉 ≡</a></span>
 <pre class="scrapbody">declare function epi:any-tree(
   $leiCompletions as map(*)*,
   $leiClosure as map(*)*,
@@ -9007,7 +8990,7 @@ returned (or a special function that raises a particular error when
 called?).</div>
 <div class="Real-P">But for the moment, this is just a stub.
 <div class="scrap"><span><a name="epi-tree-cursor" id=
-"epi-tree-cursor">〈 205 Define tree-cursor() 〉 ≡</a></span>
+"epi-tree-cursor">〈 204 Define tree-cursor() 〉 ≡</a></span>
 <pre class="scrapbody">declare function epi:tree-cursor(
   $leiCompletions as map(*)*,
   $leiClosure as map(*)*,
@@ -9034,7 +9017,7 @@ the form of parse forests. One is a function which when completed
 should return a parse-forest map, that is a data structure with a
 directed graph containing all parse trees as sub-graphs.
 <div class="scrap"><span><a name="epi-parse-forest-map" id=
-"epi-parse-forest-map">〈 206 Define parse-forest-map() 〉
+"epi-parse-forest-map">〈 205 Define parse-forest-map() 〉
 ≡</a></span>
 <pre class="scrapbody">declare function epi:parse-forest-map(
   $leiCompletions as map(*)*,
@@ -9148,7 +9131,7 @@ string value is the input substring <tt>$from</tt> .. <tt>$to</tt>,
 and whose children are the concatenation of (a) the children found
 by the recursive call, with (b) those in the accumulator.
 <div class="scrap"><span><a name="epi-all-node-sequences" id=
-"epi-all-node-sequences">〈 207 Define all-node-sequences() 〉
+"epi-all-node-sequences">〈 206 Define all-node-sequences() 〉
 ≡</a></span>
 <pre class=
 "scrapbody">(: ******************************************************
@@ -9174,11 +9157,11 @@ declare function epi:all-node-sequences(
     'all-node-seqs (0) called with Ecur:')
   return 
   <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-ans-loopcheck">Check for loops, which mean infinite ambiguity 208</a></em> 〉</span>
+"#epi-ans-loopcheck">Check for loops, which mean infinite ambiguity 207</a></em> 〉</span>
   <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-ans-basecase">Handle base case:  current item is initial 209</a></em> 〉</span>
+"#epi-ans-basecase">Handle base case:  current item is initial 208</a></em> 〉</span>
   <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-ans-recursive">Handle recursive case 212</a></em> 〉</span>  
+"#epi-ans-recursive">Handle recursive case 211</a></em> 〉</span>  
 };
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
@@ -9190,7 +9173,7 @@ whether we have already dealt with this item, in this sequence of
 nodes. If we have, then we are looking at a sentence with an
 infinite number of parse trees, and we need to snip the loop.
 <div class="scrap"><span><a name="epi-ans-loopcheck" id=
-"epi-ans-loopcheck">〈 208 Check for loops, which mean infinite
+"epi-ans-loopcheck">〈 207 Check for loops, which mean infinite
 ambiguity 〉 ≡</a></span>
 <pre class=
 "scrapbody">  (: 1. Before anything else, loop detection:  have we already 
@@ -9202,7 +9185,7 @@ ambiguity 〉 ≡</a></span>
        return ()
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#epi-all-node-sequences">Define all-node-sequences() 207</a>
+"#epi-all-node-sequences">Define all-node-sequences() 206</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">The base case, on which we terminate because it
@@ -9217,7 +9200,7 @@ along so the caller can convert the element to an attribute, or
 replace it with its children, in a later pass which constructs the
 AST from the raw parse tree.
 <div class="scrap"><span><a name="epi-ans-basecase" id=
-"epi-ans-basecase">〈 209 Handle base case: current item is initial
+"epi-ans-basecase">〈 208 Handle base case: current item is initial
 〉 ≡</a></span>
 <pre class="scrapbody">  (: 2. Base case:  $Ecur is initial. :)
   else if ($Ecur('ri') = 'q0'
@@ -9225,10 +9208,10 @@ AST from the raw parse tree.
       and $Ecur('from') eq $pFrom)
 </pre>
 <span class="scrapcontinuations">Continued in 〈<a href=
-"#d3e5202">Construct an element holding the node sequence
-210</a>〉<br /></span> <span class="scrapinbound">This code is used
+"#d3e5193">Construct an element holding the node sequence
+209</a>〉<br /></span> <span class="scrapinbound">This code is used
 in 〈 <a href="#epi-all-node-sequences">Define all-node-sequences()
-207</a> 〉<br /></span></div>
+206</a> 〉<br /></span></div>
 For a state named q0, from = to should always be true. And for all
 q0, from = $pFrom should also always be true, or should follow from
 the tests made by the caller. But we check anyway. I don't trust
@@ -9241,9 +9224,9 @@ prediction of this nonterminal. We already have a little context
 information in the form of the vertical stack <tt>$leiVStack</tt>,
 the horizontal stack <tt>$leiHStack</tt>, and the node list
 <tt>$lnAcc</tt>. Let's examine the tops of those stacks.</i>
-<div class="scrap"><span><a name="d3e5202" id="d3e5202">〈 210
+<div class="scrap"><span><a name="d3e5193" id="d3e5193">〈 209
 Construct an element holding the node sequence [continues</a>
-<a href="#epi-ans-basecase">209 Handle base case: current item is
+<a href="#epi-ans-basecase">208 Handle base case: current item is
 initial</a>] 〉 ≡</span>
 <pre class="scrapbody">  then 
     let $e := element nt {
@@ -9269,7 +9252,7 @@ initial</a>] 〉 ≡</span>
 this. It used the nonterminal name as the GI for the element, and
 it tried to handle attributes first. Both of those should now be
 handled by the AST constructor.
-<div class="scrap"><span><a name="d3e5208" id="d3e5208">〈 211
+<div class="scrap"><span><a name="d3e5199" id="d3e5199">〈 210
 Construct an element holding the node sequence [continues</a>
 <a href="#epi-ans-basecase-2016"></a>] 〉 ≡</span>
 <pre class="scrapbody">  then 
@@ -9309,7 +9292,7 @@ will first find <tt>$sym</tt>, the nonterminal with an ID of
 <tt>ixml_0</tt> in the rule for <i>Goal</i>. How we look for
 <tt>$eiPrev</tt> depends on what <tt>$sym</tt> is.
 <div class="scrap"><span><a name="epi-ans-recursive" id=
-"epi-ans-recursive">〈 212 Handle recursive case 〉 ≡</a></span>
+"epi-ans-recursive">〈 211 Handle recursive case 〉 ≡</a></span>
 <pre class="scrapbody">  (: 3. Recursive case. :)
   else (: 3. $Ecur('ri') is not a q0 / initial state :)
     (: 3.a some preparation common to T and N alike :)
@@ -9318,13 +9301,13 @@ will first find <tt>$sym</tt>, the nonterminal with an ID of
         $nParent := $Ecur('rule')/@name/string()
     return
       <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-ans-rec-terminal">Handle recursion on terminal 213</a></em> 〉</span>
+"#epi-ans-rec-terminal">Handle recursion on terminal 212</a></em> 〉</span>
       <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-ans-rec-nonterminal">Handle recursion on nonterminal 215</a></em> 〉</span>
+"#epi-ans-rec-nonterminal">Handle recursion on nonterminal 214</a></em> 〉</span>
       <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-ans-rec-whazzat">Raise error if neither terminal nor nonterminal 220</a></em> 〉</span></pre>
+"#epi-ans-rec-whazzat">Raise error if neither terminal nor nonterminal 219</a></em> 〉</span></pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#epi-all-node-sequences">Define all-node-sequences() 207</a>
+"#epi-all-node-sequences">Define all-node-sequences() 206</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">If <tt>$sym</tt> is terminal, then our clue for
@@ -9335,7 +9318,7 @@ more than one, find <em>them</em> (in <tt>$leiPrev</tt>) and then
 recur on each of them, pushing the newly created parse node
 <tt>$textnode</tt> onto the accumulator.
 <div class="scrap"><span><a name="epi-ans-rec-terminal" id=
-"epi-ans-rec-terminal">〈 213 Handle recursion on terminal 〉
+"epi-ans-rec-terminal">〈 212 Handle recursion on terminal 〉
 ≡</a></span>
 <pre class="scrapbody">      (: 3.b current $sym is terminal :)
       if (eri:fTerminal($sym)) then
@@ -9394,14 +9377,14 @@ recur on each of them, pushing the newly created parse node
                                       )
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#epi-ans-recursive">Handle recursive case 212</a>
+"#epi-ans-recursive">Handle recursive case 211</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">The initial version rendered terminals as text
 nodes and not as elements. So it had no place to put a
 <em>tmark</em>.
 <div class="scrap"><span><a name="epi-ans-rec-terminal-2016" id=
-"epi-ans-rec-terminal-2016">〈 214 Handle recursion on terminal 〉
+"epi-ans-rec-terminal-2016">〈 213 Handle recursion on terminal 〉
 ≡</a></span>
 <pre class="scrapbody">      (: 3.b current $sym is terminal :)
       if (eri:fTerminal($sym)) then
@@ -9456,7 +9439,7 @@ should include at least one completion item of the form
 First, just identify this case (and possibly issue a trace
 message).
 <div class="scrap"><span><a name="epi-ans-rec-nonterminal" id=
-"epi-ans-rec-nonterminal">〈 215 Handle recursion on nonterminal 〉
+"epi-ans-rec-nonterminal">〈 214 Handle recursion on nonterminal 〉
 ≡</a></span>
 <pre class="scrapbody">      (: 3.c current $sym is nonterminal :)
       else if ($sym/self::nonterminal) then 
@@ -9465,13 +9448,13 @@ message).
                        || 'trying to unparse nonterminal '
                        || $riCur) 
          <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-ans-recnt-leiprev">Find the child completions for $sym 216</a></em> 〉</span>
+"#epi-ans-recnt-leiprev">Find the child completions for $sym 215</a></em> 〉</span>
          <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-ans-recnt-lnodechild">Find parse trees for the child completions 217</a></em> 〉</span>
+"#epi-ans-recnt-lnodechild">Find parse trees for the child completions 216</a></em> 〉</span>
          <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-ans-recnt-recur">Recur on each predictor 218</a></em> 〉</span></pre>
+"#epi-ans-recnt-recur">Recur on each predictor 217</a></em> 〉</span></pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#epi-ans-recursive">Handle recursive case 212</a>
+"#epi-ans-recursive">Handle recursive case 211</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">Then find all completion items
@@ -9482,7 +9465,7 @@ position. That is, if <tt>$sym</tt> is a RHS reference to
 the closure which (a) has the right <i>to</i>-position and (b) is
 final for the right nonterminal.
 <div class="scrap"><span><a name="epi-ans-recnt-leiprev" id=
-"epi-ans-recnt-leiprev">〈 216 Find the child completions for $sym 〉
+"epi-ans-recnt-leiprev">〈 215 Find the child completions for $sym 〉
 ≡</a></span>
 <pre class=
 "scrapbody">         let $leiPrev := $meiClosure('to')($Ecur('to'))[
@@ -9490,7 +9473,7 @@ final for the right nonterminal.
          ]
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#epi-ans-rec-nonterminal">Handle recursion on nonterminal 215</a>
+"#epi-ans-rec-nonterminal">Handle recursion on nonterminal 214</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">Now, for each child completion, find all
@@ -9499,7 +9482,7 @@ for <tt>$sym</tt> at the start position of the completion item.
 That is, all items ending at that position, for which <tt>$sym</tt>
 is in the follow set.
 <div class="scrap"><span><a name="epi-ans-recnt-lnodechild" id=
-"epi-ans-recnt-lnodechild">〈 217 Find parse trees for the child
+"epi-ans-recnt-lnodechild">〈 216 Find parse trees for the child
 completions 〉 ≡</a></span>
 <pre class="scrapbody">         for $eiCC at $nEiCC in $leiPrev
          let $trace := eri:notrace(eri:sXei($Ecur),
@@ -9525,13 +9508,13 @@ completions 〉 ≡</a></span>
          :)
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#epi-ans-rec-nonterminal">Handle recursion on nonterminal 215</a>
+"#epi-ans-rec-nonterminal">Handle recursion on nonterminal 214</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">For each pair of parse tree and predictor item,
 we need to recur appropriately.
 <div class="scrap"><span><a name="epi-ans-recnt-recur" id=
-"epi-ans-recnt-recur">〈 218 Recur on each predictor 〉 ≡</a></span>
+"epi-ans-recnt-recur">〈 217 Recur on each predictor 〉 ≡</a></span>
 <pre class=
 "scrapbody">         for $eiPred at $nEiP in $leiPredictors
          let $trace := eri:notrace(eri:sXei($Ecur),
@@ -9543,7 +9526,7 @@ we need to recur appropriately.
          
          for $nodeCh0 at $nNch in $lnodeChild
          <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-ans-recnt-munge-mark">Adjust mark attribute on $nodeCh as needed 219</a></em> 〉</span>
+"#epi-ans-recnt-munge-mark">Adjust mark attribute on $nodeCh as needed 218</a></em> 〉</span>
          let $trace := eri:notrace(eri:sXei($Ecur),
                'all-node-seqs recurs on child'
                || '(' || $nNch
@@ -9565,7 +9548,7 @@ we need to recur appropriately.
                                       )
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#epi-ans-rec-nonterminal">Handle recursion on nonterminal 215</a>
+"#epi-ans-rec-nonterminal">Handle recursion on nonterminal 214</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">There's one more complication. The trees
@@ -9576,7 +9559,7 @@ would be the <tt>$sym</tt> element), it needs to over-ride the mark
 on the rule. So before we pop the child nodes into the accumulator,
 we make sure their <em>mark</em> attribute is correct.
 <div class="scrap"><span><a name="epi-ans-recnt-munge-mark" id=
-"epi-ans-recnt-munge-mark">〈 219 Adjust mark attribute on $nodeCh
+"epi-ans-recnt-munge-mark">〈 218 Adjust mark attribute on $nodeCh
 as needed 〉 ≡</a></span>
 <pre class="scrapbody">         let $nodeCh := 
              if (exists($sym/@mark)) 
@@ -9588,14 +9571,14 @@ as needed 〉 ≡</a></span>
              else $nodeCh0
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#epi-ans-recnt-recur">Recur on each predictor 218</a>
+"#epi-ans-recnt-recur">Recur on each predictor 217</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">If what we are looking at has not been
 recognized as a terminal or a nonterminal, then we are out of luck
 and can only report a problem.
 <div class="scrap"><span><a name="epi-ans-rec-whazzat" id=
-"epi-ans-rec-whazzat">〈 220 Raise error if neither terminal nor
+"epi-ans-rec-whazzat">〈 219 Raise error if neither terminal nor
 nonterminal 〉 ≡</a></span>
 <pre class=
 "scrapbody">      else (: not terminal, not nonterminal, we have a problem :)
@@ -9605,13 +9588,13 @@ nonterminal 〉 ≡</a></span>
           }&lt;/error-in-all-node-sequences&gt;
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
-"#epi-ans-recursive">Handle recursive case 212</a>
+"#epi-ans-recursive">Handle recursive case 211</a>
 〉<br /></span></div>
 </div>
 <div class="Real-P">Here we appear to have some cruft that has been
 commented out but not removed.
 <div class="scrap"><span><a name="epi-lnDepXCleC" id=
-"epi-lnDepXCleC">〈 221 Define lnDepXClEc() 〉 ≡</a></span>
+"epi-lnDepXCleC">〈 220 Define lnDepXClEc() 〉 ≡</a></span>
 <pre class=
 "scrapbody">(: lnDepXClEc($Closure, $Ec):  from the Earley closure $Closure,
    extract the dependents of the node completed by $Ec.
@@ -9751,7 +9734,7 @@ parameter showing how many parse trees the caller got back from the
 result with <tt>ixml:state="ambiguous"</tt>, declaring the
 namespace as <tt>xmlns:ixml="http://invisiblexml.org/NS"</tt>.
 <div class="scrap"><span><a name="epi-astXparsetree" id=
-"epi-astXparsetree">〈 222 Define astXparsetree() to make AST from
+"epi-astXparsetree">〈 221 Define astXparsetree() to make AST from
 raw parse 〉 ≡</a></span>
 <pre class="scrapbody">declare function epi:astXparsetree(
   $E as element(nt),
@@ -9787,15 +9770,15 @@ raw parse 〉 ≡</a></span>
           }
 };
 <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-docelXpt">Define doc-elementXpt() to make AST for document element 223</a></em> 〉</span>
+"#epi-docelXpt">Define doc-elementXpt() to make AST for document element 222</a></em> 〉</span>
 <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-elXpt">Define elementXpt() to make AST for one element 225</a></em> 〉</span>
+"#epi-elXpt">Define elementXpt() to make AST for one element 224</a></em> 〉</span>
 <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-attsXpt">Define attributesXpt() to collect attributes 226</a></em> 〉</span>
+"#epi-attsXpt">Define attributesXpt() to collect attributes 225</a></em> 〉</span>
 <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-avXpt">Define avXpt() to collect attribute value 227</a></em> 〉</span>
+"#epi-avXpt">Define avXpt() to collect attribute value 226</a></em> 〉</span>
 <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-contentXpt">Define contentXpt() 228</a></em> 〉</span></pre>
+"#epi-contentXpt">Define contentXpt() 227</a></em> 〉</span></pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#d3e389">[File Earley-parser-internals.xqm] 4</a>
 〉<br /></span></div>
@@ -9816,7 +9799,7 @@ or a terminal symbol, we want to coerce the result into an
 element.</div>
 <div class="Real-P">
 <div class="scrap"><span><a name="epi-docelXpt" id="epi-docelXpt">〈
-223 Define doc-elementXpt() to make AST for document element 〉
+222 Define doc-elementXpt() to make AST for document element 〉
 ≡</a></span>
 <pre class="scrapbody">declare function epi:doc-elementXpt(
   $E as element()*
@@ -9845,7 +9828,7 @@ element.</div>
           'Terminal found as root of AST'
       }, 
       text { <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-sXpt">Make string from raw parse tree terminal $E 224</a></em> 〉</span> } 
+"#epi-sXpt">Make string from raw parse tree terminal $E 223</a></em> 〉</span> } 
   }
   
   (: Unexpected input: what? :)
@@ -9854,14 +9837,14 @@ element.</div>
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#epi-astXparsetree">Define astXparsetree() to make AST from raw
-parse 222</a> 〉<br /></span></div>
+parse 221</a> 〉<br /></span></div>
 </div>
 <div class="Real-P">There are a couple of places where we will need
 to make a string from a raw parse tree terminal. This involves
 checking that the terminal is not marked hidden and then
 serializing from the list of code points. (An approximation of the
 string value will be in the
-<div class="scrap"><span><a name="epi-sXpt" id="epi-sXpt">〈 224
+<div class="scrap"><span><a name="epi-sXpt" id="epi-sXpt">〈 223
 Make string from raw parse tree terminal $E 〉 ≡</a></span>
 <pre class="scrapbody">if ($E/@tmark = '-')  
        then ()  
@@ -9874,9 +9857,9 @@ Make string from raw parse tree terminal $E 〉 ≡</a></span>
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#epi-docelXpt">Define doc-elementXpt() to make AST for document
-element 223</a> 〉 〈 <a href="#epi-avXpt">Define avXpt() to collect
-attribute value 227</a> 〉 〈 <a href="#epi-contentXpt">Define
-contentXpt() 228</a> 〉<br /></span></div>
+element 222</a> 〉 〈 <a href="#epi-avXpt">Define avXpt() to collect
+attribute value 226</a> 〉 〈 <a href="#epi-contentXpt">Define
+contentXpt() 227</a> 〉<br /></span></div>
 </div>
 </div>
 <div class="div">
@@ -9893,7 +9876,7 @@ attributes and content, respectively. The argument is required to
 be an &lt;<em>nt</em>&gt; element and expected to be marked
 “<tt>^</tt>”.</div>
 <div class="Real-P">
-<div class="scrap"><span><a name="epi-elXpt" id="epi-elXpt">〈 225
+<div class="scrap"><span><a name="epi-elXpt" id="epi-elXpt">〈 224
 Define elementXpt() to make AST for one element 〉 ≡</a></span>
 <pre class="scrapbody">declare function epi:elementXpt(
   $E as element()
@@ -9927,7 +9910,7 @@ Define elementXpt() to make AST for one element 〉 ≡</a></span>
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#epi-astXparsetree">Define astXparsetree() to make AST from raw
-parse 222</a> 〉<br /></span></div>
+parse 221</a> 〉<br /></span></div>
 </div>
 </div>
 <div class="div">
@@ -9942,7 +9925,7 @@ looking for things to serialize as attributes on the current
 element. For each such nonterminal, it constructs the attribute and
 called the attribute value constructor to construct the value.
 <div class="scrap"><span><a name="epi-attsXpt" id="epi-attsXpt">〈
-226 Define attributesXpt() to collect attributes 〉 ≡</a></span>
+225 Define attributesXpt() to collect attributes 〉 ≡</a></span>
 <pre class="scrapbody"> 
 declare function epi:attributesXpt(
   $E as element()
@@ -9974,7 +9957,7 @@ declare function epi:attributesXpt(
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#epi-astXparsetree">Define astXparsetree() to make AST from raw
-parse 222</a> 〉<br /></span></div>
+parse 221</a> 〉<br /></span></div>
 </div>
 </div>
 <div class="div">
@@ -9993,21 +9976,21 @@ the “<tt>^</tt>” marking and treats it the same as “<tt>-</tt>”,
 recurring through it. For an example of this treatment, see the
 handling of <i>dchar</i> and <i>schar</i> in the current ixml
 grammar.
-<div class="scrap"><span><a name="epi-avXpt" id="epi-avXpt">〈 227
+<div class="scrap"><span><a name="epi-avXpt" id="epi-avXpt">〈 226
 Define avXpt() to collect attribute value 〉 ≡</a></span>
 <pre class="scrapbody">declare function epi:avXpt(
   $E as element()
 ) as xs:string* {
   if ($E/(self::incl or self::excl or self::lit))
   then <span class="scrapref">〈 <em class="scrapptr"><a href=
-"#epi-sXpt">Make string from raw parse tree terminal $E 224</a></em> 〉</span> 
+"#epi-sXpt">Make string from raw parse tree terminal $E 223</a></em> 〉</span> 
   else for $c in $E/*
        return epi:avXpt($c)
 };
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#epi-astXparsetree">Define astXparsetree() to make AST from raw
-parse 222</a> 〉<br /></span></div>
+parse 221</a> 〉<br /></span></div>
 </div>
 </div>
 <div class="div">
@@ -10022,7 +10005,7 @@ looking for things to serialize as content of the current element
 and either serializing them itself (if terminals) or passing them
 to the element constructor.
 <div class="scrap"><span><a name="epi-contentXpt" id=
-"epi-contentXpt">〈 228 Define contentXpt() 〉 ≡</a></span>
+"epi-contentXpt">〈 227 Define contentXpt() 〉 ≡</a></span>
 <pre class="scrapbody">declare function epi:contentXpt(
   $E as element()
 ) as item()* {
@@ -10035,7 +10018,7 @@ to the element constructor.
   then ()
   else if ($E[self::incl or self::excl or self::lit])
   then text { <span class="scrapref">〈 <em class=
-"scrapptr"><a href="#epi-sXpt">Make string from raw parse tree terminal $E 224</a></em> 〉</span> }
+"scrapptr"><a href="#epi-sXpt">Make string from raw parse tree terminal $E 223</a></em> 〉</span> }
   else element ixml:unexpected {
        attribute f { "epi:contentXpt" }, 
        $E
@@ -10044,7 +10027,7 @@ to the element constructor.
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#epi-astXparsetree">Define astXparsetree() to make AST from raw
-parse 222</a> 〉<br /></span></div>
+parse 221</a> 〉<br /></span></div>
 </div>
 </div>
 </div>
@@ -10140,9 +10123,9 @@ only a matter of time.</div>
 </li>
 <li>
 <div class="Real-P"><b>Brown Sugar</b> plan.[<a name=
-"ref-to-d3e5742" href="#d3e5742" title=
+"ref-to-d3e5733" href="#d3e5733" title=
 " So called because this is a dirty form of the sugar plan described below. "
-id="ref-to-d3e5742">22</a>] Quick and dirty ad-hoc tokenization
+id="ref-to-d3e5733">22</a>] Quick and dirty ad-hoc tokenization
 change for ixml grammar for ixml grammars. Hand-modify and
 hand-annotate the grammar, add support for those annotations.</div>
 <div class="Real-P">Note that the ixml grammar has both safe and
@@ -10443,8 +10426,8 @@ processor</li>
 </ul>
 </div>
 <div class="div">
-<h3><a class="selflink" name="d3e6162" id="d3e6162" href=
-"#d3e6162"></a>To-do list from Earley recognizer internals
+<h3><a class="selflink" name="d3e6153" id="d3e6153" href=
+"#d3e6153"></a>To-do list from Earley recognizer internals
 module</h3>
 <div class="Real-P">This module has a complicated enough to-do list
 of its own that I'll give it here for the moment instead of
@@ -10780,7 +10763,7 @@ higher-level functions, they have been rewritten. The code should
 be self-explanatory.</div>
 <div class="Real-P">At least, I hope it is, since I don't want to
 spend any time explaining it.
-<div class="scrap"><span><a name="d3e6443" id="d3e6443">〈 229
+<div class="scrap"><span><a name="d3e6434" id="d3e6434">〈 228
 Declare ep:alltrees() function 〉 (for version <em>v0.2</em>)
 ≡</a></span>
 <pre class=
@@ -10803,7 +10786,7 @@ declare function ep:all-trees(
 〉</span></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e6448" id="d3e6448">〈 230
+<div class="scrap"><span><a name="d3e6439" id="d3e6439">〈 229
 Declare ep:anytree() function 〉 (for version <em>v0.2</em>)
 ≡</a></span>
 <pre class=
@@ -10822,7 +10805,7 @@ declare function ep:any-tree(
 "#ep-anytree">Declare ep:any-tree() function 183</a> 〉</span></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e6454" id="d3e6454">〈 231
+<div class="scrap"><span><a name="d3e6445" id="d3e6445">〈 230
 Declare ep:tree-cursor() function 〉 (for version <em>v0.2</em>)
 ≡</a></span>
 <pre class="scrapbody">declare function ep:tree-cursor(
@@ -10837,7 +10820,7 @@ Declare ep:tree-cursor() function 〉 (for version <em>v0.2</em>)
 〉</span></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e6461" id="d3e6461">〈 232
+<div class="scrap"><span><a name="d3e6452" id="d3e6452">〈 231
 Declare ep:parse-forest-map() function 〉 (for version
 <em>v0.2</em>) ≡</a></span>
 <pre class=
@@ -10857,7 +10840,7 @@ declare function ep:parse-forest-map(
 185</a> 〉</span></div>
 </div>
 <div class="Real-P">
-<div class="scrap"><span><a name="d3e6467" id="d3e6467">〈 233
+<div class="scrap"><span><a name="d3e6458" id="d3e6458">〈 232
 Declare ep:alltrees() function 〉 (for version <em>v0.2</em>)
 ≡</a></span>
 <pre class=
@@ -10883,7 +10866,7 @@ the code embeds some false assumptions about what that function
 does. Rather than unsnarl those assumptions, I rewrote things to
 use options, rather than higher-level functions, to control what
 gets returned (and other things).
-<div class="scrap"><span><a name="d3e6477" id="d3e6477">〈 234
+<div class="scrap"><span><a name="d3e6468" id="d3e6468">〈 233
 Define earley-parse() 〉 (for version <em>v0.2</em>) ≡</a></span>
 <pre class=
 "scrapbody">(: ******************************************************
@@ -10991,7 +10974,7 @@ them, since when the function is called on their parent element, it
 will recursively be called on them, too. But they can and should be
 returned without change.
 <div class="scrap"><span><a name="gl-ME-identity-2013" id=
-"gl-ME-identity-2013">〈 235 Handle leaf nodes (v0.1) 〉 ≡</a></span>
+"gl-ME-identity-2013">〈 234 Handle leaf nodes (v0.1) 〉 ≡</a></span>
 <pre class="scrapbody">if ($E/(self::quoted
       or self::charset or self::exclude
       or self::range
@@ -11005,7 +10988,7 @@ elsewhere.<br /></span></div>
 elements in the construction of the Gluschkov automaton.</i> In
 2013, all terminals were &lt;<em>terminal</em>&gt; elements.
 <div class="scrap"><span><a name="gl-ME-terminals-2013" id=
-"gl-ME-terminals-2013">〈 236 Handle terminal nodes (v0.1) 〉
+"gl-ME-terminals-2013">〈 235 Handle terminal nodes (v0.1) 〉
 ≡</a></span>
 <pre class="scrapbody">if ($E/self::terminal)
 then let $id := '_t_' || (1 + count($E/preceding::terminal))
@@ -11036,7 +11019,7 @@ contain doubled quotation marks or hexadecimal strings preceded by
 '#'. It would be tempting to inline this, but it's just complicated
 enough that I am going to write a utility function to do it.
 <div class="scrap"><span><a name="gl-read-one-ixml-char" id=
-"gl-read-one-ixml-char">〈 237 Define gl:read-one-char-spec() 〉
+"gl-read-one-ixml-char">〈 236 Define gl:read-one-char-spec() 〉
 ≡</a></span>
 <pre class="scrapbody">declare function gl:read-one-char-spec(
   $s as xs:string
@@ -11058,7 +11041,7 @@ elsewhere.<br /></span></div>
 <div class="Real-P">Armed with that little function, we can easily
 specify the regex for a range.
 <div class="scrap"><span><a name="gl-ME-identity" id=
-"gl-ME-identity">〈 238 Handle leaf nodes 〉 ≡</a></span>
+"gl-ME-identity">〈 237 Handle leaf nodes 〉 ≡</a></span>
 <pre class="scrapbody">if ($E/self::range)
 then 
    element { name($E) } {
@@ -11115,7 +11098,7 @@ Gluschkov.xqm]</a> 〉</li>
 <li><a href="#pfg-fw-set-new-acc">Add satisfactory walks to the
 accumulator 88</a></li>
 <li><a href="#epi-ans-recnt-munge-mark">Adjust mark attribute on
-$nodeCh as needed 219</a></li>
+$nodeCh as needed 218</a></li>
 <li><a href="#d3e1353">Calculate follow-set for repetition with
 separator 25</a></li>
 <li><a href="#gl-ME-alt-follow">Calculate follow:* attributes for
@@ -11132,7 +11115,7 @@ Earley set 126</a></li>
 50</a></li>
 <li><a href="#d3e1898">Check for compiler attributes 51</a></li>
 <li><a href="#epi-ans-loopcheck">Check for loops, which mean
-infinite ambiguity 208</a></li>
+infinite ambiguity 207</a></li>
 <li><a href="#ap-grok-names">Check for non-XML names 52</a></li>
 <li><a href="#ap-grok-str">Check for structural problems
 49</a></li>
@@ -11149,16 +11132,14 @@ references 55</a></li>
 <li><a href="#ap-grok-ranges">Check ranges 62</a></li>
 <li><a href="#epi-ep-versioncheck">Check results for version
 mismatch 197</a></li>
-<li><a href="#xxx-epi-ep-versioncheck">Check results for version
-mismatch 198</a></li>
 <li><a href="#ap-grok-uniqdef">Check rules for uniqueness
 53</a></li>
 <li><a href="#epi-tfgre-get-atts">Collect and serialize attributes
 103</a></li>
-<li><a href="#d3e5202">Construct an element holding the node
+<li><a href="#d3e5193">Construct an element holding the node
+sequence 209</a></li>
+<li><a href="#d3e5199">Construct an element holding the node
 sequence 210</a></li>
-<li><a href="#d3e5208">Construct an element holding the node
-sequence 211</a></li>
 <li><a href="#epi-ep-any-direct">Construct one tree directly
 192</a></li>
 <li><a href="#epi-ep-any-via-pfg">Construct one tree via
@@ -11167,36 +11148,36 @@ parse-forest-grammar 193</a></li>
 102</a></li>
 <li><a href="#ep-alltrees">Declare ep:all-trees() function
 182</a></li>
-<li><a href="#d3e6443">Declare ep:alltrees() function (v. v0.2)
-229</a></li>
-<li><a href="#d3e6467">Declare ep:alltrees() function (v. v0.2)
-233</a></li>
+<li><a href="#d3e6434">Declare ep:alltrees() function (v. v0.2)
+228</a></li>
+<li><a href="#d3e6458">Declare ep:alltrees() function (v. v0.2)
+232</a></li>
 <li><a href="#ep-anytree">Declare ep:any-tree() function
 183</a></li>
-<li><a href="#d3e6448">Declare ep:anytree() function (v. v0.2)
-230</a></li>
+<li><a href="#d3e6439">Declare ep:anytree() function (v. v0.2)
+229</a></li>
 <li><a href="#ep-parse-forest-grammar">Declare
 ep:parse-forest-grammar() function 186</a></li>
 <li><a href="#ep-parse-forest-map">Declare ep:parse-forest-map()
 function 185</a></li>
-<li><a href="#d3e6461">Declare ep:parse-forest-map() function (v.
-v0.2) 232</a></li>
+<li><a href="#d3e6452">Declare ep:parse-forest-map() function (v.
+v0.2) 231</a></li>
 <li><a href="#ep-tree-cursor">Declare ep:tree-cursor() function
 184</a></li>
-<li><a href="#d3e6454">Declare ep:tree-cursor() function (v. v0.2)
-231</a></li>
+<li><a href="#d3e6445">Declare ep:tree-cursor() function (v. v0.2)
+230</a></li>
 <li><a href="#epi-all-node-sequences">Define all-node-sequences()
-207</a></li>
-<li><a href="#epi-all-trees">Define all-trees() 199</a></li>
-<li><a href="#epi-any-tree">Define any-tree() 204</a></li>
+206</a></li>
+<li><a href="#epi-all-trees">Define all-trees() 198</a></li>
+<li><a href="#epi-any-tree">Define any-tree() 203</a></li>
 <li><a href="#epi-astXparsetree">Define astXparsetree() to make AST
-from raw parse 222</a></li>
+from raw parse 221</a></li>
 <li><a href="#epi-attsXpt">Define attributesXpt() to collect
-attributes 226</a></li>
-<li><a href="#d3e4853">Define auxiliary function for all-trees()
-200</a></li>
+attributes 225</a></li>
+<li><a href="#d3e4844">Define auxiliary function for all-trees()
+199</a></li>
 <li><a href="#epi-avXpt">Define avXpt() to collect attribute value
-227</a></li>
+226</a></li>
 <li><a href="#d3e4172">Define catescXS() to build category escape
 159</a></li>
 <li><a href="#d3e4178">Define charXhex() to get character given hex
@@ -11208,9 +11189,9 @@ expression 160</a></li>
 175</a></li>
 <li><a href="#ap2-cgfx">Define compile-grammar-from-xml()
 177</a></li>
-<li><a href="#epi-contentXpt">Define contentXpt() 228</a></li>
+<li><a href="#epi-contentXpt">Define contentXpt() 227</a></li>
 <li><a href="#epi-docelXpt">Define doc-elementXpt() to make AST for
-document element 223</a></li>
+document element 222</a></li>
 <li><a href="#d3e4210">Define eXei() to build 'item' element for
 Earley item 164</a></li>
 <li><a href="#d3e3659">Define earley-closure($lei, $I, $G)
@@ -11220,11 +11201,11 @@ $accumulator, $I, $G) 128</a></li>
 <li><a href="#d3e3789">Define earley-closure($pending,
 $accumulator, $I, $G) 132</a></li>
 <li><a href="#epi-earley-parse">Define earley-parse() 187</a></li>
-<li><a href="#d3e6477">Define earley-parse() (v. v0.2) 234</a></li>
+<li><a href="#d3e6468">Define earley-parse() (v. v0.2) 233</a></li>
 <li><a href="#eri-make-p-p-r-ri">Define eiMakePPRRi() 117</a></li>
 <li><a href="#d3e3534">Define eiMakePPT() 118</a></li>
 <li><a href="#epi-elXpt">Define elementXpt() to make AST for one
-element 225</a></li>
+element 224</a></li>
 <li><a href="#d3e3640">Define fAdvanceNrelEE() 125</a></li>
 <li><a href="#d3e3615">Define fExpectsN-Ei() 123</a></li>
 <li><a href="#eri-sym-fNonterminal">Define fNonterminal()
@@ -11238,10 +11219,10 @@ epi:make-pfg-rules() 75</a></li>
 <li><a href="#gl-ME">Define function gl:ME() 17</a></li>
 <li><a href="#gl-merge">Define gl:merge() 31</a></li>
 <li><a href="#gl-read-one-ixml-char">Define gl:read-one-char-spec()
-237</a></li>
+236</a></li>
 <li><a href="#eri-lei-advance-ei-sym-p">Define leiAdvanceEiSymP()
 119</a></li>
-<li><a href="#epi-lnDepXCleC">Define lnDepXClEc() 221</a></li>
+<li><a href="#epi-lnDepXCleC">Define lnDepXClEc() 220</a></li>
 <li><a href="#eri-sym-match-length">Define match-length()
 141</a></li>
 <li><a href="#eri-notrace-function">Define notrace() function for
@@ -11249,7 +11230,7 @@ debugging 168</a></li>
 <li><a href="#epi-parse-forest-grammar">Define
 parse-forest-grammar() 72</a></li>
 <li><a href="#epi-parse-forest-map">Define parse-forest-map()
-206</a></li>
+205</a></li>
 <li><a href="#ap2-pgfs">Define parse-grammar-from-string()
 173</a></li>
 <li><a href="#ap2-pgfu">Define parse-grammar-from-uri()
@@ -11279,7 +11260,7 @@ Earley item 163</a></li>
 debugging 169</a></li>
 <li><a href="#gl-trace">Define trace() function for debugging
 170</a></li>
-<li><a href="#epi-tree-cursor">Define tree-cursor() 205</a></li>
+<li><a href="#epi-tree-cursor">Define tree-cursor() 204</a></li>
 <li><a href="#ap-grok-hexref-cases">Diagnose errors and return
 appropriate errors 56</a></li>
 <li><a href="#eri-items">Earley items (constructors, extractors,
@@ -11302,9 +11283,9 @@ grammar 97</a></li>
 <li><a href="#eri-input-ext">Extractors for input 153</a></li>
 <li><a href="#d3e2972">Find follow-on completion items 86</a></li>
 <li><a href="#epi-ans-recnt-lnodechild">Find parse trees for the
-child completions 217</a></li>
+child completions 216</a></li>
 <li><a href="#epi-ans-recnt-leiprev">Find the child completions for
-$sym 216</a></li>
+$sym 215</a></li>
 <li><a href="#gl-ME-rep-follow-sep-2">Follow set when p in last(F),
 G not nullable 27</a></li>
 <li><a href="#gl-ME-rep-follow-sep-1">Follow set when p in last(F),
@@ -11325,7 +11306,7 @@ information from grammars 137</a></li>
 <li><a href="#gl-alts-gi-2013">GI for alts element (v0.1)
 39</a></li>
 <li><a href="#epi-all-trees-call-ans">Get the sequences, or rather
-raw parse trees 202</a></li>
+raw parse trees 201</a></li>
 <li><a href="#d3e3826">Goal-symbol construction 135</a></li>
 <li><a href="#d3e3833">Goal-symbol construction 136</a></li>
 <li><a href="#eri-grammars">Grammars (constructors, extractors,
@@ -11334,25 +11315,25 @@ etc.) 133</a></li>
 <li><a href="#gl-ME-alternatives">Handle alternatives 37</a></li>
 <li><a href="#gl-ME-def">Handle alts elements (= def) 36</a></li>
 <li><a href="#epi-ans-basecase">Handle base case: current item is
-initial 209</a></li>
+initial 208</a></li>
 <li><a href="#gl-ME-comment">Handle comment elements 42</a></li>
 <li><a href="#gl-ME-ixml">Handle ixml elements (grammars)
 44</a></li>
 <li><a href="#gl-ME-identity">Handle leaf nodes 18</a></li>
-<li><a href="#gl-ME-identity">Handle leaf nodes 238</a></li>
+<li><a href="#gl-ME-identity">Handle leaf nodes 237</a></li>
 <li><a href="#gl-ME-identity-2013">Handle leaf nodes (v0.1)
-235</a></li>
+234</a></li>
 <li><a href="#gl-ME-nonterminal">Handle nonterminal symbols
 20</a></li>
 <li><a href="#gl-ME-option">Handle options 21</a></li>
 <li><a href="#gl-ME-prolog">Handle prolog elements 43</a></li>
 <li><a href="#epi-ans-rec-nonterminal">Handle recursion on
-nonterminal 215</a></li>
+nonterminal 214</a></li>
 <li><a href="#epi-ans-rec-terminal">Handle recursion on terminal
-213</a></li>
+212</a></li>
 <li><a href="#epi-ans-rec-terminal-2016">Handle recursion on
-terminal 214</a></li>
-<li><a href="#epi-ans-recursive">Handle recursive case 212</a></li>
+terminal 213</a></li>
+<li><a href="#epi-ans-recursive">Handle recursive case 211</a></li>
 <li><a href="#gl-ME-repeats">Handle repetitions 23</a></li>
 <li><a href="#gl-ME-repeats-2013">Handle repetitions (v0.1)
 22</a></li>
@@ -11364,7 +11345,7 @@ terminal 214</a></li>
 33</a></li>
 <li><a href="#gl-ME-terminals">Handle terminal nodes 19</a></li>
 <li><a href="#gl-ME-terminals-2013">Handle terminal nodes (v0.1)
-236</a></li>
+235</a></li>
 <li><a href="#gl-ME-whahhh">Handle unexpected elements 45</a></li>
 <li><a href="#epi-mpr-stop">If PFG queue is empty, return
 accumulator 76</a></li>
@@ -11388,7 +11369,7 @@ a literal 91</a></li>
 <li><a href="#eri-itcl-traces">Issue trace messages for
 earley-closure() 131</a></li>
 <li><a href="#epi-all-trees-for">Iterate over the list of
-completion items 201</a></li>
+completion items 200</a></li>
 <li><a href="#d3e4374">Location of ixml grammar 180</a></li>
 <li><a href="#d3e4361">Location of library 179</a></li>
 <li><a href="#aparecium-main">Main interfaces for Aparecium
@@ -11400,7 +11381,7 @@ range 145</a></li>
 <li><a href="#eri-sym-reXT-lit">Make positive character group from
 literal 148</a></li>
 <li><a href="#epi-sXpt">Make string from raw parse tree terminal $E
-224</a></li>
+223</a></li>
 <li><a href="#aparecium-imports">Module imports for Aparecium
 top-level 2</a></li>
 <li><a href="#d3e1988">No error found, return nothing 61</a></li>
@@ -11420,9 +11401,9 @@ pfg) 155</a></li>
 154</a></li>
 <li><a href="#gl-prolog">Prolog for Gluschkov module 16</a></li>
 <li><a href="#epi-ans-rec-whazzat">Raise error if neither terminal
-nor nonterminal 220</a></li>
+nor nonterminal 219</a></li>
 <li><a href="#epi-ans-recnt-recur">Recur on each predictor
-218</a></li>
+217</a></li>
 <li><a href="#epi-mpr-recur">Recursive call with new queue and
 accumulator 82</a></li>
 <li><a href="#epi-ep-all-trees">Return (approximately) all trees
@@ -11440,7 +11421,7 @@ grammar 194</a></li>
 <li><a href="#epi-pfg-return">Return parse-forest grammar
 containing $rules 73</a></li>
 <li><a href="#epi-all-trees-return-trees">Return the raw parse
-trees 203</a></li>
+trees 202</a></li>
 <li><a href="#eri-rules">Rules (constructors, extractors, etc.)
 139</a></li>
 <li><a href="#aparecium-secondary">Secondary interfaces (a bit
@@ -11684,8 +11665,8 @@ time we generate the right-hand side from the walk?</div>
 <div class="note">[<a name="d3e3172" id="d3e3172" href=
 "#ref-to-d3e3172">21</a>] Actually, <i>Goal</i> should carry
 “<tt>mark="-"</tt>” in any case.</div>
-<div class="note">[<a name="d3e5742" id="d3e5742" href=
-"#ref-to-d3e5742">22</a>] So called because this is a dirty form of
+<div class="note">[<a name="d3e5733" id="d3e5733" href=
+"#ref-to-d3e5733">22</a>] So called because this is a dirty form of
 the ‘sugar’ plan described below.</div>
 </div>
 </body>

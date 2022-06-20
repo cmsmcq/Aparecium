@@ -3300,10 +3300,10 @@ walk with a single step.  And if the parent FSA is nullable, we add that walk to
                 )
 
    let $dummy := if (count($walks) gt 1)
-                 then (eri:trace(count($walks), 'Find-walks found # walks'
+                 then (eri:notrace(count($walks), 'Find-walks found # walks'
                        || ' for ' || eri:sXei($ei)),
                      for $w at $walknum in $walks 
-                     return eri:trace($w, 'Walk no. ' || $walknum || ' is:'))
+                     return eri:notrace($w, 'Walk no. ' || $walknum || ' is:'))
                  else ()
 </scrap>
 The <q><kw>follow-states</kw></q> and <q><kw>final</kw></q>
