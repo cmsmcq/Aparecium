@@ -26,7 +26,14 @@ parsing input may take some tens of seconds.
 For grammars of a few thousand characters (like that for ixml itself),
 it currently takes tens of minutes to compile the grammar.
 
+Version 2022-06 passes all tests in the ixml test catalog as of 20
+June, with the exception of those involving insertions.
+
+
 ## How to use Aparecium to experiment with ixml
+
+Clone the repository, or download the zip file offered by Github, and
+unzip it in a location of your choice.  
 
 The easiest way to play around is to load one of the query modules
 from the `demos/` subdirectory into BaseX (or Oxygen, but see below) and
