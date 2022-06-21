@@ -415,8 +415,8 @@ declare function t:test-grammar(
              and
              ($xml-grammar/self::tc:error
              [@id = ("t:tbd04", "t:tbd06")]
-             or $xml-grammar/self::no-parse
-             or $xml-grammar/child::no-parse
+             or $xml-grammar/self::ap:no-parse
+             or $xml-grammar/child::ap:no-parse
              or $xml-grammar/descendant-or-self::ap:error
 	     [@id = ('ap:tbd04' (: error compiling G :),
                      'ap:tbd05' (: compiled grammar flawed :), 
@@ -669,16 +669,16 @@ declare function t:run-test-case(
         else if (exists($parse-tree
                  /self::tc:error[@id = 't:tbd19'])) 
         then "other" (: timed out - or "not-run"? :)
-        else if ($parse-tree/self::no-parse
+        else if ($parse-tree/self::ap:no-parse
                  and $expectations
                  /self::tc:assert-not-a-sentence)
         then "pass"
-        else if (($parse-tree/self::no-parse
+        else if (($parse-tree/self::ap:no-parse
                  or $parse-tree/self::ap:error)
                  and $expectations
                  /self::tc:assert-dynamic-error)
         then "pass"
-        else if ($parse-tree/self::no-parse
+        else if ($parse-tree/self::ap:no-parse
                  and $expectations
                  /self::tc:assert-not-a-grammar)
         then "pass" (: This case should not arise :)
@@ -819,7 +819,7 @@ declare function t:run-test-case(
                 $kwE := $options/@files-on-failure,
                 $fn  := $test-case-ID || '.reported.xml'
             return 
-            if ($parse-tree/self::no-parse)
+            if ($parse-tree/self::ap:no-parse)
             then (element tc:reported-not-a-sentence{
                     element tc:app-info {
                       $parse-tree
