@@ -4,10 +4,21 @@ started 2021-11-05, most recent rev. 2022-06-06
 
 The current work plan for Aparecium is:
 
-* Add new functionality for insertions.
+* Add new functionality for insertions.  This has several steps:
 
-* Correct remaining test failures: improve handling of dynamic errors
-  and version mismatch.
+    * Accept options in top-level functions and pass the options into
+      the internals.  Two top priorities: pretty-print yes/no and
+      format of return value (parse tree, parse map, parse-forest
+      grammar, parse-forest map, various internals ... for now
+      supporting parse tree, parse-forest grammar, Earley set).
+
+    * Add insertions to the grammar compiler.
+
+    * Add insertions to the parser.
+
+    * Add insertions to the parse-forest grammar constructor.
+
+    * Add insertions to the parse-tree extractor.
 
 * Work to support more XQuery processors.
 
@@ -17,10 +28,10 @@ The current work plan for Aparecium is:
   Aparecium work with other processors or understand why it's not
   feasible.
   
+    * Saxon HE
     * eXist-db
     * FusionDB
     * Mark Logic
-    * Saxon HE
 
   Note that Berkeley DB XML, XQilla, and Xidel do not support
   Aparecium because they support XQuery 1.0 or XQuery 3.0, and thus
@@ -120,4 +131,7 @@ done, sometimes.
 
 * Better implementation independence: make Aparecium (and the test
   driver) work with Saxon.  (Milestone 6 June 2022.)
+
+* Corrected test failures for dynamic errors and version mismatch
+  (June 2022).
 

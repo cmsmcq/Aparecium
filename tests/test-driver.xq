@@ -13,7 +13,7 @@ declare namespace db =
 
 declare option db:chop "false";
 
-let $catalog-index := 'bogons' (: which catalog to run? short name :)
+let $catalog-index := 'oberon' (: which catalog to run? short name :)
     (: bogons 439. 
        test0 2s, test1 5s, hygiene 12s, zeroes 20s.  
        misc 78s, gxxx 153s, wisp-A 100s.
@@ -181,6 +181,9 @@ let $invdir := "../../cmsmcq-ixml/tests/",
       <catalog n="wisps"
 	       path="{$ixtdir}wisps/wisp-catalog.xml"/>
          
+        
+      <catalog n="oberon" path="/home/ex/Wirth/Oberon-test-catalog.xml"/>
+         
     </test-catalogs>,
 
     $test-catalog-path := $catalog-of-catalogs
@@ -243,7 +246,7 @@ let $invdir := "../../cmsmcq-ixml/tests/",
         )[1]
       },
       
-      attribute timeout { 600 }
+      attribute timeout { 60000 }
 
     }
 

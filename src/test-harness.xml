@@ -818,7 +818,12 @@ path for implementations in which the BaseX
 variable <ident>$prof-track</ident> to be either
 <ident>prof:track()</ident> or an alternative function that has the
 same interface but does not do any time tracking.
-<scrap corresp="lib-rts-g-new" version="v3"
+<hi>(This turns out not to work, since when prof:track() is the
+value of a variable, BaseX evaluates the arguments before passing them
+to the function.  So I am going to turn this off for the moment.
+This is not a long-term solution, since turning this off will
+make Saxon break.)</hi>
+<scrap corresp="lib-rts-g-new" version="alt"
        name="Set $new-xml-grammar">
 
       let $prof-track := (function-lookup(

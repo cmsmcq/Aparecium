@@ -121,15 +121,7 @@ declare function t:run-test-set(
                             $test-set/@name/string(),
                             "Starting test set: ")
           
-      let $prof-track := (function-lookup(
-                         QName('http://basex.org/modules/prof',
-                               'track'),
-                         1),
-                         function($item) {
-                             map {'time':'?', 'value': $item}
-                         }
-                         )[1]
-      let $nxg-plus := $prof-track(
+      let $nxg-plus := prof:track(
                if ($test-set/tc:ixml-grammar)
                then 
           try {

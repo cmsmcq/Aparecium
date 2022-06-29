@@ -1,6 +1,8 @@
 <timing-data>
   
-  <!-- 14 grammars with 0s < mean parsetime < 0.1s = 100 ms -->  
+  <!-- milli: 0s < mean parsetime < 0.01s = 10 ms -->
+  <!-- time is n.mE-3 seconds, n > 0 -->
+  <!-- 1 grammar (is that really all?) -->  
   <grammar-result name="G101-positive" result="pass fail" n="8">
     <mean-parsetime>0.02</mean-parsetime>
     <min-parsetime>0.02</min-parsetime>
@@ -9,6 +11,10 @@
     <times>0.02 0.02 0.02 0.02 0.02 0.02 0.02 0.02</times>
     <uri>/tests/results-gxxx-2022-03-10T11:32:00.384/test-report.gxxx-test-catalog.xml</uri>
   </grammar-result>
+  
+  <!-- centi: 0.01s = 10 ms < mean parsetime < 100ms = 0.1s -->  
+  <!-- time is n.mE-2 seconds, n > 0 -->
+  <!-- 13 grammars -->  
   <grammar-result name="name-with-spaces.ixml" result="pass fail" n="4">
     <mean-parsetime>11.185</mean-parsetime>
     <min-parsetime>7.41</min-parsetime>
@@ -114,6 +120,8 @@
     <uri>/tests/results-syntax-cagt-2022-02-17T11:44:24.743/test-report.catalog-as-grammar-tests.xml</uri>
   </grammar-result>
 
+  <!-- deci 0.1s = 100ms < mean parsetime < 1 000 ms = 1 s-->
+  <!-- time is n.mE-1 seconds, n > 0 -->
   <!-- 48 grammars with 0.1s < mean parsetime < 1s = 1 000 ms-->
   <grammar-result name="rule6.ixml" result="pass fail" n="4">
     <mean-parsetime>111.195</mean-parsetime>
@@ -501,7 +509,9 @@
   </grammar-result>
 
   
-  <!-- 9 grammars with 1s < mean parsetime < 10s  = 10 000 ms -->
+  <!-- seconds: 1s = 1 000 ms < mean parsetime < 10 000 ms = 10s -->
+  <!-- time is n.mE0 seconds, n > 0 -->
+  <!-- 9 grammars -->
   <grammar-result name="sample.grammar.13" result="pass fail" n="4">
     <mean-parsetime>1003.9749999999999</mean-parsetime>
     <min-parsetime>953.49</min-parsetime>
@@ -575,7 +585,9 @@
     <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
   </grammar-result>
 
-  <!-- 1 grammar with 10s < mean parsetime < 100s= 100 000 ms -->
+  <!-- deca: 10s = 10 000 ms < mean parsetime < 100 000 ms = 100s -->
+  <!-- time is n.mE+1 seconds, n > 0 -->
+  <!-- 1 grammar -->
   <grammar-result name="sample.grammar.03" result="pass fail" n="4">
     <mean-parsetime>11156.1875</mean-parsetime>
     <min-parsetime>4.05</min-parsetime>
@@ -584,8 +596,10 @@
     <times>14843.71 14588.70 15188.29 4.05</times>
     <uri>/tests/results-wisp-A-2022-02-20T19:55:01.204/test-report.wisps-001-020-catalog.xml</uri>
   </grammar-result>
-  
-  <!-- grammars with 100s < mean parsetime < 1 000s = 1 000 000 ms-->
+
+  <!-- hecto: 100s = 100 000 ms < mean parsetime < 1 000 000 ms = 1 000s -->
+  <!-- time is n.mE+2 seconds, n > 0 -->  
+  <!-- 1 grammar, we probably have more now -->
   <grammar-result name="a" result="pass fail" n="15">
     <mean-parsetime>303012.1213333333</mean-parsetime>
     <min-parsetime>47.29</min-parsetime>
@@ -594,7 +608,9 @@
     <times>67.94 864239.85 54.39 52.96 56.67 816662.08 47.29 81.18 524591.22 521931.40 51.63 824071.56 86.51 993105.77 81.37</times>
     <uri>/tests/results-test1-2022-03-08T20:33:07.559/test-report.test1.xml</uri>
   </grammar-result>
-  
-  <!-- grammars with 1 000s < mean parsetime  -->
+
+  <!-- kilo: 1 000 s = 1 000 000 ms < mean parsetime < 1- 000 000 ms = 10 000s -->
+  <!-- time is n.mE+3 seconds, n > 0 -->  
+  <!-- need to find at least one  -->
 
 </timing-data>
