@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '19 June 2022' >
+<!ENTITY date.last.touched '28 June 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
@@ -639,17 +639,141 @@ identifying a suitable grammar for a given input.</p></item>
 </scrap>
 </p>
 
-<p>All of the user-facing functions <hi>[will eventually]</hi> come in
-two forms, with and without an <ident>$options</ident> argument.<note place="foot">
-<p>User-supplied options have been postponed for a while, in part
-because they complicate testing; other things have a higher
-priority.</p>
-</note>  The
+<p>All of the user-facing functions should come in
+two forms, with and without an <ident>$options</ident> argument.  The
 <ident>$options</ident> argument is a map with various user-settable
-options.  For the moment, the options we care about are:
+options.  For the moment, the options we care about are these (not
+all implemented -- I am trying to plan ahead for once).</p>
+<p>First, options describing <label>what to return to the user</label>.
+<list>
+<item><p><kw>return</kw>:  specifies what information the user would
+like back.  The value is a sequence of one or more of the tokens:
+<list>
+<item><p><kw>trees</kw>: return zero or more parse trees (or in some
+cases an <gi>ap:no-parse</gi> element, or an <gi>ap:error</gi>
+element).</p>
+<p>If trees are requested, further options are relevant:
+<list>
+<item><kw>tree-type</kw>: <kw>ast</kw> (the abstract syntax tree
+described by the marks in the grammar) or <kw>raw</kw> (the raw parse
+tree, ignoring the marks in the grammar).
+Default value: <kw>ast</kw>.</item>
+<!-- tree-item-type:  element or map -->
+<item><kw>tree-count</kw>: one of:
+<list>
+<item><kw>all</kw>: return all the parse trees it's feasible to
+return.</item>
+<item><kw>cursor</kw>: return a <term>tree cursor</term>: one parse
+tree, and a function to fetch the next one; when the last tree is
+reached, no function is returned.</item>
+<item>an integer saying how many trees to return.  The value -1 is a
+synonym for <kw>all</kw>; the value -2 is a synonym for
+<kw>cursor</kw>.</item>
+</list></item>
+</list>
+</p></item>
+<item>
+<p><kw>forest</kw>: return a parse forest grammar.</p>
+<p>If a forest is requested, the <kw>pfg-type</kw> option is relevant:
+<list>
+<item><kw>pfg-type</kw>: <kw>xml</kw> (a parse-forest grammar written
+in ixml) or <kw>map</kw> (a parse-forest grammar represented as a map)
+[<hi>not yet implemented</hi>].</item>
+</list>
+</p>
+</item>
+<item><p><kw>items</kw>: return the set of Earley items (debugging only).</p>
+<p>If the Earley set is requested, the <kw>set-type</kw> option is relevant:
+<list>
+<item><kw>set-type</kw>: <kw>xml</kw> or <kw>map</kw>.</item>
+</list>
+</p></item>
+<item><p><kw>grammar</kw>: return the grammar (debugging only).</p>
+<p>If the grammar set is requested, these options are relevant:
+<list>
+<item><kw>compiled</kw>: should the returned grammar be the compiled
+form?  (<kw>false()</kw> means the uncompiled form).</item>
+</list>
+</p></item>
+</list>
+</p>
+</item>
+</list>
+</p>
+
+<p>Some options describe <label>processing choices</label>.  Some of
+these affect conformance.</p>
+<p>First, there are four options that control behavior regarding
+individual points of grammar <soCalled>hygiene</soCalled>:
+<list>
+<item><p><kw>multiple-definitions</kw>: how should multiple definition
+of a nonterminal symbol be treated?  As an <kw>error</kw>, as a <kw>warning</kw>,
+or passed over in <kw>silence</kw>?</p>
+<p><hi>Currently only <kw>error</kw> is implemented.</hi></p></item>
+<item><p><kw>undefined-symbols</kw>: how should undefined nonterminal symbols
+be treated? (Same values.)</p>
+<p><hi>Currently only <kw>error</kw> is implemented.</hi></p></item>
+<item><p><kw>unreachable-symbols</kw>: how should unreachable nonterminal symbols
+be treated? (Same values.)</p>
+<p><hi>Currently only <kw>silence</kw> is implemented.</hi></p></item>
+<item><p><kw>unproductive-symbols</kw>: how should unproductive nonterminal symbols
+be treated? (Same values.)</p>
+<p><hi>Currently only <kw>silence</kw> is implemented.</hi></p></item>
+</list>
+The <kw>hygiene</kw> option provides a sort of gang-switch for these.
+<list>
+<item><p><kw>hygiene</kw>: what should the processor do about checking
+grammar hygiene issues?  
+<list>
+<item><kw>error</kw>: treat any hygiene issue as a fatal error.
+Unless they are specified individually, sets all four hygiene options
+to <code>error</code>.</item>
+<item><kw>warning</kw>:  sets hygiene options to <kw>warning</kw>.</item>
+<item><kw>silence</kw>:  sets hygiene options to <kw>silence</kw>.</item>
+<item><kw>easy</kw>: sets <kw>multiple-definitions</kw> and
+<kw>undefined-symbols</kw> to <kw>warning</kw> because they are easy
+to check, sets <kw>unreachable-symbols</kw> and
+<kw>unproductive-symbols</kw> to <kw>silence</kw> because they are
+harder.</item>
+<item><kw>tolerant</kw>: synonym for <kw>warning</kw>.</item>
+</list></p></item>
+<item><p><kw>conformance</kw>: how strict should conformance checking be?
+<list>
+<item><kw>strict</kw> (default):  enforce all conformance rules; sets
+<kw>hygiene</kw> to <kw>easy</kw> unless it is set separately.</item>
+<item><kw>pedantic</kw>:  currently a synonym for <kw>strict</kw>.</item>
+<item><kw>tolerant</kw>: enforce most conformance rules, but ignore
+those that seem unhelpful; sets <kw>hygiene</kw> to <kw>tolerant</kw>.
+(<hi>When the underlying options are all implemented, this will become
+the default.</hi>)</item>
+</list></p></item>
+</list>
+<hi>Currently only <kw>easy</kw> is implemented.</hi>
+</p>
+<p>If the forest is requested:
+<list>
+<item><kw>tree-cursor</kw>: return a pair consisting of a parse trees
+and a function; when called, the function returns the next parse tree
+and a new function.  By calling each function in turn, the user can
+retrieve and examine as many parse trees as they wish.  When the set
+of parse trees has been exhausted, a no-more-trees signal is
+returned. <hi>Not yet implemented.</hi></item> 
+<item><kw>parse-forest-grammar</kw>: return a parse-forest grammar (in ixml form) for
+the set of parse trees found.</item>
+<!--
+<item><kw>parse-forest-map</kw>: return a map with a parse forest.  <hi>Not yet
+implemented.</hi></item>
+-->
+<item><kw>Earley-set</kw>: return the set of Earley items generated by the
+Earley recognition algorithm; often called a <term>chart</term>.  <hi>Not yet
+implemented.</hi></item>
+</list>
+Other values foreseen but not yet implemented include
+<kw>tree-cursor</kw> and <kw>parse-forest-map</kw>.  (These may be
+mentioned elsewhere.)
 <list>
 <item><kw>return</kw>:  specifies what information the user would
-like back.  Values are:
+like back.  The value is a sequence of one or more of the tokens:
 <list>
 <item><kw>any-tree</kw>: return a parse tree; if there is more than one, return any one.</item>
 <item><kw>all-trees</kw>: return all the parse trees, except those excluded by
