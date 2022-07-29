@@ -21,6 +21,9 @@ import module namespace gluschkov
 import module namespace d2x 
    = 'http://blackmesatech.com/2019/iXML/d2x'
   at "d2x.xqm";
+
+declare namespace map = 
+"http://www.w3.org/2005/xpath-functions/map";
   
 (: Quick hack for testing ... :)
 import module namespace ws
@@ -37,10 +40,17 @@ import module namespace ws
    parse-resource($Input, $Grammar)
    ......................................................
 :)
-
 declare function aparecium:parse-resource(
   $uriI as xs:string,
   $uriG as xs:string
+) as element() {
+  aparecium:parse-resource($uriI, $uriG, $aparecium:options)
+};
+
+declare function aparecium:parse-resource(
+  $uriI as xs:string,
+  $uriG as xs:string,
+  $options as map(*)
 ) as element() {
   let $sI := if (unparsed-text-available($uriI))
              then unparsed-text($uriI)
@@ -49,7 +59,7 @@ declare function aparecium:parse-resource(
              then unparsed-text($uriG)
              else ()
   return if (exists($sI) and exists($sG))
-         then aparecium:parse-string($sI, $sG)
+         then aparecium:parse-string($sI, $sG, $options)
          else          if (exists($sI))
          then element aparecium:error {
               attribute id { "ap:tbd01" },
@@ -78,8 +88,16 @@ declare function aparecium:parse-string(
   $sI as xs:string,
   $sG as xs:string
 ) as element() {
+  aparecium:parse-string($sI, $sG, $aparecium:options)
+};
+
+declare function aparecium:parse-string(
+  $sI as xs:string,
+  $sG as xs:string,
+  $options as map(*)
+) as element() {
   let $cG := (:stat ...prof:time( ... tats:)
-             aparecium:compile-grammar-from-string($sG)
+             aparecium:compile-grammar-from-string($sG, $options)
              (:stat ..., 
              'parse-string: compiling grammar from string:') 
              ... tats:)
@@ -92,7 +110,9 @@ declare function aparecium:parse-string(
       $cG      
     }
     else (:stat ...prof:time( ... tats:)
-         aparecium:parse-string-with-compiled-grammar($sI, $cG)
+         aparecium:parse-string-with-compiled-grammar(
+             $sI, $cG, $options
+         )
          (:stat ..., 'parse-string:  parsing input string:') ... tats:)
 };
 
@@ -104,15 +124,27 @@ declare function aparecium:parse-string-with-compiled-grammar(
   $sI as xs:string,
   $cG as element(ixml)
 ) as element() {
+  aparecium:parse-string-with-compiled-grammar(
+      $sI, $cG, $aparecium:options
+  )
+};
+
+declare function aparecium:parse-string-with-compiled-grammar(
+  $sI as xs:string,
+  $cG as element(ixml),
+  $options0 as map(*)
+) as element() {
+  let $options := map:merge(($options0, $aparecium:options))
+
   let $cg-ok := (:stat ...prof:time( ... tats:)
-                aparecium:grammar-ok($cG)
+                aparecium:grammar-ok($cG, $options)
                 (:stat ..., 'pswcg() calling grammar-ok():') ... tats:)
 
   let $result := if ($cg-ok/self::ixml) 
                  then (:stat ...prof:time( ... tats:)
-                     earley:any-tree($sI, $cG) 
+                     earley:parse($sI, $cG, $options) 
                      (:stat ...
-                     , '0 Outer call to earley:any-tree(): ')
+                     , '0 Outer call to earley:parse(): ')
                       ... tats:)
                  else element aparecium:error {
                    attribute id { "ap:tbd05" },
@@ -162,11 +194,23 @@ declare function aparecium:doc(
 declare function aparecium:parse-grammar-from-uri(
   $uriG as xs:string
 ) as element() {
+  aparecium:parse-grammar-from-uri(
+      $uriG,
+      $aparecium:options
+  )
+};
+declare function aparecium:parse-grammar-from-uri(
+  $uriG as xs:string,
+  $options as map(*)
+) as element() {
   let $sG := if (unparsed-text-available($uriG))
              then unparsed-text($uriG)
              else ()
   return if (exists($sG)) 
-         then aparecium:parse-grammar-from-string($sG)
+         then aparecium:parse-grammar-from-string(
+                  $sG, 
+                  $options
+              )
          else element aparecium:error {
            attribute id { "ap:tbd14" },
            "Grammar (" || $uriG || ") not found."
@@ -182,12 +226,26 @@ declare function aparecium:parse-grammar-from-uri(
 declare function aparecium:parse-grammar-from-string(
   $G as xs:string
 ) as element() {
+  aparecium:parse-grammar-from-string(
+      $G,
+      $aparecium:options
+  )
+};
+
+declare function aparecium:parse-grammar-from-string(
+  $G as xs:string,
+  $options as map(*)
+) as element() {
   (: CGIG:  compiled grammar for ixml grammars :)
   let $CGIG := doc($aparecium:ixml.gl.xml)/ixml,
       (: PG: parsed grammar :)
-      $PG0 := aparecium:parse-string-with-compiled-grammar($G,$CGIG),
+      $PG0 := aparecium:parse-string-with-compiled-grammar(
+                  $G,
+                  $CGIG,
+                  $options
+              ),
       $PG := (:stat ...prof:time( ... tats:)
-             aparecium:grammar-ok($PG0)
+             aparecium:grammar-ok($PG0, $options)
              (:stat ..., 'pgfs() calling grammar-ok():') ... tats:)
   return $PG
 };
@@ -201,8 +259,18 @@ declare function aparecium:parse-grammar-from-string(
 declare function aparecium:compile-grammar-from-uri(
   $uriG as xs:string
 ) as element() {
-  let $xmlG := aparecium:parse-grammar-from-uri($uriG)
-  return gluschkov:ME($xmlG)
+  aparecium:compile-grammar-from-uri(
+    $uriG,
+    $aparecium:options
+  )
+};
+
+declare function aparecium:compile-grammar-from-uri(
+  $uriG as xs:string,
+  $options as map(*)
+) as element() {
+  let $xmlG := aparecium:parse-grammar-from-uri($uriG, $options)
+  return gluschkov:ME($xmlG, $options)
 };
 
 
@@ -214,8 +282,18 @@ declare function aparecium:compile-grammar-from-uri(
 declare function aparecium:compile-grammar-from-string(
   $sG as xs:string
 ) as element() {
+  aparecium:compile-grammar-from-string(
+    $sG, 
+    $aparecium:options
+  )
+};
+
+declare function aparecium:compile-grammar-from-string(
+  $sG as xs:string,
+  $options as map(*)
+) as element() {
   let $xmlG := aparecium:parse-grammar-from-string($sG)
-  return gluschkov:ME($xmlG)
+  return gluschkov:ME($xmlG, $options)
 };
 
 
@@ -230,11 +308,21 @@ declare function aparecium:compile-grammar-from-string(
 declare function aparecium:compile-grammar-from-xml(
   $xmlG as element()
 ) as element(ixml) {
+  aparecium:compile-grammar-from-xml(
+    $xmlG,
+    $aparecium:options
+  )
+};
+
+declare function aparecium:compile-grammar-from-xml(
+  $xmlG as element(),
+  $options as map(*)
+) as element(ixml) {
   let $G := (:stat ...prof:time( ... tats:)
-            aparecium:grammar-ok($xmlG)
+            aparecium:grammar-ok($xmlG, $options)
             (:stat ..., 'cgfx() calling grammar-ok():') ... tats:)
   return if ($G/self::ixml)
-         then gluschkov:ME($xmlG)
+         then gluschkov:ME($xmlG, $options)
          else element aparecium:error {
            attribute id { "ap:tbd15" },
            "compile-grammar-from-xml(): ",
@@ -285,7 +373,8 @@ declare function aparecium:recompile-ixml-grammar(
 (: grammar-ok(): check grammar 
 :)
 declare function aparecium:grammar-ok(
-  $G as element()
+  $G as element(),
+  $options as map(*)
 ) as element() {
   if ($G/self::ixml)
   then 
@@ -531,9 +620,12 @@ declare function aparecium:grammar-ok(
 declare variable $aparecium:options 
    as map(xs:string, item()*)
    := map {
-        'return': 'any-tree',
-        'tree-count': 2,
-        'tree-form': 'ast',
+        'return-tree': true(),
+        'return-pfg': false(),
+        'return-items': false(),
+        'return-grammar': false(),
+
+        'tree-type': 'ast',
                 'multiple-definitions': 'error',
         'undefined-symbols': 'error',
         'unreachable-symbols': 'silence',

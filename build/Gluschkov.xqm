@@ -23,11 +23,12 @@ declare variable $gl:follow-ns :=
 "http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset";
 
 declare function gl:ME (
-  $E as element()
+  $E as element(),
+  $options as map(*)
 ) as element() {
   let $children := for $c in $E/node() 
                    return if ($c/self::element())
-                          then gl:ME($c)
+                          then gl:ME($c, $options)
                           else $c,
       $ch := $children[self::element()]
   return if ($E/self::member) then $E
@@ -372,7 +373,9 @@ then element ap:error {
 else element ap:error {
        attribute id {"ap:tbd37"},
        element desc {
-         "Element {name($E)} was unexpected:"
+         "Element", 
+         name($E),
+         "was unexpected:"
        },
        $E
      }

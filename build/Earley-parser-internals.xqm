@@ -50,7 +50,7 @@ declare function epi:earley-parse(
       else $options
 
   let $mapResult := (:stat ...prof:time( ... tats:)
-                    er:recognizeX($I, $G),
+                    er:recognizeX($I, $G, $options),
                     (:stat ...'0a recognize(): '),... tats:)
 
       $meiClosure := $mapResult('Closure'),
@@ -84,7 +84,7 @@ declare function epi:earley-parse(
                       'epi:earley-parse() has result') 
 
         let $pfg := (:stat ...prof:time(... tats:)
-                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I)
+                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I, $options)
                     (:stat ..., '0b making pfg: ')... tats:)
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a parse-forest grammart') 
@@ -107,7 +107,7 @@ declare function epi:earley-parse(
 
         else 
         let $pfg := (:stat ...prof:time(... tats:)
-                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I),
+                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I, $options),
                     (:stat ...'0b making pfg: '),... tats:)
             $ast := (:stat ...prof:time(... tats:)
                     epi:tree-from-pfg($pfg, 'document', ())
@@ -193,8 +193,8 @@ declare function epi:earley-parse(
 
   let $leResults := if ( ($G/prolog/version/@string
            /string(), "1.0")[1] eq "1.0")
-      then $leResults0
-      else for $item in $leResults0
+      then $leResults0 
+      else for $item in $leResults0 
            return if ($item instance of element())
            then element {name($item)} {
                   ($item/@* except 
@@ -307,7 +307,8 @@ declare function epi:parse-forest-grammar(
   $leiClosure as map(xs:string,
     map(xs:integer,
         map(xs:string, item())*)) ,
-  $I as xs:string
+  $I as xs:string,
+  $options as map(*)
 ) as element() {
   let $rules := epi:make-pfg-rules(
                     $leiCompletions,

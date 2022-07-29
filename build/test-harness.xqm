@@ -213,10 +213,16 @@ declare function t:run-test-set(
           if (exists($new-xml-grammar)
               and exists($prof-time)) 
           then $prof-time(
-                  ap:grammar-ok($new-xml-grammar)
+                  ap:grammar-ok(
+                      $new-xml-grammar, 
+                      $ap:options
+                  )
                , 'test-harness: checking XML grammar.')
           else if (exists($new-xml-grammar))
-          then ap:grammar-ok($new-xml-grammar)
+          then ap:grammar-ok(
+                   $new-xml-grammar,
+                   $ap:options
+               )
           else ()
 
       
@@ -567,25 +573,7 @@ declare function t:run-test-case(
                  }
 
   
-    
-    let $prof-track := (
-        function-lookup(
-            QName('http://basex.org/modules/prof',
-                  'track'),
-            1),
-        function($items) { 
-            map { 'time': '?', 'value': $items } 
-        }
-        )[1]
-
-    
-    let $xquery-eval := function-lookup(
-            QName('http://basex.org/modules/xquery',
-                  'eval'),
-            3)
-
-
-    let $pt-plus := $prof-track(
+    let $pt-plus := prof:track(
         
         if ($input-string eq $failure-string)
         then ()
@@ -602,8 +590,6 @@ declare function t:run-test-case(
 
         else try {
           
-          if (exists($xquery-eval))
-          then 
           let $query := "import module namespace aparecium
                 = 'http://blackmesatech.com/2019/iXML/Aparecium'
                 at '../build/Aparecium.xqm';
@@ -618,14 +604,7 @@ declare function t:run-test-case(
                             'timeout' : 
                             ($options/@timeout/number(), 600)[1]
                           }
-          return $xquery-eval($query, $bindings, $options)
-
-          else 
-          ap:parse-string-with-compiled-grammar(
-            $input-string,
-            $G
-          )         
-
+          return xquery:eval($query, $bindings, $options)
 
         } catch xquery:timeout {
           element tc:error {
@@ -804,7 +783,9 @@ declare function t:run-test-case(
                       else () (: unknown option, bag it :)
                  )
 
-            else element tc:assert-xml { "..." } (: $result ne 'fail' :)            
+            else element tc:assert-xml { 
+                 element as-reported {} 
+            } (: $result ne 'fail' :)            
 ,
               
             let $kwD := $options/@reported-result,

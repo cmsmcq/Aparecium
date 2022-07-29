@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '6 June 2022' >
+<!ENTITY date.last.touched '28 July 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
@@ -321,79 +321,160 @@ indexing into the list.  It's easy to change the index.
 
     $catalog-of-catalogs := &lt;test-catalogs>
 
-      &lt;!-- local catalogs, mostly simple -->
+      <ptr target="dr-cats-local"/>      
+      <ptr target="dr-cats-ixml"/>      
+      <ptr target="dr-cats-ixml-tests"/>      
 
+    &lt;/test-catalogs>,
+
+    $test-catalog-path := $catalog-of-catalogs
+                          /catalog[@n=$catalog-index]
+                          /@path/string(),
+
+    $test-catalog-uri := resolve-uri($test-catalog-path, 
+                                     static-base-uri()),
+
+    $report-filename := 'test-report.' 
+                        || replace($test-catalog-uri,
+                                   "^(.*)/([^/]*)(\.xml)",
+                                   "$2")
+                        || '.xml', 
+    $report-uri := $outdir || $report-filename,
+</scrap>
+I've grouped the catalogs for a better overview.</p>
+<p>First, local (i.e. Aparecium-specific) catalogs, roughly
+simple to complex.
+<scrap id="dr-cats-local"
+       name="Local catalogs">
+      &lt;!--* .......................................................
+          * local catalogs, mostly simple 
+          * ...................................................... -->
+
+      &lt;!-- need timing ........................................ -->
       &lt;catalog n="expr1" path="{$apadir}expr1-20220415.xml"/>&lt;!-- ??? s -->
+
+      &lt;!-- local performance tests (cut off the slow ones for now) -->
+      &lt;catalog n="local-doubling" 
+               path="{$apadir}doubling-test-catalog.xml"
+               />&lt;!-- ??? s -->
+      &lt;catalog n="local-tens"
+	       path="{$apadir}tenfold-test-catalog.xml"
+               />&lt;!-- ??? s -->
+      &lt;catalog n="local-evens-and-odds" 
+               path="{$apadir}evens-and-odds-test-catalog.xml"
+               />&lt;!-- ??? s -->	       
+      
     
-      &lt;!-- under 60 seconds (2.1, 4.8, 20.1, 12.4) -->
+      &lt;!-- under 60 seconds ................................... -->
       &lt;catalog n="test0" path="{$apadir}test0.xml"/>&lt;!-- 2 s -->
       &lt;catalog n="test1" path="{$apadir}test1.xml"/>&lt;!-- 5 s -->
-      &lt;catalog n="hygiene" path="{$itwdir}ixml-20220222/hygiene-tests.xml"/>&lt;!-- 12 s -->>
       &lt;catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/>&lt;!-- 20 s -->
-
-      &lt;!-- under 10 minutes -->      
+      
+      &lt;!-- under 10 minutes ................................... -->      
       &lt;catalog n="misc" path="{$apadir}misc-tests.xml"/>&lt;!-- 78.1s -->
-      
-      &lt;!-- embeds all the gxxx catalogs so they can be done in a single run -->      
-      &lt;catalog n="gxxx"
-	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/>&lt;!-- 153s -->
 
-      &lt;catalog n="bogons" path="{$apadir}bogons-20220310.xml"/>&lt;!-- 439 s -->
-
-      &lt;!-- under 1 hour () -->
+      &lt;!-- under 1 hour ....................................... -->      
       &lt;catalog n="test2" path="{$apadir}test2.xml"/>&lt;!-- 745 s -->
+      
+      &lt;!-- over 1 hour ........................................ -->      
 
-      &lt;!-- under 2 hours () -->
-      &lt;!-- under 5 hours () -->
+</scrap>
+Removed as no longer useful:
+<list>
+  <item><ident>bogons-20220310.xml</ident> (439s)</item>
+  <item><ident>jl-insertion-test-catalog.xml</ident> (? s)</item>
+  <item><ident>jl-prolog-test-catalog.xml</ident> (? s)</item>
+</list>
+</p>
+<p>Tests from the mail ixml repo (or rather, for simplicity when
+working on pull requests, my local fork of it).
+<scrap id="dr-cats-ixml"
+       name="From main ixml repo">
+      &lt;!--* .......................................................
+          * Main ixml repo
+          * ...................................................... -->
 
-      &lt;!-- over 5 hours () -->
-      &lt;!-- ixml-all is very slow (5.5h or so): 
-           all of the tests in the ixml repo -->
+      &lt;!-- all ................................................ -->
       &lt;catalog n="ixml-all"
-	       path="{$invdir}test-catalog.xml"/>
-      
-      &lt;!-- to be timed -->
-      &lt;catalog n="prolog" path="{$invdir}grammar-misc/prolog-tests.xml"/>&lt;!-- ? s -->
-      &lt;catalog n="insert" path="{$invdir}grammar-misc/insertion-tests.xml"/>&lt;!-- ? s -->
-      
-      &lt;catalog n="jl-insert-old" path="{$apadir}jl-insertion-test-catalog.xml"/>&lt;!-- ? s -->
-      &lt;catalog n="jl-prolog-old" path="{$apadir}jl-prolog-test-catalog.xml"/>&lt;!-- ? s -->
+	       path="{$invdir}test-catalog.xml"
+               />&lt;!-- 5.5h -->
 
-      &lt;!-- syntax error tests in ixml repo -->
-      &lt;!-- 24s, -->
+      &lt;!-- syntax/* ........................................... -->
       &lt;catalog n="syntax-cagt"
-       path="{$invdir}syntax/catalog-as-grammar-tests.xml"/>
+        path="{$invdir}syntax/catalog-as-grammar-tests.xml"
+        />&lt;!-- ? s -->
       &lt;catalog n="syntax-caii"
-       path="{$invdir}syntax/catalog-as-instance-tests-ixml.xml"/>
+        path="{$invdir}syntax/catalog-as-instance-tests-ixml.xml"
+        />&lt;!-- ? s -->
       &lt;catalog n="syntax-caix"
-       path="{$invdir}syntax/catalog-as-instance-tests-xml.xml"/>
+        path="{$invdir}syntax/catalog-as-instance-tests-xml.xml"
+        />&lt;!-- ? s -->
       &lt;catalog n="syntax-correct"
-       path="{$invdir}syntax/catalog-of-correct-tests.xml"/>
+        path="{$invdir}syntax/catalog-of-correct-tests.xml"
+        />&lt;!-- ? s -->
 
       &lt;!-- other tests in ixml repo -->
       &lt;catalog n="ixml-ambi"
-	       path="{$invdir}ambiguous/test-catalog.xml"/>
+	       path="{$invdir}ambiguous/test-catalog.xml"
+               />&lt;!-- ? s -->
       &lt;catalog n="ixml-corr"
-	       path="{$invdir}correct/test-catalog.xml"/>
+	       path="{$invdir}correct/test-catalog.xml"
+               />&lt;!-- ? s -->
+      &lt;catalog n="ixml-ixml"
+	       path="{$invdir}ixml/test-catalog.xml"
+               />&lt;!-- ? s -->
       &lt;catalog n="ixml-parse"
-	       path="{$invdir}parse/test-catalog.xml"/>
+	       path="{$invdir}parse/test-catalog.xml"
+               />&lt;!-- ? s -->
       &lt;catalog n="ixml-error"
-	       path="{$invdir}error/test-catalog.xml"/>
+	       path="{$invdir}error/test-catalog.xml"
+               />&lt;!-- ? s -->
       &lt;catalog n="ixml-hygiene"
-	       path="{$invdir}grammar-misc/test-catalog.xml"/>
+	       path="{$invdir}grammar-misc/test-catalog.xml"
+               />&lt;!-- ? s -->
       &lt;catalog n="ixml-prolog"
-	       path="{$invdir}grammar-misc/test-catalog.xml"/>
+	       path="{$invdir}grammar-misc/prolog-tests.xml"
+               />&lt;!-- ? s -->
       &lt;catalog n="ixml-insertion"
-	       path="{$invdir}grammar-misc/test-catalog.xml"/>
+	       path="{$invdir}grammar-misc/insertion-tests.xml"
+               />&lt;!-- ? s -->
+      &lt;catalog n="ixml-misc-1"
+	       path="{$invdir}misc/misc-001-020-catalog.xml"
+               />&lt;!-- ? s -->
+      &lt;catalog n="ixml-misc-2"
+	       path="{$invdir}misc/misc-021-040-catalog.xml"
+               />&lt;!-- ? s -->
+      &lt;catalog n="ixml-misc-3"
+	       path="{$invdir}misc/misc-041-060-catalog.xml"
+               />&lt;!-- ? s -->
 
       &lt;!-- ixml-ixml is slow -->
-      &lt;catalog n="ixml-ixml"
-	       path="{$invdir}ixml/test-catalog.xml"/>
-      
 
+      &lt;!-- performance tests -->
+      &lt;catalog n="a-star-twos" 
+               path="{$invdir}performance/a-star/doubling-test-catalog.xml"
+               />&lt;!-- ??? s -->
+      &lt;catalog n="a-star-tens"
+	       path="{$invdir}performance/a-star/tenfold-test-catalog.xml"
+               />&lt;!-- ??? s -->
+      &lt;catalog n="odds-evens" 
+               path="{$invdir}performance/evens-and-odds/test-catalog.xml"
+               />&lt;!-- ??? s -->	       
 
-      &lt;!-- Positive and negative catalogs for various small grammars -->
-
+      &lt;!-- under 60 seconds ................................... -->
+      &lt;!-- under 10 minutes ................................... -->
+      &lt;!-- under 1 hour ....................................... -->
+      &lt;!-- over 1 hour ........................................ -->
+</scrap>
+</p>
+<p>Tests from the ixml-tests repo (not quite derelict yet, but these
+should all move to ixml eventually).
+<scrap id="dr-cats-ixml-tests"
+       name="From ixml-tests repo">
+      &lt;!--* .......................................................
+          * ixml-tests repo
+          * ...................................................... -->
+      &lt;!-- need timing ........................................ -->
       &lt;catalog n="g010"
 	       path="{$ixtdir}gxxx/g010.test-catalog.xml"/>
       &lt;catalog n="g010neg"
@@ -424,7 +505,17 @@ indexing into the list.  It's easy to change the index.
       &lt;catalog n="g112neg"
 	       path="{$ixtdir}gxxx/g112.O3.test-catalog.all.neg.xml"/>
 
-
+      &lt;!-- under 60 seconds ................................... -->
+      &lt;!-- under 10 minutes ................................... -->
+      &lt;!-- embeds all the gxxx catalogs so they can be done in a single run -->      
+      &lt;catalog n="gxxx"
+	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/>&lt;!-- 153s -->
+      &lt;!-- under 1 hour ....................................... -->
+      &lt;!-- over 1 hour ........................................ -->
+</scrap>
+Removed the following for the moment, as they appear to be broken.
+Maybe I can fix them.  Maybe I will.
+<scrap name="Broken tests">
       &lt;!-- arithmetic expressions, with 
            2, 7638, 2886, 1020, and 338 test cases.
            Broken. -->
@@ -438,47 +529,6 @@ indexing into the list.  It's easy to change the index.
 	       path="{$ixtdir}arith/arith.O3.test-catalog.state.neg.xml"/>
       &lt;catalog n="arith-sf-neg"
 	       path="{$ixtdir}arith/arith.O3.test-catalog.state-final.neg.xml"/>
-
-      &lt;!--  straw-man tests on ixml itself
-           (n.b. old version of ixml grammar) -->
-      &lt;catalog n="straw-ixml"
-	       path="{$ixtdir}ixml/ixml.test-catalog.pos.xml"/>
-
-      &lt;!--  wisps test set (currently in progress) -->
-      &lt;catalog n="misc-001"
-	       path="{$invdir}misc/misc-001-020-catalog.xml"/>
-      &lt;catalog n="misc-021"
-	       path="{$invdir}misc/misc-021-040-catalog.xml"/>
-         
-      &lt;catalog n="wisp-A"
-	       path="{$ixtdir}wisps/wisps-001-020-catalog.xml"/>
-      &lt;catalog n="wisp-B"
-	       path="{$ixtdir}wisps/wisps-021-040-catalog.xml"/>
-      &lt;catalog n="wisp-C"
-	       path="{$ixtdir}wisps/wisps-041-060-catalog.xml"/>
-      &lt;catalog n="wisp-D"
-	       path="{$ixtdir}wisps/wisps-061-080-catalog.xml"/>
-      &lt;catalog n="wisp-E"
-	       path="{$ixtdir}wisps/wisps-081-102-catalog.xml"/>
-
-      &lt;catalog n="wisps"
-	       path="{$ixtdir}wisps/wisp-catalog.xml"/>
-         
-    &lt;/test-catalogs>,
-
-    $test-catalog-path := $catalog-of-catalogs
-                          /catalog[@n=$catalog-index]
-                          /@path/string(),
-
-    $test-catalog-uri := resolve-uri($test-catalog-path, 
-                                     static-base-uri()),
-
-    $report-filename := 'test-report.' 
-                        || replace($test-catalog-uri,
-                                   "^(.*)/([^/]*)(\.xml)",
-                                   "$2")
-                        || '.xml', 
-    $report-uri := $outdir || $report-filename,
 </scrap>
 </p>
 
@@ -977,10 +1027,16 @@ function, if we have a new grammar.
           if (exists($new-xml-grammar)
               and exists($prof-time)) 
           then $prof-time(
-                  ap:grammar-ok($new-xml-grammar)
+                  ap:grammar-ok(
+                      $new-xml-grammar, 
+                      $ap:options
+                  )
                , 'test-harness: checking XML grammar.')
           else if (exists($new-xml-grammar))
-          then ap:grammar-ok($new-xml-grammar)
+          then ap:grammar-ok(
+                   $new-xml-grammar,
+                   $ap:options
+               )
           else ()
 </scrap>
 The older version, for reference:
@@ -1840,10 +1896,22 @@ the code is very similar, but instead of calling
 named <ident>$prof-track</ident>, whose value needs to be set up in
 advance, as does that of a variable unsurprisingly named
 <ident>$xquery-eval</ident>.
-
+<hi>Unfortunately, assigning <ident>prof:track</ident> (and apparently
+also <ident>xquery:eval</ident>) to a variable changes the evaluation
+strategy used by BaseX and causes the time taken to be recorded as
+zero.</hi><note place="foot"><p>The <ident>prof:track</ident> routine has a
+meaning that requires that it be implemented as what a Lisp
+implementation would call a <soCalled>special form</soCalled>, in
+which the actual arguments in the call are passed in not as values but
+as expressions, and are evaluated under control of the routine.  But
+assigning <ident>prof:track</ident> to a variable, as is done here,
+causes the actual arguments to be evaluated before the routine is
+called.</p></note> So this code does not work in BaseX.  It does work
+in Saxon, so I'll leave it here in hopes that at some point I can
+figure out a way to make implementation-neutral code work.
 <scrap corresp="lib-rtc-parse"
        id="lib-rtc-parse-v3"
-       version="v3"
+       version="alt"
        name="Set $parse-tree by parsing the test input string">
 
     <ptr target="lib-rtc-parse-prof-track"/>
@@ -1910,7 +1978,7 @@ have an alternate function: it either holds the
 <p>Using this variable, we can choose two ways to
 produce the parse tree.
 <scrap corresp="lib-rtc-parse-with-timeout"
-       version="v3"
+       version="alt"
        name="Parse the input, maybe with a time limit">
 
           if (exists($xquery-eval))
@@ -2487,7 +2555,9 @@ we serialize it externally.</item>
                       else () (: unknown option, bag it :)
                  )
 
-            else element tc:assert-xml { "..." } (: $result ne 'fail' :)            
+            else element tc:assert-xml { 
+                 element as-reported {} 
+            } (: $result ne 'fail' :)            
 </scrap>
 </p>
 <p>The logic for reported results is similar but is not

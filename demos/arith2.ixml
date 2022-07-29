@@ -1,15 +1,16 @@
 { simpler AST for arithmetic }
 
-expr: s?, SUM, s?.
+     expr: s?, SUM, s?.
+     -SUM: PRODUCT;
+           sum.
+      sum: SUM, addop, PRODUCT.
+ -PRODUCT: FACTOR;
+           product.
+  product: PRODUCT, mulop, FACTOR.
+  -FACTOR: number; var; -'(', -expr, -')'.
 
--SUM: PRODUCT; sum.
-sum: SUM, addop, PRODUCT.
--PRODUCT: FACTOR; product.
-product: PRODUCT, mulop, FACTOR.
--FACTOR: number; var; -'(', -expr, -')'.
-
-number: ['0'-'9']+.
-var: ['a'-'z'; 'A'-'Z']+.
-@addop: s?, ['+-'], s?.
-@mulop: s?, ['*/'], s?.
--s: -[Zs]+.
+   number: ['0'-'9']+, ('.', ['0'-'9']+)?.
+      var: '$', [L].
+   @addop: s?, ['+-'], s?.
+   @mulop: s?, (['*/']; 'mod'; 'idiv'), s?.
+       -s: -[Zs; #A; #D]+.

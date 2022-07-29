@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '28 June 2022' >
+<!ENTITY date.last.touched '28 July 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
@@ -77,8 +77,9 @@
         (setq nxml-child-indent 0)
       )
 
-      For now, do this manually.  I don't know how to
-      make Aquamacs do it using eval-last-sexp or eval-expression.
+      For now, do this manually, or select the progn expression
+      and use eval-region.  Neither eval-last-sexp nor eval-expression
+      seem to do it.
     *-->
 ]>
 <TEI.2>
@@ -100,6 +101,9 @@
 </fileDesc>
 <revisionDesc>
 <list>
+<item>2022-07-28 : CMSMcQ : level set with options.</item>
+<item>2022-07 : CMSMcQ : working to allow user options and pass them
+from user-facing functions into the internals.</item>
 <item>2022-06-01 : CMSMcQ : work on version mismatch warning</item>
 <item>2022-06-01/2022-06-06 : CMSMcQ : get Aparecium and test driver to work in Saxon in Oxygen</item>
 <item>2022-04-12 : CMSMcQ : try again to escape newlines in error message</item>
@@ -365,6 +369,9 @@ functionality described above.</p>
 <item><ident>Aparecium.xqm</ident> declares the top-level user-facing
 functions for parsing (and also some cruft most users can and should
 ignore).</item>
+<item>A set of stand-alone XQuery modules and a shell script provide a
+command-line interface to selected top-level user-facing
+functions.</item>
 <item><ident>Earley-recognizer.xqm</ident> declares the high-level
 functions of an Earley recognizer.  These functions prepare the
 grammar, build the initial Earley item, and construct the Earley set.
@@ -387,7 +394,7 @@ routines for the Earley parser.</item>
 rules in a grammar with attributes allowing the rule to be interpreted
 as a finite state automaton instead of as a regular expression.</item>
 </list>
-These files are described in the following paragraphs.
+These files are described in the following subsections.
 </p>
 <div id="files-ap">
 <head>Aparecium module:  <ident>Aparecium.xqm</ident></head>
@@ -430,6 +437,9 @@ import module namespace gluschkov
 import module namespace d2x 
    = 'http://blackmesatech.com/2019/iXML/d2x'
   at "d2x.xqm";
+
+declare namespace map = 
+"http://www.w3.org/2005/xpath-functions/map";
   
 (: Quick hack for testing ... :)
 import module namespace ws
@@ -440,6 +450,84 @@ import module namespace ws
 <p>The user-facing functions of this module are described in
 sections <ptr target="hi-calling" type="secnum"/> and <ptr
 target="alt-calls" type="secnum"/>.</p>
+</div>
+
+<div id="files-cli">
+<head>Command-line interface</head>
+<p>The modules for calling from the command line will
+be described here.
+</p>
+<p>The <ident>parse-resource</ident> XQuery module is a top-level
+XQuery module which calls <code>parse-resource()</code> on
+user-specified URIs for input and grammar.
+<scrap file="parse-resource.xqy">
+(: watch this space :)
+</scrap></p>
+<p>The <ident>parse-resource</ident> XQuery module is a top-level
+XQuery module which calls <code>parse-resource()</code> on
+user-specified URIs for input and grammar.
+<scrap file="parse-resource.xqy">
+import module namespace aparecium 
+= "http://blackmesatech.com/2019/iXML/Aparecium"
+at "../build/Aparecium.xqm";
+
+declare variable $input as xs:string external;
+declare variable $grammar as xs:string external;
+
+return aparecium:parse-resource(
+           $input, 
+           $grammar)
+</scrap>
+</p>
+<p>The <ident>parse-resource-with-compiled-grammar</ident> module is
+intended to be called from the command line; as the name suggests, it
+accepts URIs for the input and a compiled grammar and uses the grammar
+to parse the input.
+<scrap file="parse-resource-with-compiled-grammar.xq">
+import module namespace aparecium 
+= "http://blackmesatech.com/2019/iXML/Aparecium"
+at "../build/Aparecium.xqm";
+
+declare variable $input as xs:string external;
+declare variable $grammar as xs:string external;
+
+let $input-string := try {
+        doc($input)
+    } catch * {
+        trace(element aparecium:error {
+           'Failure loading input string from',
+           '&#xA;' || $input
+        }, 
+        'Failure loading input string, sorry.')
+    },
+    $compiled-grammar := try {
+        doc($grammar/ixml)
+    } catch * {
+        trace(element aparecium:error {
+           'Failure loading compiled grammar from',
+           '&#xA;' || $grammar
+        }, 
+        'Failure loading compiled grammar, sorry.')        
+    },
+
+return aparecium:parse-string-with-compiled-grammar(
+           $input-string, 
+           $grammar)
+</scrap></p>
+<p>The <ident>compile-grammar</ident> module is intended to be
+called from the command line; as the name suggests, it compiles a
+grammar and returns it.
+<scrap file="compile-grammar.xq">
+import module namespace aparecium 
+= "http://blackmesatech.com/2019/iXML/Aparecium"
+at "../build/Aparecium.xqm";
+
+declare variable $file as xs:string external;
+
+let $xml-grammar := doc($file),
+    $compiled-grammar := aparecium:compile-grammar-from-xml($xml-grammar/ixml)
+return $compiled-grammar
+</scrap></p>
 </div>
 
 <div id="files-parser">
@@ -460,9 +548,22 @@ import module namespace epi =
 "http://blackmesatech.com/2019/iXML/Earley-parser-internals"
 at "Earley-parser-internals.xqm";
 
+import module namespace er =
+"http://blackmesatech.com/2019/iXML/Earley-recognizer"
+at "Earley-recognizer.xqm";
+
+import module namespace eri =
+"http://blackmesatech.com/2019/iXML/Earley-rec-internals"
+at "Earley-rec-internals.xqm";
+
 declare namespace ap = 
 "http://blackmesatech.com/2019/iXML/Aparecium";
 
+declare namespace ixml = 
+"http://invisiblexml.org/NS";
+
+declare namespace map = 
+"http://www.w3.org/2005/xpath-functions/map";
 </scrap></p>
 </div>
 
@@ -639,27 +740,54 @@ identifying a suitable grammar for a given input.</p></item>
 </scrap>
 </p>
 
-<p>All of the user-facing functions should come in
-two forms, with and without an <ident>$options</ident> argument.  The
-<ident>$options</ident> argument is a map with various user-settable
-options.  For the moment, the options we care about are these (not
-all implemented -- I am trying to plan ahead for once).</p>
+<p>All of the user-facing functions should come in two forms, with and
+without an <ident>$options</ident> argument.  The current set of
+options are described <ref target="hi-call-options">below</ref>.</p>
+
+<div id="hi-call-options">
+<head>User options</head>
+
+<p>All the functions in this group have an optional
+<ident>$options</ident> argument, which takes the form of a map with
+string keys and atomic values.  For the moment, the options we care
+about are these (not all implemented -- I am trying to plan ahead for
+once).</p>
+
+<div id="hi-call-opt-returns">
+<head>How to return results</head>
 <p>First, options describing <label>what to return to the user</label>.
+These are a set of Boolean values, with the indicated default values.
 <list>
-<item><p><kw>return</kw>:  specifies what information the user would
-like back.  The value is a sequence of one or more of the tokens:
-<list>
-<item><p><kw>trees</kw>: return zero or more parse trees (or in some
-cases an <gi>ap:no-parse</gi> element, or an <gi>ap:error</gi>
-element).</p>
-<p>If trees are requested, further options are relevant:
+<item><p><kw>return-tree</kw> (<code>true</code>): return a parse
+tree, if there is any.  If there is none, an
+<gi>aparecium:no-parse</gi> element is returned.
+<!--* return one or more parse trees, if there are any.  (The
+number of trees to return is controlled by <kw>tree-count</kw).) *-->
+</p></item>
+<item><p><kw>return-pfg</kw> (<code>false</code>): return a
+parse-forest grammar, if there is one.</p></item>
+<item><p><kw>return-items</kw> (<code>false</code>): return an
+XML representation of the Earley set constructed during parsing.
+Unlikely to be of interest except for debugging.</p></item>
+<item><p><kw>return-grammar</kw> (<code>false</code>): return the
+XML representation of the compiled grammar.</p></item>
+<!--
+<item><p><kw>return-cursor</kw> (<code>false</code>): together with
+the first tree, return a function which can be called to fetch the
+next tree (which will be delivered with a function to fetch the next
+tree, and so on as long as there are more trees to be
+returned).</p></item>
+-->
+</list>
+</p>
+<p>If trees are requested, then <kw>tree-type</kw> is relevant:
 <list>
 <item><kw>tree-type</kw>: <kw>ast</kw> (the abstract syntax tree
 described by the marks in the grammar) or <kw>raw</kw> (the raw parse
 tree, ignoring the marks in the grammar).
 Default value: <kw>ast</kw>.</item>
 <!-- tree-item-type:  element or map -->
-<item><kw>tree-count</kw>: one of:
+<!-- <item><kw>tree-count</kw>: one of: 
 <list>
 <item><kw>all</kw>: return all the parse trees it's feasible to
 return.</item>
@@ -669,38 +797,40 @@ reached, no function is returned.</item>
 <item>an integer saying how many trees to return.  The value -1 is a
 synonym for <kw>all</kw>; the value -2 is a synonym for
 <kw>cursor</kw>.</item>
-</list></item>
 </list>
-</p></item>
-<item>
-<p><kw>forest</kw>: return a parse forest grammar.</p>
+-->
+</list>
+</p>
+<!--
 <p>If a forest is requested, the <kw>pfg-type</kw> option is relevant:
 <list>
 <item><kw>pfg-type</kw>: <kw>xml</kw> (a parse-forest grammar written
 in ixml) or <kw>map</kw> (a parse-forest grammar represented as a map)
-[<hi>not yet implemented</hi>].</item>
+</item>
 </list>
 </p>
-</item>
-<item><p><kw>items</kw>: return the set of Earley items (debugging only).</p>
+-->
+<!--
 <p>If the Earley set is requested, the <kw>set-type</kw> option is relevant:
 <list>
 <item><kw>set-type</kw>: <kw>xml</kw> or <kw>map</kw>.</item>
 </list>
-</p></item>
-<item><p><kw>grammar</kw>: return the grammar (debugging only).</p>
+</p>
+-->
+<!--
 <p>If the grammar set is requested, these options are relevant:
 <list>
 <item><kw>compiled</kw>: should the returned grammar be the compiled
 form?  (<kw>false()</kw> means the uncompiled form).</item>
 </list>
-</p></item>
-</list>
 </p>
-</item>
-</list>
-</p>
+-->
+<p>If more than one of these is set, then the results will be wrapped
+in an enclosing <gi>aparecium:result</gi> element.</p>
+</div>
 
+<div id="hi-call-opt-how">
+<head>Processing choices and behavior</head>
 <p>Some options describe <label>processing choices</label>.  Some of
 these affect conformance.</p>
 <p>First, there are four options that control behavior regarding
@@ -720,7 +850,12 @@ be treated? (Same values.)</p>
 be treated? (Same values.)</p>
 <p><hi>Currently only <kw>silence</kw> is implemented.</hi></p></item>
 </list>
-The <kw>hygiene</kw> option provides a sort of gang-switch for these.
+</p>
+<p>Then there are some options which serve as short-hand for those
+just mentioned.
+</p>
+<p>The <kw>hygiene</kw> option provides a sort of gang-switch for the
+individual hygiene options:
 <list>
 <item><p><kw>hygiene</kw>: what should the processor do about checking
 grammar hygiene issues?  
@@ -728,99 +863,49 @@ grammar hygiene issues?
 <item><kw>error</kw>: treat any hygiene issue as a fatal error.
 Unless they are specified individually, sets all four hygiene options
 to <code>error</code>.</item>
-<item><kw>warning</kw>:  sets hygiene options to <kw>warning</kw>.</item>
+<item><kw>tolerant</kw> or <kw>warning</kw>: sets hygiene options to
+<kw>warning</kw>.</item>
 <item><kw>silence</kw>:  sets hygiene options to <kw>silence</kw>.</item>
-<item><kw>easy</kw>: sets <kw>multiple-definitions</kw> and
+<item><kw>conformant</kw> or <kw>easy</kw>: sets <kw>multiple-definitions</kw> and
 <kw>undefined-symbols</kw> to <kw>warning</kw> because they are easy
 to check, sets <kw>unreachable-symbols</kw> and
 <kw>unproductive-symbols</kw> to <kw>silence</kw> because they are
 harder.</item>
-<item><kw>tolerant</kw>: synonym for <kw>warning</kw>.</item>
 </list></p></item>
 <item><p><kw>conformance</kw>: how strict should conformance checking be?
 <list>
-<item><kw>strict</kw> (default):  enforce all conformance rules; sets
-<kw>hygiene</kw> to <kw>easy</kw> unless it is set separately.</item>
+<item><kw>strict</kw> (default): enforce all conformance rules; sets
+<kw>hygiene</kw> to <kw>conformant</kw> unless it is set
+separately<!-- ; sets <kw>recognize-pragmas</kw> to <kw>false</kw>
+unless it is set separately -->.</item>
 <item><kw>pedantic</kw>:  currently a synonym for <kw>strict</kw>.</item>
 <item><kw>tolerant</kw>: enforce most conformance rules, but ignore
 those that seem unhelpful; sets <kw>hygiene</kw> to <kw>tolerant</kw>.
 (<hi>When the underlying options are all implemented, this will become
 the default.</hi>)</item>
 </list></p></item>
+<!--
+<item><p><kw>recognize-pragmas</kw>: should Aparecium recognize
+pragmas (and enforce the rules of pragma syntax) or operate without
+any knowledge of pragmas?
+<list>
+<item><kw>true</kw> (default):  recognize pragmas as such, act on
+known pragmas.</item>
+<item><kw>false</kw> (default):  use a pragma-free grammar for
+ixml grammars, so all pragmas are parsed as comments.</item>
+</list></p></item>
+-->
 </list>
 <hi>Currently only <kw>easy</kw> is implemented.</hi>
 </p>
-<p>If the forest is requested:
-<list>
-<item><kw>tree-cursor</kw>: return a pair consisting of a parse trees
-and a function; when called, the function returns the next parse tree
-and a new function.  By calling each function in turn, the user can
-retrieve and examine as many parse trees as they wish.  When the set
-of parse trees has been exhausted, a no-more-trees signal is
-returned. <hi>Not yet implemented.</hi></item> 
-<item><kw>parse-forest-grammar</kw>: return a parse-forest grammar (in ixml form) for
-the set of parse trees found.</item>
-<!--
-<item><kw>parse-forest-map</kw>: return a map with a parse forest.  <hi>Not yet
-implemented.</hi></item>
--->
-<item><kw>Earley-set</kw>: return the set of Earley items generated by the
-Earley recognition algorithm; often called a <term>chart</term>.  <hi>Not yet
-implemented.</hi></item>
-</list>
-Other values foreseen but not yet implemented include
-<kw>tree-cursor</kw> and <kw>parse-forest-map</kw>.  (These may be
-mentioned elsewhere.)
-<list>
-<item><kw>return</kw>:  specifies what information the user would
-like back.  The value is a sequence of one or more of the tokens:
-<list>
-<item><kw>any-tree</kw>: return a parse tree; if there is more than one, return any one.</item>
-<item><kw>all-trees</kw>: return all the parse trees, except those excluded by
-loop detection.</item>
-<item><kw>n-trees</kw>: return up to &n; parse trees, if there are that many; &n; is
-specified on the <kw>tree-count</kw> option. <hi>Not yet implemented.</hi></item>
-<!-- 
-<item><kw>tree-cursor</kw>: return a pair consisting of a parse trees
-and a function; when called, the function returns the next parse tree
-and a new function.  By calling each function in turn, the user can
-retrieve and examine as many parse trees as they wish.  When the set
-of parse trees has been exhausted, a no-more-trees signal is
-returned. <hi>Not yet implemented.</hi></item> 
--->
-<item><kw>parse-forest-grammar</kw>: return a parse-forest grammar (in ixml form) for
-the set of parse trees found.</item>
-<!--
-<item><kw>parse-forest-map</kw>: return a map with a parse forest.  <hi>Not yet
-implemented.</hi></item>
--->
-<item><kw>Earley-set</kw>: return the set of Earley items generated by the
-Earley recognition algorithm; often called a <term>chart</term>.  <hi>Not yet
-implemented.</hi></item>
-</list>
-Other values foreseen but not yet implemented include
-<kw>tree-cursor</kw> and <kw>parse-forest-map</kw>.  (These may be
-mentioned elsewhere.)
-</item>
-<item><kw>tree-count</kw>:  specifies how many trees to return; makes sense
-only with <kw>n-trees</kw> value for <kw>return</kw>.
-</item>
-<item><kw>tree-form</kw>: allows the user to request raw parse trees
-instead of the abstract syntax trees required by the ixml spec.  Makes
-sense only if XML parse trees are being returned.  Values:
-<list>
-<item><kw>ast</kw>: the default.  An abstract syntax tree in which the
-marks in the ixml input grammar specify that some nonterminals and
-terminals are to be hidden and some nonterminals serialized as
-attributes.</item>
-<item><kw>raw</kw>: A parse tree in which every nonterminal and
-terminal is serialized as an element; for details see section <ptr
-target="hi-ptc-raw" type="secnum"/>.</item>
-</list>
-</item>
-</list>
-Other options may be described later.</p>
-<p>The default options are specified as a global variable:<scrap id="aparecium-variables"
+<p>Other options may be described later.</p>
+</div>
+
+<div id="hi-call-opt-dfts">
+<head>Default values for options</head>
+
+<p>The default options are specified as a global variable:
+<scrap id="aparecium-variables"
        name="Variables (of interest only for maintainer)">
 (: ******************************************************
    * Variables (of interest only for maintainer) 
@@ -829,9 +914,12 @@ Other options may be described later.</p>
 declare variable $aparecium:options 
    as map(xs:string, item()*)
    := map {
-        'return': 'any-tree',
-        'tree-count': 2,
-        'tree-form': 'ast',
+        'return-tree': true(),
+        'return-pfg': false(),
+        'return-items': false(),
+        'return-grammar': false(),
+
+        'tree-type': 'ast',
         <ptr target="aparecium-other-default-options"/>
       };
 </scrap>
@@ -849,6 +937,8 @@ on these to control what is returned, and how:
 giving character offsets of the construct?</item>
 </list>
 </p>
+</div>
+</div>
 
 <div id="hi-call-pr">
 <head>The <ident>parse-resource()</ident> function</head>
@@ -868,6 +958,50 @@ some prose explanation of the error.</p>
 <p><hi>At present, the error detection and error reporting of
 Aparecium offer many opportunities for improvement.</hi></p></item>
 </list>
+Let's try (experimentally) a slightly more systematic description.
+<list>
+<item><p><label>Pre-requisites:</label></p>
+<list>
+<!--<item><p>Caller has specified strings which are purportedly URIs for
+input and grammar, and also a map with options.  (We know this,
+because otherwise the XQuery engine raises a type error.)</p>
+<p>This input is untrusted</p></item>-->
+<item><p><ident>$uriI</ident> is an untrusted string value to be
+interpreted as a URI for the input string to be parsed.</p></item>
+<item><p><ident>$uriG</ident> is an untrusted string value to be
+interpreted as a URI for the grammar to be used in parsing the input
+string.</p></item>
+<item><p><ident>$options</ident>, if specified, is an untrusted map to
+be interpreted as options for processing.</p></item>
+</list>
+</item>
+<item><p><label>Post-conditions / assurances:</label></p>
+<list>
+<item><p>If a resource denoted by <ident>$uriI</ident> is available,
+then the string value of the resource is the input stream to be
+parsed; otherwise, an <ident>aparecium:error</ident> is
+returned.</p></item>
+<item><p>If a resource denoted by <ident>$uriG</ident> is available,
+the string value of that resource is an untrusted input grammar to be
+used in parsing; otherwise, an <ident>aparecium:error</ident> is
+returned.</p></item>
+<item><p>If <ident>$options</ident> is supplied, its values are
+checked and default values are supplied for options not specified.
+Undocumented options are not removed.  Warnings are issued if options
+are unknown or incorrect.</p></item>
+<item><p>If parsing (or other processing) is successful, the results
+of parsing requested in <ident>$options</ident> are returned; if
+processing is unsuccessful, an <ident>aparecium:error</ident> element
+is returned. If multiple results are requested and processing is
+partly successful, the results may include some normal results and
+some error elements.</p>
+<p>Details as for
+<ident>parse-string-with-compiled-grammar()</ident>.</p>
+</item>
+</list>
+</item>
+</list>
+
 <!-- scrap prev="aparecium-main" -->
 <scrap id="ap-pr"
        name="Define parse-resource()">
@@ -875,10 +1009,17 @@ Aparecium offer many opportunities for improvement.</hi></p></item>
    parse-resource($Input, $Grammar)
    ......................................................
 :)
-
 declare function aparecium:parse-resource(
   $uriI as xs:string,
   $uriG as xs:string
+) as element() {
+  aparecium:parse-resource($uriI, $uriG, $aparecium:options)
+};
+
+declare function aparecium:parse-resource(
+  $uriI as xs:string,
+  $uriG as xs:string,
+  $options as map(*)
 ) as element() {
   let $sI := if (unparsed-text-available($uriI))
              then unparsed-text($uriI)
@@ -887,7 +1028,7 @@ declare function aparecium:parse-resource(
              then unparsed-text($uriG)
              else ()
   return if (exists($sI) and exists($sG))
-         then aparecium:parse-string($sI, $sG)
+         then aparecium:parse-string($sI, $sG, $options)
          else <ptr target="appr-errors"/>
 };
 </scrap>
@@ -928,8 +1069,36 @@ return an error element.
 <p>Given strings with the input and an ixml grammar describing it,
 the <ident>parse-string()</ident> function returns the XML
 representation of the resource, or an <gi>aparecium:no-parse</gi>
-element, or an <gi>aparecium:error</gi> element.
+element, or an <gi>aparecium:error</gi> element.</p>
 
+<p>Description:
+<list>
+<item><p><label>Pre-requisites:</label></p>
+<list>
+<item><p><ident>$sI</ident> is the input string to be parsed.  We may
+assume it consists of XML characters.</p></item>
+<item><p><ident>$sG</ident> is an untrusted string value to be
+interpreted as a grammar to be used in parsing the input
+string.</p></item>
+<item><p><ident>$options</ident>, if specified, is an untrusted map to
+be interpreted as options for processing.</p></item>
+</list>
+</item>
+<item><p><label>Post-conditions / assurances:</label></p>
+<list>
+<item>
+<p>If <ident>$sG</ident> is a usable grammar, then <ident>$sI</ident>
+is parsed against it and results returned in accordance with the
+specified <ident>$options</ident>; details as for
+<ident>parse-string-with-compiled-grammar()</ident>.</p>
+</item>
+<item>
+<p>If <ident>$sG</ident> is not a usable grammar, an <gi>aparecium:error</gi>
+element is returned.</p>
+</item>
+</list>
+</item>
+</list>
 <scrap id="ap-ps"       
        name="Define parse-string()">
 (: ......................................................
@@ -941,8 +1110,16 @@ declare function aparecium:parse-string(
   $sI as xs:string,
   $sG as xs:string
 ) as element() {
+  aparecium:parse-string($sI, $sG, $aparecium:options)
+};
+
+declare function aparecium:parse-string(
+  $sI as xs:string,
+  $sG as xs:string,
+  $options as map(*)
+) as element() {
   let $cG := &STAT;prof:time( &TATS;
-             aparecium:compile-grammar-from-string($sG)
+             aparecium:compile-grammar-from-string($sG, $options)
              &STAT;, 
              'parse-string: compiling grammar from string:') 
              &TATS;
@@ -955,7 +1132,9 @@ declare function aparecium:parse-string(
       $cG      
     }
     else &STAT;prof:time( &TATS;
-         aparecium:parse-string-with-compiled-grammar($sI, $cG)
+         aparecium:parse-string-with-compiled-grammar(
+             $sI, $cG, $options
+         )
          &STAT;, 'parse-string:  parsing input string:') &TATS;
 };
 </scrap>
@@ -964,8 +1143,9 @@ declare function aparecium:parse-string(
 
 <div id="hi-call-pscg">
 <head>The <ident>aparecium:parse-string-with-compiled-grammar()</ident> function</head>
-<p>Given a string with the input and the pre-processed form of an ixml
-grammar describing it, the function
+
+<p>Given a string with the input and the pre-processed 
+form of an ixml grammar describing it, the function
 <ident>parse-string-with-compiled-grammar()</ident> returns the XML
 representation of the string's parse tree.</p>
 <p>This is the workhorse of the library, called by many other
@@ -978,6 +1158,149 @@ in signaling that the grammar has just been checked.  But in
 fact it's quite possible that the XQuery engine will detect
 the double call and re-use the answer from the first call.</p>
 </note>
+Description:
+<list>
+<item><p><label>Pre-requisites:</label></p>
+<list>
+<item><p><ident>$sI</ident> is the input string to be
+parsed.</p></item>
+<item><p><ident>$cG</ident> is a(n untrusted) compiled grammar.</p>
+<p><hi>At the moment, it is treated as untrusted, even though in some
+cases it is known to be OK and does not need to be checked.  To do:
+make a separate function for parsing with a trusted compiled
+grammar.</hi></p></item>
+<item><p><ident>$options</ident>, if specified, is an untrusted map to
+be interpreted as options for processing.</p></item>
+</list>
+</item>
+<!-- <item><p><label>Post-conditions / assurances:</label></p>
+<list>
+<item><p>If <ident>$options</ident> is supplied, its values are
+checked and default values are supplied for options not specified.
+Undocumented options are not removed.  Warnings are issued if options
+are unknown or incorrect.</p></item>
+
+<item><p>If <ident>$cG</ident> is not usable (concretely, if
+<ident>grammar-ok()</ident> flags any errors), an
+<gi>aparecium:error</gi> element is returned.</p></item>
+
+<item><p>Otherwise, results are returned in accordance with
+the specified <ident>$options</ident>.  Concretely:</p>
+<list>
+
+<item>
+<p>If a parse-tree was requested (option <code>return-tree =
+true</code>), then
+<list>
+<item><p>If parsing yielded a single parse tree, that parse tree is
+returned.</p></item>
+<item><p>Otherwise, if parsing yielded multiple parse trees, some
+parse tree is returned, with an <att>ixml:state</att> attribute
+containing the token <code>ambiguous</code>.</p></item>
+<item><p>Otherwise, if parsing showed that the input is not a
+sentence in the language defined by the grammar, an
+<gi>aparecium:no-parse</gi> element is returned containing
+diagnostic information.</p>
+</item>
+<item><p>Otherwise, if parsing was not possible for some reason,
+and <gi>aparecium:error</gi> element is returned.</p>
+</item>
+</list></p>
+</item>
+
+<item>
+<p>If a parse-forest grammar was requested (option <code>return-pfg =
+true</code>), then
+<list>
+<item><p>If parsing yielded a positive result, a parse-forest
+grammar is returned, which describes all parse trees found.</p></item>
+<item><p>Otherwise, if parsing yielded a negative result, an
+<gi>aparecium:error</gi> element is returned.
+tree is returned, with an <att>ixml:state</att> attribute containing
+the token <code>ambiguous</code>.</p></item>
+<item><p>Otherwise, if parsing showed that the input is not a
+sentence in the language defined by the grammar, an
+<gi>aparecium:no-parse</gi> element is returned containing
+diagnostic information.</p></item>
+<item><p>Otherwise, if parsing was not possible for some reason,
+and <gi>aparecium:error</gi> element is returned.</p>
+</item>
+</list></p>
+</item>
+
+<item>
+<p>If the set of Earley items was requested (option <code>return-items =
+true</code>), then the set of Earley items generated during parsing is
+returned as an <gi>aparecium:item-set</gi> element.</p>
+</item>
+
+<item>
+<p>If the grammar was requested (option <code>return-grammar =
+true</code>), then the compiled grammar used in parsing is returned as
+an <gi>ixml</gi> element.</p></item>
+</list>
+</item>
+
+</list>
+</item>
+-->
+<item><p><label>Post-conditions / assurances:</label></p>
+<list>
+<item><p>If <ident>$options</ident> is supplied, its values are
+checked and default values are supplied for options not specified.
+Undocumented options are not removed.  Warnings are issued if options
+are unknown or incorrect.</p></item>
+
+<item><p>An element with the same name as the grammar's start symbol
+is returned if and only if
+<list>
+<item><ident>$sI</ident> can be derived from the
+start symbol of <ident>$sG</ident> and</item>
+<item>the returned element exhibits the
+parse tree for some such derivation and</item>
+<item>the <code>return-tree</code> option is set.</item>
+</list>
+</p>
+<p>The token <code>ambiguous</code> is returned as (part of) the value of 
+an <ident>ixml:state</ident> attribute on the root element if and only if
+there is more than one derivation for the input.</p>
+</item>
+<item><p>An <gi>aparecium:no-parse</gi> element is returned
+(with diagnostic contents) if and only if <ident>$cG</ident> is
+a usable grammar and <ident>$sI</ident> cannot be derived from
+its start symbol.</p></item>
+<item><p>An <gi>aparecium:error</gi> is returned if
+<list>
+<item><ident>$cG</ident> is not usable (concretely, if <ident>grammar-ok</ident>
+flags any errors_, or</item>
+<item>parsing was not possible for any other reason.</item>
+</list>
+</p></item>
+<item><p>An <gi>ixml</gi> element with a parse-forest grammar is
+returned if and only if 
+<list>
+<item><ident>$cG</ident> is usable and</item>
+<item>the <code>return-pfg</code> option is set.</item>
+</list>
+</p></item>
+<item><p>An <gi>ixml</gi> element with a compiled form of the
+user-suppied grammar is returned if and only if
+<list>
+<item><ident>$cG</ident> is usable and</item>
+<item>the <code>return-grammar</code> option is set.</item>
+</list>
+</p></item>
+<item><p>An <gi>aparecium:item-list</gi> element with the set of all
+Earley items generated in parsing is returned if and only if
+<list>
+<item>the <code>return-items</code> option is set.</item>
+</list>
+</p></item>
+
+</list>
+</item>
+</list>
+
 <scrap id="ap-pswcg"
        name="Define parse-string-with-compiled-grammar()">
 (: ......................................................
@@ -988,15 +1311,27 @@ declare function aparecium:parse-string-with-compiled-grammar(
   $sI as xs:string,
   $cG as element(ixml)
 ) as element() {
+  aparecium:parse-string-with-compiled-grammar(
+      $sI, $cG, $aparecium:options
+  )
+};
+
+declare function aparecium:parse-string-with-compiled-grammar(
+  $sI as xs:string,
+  $cG as element(ixml),
+  $options0 as map(*)
+) as element() {
+  let $options := map:merge(($options0, $aparecium:options))
+
   let $cg-ok := &STAT;prof:time( &TATS;
-                aparecium:grammar-ok($cG)
+                aparecium:grammar-ok($cG, $options)
                 &STAT;, 'pswcg() calling grammar-ok():') &TATS;
 
   let $result := if ($cg-ok/self::ixml) 
                  then &STAT;prof:time( &TATS;
-                     earley:any-tree($sI, $cG) 
+                     earley:parse($sI, $cG, $options) 
                      &STAT;
-                     , '0 Outer call to earley:any-tree(): ')
+                     , '0 Outer call to earley:parse(): ')
                       &TATS;
                  else element aparecium:error {
                    attribute id { "ap:tbd05" },
@@ -1130,6 +1465,7 @@ grammars.</p>
 </list>
 </p>
 </div>
+
 </div>
 
 <div id="hi-prep-input">
@@ -1395,11 +1731,12 @@ for &e; itself.
 <scrap id="gl-ME"
        name="Define function gl:ME()">
 declare function gl:ME (
-  $E as element()
+  $E as element(),
+  $options as map(*)
 ) as element() {
   let $children := for $c in $E/node() 
                    return if ($c/self::element())
-                          then gl:ME($c)
+                          then gl:ME($c, $options)
                           else $c,
       $ch := $children[self::element()]
   return <ptr target="gl-ME-identity"/>
@@ -2092,7 +2429,9 @@ then element ap:error {
 else element ap:error {
        attribute id {"ap:tbd37"},
        element desc {
-         "Element {name($E)} was unexpected:"
+         "Element", 
+         name($E),
+         "was unexpected:"
        },
        $E
      }
@@ -2252,7 +2591,8 @@ and return an <gi>aparecium:error</gi> element.
 (: grammar-ok(): check grammar 
 :)
 declare function aparecium:grammar-ok(
-  $G as element()
+  $G as element(),
+  $options as map(*)
 ) as element() {
   if ($G/self::ixml)
   then 
@@ -2722,6 +3062,147 @@ That code should clear the hygiene problems.
 </div>
 </div>
 
+<div id="hi-earley-parse">
+<head>Managing the parsing process</head>
+
+<p>The Earley-parser module provides a single public interface to the
+parsing routines of the Earley-parser-internals module.  The
+<ident>earley:parse()</ident> function calls the internal functions to
+construct the required set of Earley items,
+a parse-forest grammar for the results,
+and a parse tree, and return whichever of those
+is requested.
+<!-- earley:parse() is modeled on the old earley:any-tree()
+     and epi:earley-parse() -->
+<scrap id="ep-parse"
+       name="Define earley:parse()">
+declare function ep:parse(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :),
+  $options as map(*)
+) as element() {
+
+  let $map := &STAT;prof:time( &TATS;
+              er:recognizeX($I, $G, $options),
+              &STAT;'0a recognize(): '),&TATS;
+      $completion-item := $map('Completions'),
+      $pfg := <ptr target="epp-make-pfg"/>,
+      $ast0 := <ptr target="epp-make-ast"/>,
+      $ast := <ptr target="epp-ep-versioncheck"/>
+
+  return if ($options('return-tree') 
+            and not($options('return-pfg'))
+            and not($options('return-items'))
+            and not($options('return-grammar')))
+      then $ast
+      else element ap:results {
+               if ($options('return-tree'))
+               then element ap:ast { $ast }
+               else (),
+               if ($options('return-pfg'))
+               then element ap:pfg { $pfg }
+               else (),
+               if ($options('return-items'))
+               then element ap:items { 
+                      let $mei := $map('Closure')
+                      for $n in map:keys($mei('to'))
+                      order by $n descending
+                      for $ei in $mei('to')($n)
+                      return eri:eXei($ei)
+                    }
+               else (),
+               if ($options('return-grammar'))
+               then element ap:compiled-grammar { 
+                        $map('Grammar')
+                    }
+               else ()
+           }
+
+};
+</scrap>
+</p>
+
+<p>We make the pfg ...
+<scrap id="epp-make-pfg"
+       name="Make parse-forest grammar or dummy">
+
+              &STAT;prof:time(&TATS;
+              if (exists($map('Completions')))
+              then epi:parse-forest-grammar(
+                       $map('Completions'), 
+                       $map('Closure'), 
+                       $I,
+                       $options)
+              else element ap:no-pfg {
+                "Parse failed, no parse-forest grammar."
+              }
+              &STAT;, '0b making pfg: ')&TATS;
+</scrap>
+</p>
+<p>If the PFG has successfully been constructed,
+we can extract a parse-tree from it.
+<scrap id="epp-make-ast"
+       name="Make AST or no-parse">
+              &STAT;prof:time(&TATS;
+              if (exists($pfg/self::ixml))
+              then epi:tree-from-pfg($pfg, 'document', ())
+              else <ptr target="epp-make-noparse"/>
+              &STAT;, '0c extracting tree: ')&TATS;
+
+</scrap>
+</p>
+<p>If there is no PFG, there is no parse.  We return an
+<gi>aparecium:no-parse</gi> element to say so.
+<scrap id="epp-make-noparse"
+       name="Make no-parse result">
+  let $high-water := max(map:keys($map('Closure')('to')))
+  let $start := max((1, (1 + $high-water - 30))),
+      $end := min((string-length($I),
+                   ($high-water + 30))),
+      $cL := min(($high-water, 30)),
+      $cR := min(($end - $high-water, 30)),
+      $sL := concat(if ($high-water gt 30)
+                    then '...'
+                    else '',
+                    substring($I, $start, $cL)
+             ),
+      $sR := concat(substring($I, $high-water+1, 30 (: $cR :) ),
+                    if ($cR lt 30)
+                    then ''
+                    else '...'
+             )
+  return     
+  element ap:no-parse {
+    attribute ixml:state { "failed" },
+    element p { 
+      "Sorry, no parse for this string and grammar." 
+    },
+    element p {
+      "The parser gave up at character",
+      string($high-water) || ": ",
+      "parsing succeeded up through", 
+      element q {
+          replace($sL,'&amp;#xA;','&amp;amp;#xA;')
+      },
+      "but failed on",
+      element q {
+          replace($sR, '&amp;#xA;', '&amp;amp;#xA;')
+      }
+    },
+    element p {
+      "Expecting one of: ",
+      string-join(
+           for $ei in $map('Closure')('to')($high-water)
+           for $sym in eri:lsymExpectedXEi($ei)[eri:fTerminal(.)]
+           return concat('"', eri:reXTerminal($sym), '"'),
+           ', '
+      )
+    }
+  }
+</scrap>
+</p>
+</div>
+
 <div id="hi-earley-set">
 <head>Generating the Earley set</head>
 <p>Watch this space.</p>
@@ -2899,9 +3380,10 @@ works as a kind of wrapper around the other function:
        name="Define recognize()">
 declare function ix:recognize(
   $I as item() (: INPUT :),
-  $G as item() (: GRAMMAR :)
+  $G as item() (: GRAMMAR :),
+  $options as map(*)
 ) as xs:boolean {
-  let $m := ix:recognizeX($I, $G)
+  let $m := ix:recognizeX($I, $G, $options)
   return $m('Result')
 };
 
@@ -2913,7 +3395,8 @@ recognizer, if you will)
        name="Define recognizeX()">
 declare function ix:recognizeX(
   $I as item() (: INPUT :),
-  $G as item() (: GRAMMAR :)
+  $G as item() (: GRAMMAR :),
+  $options as map(*)
 ) as map(*) {
   let $G2 := ixi:augment-grammar($G),
       $symStart0 := ixi:symStartG($G),
@@ -3219,7 +3702,8 @@ element or an <gi>error</gi> element.</p>
 declare function epi:parse-forest-grammar(
   $leiCompletions as <ptr target="adt-list-ei"/>,
   $leiClosure as <ptr target="adt-eiclosure"/>,
-  $I as <ptr target="adt-input"/>
+  $I as <ptr target="adt-input"/>,
+  $options as map(*)
 ) as element() {
   let $rules := epi:make-pfg-rules(
                     $leiCompletions,
@@ -6511,11 +6995,23 @@ retrieves the grammar and parses it by calling
 declare function aparecium:parse-grammar-from-uri(
   $uriG as xs:string
 ) as element() {
+  aparecium:parse-grammar-from-uri(
+      $uriG,
+      $aparecium:options
+  )
+};
+declare function aparecium:parse-grammar-from-uri(
+  $uriG as xs:string,
+  $options as map(*)
+) as element() {
   let $sG := if (unparsed-text-available($uriG))
              then unparsed-text($uriG)
              else ()
   return if (exists($sG)) 
-         then aparecium:parse-grammar-from-string($sG)
+         then aparecium:parse-grammar-from-string(
+                  $sG, 
+                  $options
+              )
          else element aparecium:error {
            attribute id { "ap:tbd14" },
            "Grammar (" || $uriG || ") not found."
@@ -6540,12 +7036,26 @@ grammar for ixml grammars.
 declare function aparecium:parse-grammar-from-string(
   $G as xs:string
 ) as element() {
+  aparecium:parse-grammar-from-string(
+      $G,
+      $aparecium:options
+  )
+};
+
+declare function aparecium:parse-grammar-from-string(
+  $G as xs:string,
+  $options as map(*)
+) as element() {
   (: CGIG:  compiled grammar for ixml grammars :)
   let $CGIG := doc($aparecium:ixml.gl.xml)/ixml,
       (: PG: parsed grammar :)
-      $PG0 := aparecium:parse-string-with-compiled-grammar($G,$CGIG),
+      $PG0 := aparecium:parse-string-with-compiled-grammar(
+                  $G,
+                  $CGIG,
+                  $options
+              ),
       $PG := &STAT;prof:time( &TATS;
-             aparecium:grammar-ok($PG0)
+             aparecium:grammar-ok($PG0, $options)
              &STAT;, 'pgfs() calling grammar-ok():') &TATS;
   return $PG
 };
@@ -6581,8 +7091,18 @@ is given the URI of an ixml grammar and returns the
 declare function aparecium:compile-grammar-from-uri(
   $uriG as xs:string
 ) as element() {
-  let $xmlG := aparecium:parse-grammar-from-uri($uriG)
-  return gluschkov:ME($xmlG)
+  aparecium:compile-grammar-from-uri(
+    $uriG,
+    $aparecium:options
+  )
+};
+
+declare function aparecium:compile-grammar-from-uri(
+  $uriG as xs:string,
+  $options as map(*)
+) as element() {
+  let $xmlG := aparecium:parse-grammar-from-uri($uriG, $options)
+  return gluschkov:ME($xmlG, $options)
 };
 </scrap>
 </p>
@@ -6600,8 +7120,18 @@ returns the compiled representation of the grammar.
 declare function aparecium:compile-grammar-from-string(
   $sG as xs:string
 ) as element() {
+  aparecium:compile-grammar-from-string(
+    $sG, 
+    $aparecium:options
+  )
+};
+
+declare function aparecium:compile-grammar-from-string(
+  $sG as xs:string,
+  $options as map(*)
+) as element() {
   let $xmlG := aparecium:parse-grammar-from-string($sG)
-  return gluschkov:ME($xmlG)
+  return gluschkov:ME($xmlG, $options)
 };
 </scrap>
 </p>
@@ -6623,11 +7153,21 @@ returns its compiled representation.
 declare function aparecium:compile-grammar-from-xml(
   $xmlG as element()
 ) as element(ixml) {
+  aparecium:compile-grammar-from-xml(
+    $xmlG,
+    $aparecium:options
+  )
+};
+
+declare function aparecium:compile-grammar-from-xml(
+  $xmlG as element(),
+  $options as map(*)
+) as element(ixml) {
   let $G := &STAT;prof:time( &TATS;
-            aparecium:grammar-ok($xmlG)
+            aparecium:grammar-ok($xmlG, $options)
             &STAT;, 'cgfx() calling grammar-ok():') &TATS;
   return if ($G/self::ixml)
-         then gluschkov:ME($xmlG)
+         then gluschkov:ME($xmlG, $options)
          else element aparecium:error {
            attribute id { "ap:tbd15" },
            "compile-grammar-from-xml(): ",
@@ -6789,197 +7329,31 @@ tree with the option to fetch more.</p>
 </item>
 </list>
 </p>
-<p><hi>Delete or revise this:  it's out of date.</hi>
-We will offer four functions (names subject to change):
+<p>It's the job of <ident>earley:parse()</ident> to organize all of
+this.  It accepts input, compiled grammar, and options, calls the
+Earley recognizer to build the Earley set, and depending on the
+options calls appropriate functions to produce the desired results.
+It also takes care of wrapping the results in a container if
+necessary, and flagging errors.</p>
+<p>Description:
 <list>
-<item><p>ep:all-trees($I,$G) will return all loopless parse
-trees</p></item>
-<item><p>ep:any-tree($I, $G) will return the first tree it finds and
-stop</p></item>
-<item><p>ep:tree-cursor($I, $G) will return two items: the first tree
-it finds and a function to call for the next tree (and the next
-function); this involves wrapping up continuations and passing them
-around.  (It may be helpful to do a five-finger exercise fetching the
-items of a sequence one at a time.)</p></item>
-<item><p>ep:parse-forest-grammar($I, $G) will return a parse-forest grammar for
-the trees.  It can and should include the looped parse trees.  It may
-have clean/dirty variants that do or don't bother to clean the grammar
-up (tbd; dunno yet).</p></item>
-</list>
-</p>
-<p>These are all intended to be user-facing; there will be
-corresponding functions internal to the module not intended to be
-called by the user.
-<scrap file="Earley-parser.xqm">
-
-(: Goal:  to return the set of parse trees recorded implicitly in the
-   Earley closure.
-   :)
-<ptr target="ep-alltrees"/>
-<ptr target="ep-anytree"/>
-<ptr target="ep-tree-cursor"/>
-<ptr target="ep-parse-forest-map"/>
-<ptr target="ep-parse-forest-grammar"/>
-</scrap>
-</p>
-<p>The <ident>alltrees()</ident> function calls
-the internal <ident>earley-parse()</ident> function
-and passes options to it to signal what should be done
-with the Earley set.
-<scrap id="ep-alltrees"
-       name="Declare ep:all-trees() function">
-(: ep:all-trees($I,$G):  return all loopless parse trees :)
-declare function ep:all-trees(
-  $I as item() (: INPUT :),
-  $G as item() (: GRAMMAR :)
-) as element()+ {
-
-  epi:earley-parse($I, $G, 
-      map { 'return': 'all-trees',
-            'tree-count': -1,
-            'failure-dump': 'closure'
-      }
-  )
-  
-};
-
-</scrap></p>
-
-<p>The <ident>anytree()</ident> function similarly
-calls <ident>earley-parse()</ident> with a different
-option.
-<scrap id="ep-anytree"
-       name="Declare ep:any-tree() function">
-(: ep:any-tree($I,$G):  return one (loopless) parse tree, 
-   whichever is found first 
-:)
-declare function ep:any-tree(
-  $I as item() (: INPUT :),
-  $G as item() (: GRAMMAR :)
-) as element()? {
-  let $result := epi:earley-parse($I, $G, 
-                    map { 'return': 'any-tree',
-                          'tree-count': 1,
-                          'ambiguity-test': true(),
-                          'failure-dump': 'closure',
-                          'tree-constructor': 'pfg'
-                        }
-                 )
-  return if (count($result) eq 1) 
-         then $result
-         else if (empty($result))
-         then element ap:error {
-           attribute id { "ap:tbd23" },
-           "Earley-parse returned nothing." 
-	 }
-         else element ap:error {
-           attribute id { "ap:tbd34" },
-           attribute code { "ixml:D06" },
-           element ap:desc { "No root element." },
-           $result
-	 }
-};
-</scrap></p>
-
-<p>The <ident>tree-cursor()</ident> function (not yet
-implemented) is intended to return a pair consisting of
-(1) a parse tree, and (2) a function that will return
-another pair for the next parse tree.  When there are
-no more trees, a <q><kw>no-more-trees</kw></q> signal
-will be returned instead of a function.</p>
-<p>The name is intended to recall the cursor notion of SQL
-results.</p>
-<p>If you keep track of the number of trees delivered, the
-no-more-trees signal can distinguish there-were-no-trees
-from all-done-now signals.
-<scrap id="ep-tree-cursor"
-       name="Declare ep:tree-cursor() function">
-
-declare function ep:tree-cursor(
-  $I as item() (: INPUT :),
-  $G as item() (: GRAMMAR :)
-) as item()* {
-  epi:earley-parse($I, $G,  
-      map { 'return': 'tree-cursor',
-            'failure-dump': 'closure' }
-  )
-};
-</scrap>
-</p>
-<p>The idea of the <ident>parse-forest-map()</ident>
-function is to return not a parse tree but a parse forest,
-in the form of a map.  It is currently not implemented,
-and may be unnecessary.  The <ident>parse-forest grammar()</ident>
-function may suffice.
-<scrap id="ep-parse-forest-map"
-       name="Declare ep:parse-forest-map() function">
-
-(: ep:parse-forest-map($I,$G):  return a map containing an and/or tree
-   representing the set of all parses.
-:)
-declare function ep:parse-forest-map(
-  $I as item() (: INPUT :),
-  $G as item() (: GRAMMAR :)
-) as element()* {
-  epi:earley-parse($I, $G, 
-      map { 'return': 'parse-forest-map', 
-            'tree-count': -1,
-            'failure-dump': 'closure'
-      }
-  )
-};
-</scrap>
-</p>
-<p>The <ident>parse-forest-grammar()</ident> function
-returns an ixml grammar describing a single sentence, from
-which parse trees can be constructed.
-<scrap id="ep-parse-forest-grammar"
-       name="Declare ep:parse-forest-grammar() function">
-(: ep:parse-forest-grammar($I,$G):  return a BNF (not EBNF[?]) grammar
-   describing the set of all parses of $I against $G.
-:)
-declare function ep:parse-forest-grammar(
-  $I as item() (: INPUT :),
-  $G as item() (: GRAMMAR :)
-) as element()* {
-  epi:earley-parse($I, $G, 
-      map { 'return': 'parse-forest-grammar',
-            'tree-count': -1,
-            'failure-dump': 'closure'
-      }
-  )
-};
-</scrap>
-</p>
-<p>Let us pause for a moment to summarize the options
-these functions are assuming.  Options and their values
-include:
+<item><p><label>Pre-requisites:</label></p>
 <list>
-<item><label><kw>return</kw></label>:  one of
-<q><kw>all-trees</kw></q>,
-<q><kw>any-tree</kw></q>,
-<q><kw>tree-cursor</kw></q>,
-<q><kw>parse-forest-map</kw></q>,
-<q><kw>parse-forest-grammar</kw></q>.</item>
-
-<item><label><kw>tree-count</kw></label>: an integer specifying a
-maximum number of trees to (find and) return.  The magic number -1
-is used to signal that all (or as many as possible) should be
-returned.</item>
-
-<item><label><kw>ambiguity-test</kw></label>: an boolean value used
-when the <q><kw>tree-count</kw></q> option is 1, to indicate whether
-a second tree should be searched for (though not returned), so as to
-correctly detect amgiguity.</item>
-
-<item><label><kw>failure-dump</kw></label>: one of
-<q><kw>yes</kw></q>, <q><kw>no</kw></q>, <q><kw>closure</kw></q>.
-Used in case of parse failures to indicate whether all data
-structures should be dumped; <q><kw>closure</kw></q> indicates that
-just the closure should be provided.</item>
-
+<item><p></p></item>
 </list>
-</p>
+</item>
+<item><p><label>Invariants:</label></p>
+<list>
+<item><p></p></item>
+</list>
+</item>
+<item><p><label>Post-conditions / assurances:</label></p>
+<list>
+<item><p></p></item>
+</list>
+</item>
+</list></p>
+
 </div>
 <div id="legacy-Earley-parser-internals.xqm">
 <head>Parser internals</head>
@@ -7015,7 +7389,7 @@ declare function epi:earley-parse(
       else $options
 
   let $mapResult := &STAT;prof:time( &TATS;
-                    er:recognizeX($I, $G),
+                    er:recognizeX($I, $G, $options),
                     &STAT;'0a recognize(): '),&TATS;
 
       $meiClosure := $mapResult('Closure'),
@@ -7238,7 +7612,7 @@ a call to extract the tree.
        name="Construct one tree via parse-forest-grammar">
 
         let $pfg := &STAT;prof:time(&TATS;
-                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I),
+                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I, $options),
                     &STAT;'0b making pfg: '),&TATS;
             $ast := &STAT;prof:time(&TATS;
                     epi:tree-from-pfg($pfg, 'document', ())
@@ -7263,7 +7637,7 @@ a call to extract the tree.
                       'epi:earley-parse() has result') 
 
         let $pfg := &STAT;prof:time(&TATS;
-                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I)
+                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I, $options)
                     &STAT;, '0b making pfg: ')&TATS;
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a parse-forest grammart') 
@@ -7302,12 +7676,40 @@ attribute on the root element with the value
 <att>ixml:state</att> attribute, then we add the
 <code>version-mismatch</code> token to its value.</p>
 <p>We do this by checking the results, before we return them.
+<scrap id="epp-ep-versioncheck"
+       name="Check results for version mismatch">
+if ( ($G/prolog/version/@string
+           /string(), "1.0")[1] eq "1.0")
+      then $ast0 (: $leResults0 :)
+      else for $item in $ast0 (: $leResults0 :)
+           return if ($item instance of element())
+           then element {name($item)} {
+                  ($item/@* except 
+                    ($item/@ixml:state,
+                     $item/@ap:version-string,
+                     $item/@ap:version-used)),
+                  attribute ixml:state {
+                    $item/@ixml:state/string(),
+                    'version-mismatch'
+                  },
+                  attribute ap:version-string {
+                    string($G/prolog/version/@string)
+                  },
+                  attribute ap:version-used {
+                    "1.0"
+                  },
+                  $item/child::node()
+                }
+           else $item
+</scrap> 
+</p>
+<p>Temporarily, we have a duplicate copy of this code.
 <scrap id="epi-ep-versioncheck"
        name="Check results for version mismatch">
 if ( ($G/prolog/version/@string
            /string(), "1.0")[1] eq "1.0")
-      then $leResults0
-      else for $item in $leResults0
+      then $leResults0 
+      else for $item in $leResults0 
            return if ($item instance of element())
            then element {name($item)} {
                   ($item/@* except 
@@ -9294,7 +9696,7 @@ declare function epi:earley-parse(
 ) as item()* {
   let $dummy := eri:notrace((), 'epi:earley-parse() ...') 
   let $mapResult := &STAT;prof:time(&TATS;
-                    er:recognizeX($I, $G), 
+                    er:recognizeX($I, $G, $options), 
                     &STAT;'0a recognize(): '),&TATS;
 
       $meiClosure := $mapResult('Closure'),
@@ -9456,6 +9858,207 @@ then
 </scrap>
 </p>
 </div>
+</div>
+
+
+<div id="legacy-Earley-parser-deadcode">
+<head>Dead code from Earley-parser.xqm</head>
+<p><hi>This section contains code that should now all be dead.
+It has not yet been deleted in case it is needed.</hi></p>
+<p><hi>Delete or revise this:  it's out of date.</hi>
+We will offer four functions (names subject to change):
+<list>
+<item><p>ep:all-trees($I,$G) will return all loopless parse
+trees</p></item>
+<item><p>ep:any-tree($I, $G) will return the first tree it finds and
+stop</p></item>
+<item><p>ep:tree-cursor($I, $G) will return two items: the first tree
+it finds and a function to call for the next tree (and the next
+function); this involves wrapping up continuations and passing them
+around.  (It may be helpful to do a five-finger exercise fetching the
+items of a sequence one at a time.)</p></item>
+<item><p>ep:parse-forest-grammar($I, $G) will return a parse-forest grammar for
+the trees.  It can and should include the looped parse trees.  It may
+have clean/dirty variants that do or don't bother to clean the grammar
+up (tbd; dunno yet).</p></item>
+</list>
+</p>
+<p>These are all intended to be user-facing; there will be
+corresponding functions internal to the module not intended to be
+called by the user.
+<scrap file="Earley-parser.xqm">
+
+(: Goal:  to return the set of parse trees recorded implicitly in the
+   Earley closure.
+   :)
+<ptr target="ep-parse"/>
+<!--
+<ptr target="ep-alltrees"/>
+<ptr target="ep-anytree"/>
+<ptr target="ep-tree-cursor"/>
+<ptr target="ep-parse-forest-map"/>
+<ptr target="ep-parse-forest-grammar"/>
+--></scrap>
+</p>
+
+<p>The <ident>alltrees()</ident> function calls
+the internal <ident>earley-parse()</ident> function
+and passes options to it to signal what should be done
+with the Earley set.
+<scrap id="ep-alltrees"
+       name="Declare ep:all-trees() function">
+(: ep:all-trees($I,$G):  return all loopless parse trees :)
+declare function ep:all-trees(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as element()+ {
+
+  epi:earley-parse($I, $G, 
+      map { 'return': 'all-trees',
+            'tree-count': -1,
+            'failure-dump': 'closure'
+      }
+  )
+  
+};
+
+</scrap></p>
+
+<p>The <ident>anytree()</ident> function similarly
+calls <ident>earley-parse()</ident> with a different
+option.
+<scrap id="ep-anytree"
+       name="Declare ep:any-tree() function">
+(: ep:any-tree($I,$G):  return one (loopless) parse tree, 
+   whichever is found first 
+:)
+declare function ep:any-tree(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as element()? {
+  let $result := epi:earley-parse($I, $G, 
+                    map { 'return': 'any-tree',
+                          'tree-count': 1,
+                          'ambiguity-test': true(),
+                          'failure-dump': 'closure',
+                          'tree-constructor': 'pfg'
+                        }
+                 )
+  return if (count($result) eq 1) 
+         then $result
+         else if (empty($result))
+         then element ap:error {
+           attribute id { "ap:tbd23" },
+           "Earley-parse returned nothing." 
+	 }
+         else element ap:error {
+           attribute id { "ap:tbd34" },
+           attribute code { "ixml:D06" },
+           element ap:desc { "No root element." },
+           $result
+	 }
+};
+</scrap></p>
+
+<p>The <ident>tree-cursor()</ident> function (not yet
+implemented) is intended to return a pair consisting of
+(1) a parse tree, and (2) a function that will return
+another pair for the next parse tree.  When there are
+no more trees, a <q><kw>no-more-trees</kw></q> signal
+will be returned instead of a function.</p>
+<p>The name is intended to recall the cursor notion of SQL
+results.</p>
+<p>If you keep track of the number of trees delivered, the
+no-more-trees signal can distinguish there-were-no-trees
+from all-done-now signals.
+<scrap id="ep-tree-cursor"
+       name="Declare ep:tree-cursor() function">
+
+declare function ep:tree-cursor(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as item()* {
+  epi:earley-parse($I, $G,  
+      map { 'return': 'tree-cursor',
+            'failure-dump': 'closure' }
+  )
+};
+</scrap>
+</p>
+<p>The idea of the <ident>parse-forest-map()</ident>
+function is to return not a parse tree but a parse forest,
+in the form of a map.  It is currently not implemented,
+and may be unnecessary.  The <ident>parse-forest grammar()</ident>
+function may suffice.
+<scrap id="ep-parse-forest-map"
+       name="Declare ep:parse-forest-map() function">
+
+(: ep:parse-forest-map($I,$G):  return a map containing an and/or tree
+   representing the set of all parses.
+:)
+declare function ep:parse-forest-map(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as element()* {
+  epi:earley-parse($I, $G, 
+      map { 'return': 'parse-forest-map', 
+            'tree-count': -1,
+            'failure-dump': 'closure'
+      }
+  )
+};
+</scrap>
+</p>
+<p>The <ident>parse-forest-grammar()</ident> function
+returns an ixml grammar describing a single sentence, from
+which parse trees can be constructed.
+<scrap id="ep-parse-forest-grammar"
+       name="Declare ep:parse-forest-grammar() function">
+(: ep:parse-forest-grammar($I,$G):  return a BNF (not EBNF[?]) grammar
+   describing the set of all parses of $I against $G.
+:)
+declare function ep:parse-forest-grammar(
+  $I as item() (: INPUT :),
+  $G as item() (: GRAMMAR :)
+) as element()* {
+  epi:earley-parse($I, $G, 
+      map { 'return': 'parse-forest-grammar',
+            'tree-count': -1,
+            'failure-dump': 'closure'
+      }
+  )
+};
+</scrap>
+</p>
+<p>Let us pause for a moment to summarize the options
+these functions are assuming.  Options and their values
+include:
+<list>
+<item><label><kw>return</kw></label>:  one of
+<q><kw>all-trees</kw></q>,
+<q><kw>any-tree</kw></q>,
+<q><kw>tree-cursor</kw></q>,
+<q><kw>parse-forest-map</kw></q>,
+<q><kw>parse-forest-grammar</kw></q>.</item>
+
+<item><label><kw>tree-count</kw></label>: an integer specifying a
+maximum number of trees to (find and) return.  The magic number -1
+is used to signal that all (or as many as possible) should be
+returned.</item>
+
+<item><label><kw>ambiguity-test</kw></label>: an boolean value used
+when the <q><kw>tree-count</kw></q> option is 1, to indicate whether
+a second tree should be searched for (though not returned), so as to
+correctly detect amgiguity.</item>
+
+<item><label><kw>failure-dump</kw></label>: one of
+<q><kw>yes</kw></q>, <q><kw>no</kw></q>, <q><kw>closure</kw></q>.
+Used in case of parse failures to indicate whether all data
+structures should be dumped; <q><kw>closure</kw></q> indicates that
+just the closure should be provided.</item>
+
+</list>
+</p>
 </div>
 </div>
 

@@ -103,15 +103,17 @@ declare function ix:comp(
 
 declare function ix:recognize(
   $I as item() (: INPUT :),
-  $G as item() (: GRAMMAR :)
+  $G as item() (: GRAMMAR :),
+  $options as map(*)
 ) as xs:boolean {
-  let $m := ix:recognizeX($I, $G)
+  let $m := ix:recognizeX($I, $G, $options)
   return $m('Result')
 };
 
 declare function ix:recognizeX(
   $I as item() (: INPUT :),
-  $G as item() (: GRAMMAR :)
+  $G as item() (: GRAMMAR :),
+  $options as map(*)
 ) as map(*) {
   let $G2 := ixi:augment-grammar($G),
       $symStart0 := ixi:symStartG($G),

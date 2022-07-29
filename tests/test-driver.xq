@@ -13,7 +13,7 @@ declare namespace db =
 
 declare option db:chop "false";
 
-let $catalog-index := 'oberon' (: which catalog to run? short name :)
+let $catalog-index := 'test0' (: which catalog to run? short name :)
     (: bogons 439. 
        test0 2s, test1 5s, hygiene 12s, zeroes 20s.  
        misc 78s, gxxx 153s, wisp-A 100s.
@@ -38,79 +38,119 @@ let $invdir := "../../cmsmcq-ixml/tests/",
 
     $catalog-of-catalogs := <test-catalogs>
 
-      <!-- local catalogs, mostly simple -->
+            <!--* .......................................................
+          * local catalogs, mostly simple 
+          * ...................................................... -->
 
+      <!-- need timing ........................................ -->
       <catalog n="expr1" path="{$apadir}expr1-20220415.xml"/><!-- ??? s -->
+
+      <!-- local performance tests (cut off the slow ones for now) -->
+      <catalog n="local-doubling" 
+               path="{$apadir}doubling-test-catalog.xml"
+               /><!-- ??? s -->
+      <catalog n="local-tens"
+	       path="{$apadir}tenfold-test-catalog.xml"
+               /><!-- ??? s -->
+      <catalog n="local-evens-and-odds" 
+               path="{$apadir}evens-and-odds-test-catalog.xml"
+               /><!-- ??? s -->	       
+      
     
-      <!-- under 60 seconds (2.1, 4.8, 20.1, 12.4) -->
+      <!-- under 60 seconds ................................... -->
       <catalog n="test0" path="{$apadir}test0.xml"/><!-- 2 s -->
       <catalog n="test1" path="{$apadir}test1.xml"/><!-- 5 s -->
-      <catalog n="hygiene" path="{$itwdir}ixml-20220222/hygiene-tests.xml"/><!-- 12 s -->>
       <catalog n="zeroes" path="{$apadir}zeroes-tests.xml"/><!-- 20 s -->
-
-      <!-- under 10 minutes -->      
+      
+      <!-- under 10 minutes ................................... -->      
       <catalog n="misc" path="{$apadir}misc-tests.xml"/><!-- 78.1s -->
-      
-      <!-- embeds all the gxxx catalogs so they can be done in a single run -->      
-      <catalog n="gxxx"
-	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/><!-- 153s -->
 
-      <catalog n="bogons" path="{$apadir}bogons-20220310.xml"/><!-- 439 s -->
-
-      <!-- under 1 hour () -->
+      <!-- under 1 hour ....................................... -->      
       <catalog n="test2" path="{$apadir}test2.xml"/><!-- 745 s -->
+      
+      <!-- over 1 hour ........................................ -->      
 
-      <!-- under 2 hours () -->
-      <!-- under 5 hours () -->
+      
+            <!--* .......................................................
+          * Main ixml repo
+          * ...................................................... -->
 
-      <!-- over 5 hours () -->
-      <!-- ixml-all is very slow (5.5h or so): 
-           all of the tests in the ixml repo -->
+      <!-- all ................................................ -->
       <catalog n="ixml-all"
-	       path="{$invdir}test-catalog.xml"/>
-      
-      <!-- to be timed -->
-      <catalog n="prolog" path="{$invdir}grammar-misc/prolog-tests.xml"/><!-- ? s -->
-      <catalog n="insert" path="{$invdir}grammar-misc/insertion-tests.xml"/><!-- ? s -->
-      
-      <catalog n="jl-insert-old" path="{$apadir}jl-insertion-test-catalog.xml"/><!-- ? s -->
-      <catalog n="jl-prolog-old" path="{$apadir}jl-prolog-test-catalog.xml"/><!-- ? s -->
+	       path="{$invdir}test-catalog.xml"
+               /><!-- 5.5h -->
 
-      <!-- syntax error tests in ixml repo -->
-      <!-- 24s, -->
+      <!-- syntax/* ........................................... -->
       <catalog n="syntax-cagt"
-       path="{$invdir}syntax/catalog-as-grammar-tests.xml"/>
+        path="{$invdir}syntax/catalog-as-grammar-tests.xml"
+        /><!-- ? s -->
       <catalog n="syntax-caii"
-       path="{$invdir}syntax/catalog-as-instance-tests-ixml.xml"/>
+        path="{$invdir}syntax/catalog-as-instance-tests-ixml.xml"
+        /><!-- ? s -->
       <catalog n="syntax-caix"
-       path="{$invdir}syntax/catalog-as-instance-tests-xml.xml"/>
+        path="{$invdir}syntax/catalog-as-instance-tests-xml.xml"
+        /><!-- ? s -->
       <catalog n="syntax-correct"
-       path="{$invdir}syntax/catalog-of-correct-tests.xml"/>
+        path="{$invdir}syntax/catalog-of-correct-tests.xml"
+        /><!-- ? s -->
 
       <!-- other tests in ixml repo -->
       <catalog n="ixml-ambi"
-	       path="{$invdir}ambiguous/test-catalog.xml"/>
+	       path="{$invdir}ambiguous/test-catalog.xml"
+               /><!-- ? s -->
       <catalog n="ixml-corr"
-	       path="{$invdir}correct/test-catalog.xml"/>
+	       path="{$invdir}correct/test-catalog.xml"
+               /><!-- ? s -->
+      <catalog n="ixml-ixml"
+	       path="{$invdir}ixml/test-catalog.xml"
+               /><!-- ? s -->
       <catalog n="ixml-parse"
-	       path="{$invdir}parse/test-catalog.xml"/>
+	       path="{$invdir}parse/test-catalog.xml"
+               /><!-- ? s -->
       <catalog n="ixml-error"
-	       path="{$invdir}error/test-catalog.xml"/>
+	       path="{$invdir}error/test-catalog.xml"
+               /><!-- ? s -->
       <catalog n="ixml-hygiene"
-	       path="{$invdir}grammar-misc/test-catalog.xml"/>
+	       path="{$invdir}grammar-misc/test-catalog.xml"
+               /><!-- ? s -->
       <catalog n="ixml-prolog"
-	       path="{$invdir}grammar-misc/test-catalog.xml"/>
+	       path="{$invdir}grammar-misc/prolog-tests.xml"
+               /><!-- ? s -->
       <catalog n="ixml-insertion"
-	       path="{$invdir}grammar-misc/test-catalog.xml"/>
+	       path="{$invdir}grammar-misc/insertion-tests.xml"
+               /><!-- ? s -->
+      <catalog n="ixml-misc-1"
+	       path="{$invdir}misc/misc-001-020-catalog.xml"
+               /><!-- ? s -->
+      <catalog n="ixml-misc-2"
+	       path="{$invdir}misc/misc-021-040-catalog.xml"
+               /><!-- ? s -->
+      <catalog n="ixml-misc-3"
+	       path="{$invdir}misc/misc-041-060-catalog.xml"
+               /><!-- ? s -->
 
       <!-- ixml-ixml is slow -->
-      <catalog n="ixml-ixml"
-	       path="{$invdir}ixml/test-catalog.xml"/>
+
+      <!-- performance tests -->
+      <catalog n="a-star-twos" 
+               path="{$invdir}performance/a-star/doubling-test-catalog.xml"
+               /><!-- ??? s -->
+      <catalog n="a-star-tens"
+	       path="{$invdir}performance/a-star/tenfold-test-catalog.xml"
+               /><!-- ??? s -->
+      <catalog n="odds-evens" 
+               path="{$invdir}performance/evens-and-odds/test-catalog.xml"
+               /><!-- ??? s -->	       
+
+      <!-- under 60 seconds ................................... -->
+      <!-- under 10 minutes ................................... -->
+      <!-- under 1 hour ....................................... -->
+      <!-- over 1 hour ........................................ -->
       
-
-
-      <!-- Positive and negative catalogs for various small grammars -->
-
+            <!--* .......................................................
+          * ixml-tests repo
+          * ...................................................... -->
+      <!-- need timing ........................................ -->
       <catalog n="g010"
 	       path="{$ixtdir}gxxx/g010.test-catalog.xml"/>
       <catalog n="g010neg"
@@ -141,49 +181,15 @@ let $invdir := "../../cmsmcq-ixml/tests/",
       <catalog n="g112neg"
 	       path="{$ixtdir}gxxx/g112.O3.test-catalog.all.neg.xml"/>
 
+      <!-- under 60 seconds ................................... -->
+      <!-- under 10 minutes ................................... -->
+      <!-- embeds all the gxxx catalogs so they can be done in a single run -->      
+      <catalog n="gxxx"
+	       path="{$ixtdir}gxxx/gxxx-test-catalog.xml"/><!-- 153s -->
+      <!-- under 1 hour ....................................... -->
+      <!-- over 1 hour ........................................ -->
+      
 
-      <!-- arithmetic expressions, with 
-           2, 7638, 2886, 1020, and 338 test cases.
-           Broken. -->
-      <catalog n="arith-pos"
-	       path="{$ixtdir}arith/arith.test-catalog.pos.xml"/>
-      <catalog n="arith-a-neg"
-	       path="{$ixtdir}arith/arith.O3.test-catalog.arc.neg.xml"/>
-      <catalog n="arith-af-neg"
-	       path="{$ixtdir}arith/arith.O3.test-catalog.arc-final.neg.xml"/>
-      <catalog n="arith-s-neg"
-	       path="{$ixtdir}arith/arith.O3.test-catalog.state.neg.xml"/>
-      <catalog n="arith-sf-neg"
-	       path="{$ixtdir}arith/arith.O3.test-catalog.state-final.neg.xml"/>
-
-      <!--  straw-man tests on ixml itself
-           (n.b. old version of ixml grammar) -->
-      <catalog n="straw-ixml"
-	       path="{$ixtdir}ixml/ixml.test-catalog.pos.xml"/>
-
-      <!--  wisps test set (currently in progress) -->
-      <catalog n="misc-001"
-	       path="{$invdir}misc/misc-001-020-catalog.xml"/>
-      <catalog n="misc-021"
-	       path="{$invdir}misc/misc-021-040-catalog.xml"/>
-         
-      <catalog n="wisp-A"
-	       path="{$ixtdir}wisps/wisps-001-020-catalog.xml"/>
-      <catalog n="wisp-B"
-	       path="{$ixtdir}wisps/wisps-021-040-catalog.xml"/>
-      <catalog n="wisp-C"
-	       path="{$ixtdir}wisps/wisps-041-060-catalog.xml"/>
-      <catalog n="wisp-D"
-	       path="{$ixtdir}wisps/wisps-061-080-catalog.xml"/>
-      <catalog n="wisp-E"
-	       path="{$ixtdir}wisps/wisps-081-102-catalog.xml"/>
-
-      <catalog n="wisps"
-	       path="{$ixtdir}wisps/wisp-catalog.xml"/>
-         
-        
-      <catalog n="oberon" path="/home/ex/Wirth/Oberon-test-catalog.xml"/>
-         
     </test-catalogs>,
 
     $test-catalog-path := $catalog-of-catalogs
@@ -246,7 +252,7 @@ let $invdir := "../../cmsmcq-ixml/tests/",
         )[1]
       },
       
-      attribute timeout { 60000 }
+      attribute timeout { 600 }
 
     }
 
