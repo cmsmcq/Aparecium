@@ -6,12 +6,6 @@ The current work plan for Aparecium is:
 
 * Add new functionality for insertions.  This has several steps:
 
-    * Accept options in top-level functions and pass the options into
-      the internals.  Two top priorities: pretty-print yes/no and
-      format of return value (parse tree, parse map, parse-forest
-      grammar, parse-forest map, various internals ... for now
-      supporting parse tree, parse-forest grammar, Earley set).
-
     * Add insertions to the grammar compiler.
 
     * Add insertions to the parser.
@@ -135,3 +129,5 @@ done, sometimes.
 * Corrected test failures for dynamic errors and version mismatch
   (June 2022).
 
+* Rewrote top-level functions to accept user-supplied options and pass
+  the options into the internals (29 July 2022).

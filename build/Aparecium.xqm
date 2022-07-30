@@ -397,16 +397,9 @@ declare function aparecium:grammar-ok(
         attribute id { "ap:tbd09" },
         "Unexpected " || $e/name() 
         || " element as child of rule."
-      },
-
-      let $le0 := $G/rule/descendant::insertion
-      for $e in $le0 
-      return element aparecium:error {
-        attribute id { "ap:tbd38" },
-        "Sorry!  Aparecium does not currently support "
-        || "grammars with insertions."
       }
-      
+
+
   )
       
 
@@ -599,16 +592,18 @@ declare function aparecium:grammar-ok(
                    $lee-reachable, $lee-productive)
   return if (empty($lee-all/self::aparecium:error))
   then $G
-  else element aparecium:error {
-    attribute id { "ap:tbd06" },
-    element p { "Errors found in grammar." },
-    $lee-all,
-    $G
+  else (: not(empty($lee-all/self::ap:error)) :)
+    element aparecium:error {
+      attribute id { "ap:tbd06" },
+      element p { "Errors found in grammar." },
+      $lee-all,
+      $G
   }
-  else element aparecium:error {
-    attribute id { "ap:tbd07" },
-    element p { "This is not a grammar." },
-    $G
+  else (: not($G/self::ixml) :) 
+    element aparecium:error {
+      attribute id { "ap:tbd07" },
+      element p { "This is not a grammar." },
+      $G
   }
 };
 

@@ -12,7 +12,7 @@ at "Earley-rec-internals.xqm";
    ****************************************************** :)
 (: If $E expects any terminals which occur as expected, 
    return the advance of E over those terminals.  There 
-   may be more than one. :)
+   may be more than one.  :)
    
 declare function ix:scan(
   $E as item() (: ITEM :),

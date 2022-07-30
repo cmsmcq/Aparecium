@@ -88,7 +88,15 @@ declare function ixi:eiMakePPT(
     'from' : $From,
     'to' : $To,
     'rule' : $t,
-    'ri' : "#terminal" (:,
+    'ri' : if ($t/self::insertion[exists(@string)]) 
+           then "#ins_" 
+                || string-join(
+                     string-to-codepoints($t/@string),
+                     '.')
+           else if ($t/self::insertion[exists(@hex)]) 
+           then "#ins_" || string(d2x:x2d($t/@hex))
+           else "#terminal" 
+    (:,
     'sig' : concat('(', $From, 
                    '.', $To,
                    '.', $t,
@@ -819,6 +827,8 @@ declare function ixi:reXTerminal(
     then "[^\i\I]" (: empty inclusion matches nothing :)
     else if ($t/self::exclusion)
     then "[\s\S]" (: empty inclusion excludes nothing :)
+    else if ($t/self::insertion)
+    then "[^\p{Z}\P{Z}]?" (: insertion matches empty sequence :)
     else "--error in reXTerminal--"
 };
 
@@ -836,6 +846,7 @@ declare function ixi:fTerminal(
     or self::literal
     or self::inclusion
     or self::exclusion
+    or self::insertion
   ])
 };
 
@@ -947,6 +958,8 @@ declare function ixi:cMatchesIPT(
      return if ($fYesno)
             then 1
             else -1
+  else if ($t/self::insertion) then
+     0
   else (: error :) -1
 };
    

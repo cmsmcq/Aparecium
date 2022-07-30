@@ -11,7 +11,11 @@ at "Earley-recognizer.xqm";
 import module namespace eri =
 "http://blackmesatech.com/2019/iXML/Earley-rec-internals"
 at "Earley-rec-internals.xqm";
-  
+
+import module namespace d2x = 
+'http://blackmesatech.com/2019/iXML/d2x'
+at "d2x.xqm";
+
 declare namespace follow = 
 "http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset"; 
 
@@ -401,8 +405,9 @@ declare function epi:make-pfg-rules(
                    if (empty($walks))
                    then element ap:error {
 		     attribute id { "ap:tbd21" },
-                     element p { "In make-pfg-rules, " },
-                     element p { "find-walks() failed." },
+                     element p { 
+                       "In make-pfg-rules," ||
+                       "find-walks() failed." },
                      element p { "Here is what I know." },
                      element dump { 
                        element var {
@@ -531,7 +536,8 @@ declare function epi:find-walks(
                      [(.?rule/@name eq $N)
                       or (.?rule/@xml:id eq $T)]
                      [eri:fFinalEi(.) 
-                      or (.?ri eq '#terminal')]
+                      or (.?ri eq '#terminal')
+                      or starts-with(.?ri, '#ins_')]
                      [.?to le $eiParent('to')],
           $items  := for $i at $index in $items0
                      where not(
@@ -619,6 +625,32 @@ declare function epi:rhs-from-walk(
 	   $next-step := $w('pred')
        return epi:rhs-from-walk($next-step, $I, $new-acc)
 
+  else   if (starts-with($w('item')('ri'), '#ins_'))
+  then let $ei := $w('item')
+       let $x := $ei('from'),
+           $y := $ei('to'),
+           $symbol := element insertion {
+               let $s0 := substring-after(
+                            $w('item')('ri'),
+                            '#ins_'
+                          ),
+                   $ls0 := tokenize($s0, '\.'),
+                   $codepoints := for $n in $ls0 
+                                  return xs:integer($n),
+                   $s := codepoints-to-string($codepoints)
+               return
+                   if ((count($codepoints) eq 1)
+                      and
+                      $codepoints lt 32)
+                   then (: we have a c0 control character :)
+                      attribute hex { d2x:d2x($codepoints) }
+                   else attribute string { $s }
+           },
+
+           $new-acc := ($symbol, $acc),
+	   $next-step := $w('pred')
+       return epi:rhs-from-walk($next-step, $I, $new-acc)
+
   else   if (exists($w('item')('rule')/self::rule[@name]))
   then let $ei := $w('item'),
 
@@ -661,6 +693,8 @@ declare function epi:lei-from-walk(
   else if ($w('state') eq 'q0')
   then $acc
   else if ($w('item')('ri') eq '#terminal')
+  then epi:lei-from-walk($w('pred'), $acc)
+  else if (starts-with($w('item')('ri'), '#ins_'))
   then epi:lei-from-walk($w('pred'), $acc)
   else epi:lei-from-walk($w('pred'),
                          ($w('item'), $acc))
@@ -930,6 +964,17 @@ let $dummy := eri:notrace(count($lnAdups), 'Of these some are dups: ')
               then ()
               else if ($nodetype = ('element', 'attribute'))
               then () (: is this an error? :)
+              else text { $s }
+
+  else if ($pfg/self::insertion)
+  then        let $s := if (exists($pfg/@string))
+           then string($pfg/@string)
+           else if (exists($pfg/@hex))
+           then eri:charXhex($pfg/@hex)
+           else '&#x1D350;' (: tetragram for failure U+1D350 :)
+
+       return if ($nodetype = ('attribute'))
+              then () (: not an error :)
               else text { $s }
 
   else element eek {

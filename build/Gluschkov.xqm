@@ -36,9 +36,16 @@ else if ($E/self::range) then $E
 else if ($E/self::class) then $E
 
   else if ($E/self::inclusion or $E/self::exclusion
-    or $E/self::literal)
+    or $E/self::literal
+    or $E/self::insertion)
 then
-      let $id := '_t_' 
+      let $id := if ($E/self::insertion)
+                 then '_ins_' 
+                 || (1 + count(($E/preceding::* | $E/ancestor::*)
+                    [self::insertion])) 
+                 || '.'
+                 || (string-join(string-to-codepoints($E/@string), '.'))
+                 else '_t_' 
                  || (1 + count(($E/preceding::* | $E/ancestor::*)
                     [self::inclusion 
                     or self::exclusion
@@ -82,7 +89,8 @@ then
     [count(*) eq 1]
     [child::*[self::inclusion
               or self::exclusion
-              or self::literal 
+              or self::literal
+              or self::insertion
               or self::nonterminal 
 	      or self::alts]])
 then
@@ -105,6 +113,7 @@ then
       [*[1]
         [self::inclusion or self::exclusion
         or self::literal
+        or self::insertion
         or self::nonterminal
 	or self::alts]]
       [count(*) eq 1 
@@ -358,15 +367,19 @@ then let $gi := name($E)
 then element ap:error {
        attribute id {"ap:tbd35"},
        element desc {
-         "Element {name($E)} with unexpected content:"
+         "Element",
+         name($E), 
+         "with unexpected content:"
        },
        $E
      }
-else if ($E/(self::repeat1 or self::repeat0))
+else if ($E[self::repeat1 or self::repeat0])
 then element ap:error {
        attribute id {"ap:tbd36"},
        element desc {
-         "Element {name($E)} with unexpected content:"
+         "Element",
+         name($E), 
+         "with unexpected content:"
        },
        $E
      }

@@ -589,7 +589,11 @@ at "Earley-recognizer.xqm";
 import module namespace eri =
 "http://blackmesatech.com/2019/iXML/Earley-rec-internals"
 at "Earley-rec-internals.xqm";
-  
+
+import module namespace d2x = 
+'http://blackmesatech.com/2019/iXML/d2x'
+at "d2x.xqm";
+
 declare namespace follow = 
 "http://blackmesatech.com/2016/nss/ixml-gluschkov-automata-followset"; 
 
@@ -1784,13 +1788,31 @@ else if ($E/self::class) then $E
 
 <p>For terminal symbols, all attribute values are straightforward.
 They are non-nullable, they are their own first and last states, and
-they have no follow states.  
+they have no follow states.</p>
+
+<p>The <gi>insertion</gi> element is less straightforward, perhaps,
+but requires the same treatment.  I treat it as a terminal because it
+is not defined by any rule in the grammar, but unlike a normal
+terminal it consumes no input.  Despite consuming no input, however,
+it is not nullable: a parse tree for the expression <q><code>a, +"b",
+c</code></q> must include the insertion, unlike a parse tree for
+<q><code>a, (+"b")?, c</code></q>, in which it's optional.  In this
+respect, an insertion resembles a nonterminal defined with an empty
+production rule.</p>
+<p>
 <scrap id="gl-ME-terminals"
        name="Handle terminal nodes">
 if ($E/self::inclusion or $E/self::exclusion
-    or $E/self::literal)
+    or $E/self::literal
+    or $E/self::insertion)
 then
-      let $id := '_t_' 
+      let $id := if ($E/self::insertion)
+                 then '_ins_' 
+                 || (1 + count(($E/preceding::* | $E/ancestor::*)
+                    [self::insertion])) 
+                 || '.'
+                 || (string-join(string-to-codepoints($E/@string), '.'))
+                 else '_t_' 
                  || (1 + count(($E/preceding::* | $E/ancestor::*)
                     [self::inclusion 
                     or self::exclusion
@@ -1818,6 +1840,7 @@ internals module.
 </p>
 
 </div>
+
 <div id="higl-ME-nonterminals">
 <head>Gluschkov automata for nonterminal symbols</head>
 
@@ -1865,7 +1888,8 @@ if ($E/self::option
     [count(*) eq 1]
     [child::*[self::inclusion
               or self::exclusion
-              or self::literal 
+              or self::literal
+              or self::insertion
               or self::nonterminal 
 	      or self::alts]])
 then
@@ -1942,6 +1966,7 @@ if ($E[self::repeat0 or self::repeat1]
       [*[1]
         [self::inclusion or self::exclusion
         or self::literal
+        or self::insertion
         or self::nonterminal
 	or self::alts]]
       [count(*) eq 1 
@@ -2414,15 +2439,19 @@ if ($E/self::option or $E/self::sep)
 then element ap:error {
        attribute id {"ap:tbd35"},
        element desc {
-         "Element {name($E)} with unexpected content:"
+         "Element",
+         name($E), 
+         "with unexpected content:"
        },
        $E
      }
-else if ($E/(self::repeat1 or self::repeat0))
+else if ($E[self::repeat1 or self::repeat0])
 then element ap:error {
        attribute id {"ap:tbd36"},
        element desc {
-         "Element {name($E)} with unexpected content:"
+         "Element",
+         name($E), 
+         "with unexpected content:"
        },
        $E
      }
@@ -2616,16 +2645,18 @@ declare function aparecium:grammar-ok(
                    $lee-reachable, $lee-productive)
   return if (empty($lee-all/self::aparecium:error))
   then $G
-  else element aparecium:error {
-    attribute id { "ap:tbd06" },
-    element p { "Errors found in grammar." },
-    $lee-all,
-    $G
+  else (: not(empty($lee-all/self::ap:error)) :)
+    element aparecium:error {
+      attribute id { "ap:tbd06" },
+      element p { "Errors found in grammar." },
+      $lee-all,
+      $G
   }
-  else element aparecium:error {
-    attribute id { "ap:tbd07" },
-    element p { "This is not a grammar." },
-    $G
+  else (: not($G/self::ixml) :) 
+    element aparecium:error {
+      attribute id { "ap:tbd07" },
+      element p { "This is not a grammar." },
+      $G
   }
 };
 </scrap>
@@ -2658,8 +2689,8 @@ comments or pragmas.
         attribute id { "ap:tbd09" },
         "Unexpected " || $e/name() 
         || " element as child of rule."
-      },
-
+      }
+<!--
       let $le0 := $G/rule/descendant::insertion
       for $e in $le0 
       return element aparecium:error {
@@ -2667,13 +2698,19 @@ comments or pragmas.
         "Sorry!  Aparecium does not currently support "
         || "grammars with insertions."
       }
-      
+-->
+
   )
       
 </scrap>
 Later, this will be replaced with code to validate every
 child against the appropriate content model and check
-attributes.
+attributes.  <hi>The simplest approach would be to call
+the function <ident>validate:rng()</ident>, which is
+predefined in BaseX.  That would introduce an
+implementation dependency; to hide it, write an ixml:validate
+function which calls an RNG validator if one is available
+and performs some simple fallback checking otherwise.</hi>
 </p>
 <p>Since we cannot check the compilation of the grammar
 in detail, we limit ourselves to checking that every
@@ -3237,7 +3274,8 @@ declare function ix:scan(
 };
 
 </scrap>
-The double call seems wasteful; it seems simpler to ask the matching
+The double call <!-- to what and what? -->
+seems wasteful; it seems simpler to ask the matching
 function to tell us how many characters of the input the terminal
 consumed.</p>
 
@@ -3245,9 +3283,13 @@ consumed.</p>
 <ident>ixi:cMatchesIPT()</ident> to see whether we have a match and
 how long it is.  If we have a match, we return both the advance over
 the terminal and a new form of item, with a terminal rather than a
-nonterminal in the rule position, and <q><code>#terminal</code></q>
-as the rule index.
-
+nonterminal in the rule position, and a rule index of
+<q><code>#terminal</code></q> or (for insertions)
+the string <q><code>#ins_</code></q> followed by a dot-separated
+list of code points in the string to be inserted.
+<hi>This is a hideous hack that reflects the fact that I have not
+found a way to integrate text insertions cleanly into the parsing
+model.</hi>
 <scrap corresp="er-scan" id="er-scan-pfg"
        version="pfg"
        name="Define scan()">
@@ -3256,7 +3298,7 @@ as the rule index.
    ****************************************************** :)
 (: If $E expects any terminals which occur as expected, 
    return the advance of E over those terminals.  There 
-   may be more than one. :)
+   may be more than one.  :)
    
 declare function ix:scan(
   $E as item() (: ITEM :),
@@ -4035,8 +4077,9 @@ appropriate expression on the right-hand side.
                    if (empty($walks))
                    then element ap:error {
 		     attribute id { "ap:tbd21" },
-                     element p { "In make-pfg-rules, " },
-                     element p { "find-walks() failed." },
+                     element p { 
+                       "In make-pfg-rules," ||
+                       "find-walks() failed." },
                      element p { "Here is what I know." },
                      element dump { 
                        element var {
@@ -4268,7 +4311,8 @@ their rule index, we take only one of them.
                      [(.?rule/@name eq $N)
                       or (.?rule/@xml:id eq $T)]
                      [eri:fFinalEi(.) 
-                      or (.?ri eq '#terminal')]
+                      or (.?ri eq '#terminal')
+                      or starts-with(.?ri, '#ins_')]
                      [.?to le $eiParent('to')],
           $items  := for $i at $index in $items0
                      where not(
@@ -4348,6 +4392,7 @@ declare function epi:rhs-from-walk(
 
   <ptr target="epi-rfw-stop"/>
   else <ptr target="epi-rfw-terminal"/>
+  else <ptr target="epi-rfw-insertion"/>
   else <ptr target="epi-rfw-nonterminal"/>
 };
 </scrap>
@@ -4376,6 +4421,38 @@ construct a <gi>literal</gi> element and recur.
                attribute string {
                    substring($I, $x+1, ($y - $x))              
                }
+           },
+
+           $new-acc := ($symbol, $acc),
+	   $next-step := $w('pred')
+       return epi:rhs-from-walk($next-step, $I, $new-acc)
+</scrap>
+</p>
+<p>If the walk includes a completion item for an insertion,
+of the form (&x; &x; _ins_&n; '#ins_' || &s;), then we
+construct an <gi>insertion</gi> element and recur.
+<scrap id="epi-rfw-insertion"
+       name="If this step is an insertion, return an insertion">
+  if (starts-with($w('item')('ri'), '#ins_'))
+  then let $ei := $w('item')
+       let $x := $ei('from'),
+           $y := $ei('to'),
+           $symbol := element insertion {
+               let $s0 := substring-after(
+                            $w('item')('ri'),
+                            '#ins_'
+                          ),
+                   $ls0 := tokenize($s0, '\.'),
+                   $codepoints := for $n in $ls0 
+                                  return xs:integer($n),
+                   $s := codepoints-to-string($codepoints)
+               return
+                   if ((count($codepoints) eq 1)
+                      and
+                      $codepoints lt 32)
+                   then (: we have a c0 control character :)
+                      attribute hex { d2x:d2x($codepoints) }
+                   else attribute string { $s }
            },
 
            $new-acc := ($symbol, $acc),
@@ -4442,7 +4519,8 @@ the parent node.<note place="foot">
 generate the right-hand side from the walk?</p></note></p>
 
 <p>We do this by walking through the list step by step, pushing each
-item onto the front of the accumulator.
+item onto the front of the accumulator.  Unless it's a terminal
+or an insertion, in which case we skip it.
 <scrap id="epi-lei-from-walk"
        name="The lei-from-walk() function">
 declare function epi:lei-from-walk(
@@ -4454,6 +4532,8 @@ declare function epi:lei-from-walk(
   else if ($w('state') eq 'q0')
   then $acc
   else if ($w('item')('ri') eq '#terminal')
+  then epi:lei-from-walk($w('pred'), $acc)
+  else if (starts-with($w('item')('ri'), '#ins_'))
   then epi:lei-from-walk($w('pred'), $acc)
   else epi:lei-from-walk($w('pred'),
                          ($w('item'), $acc))
@@ -4544,6 +4624,8 @@ declare function epi:tree-from-pfg(
   then <ptr target="epi-tfg-nonterminal"/>
   else if ($pfg/self::literal)
   then <ptr target="epi-tfg-literal"/>
+  else if ($pfg/self::insertion)
+  then <ptr target="epi-tfg-insertion"/>
   else element eek {
       element desc {
           "tree-from-pfg got "
@@ -4934,6 +5016,23 @@ attribute.
               else text { $s }
 </scrap>
 </p>
+<p>
+Extracting an insertion is also simple:  it's always literally present
+in the <att>string</att> attribute, or else in the <att>hex</att>
+attribute.
+<scrap id="epi-tfg-insertion"
+       name="Extract character data from insertion element">
+       let $s := if (exists($pfg/@string))
+           then string($pfg/@string)
+           else if (exists($pfg/@hex))
+           then eri:charXhex($pfg/@hex)
+           else '&amp;#x1D350;' (: tetragram for failure U+1D350 :)
+
+       return if ($nodetype = ('attribute'))
+              then () (: not an error :)
+              else text { $s }
+</scrap>
+</p>
 </div>
 
 <div id="hi-ast-ex-rpt">
@@ -5099,7 +5198,15 @@ declare function ixi:eiMakePPT(
     'from' : $From,
     'to' : $To,
     'rule' : $t,
-    'ri' : "#terminal" (:,
+    'ri' : if ($t/self::insertion[exists(@string)]) 
+           then "#ins_" 
+                || string-join(
+                     string-to-codepoints($t/@string),
+                     '.')
+           else if ($t/self::insertion[exists(@hex)]) 
+           then "#ins_" || string(d2x:x2d($t/@hex))
+           else "#terminal" 
+    (:,
     'sig' : concat('(', $From, 
                    '.', $To,
                    '.', $t,
@@ -6113,6 +6220,8 @@ declare function ixi:reXTerminal(
     then "[^\i\I]" (: empty inclusion matches nothing :)
     else if ($t/self::exclusion)
     then "[\s\S]" (: empty inclusion excludes nothing :)
+    else if ($t/self::insertion)
+    then "[^\p{Z}\P{Z}]?" (: insertion matches empty sequence :)
     else "--error in reXTerminal--"
 };
 </scrap>
@@ -6120,8 +6229,16 @@ We use <q><code>[\s\S]</code></q> and <q><code>[^\i\I]</code></q> as
 XPath representations of the empty inclusion and the empty exclusion,
 respectively.  Any pair of complementary character class escapes would
 work as well: <q><code>\w\W</code></q> <q><code>\i\I</code></q>, etc.
+<!--* complete list: \s\S space and nonspace, \i\I namestart,
+      \c\C name characters, \d\D \p{Nd}, \w\W all but \p{P} \p{Z} \p{C}
+      Also \p{c}\P{c} for c in 
+      L letters, M marks, N numbers, P punctuation, Z separators, 
+      S symbols, C all others
+    *--> 
 We will use a different pair each time we generate such a character
 class, to help make clear where that character class was generated.
+Insertions could just be written with the empty string, but writing
+<q><code>[^\p{Z}\P{Z}]?</code></q> should make them easier to trace.
 </p>
 
 <p>An important wrinkle is that not every integer between #0000 and
@@ -6269,7 +6386,7 @@ anything in an exclusion.
 <div>
 <head>Testing for symbol type</head>
 <p>The function <ident>fTerminal()</ident> returns true iff the
-argument is a terminal symbol.  This version supports both my
+argument is a terminal symbol or an insertion.  This version supports both my
 interpretation of the 2016 syntax (with element type
 <gi>terminal</gi>) and the 2019 syntax (literal, inclusion,
 exclusion).
@@ -6285,6 +6402,7 @@ declare function ixi:fTerminal(
     or self::literal
     or self::inclusion
     or self::exclusion
+    or self::insertion
   ])
 };
 </scrap>
@@ -6515,15 +6633,15 @@ al($t)
 };
 </scrap></p>
 
-<p>It will however simplify the construction of the parse tree if
-the Earley set contains an item recording that this particular
-terminal symbol matched a particular substring of the input.  That
-will also simplify the <ident>match-length()</ident> functions, or
-more likely render them unnecessary.  So in version
-<ident>pfg</ident>, we return a match length, not a Boolean, and
-rename the function accordingly.  We use -1, not 0, as the failure
-signal, in case we ever end up using this for arbitrary regular
-expressions which might succeed and match zero characters.
+<p>It will however simplify the construction of the parse tree if the
+Earley set contains an item recording that this particular terminal
+symbol matched a particular substring of the input.  That will also
+simplify the <ident>match-length()</ident> functions, or more likely
+render them unnecessary.  So in version <ident>pfg</ident>, we return
+a match length, not a Boolean, and rename the function accordingly.
+We use -1, not 0, as the failure signal, since insertions will match
+zero characters, and eventually I hope to use this for arbitrary
+regular expressions which might succeed with a zero-length match.
 
 <scrap corresp="eri-input-pred" id="eri-inpred-pfg"
        version="pfg"
@@ -6563,6 +6681,8 @@ declare function ixi:cMatchesIPT(
      return if ($fYesno)
             then 1
             else -1
+  else if ($t/self::insertion) then
+     0
   else (: error :) -1
 };
 </scrap>
@@ -9442,7 +9562,8 @@ nonterminals which are not NCNames will require non-trivial rewrites
 of existing code.</p></item>
 
 <item><p>Aparecium does not currently support insertions.</p>
-<p>This deficiency is expected to be remedied in the near future.</p>
+<p>This deficiency is expected to be remedied in the near future.
+<hi>Work is in progress.</hi></p>
 </item>
 
 </list>
