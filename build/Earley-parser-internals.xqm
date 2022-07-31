@@ -383,7 +383,7 @@ declare function epi:make-pfg-rules(
                   map { 'tree-count': 2 } (: options :)
                 )
 
-   let $dummy := if (count($walks) gt 1)
+   let $dummy := if (count($walks) gt 0)
                  then (eri:notrace(count($walks), 'Find-walks found # walks'
                        || ' for ' || eri:sXei($ei)),
                      for $w at $walknum in $walks 
@@ -507,18 +507,32 @@ declare function epi:find-walks(
     if (($options('tree-count') ne -1)
       and 
       (count($acc) ge $options('tree-count')))
-  then $acc
+  then (eri:notrace((), 'find-walks:  returning ' || count($acc) || ' walks, maxed.'), $acc)
   else if (empty($queue))
-  then $acc
+  then (eri:notrace((), 'find-walks:  returning ' || count($acc) || ' walks, queue 0.'), $acc)
 
   else 
+
+let $dummy := eri:notrace((),
+concat('find-walks:  called for parent ',
+       eri:sXei($eiParent),
+       ' with ',
+       count($acc),
+       ' in accumulator and ',
+       count($queue),
+       ' in the queue. ... ... ... ... '
+       ))
+
   
   let $new-queue := 
-      for $w in $queue
+      for $w at $queue-num in $queue
       let $x := if ($w?state eq 'q0')
                 then $w('item')('from')
                 else $w('item')('to'),
           $qqNext := $w('follow-states')
+
+let $dummy := eri:notrace(eri:sXei($w('item')),
+'find-walks:  walk ' || $queue-num || ' in queue starts with: ') 
 
       for $qNext in $qqNext
       let $symbol := $eiParent('rule')//*[@xml:id=$qNext],
@@ -528,7 +542,10 @@ declare function epi:find-walks(
 
       let $dummy := if (exists($T)) then eri:notrace($T,
           'find-walks: seeking completion items for this terminal:')
-          else ()
+          else if (exists($N)) then eri:notrace($N, 
+          'find-walks:  seeking completion items for this nonterminal:')
+          else eri:notrace($symbol,
+          'find-walks:  symbol broke my classification:')
 
       group by $x, $qNext, $N, $T
 
@@ -539,6 +556,8 @@ declare function epi:find-walks(
                       or (.?ri eq '#terminal')
                       or starts-with(.?ri, '#ins_')]
                      [.?to le $eiParent('to')],
+$dummy := for $i in $items0 return eri:notrace($i,
+'find-walks:  found follow-on completions.'),
           $items  := for $i at $index in $items0
                      where not(
                        some $j in 1 to ($index - 1) 
@@ -553,12 +572,17 @@ declare function epi:find-walks(
                      )
                      return $i
 
+, $dummy := for $i in $items return eri:notrace($i,
+'find-walks:  deduped list of follow-on completions.')
+
+
 
       for $i in $items
+      for $walk-index in 1 to count($w)
       let $fNull := ($i('to') eq $i('from')),
           $leiDups := if ($fNull)
                       then epi:dups-from-walk(
-                               $qNext, $i, $w[1], ()
+                               $qNext, $i, $w[$walk-index], ()
                            )
                       else ()
 
@@ -580,7 +604,7 @@ declare function epi:find-walks(
                  'follow-states' : $qqNextfollow,
                  'final' : $f-qnext-final,
                  'mark'  : $symbol-mark,
-                 'pred'  : $w[1]
+                 'pred'  : $w[$walk-index]
              }
 
 

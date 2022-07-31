@@ -146,7 +146,7 @@
 <h1>An ixml parser for XSLT and XQuery</h1>
 <h3>C. M. Sperberg-McQueen</h3>
 <h3>Begun 16 August 2021<br />
-Last rev. 28 July 2022</h3>
+Last rev. 30 July 2022</h3>
 <div class="versionList">
 <p>Versions defined:</p>
 <ul>
@@ -369,7 +369,7 @@ inserting them into that skeleton. Not everything landed where it
 ought in principle to have landed; the organization of the document
 suffered somewhat from that. As time permits, I hope to revise the
 document to make it easier to read and better organized.</div>
-<div class="Real-P">At this revision (28 July 2022), Aparecium
+<div class="Real-P">At this revision (30 July 2022), Aparecium
 works and passes the large majority of the tests available. (A list
 of test-case failures as of today is given <a href="#known-bugs">in
 an appendix</a>.) The current plans for further work are given
@@ -2700,6 +2700,7 @@ Handle separator expressions 〉 ≡</a></span>
            [child::*[self::inclusion
                      or self::exclusion 
                      or self::literal 
+                     or self::insertion 
                      or self::nonterminal 
                      or self::alts]]
           ) then
@@ -4911,7 +4912,7 @@ $ei 〉 ≡</a></span>
                   map { 'tree-count': 2 } (: options :)
                 )
 
-   let $dummy := if (count($walks) gt 1)
+   let $dummy := if (count($walks) gt 0)
                  then (eri:notrace(count($walks), 'Find-walks found # walks'
                        || ' for ' || eri:sXei($ei)),
                      for $w at $walknum in $walks 
@@ -5131,6 +5132,17 @@ lost. <i>To do: check for loops.</i>
   <span class="scrapref">〈 <em class="scrapptr"><a href=
 "#pfg-fw-if-done">If we have all our walks, return 93</a></em> 〉</span>
   else 
+
+let $dummy := eri:notrace((),
+concat('find-walks:  called for parent ',
+       eri:sXei($eiParent),
+       ' with ',
+       count($acc),
+       ' in accumulator and ',
+       count($queue),
+       ' in the queue. ... ... ... ... '
+       ))
+
   <span class="scrapref">〈 <em class="scrapptr"><a href=
 "#pfg-fw-set-new-queue">Set new queue by extending all walks in the queue 94</a></em> 〉</span>
   <span class="scrapref">〈 <em class="scrapptr"><a href=
@@ -5160,9 +5172,9 @@ id="ref-to-d3e3450">17</a>]
 <pre class="scrapbody">  if (($options('tree-count') ne -1)
       and 
       (count($acc) ge $options('tree-count')))
-  then $acc
+  then (eri:notrace((), 'find-walks:  returning ' || count($acc) || ' walks, maxed.'), $acc)
   else if (empty($queue))
-  then $acc
+  then (eri:notrace((), 'find-walks:  returning ' || count($acc) || ' walks, queue 0.'), $acc)
 </pre>
 <span class="scrapinbound">This code is used in 〈 <a href=
 "#epi-find-walks">The find-walks() function 92</a>
@@ -5183,11 +5195,14 @@ id="ref-to-d3e3485">19</a>]
 "pfg-fw-set-new-queue">〈 94 Set new queue by extending all walks in
 the queue 〉 ≡</a></span>
 <pre class="scrapbody">  let $new-queue := 
-      for $w in $queue
+      for $w at $queue-num in $queue
       let $x := if ($w?state eq 'q0')
                 then $w('item')('from')
                 else $w('item')('to'),
           $qqNext := $w('follow-states')
+
+let $dummy := eri:notrace(eri:sXei($w('item')),
+'find-walks:  walk ' || $queue-num || ' in queue starts with: ') 
 
       for $qNext in $qqNext
       let $symbol := $eiParent('rule')//*[@xml:id=$qNext],
@@ -5197,7 +5212,10 @@ the queue 〉 ≡</a></span>
 
       let $dummy := if (exists($T)) then eri:notrace($T,
           'find-walks: seeking completion items for this terminal:')
-          else ()
+          else if (exists($N)) then eri:notrace($N, 
+          'find-walks:  seeking completion items for this nonterminal:')
+          else eri:notrace($symbol,
+          'find-walks:  symbol broke my classification:')
 
       group by $x, $qNext, $N, $T
 </pre>
@@ -5229,6 +5247,8 @@ the queue</a>] 〉 ≡</span>
                       or (.?ri eq '#terminal')
                       or starts-with(.?ri, '#ins_')]
                      [.?to le $eiParent('to')],
+$dummy := for $i in $items0 return eri:notrace($i,
+'find-walks:  found follow-on completions.'),
           $items  := for $i at $index in $items0
                      where not(
                        some $j in 1 to ($index - 1) 
@@ -5243,16 +5263,21 @@ the queue</a>] 〉 ≡</span>
                      )
                      return $i
 
+, $dummy := for $i in $items return eri:notrace($i,
+'find-walks:  deduped list of follow-on completions.')
+
+
 </pre></div>
 For each such item, we extend the walk we started with:
 <div class="scrap"><span><a name="d3e3511" id="d3e3511">〈 96 Extend
 the walk [continues</a> <a href="#pfg-fw-set-new-queue">94 Set new
 queue by extending all walks in the queue</a>] 〉 ≡</span>
 <pre class="scrapbody">      for $i in $items
+      for $walk-index in 1 to count($w)
       let $fNull := ($i('to') eq $i('from')),
           $leiDups := if ($fNull)
                       then epi:dups-from-walk(
-                               $qNext, $i, $w[1], ()
+                               $qNext, $i, $w[$walk-index], ()
                            )
                       else ()
 
@@ -5274,7 +5299,7 @@ queue by extending all walks in the queue</a>] 〉 ≡</span>
                  'follow-states' : $qqNextfollow,
                  'final' : $f-qnext-final,
                  'mark'  : $symbol-mark,
-                 'pred'  : $w[1]
+                 'pred'  : $w[$walk-index]
              }
 
 </pre></div>
@@ -8837,13 +8862,13 @@ Location of ixml grammar [continues</a> <a href=
 maintainer)</a>] 〉 ≡</span>
 <pre class=
 "scrapbody">declare variable $aparecium:ixml.ixml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-28.ixml';
+  := $aparecium:libloc || '/ixml.2022-06-07.ixml';
 
 declare variable $aparecium:ixml.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-28.01.inlined.xml';
+  := $aparecium:libloc || '/ixml.2022-06-07.01.inlined.xml';
   
 declare variable $aparecium:ixml.gl.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-28.inlined.compiled.xml';  
+  := $aparecium:libloc || '/ixml.2022-06-07.inlined.compiled.xml';  
 </pre></div>
 <i>It may be premature, but I'm using a pre-processed ixml grammar
 in which invisible nonterminals have been inlined. (See the
@@ -10842,7 +10867,7 @@ lists.</div>
 <div class="div">
 <h3><a class="selflink" name="to-do-large" id="to-do-large" href=
 "#to-do-large"></a>Overall plans</h3>
-<div class="Real-P">At the moment (28 July 2022), the primary
+<div class="Real-P">At the moment (30 July 2022), the primary
 concerns are to improve performance and robustness.</div>
 <ul>
 <li>

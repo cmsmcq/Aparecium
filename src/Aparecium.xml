@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '28 July 2022' >
+<!ENTITY date.last.touched '30 July 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
@@ -2150,6 +2150,7 @@ if ($E/self::sep
            [child::*[self::inclusion
                      or self::exclusion 
                      or self::literal 
+                     or self::insertion 
                      or self::nonterminal 
                      or self::alts]]
           ) then
@@ -4034,7 +4035,7 @@ walk with a single step.  And if the parent FSA is nullable, we add that walk to
                   map { 'tree-count': 2 } (: options :)
                 )
 
-   let $dummy := if (count($walks) gt 1)
+   let $dummy := if (count($walks) gt 0)
                  then (eri:notrace(count($walks), 'Find-walks found # walks'
                        || ' for ' || eri:sXei($ei)),
                      for $w at $walknum in $walks 
@@ -4221,6 +4222,17 @@ declare function epi:find-walks(
 ) as <ptr target="pfg-adt-walks"/> {
   <ptr target="pfg-fw-if-done"/>
   else 
+
+let $dummy := eri:notrace((),
+concat('find-walks:  called for parent ',
+       eri:sXei($eiParent),
+       ' with ',
+       count($acc),
+       ' in accumulator and ',
+       count($queue),
+       ' in the queue. ... ... ... ... '
+       ))
+
   <ptr target="pfg-fw-set-new-queue"/>
   <ptr target="pfg-fw-set-new-acc"/>
   return epi:find-walks(
@@ -4252,9 +4264,9 @@ two two-way ambiguities does not guarantee four trees.</p>
   if (($options('tree-count') ne -1)
       and 
       (count($acc) ge $options('tree-count')))
-  then $acc
+  then (eri:notrace((), 'find-walks:  returning ' || count($acc) || ' walks, maxed.'), $acc)
   else if (empty($queue))
-  then $acc
+  then (eri:notrace((), 'find-walks:  returning ' || count($acc) || ' walks, queue 0.'), $acc)
 </scrap>
 </p>
 
@@ -4274,11 +4286,14 @@ subscripts.</p></note>
        name="Set new queue by extending all walks in the queue">
 
   let $new-queue := 
-      for $w in $queue
+      for $w at $queue-num in $queue
       let $x := if ($w?state eq 'q0')
                 then $w('item')('from')
                 else $w('item')('to'),
           $qqNext := $w('follow-states')
+
+let $dummy := eri:notrace(eri:sXei($w('item')),
+'find-walks:  walk ' || $queue-num || ' in queue starts with: ') 
 
       for $qNext in $qqNext
       let $symbol := $eiParent('rule')//*[@xml:id=$qNext],
@@ -4288,7 +4303,10 @@ subscripts.</p></note>
 
       let $dummy := if (exists($T)) then eri:notrace($T,
           'find-walks: seeking completion items for this terminal:')
-          else ()
+          else if (exists($N)) then eri:notrace($N, 
+          'find-walks:  seeking completion items for this nonterminal:')
+          else eri:notrace($symbol,
+          'find-walks:  symbol broke my classification:')
 
       group by $x, $qNext, $N, $T
 </scrap>
@@ -4314,6 +4332,8 @@ their rule index, we take only one of them.
                       or (.?ri eq '#terminal')
                       or starts-with(.?ri, '#ins_')]
                      [.?to le $eiParent('to')],
+$dummy := for $i in $items0 return eri:notrace($i,
+'find-walks:  found follow-on completions.'),
           $items  := for $i at $index in $items0
                      where not(
                        some $j in 1 to ($index - 1) 
@@ -4328,16 +4348,21 @@ their rule index, we take only one of them.
                      )
                      return $i
 
+, $dummy := for $i in $items return eri:notrace($i,
+'find-walks:  deduped list of follow-on completions.')
+
+
 </scrap>
 For each such item, we extend the walk we started with:
 <scrap prev="pfg-fw-set-new-queue"
        name="Extend the walk">
 
       for $i in $items
+      for $walk-index in 1 to count($w)
       let $fNull := ($i('to') eq $i('from')),
           $leiDups := if ($fNull)
                       then epi:dups-from-walk(
-                               $qNext, $i, $w[1], ()
+                               $qNext, $i, $w[$walk-index], ()
                            )
                       else ()
 
@@ -4359,7 +4384,7 @@ For each such item, we extend the walk we started with:
                  'follow-states' : $qqNextfollow,
                  'final' : $f-qnext-final,
                  'mark'  : $symbol-mark,
-                 'pred'  : $w[1]
+                 'pred'  : $w[$walk-index]
              }
 
 </scrap></p>
@@ -7373,13 +7398,13 @@ an FSA.
 <scrap prev="aparecium-variables"
        name="Location of ixml grammar">
 declare variable $aparecium:ixml.ixml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-28.ixml';
+  := $aparecium:libloc || '/ixml.2022-06-07.ixml';
 
 declare variable $aparecium:ixml.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-28.01.inlined.xml';
+  := $aparecium:libloc || '/ixml.2022-06-07.01.inlined.xml';
   
 declare variable $aparecium:ixml.gl.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-28.inlined.compiled.xml';  
+  := $aparecium:libloc || '/ixml.2022-06-07.inlined.compiled.xml';  
 </scrap>
 <hi>It may be premature, but I'm using a pre-processed ixml grammar
 in which invisible nonterminals have been inlined.  (See the Makefile

@@ -142,7 +142,7 @@
 
 <h3>C. M. Sperberg-McQueen</h3>
 <h3>Begun 16 August 2021
-<br>Last rev. 28 July 2022</h3>
+<br>Last rev. 30 July 2022</h3>
 
 <div class="versionList"><p>Versions defined:</p><ul>
 <li id="v0.2" class="versionentry"><em>v0.2:</em>&nbsp;Version presented at Balisage in 2020
@@ -242,7 +242,7 @@ that skeleton.  Not everything landed where it ought in principle to
 have landed; the organization of the document suffered somewhat from
 that.  As time permits, I hope to revise the document to make it
 easier to read and better organized.</div>
-<div class="Real-P">At this revision (28 July 2022), Aparecium works and passes
+<div class="Real-P">At this revision (30 July 2022), Aparecium works and passes
 the large majority of the tests available.  (A list of test-case
 failures as of today is given <a href="#known-bugs">in an
 appendix</a>.)  The current plans for further work are 
@@ -2146,6 +2146,7 @@ changes none of its properties.
            [child::*[self::inclusion
                      or self::exclusion 
                      or self::literal 
+                     or self::insertion 
                      or self::nonterminal 
                      or self::alts]]
           ) then
@@ -4161,7 +4162,7 @@ walk with a single step.  And if the parent FSA is nullable, we add that walk to
                   map { 'tree-count': 2 } (: options :)
                 )
 
-   let $dummy := if (count($walks) gt 1)
+   let $dummy := if (count($walks) gt 0)
                  then (eri:notrace(count($walks), 'Find-walks found # walks'
                        || ' for ' || eri:sXei($ei)),
                      for $w at $walknum in $walks 
@@ -4367,6 +4368,17 @@ lost.
 ) as <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#pfg-adt-walks">Type: collection of walks 87</a></em> &#x3009;</span> {
   <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#pfg-fw-if-done">If we have all our walks, return 93</a></em> &#x3009;</span>
   else 
+
+let $dummy := eri:notrace((),
+concat('find-walks:  called for parent ',
+       eri:sXei($eiParent),
+       ' with ',
+       count($acc),
+       ' in accumulator and ',
+       count($queue),
+       ' in the queue. ... ... ... ... '
+       ))
+
   <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#pfg-fw-set-new-queue">Set new queue by extending all walks in the queue 94</a></em> &#x3009;</span>
   <span class="scrapref">&#x3008; <em class="scrapptr"><a href="#pfg-fw-set-new-acc">Add satisfactory walks to the accumulator 97</a></em> &#x3009;</span>
   return epi:find-walks(
@@ -4392,9 +4404,9 @@ lost.
 <pre class="scrapbody">  if (($options('tree-count') ne -1)
       and 
       (count($acc) ge $options('tree-count')))
-  then $acc
+  then (eri:notrace((), 'find-walks:  returning ' || count($acc) || ' walks, maxed.'), $acc)
   else if (empty($queue))
-  then $acc
+  then (eri:notrace((), 'find-walks:  returning ' || count($acc) || ' walks, queue 0.'), $acc)
 </pre>
 <span class="scrapcontinuations"></span>
 
@@ -4411,11 +4423,14 @@ the nonterminal (or terminal) we are seeking to match (here <i>N</i> and
 <i>T</i>[<a name="ref-to-d3e3485" href="#d3e3485" title="Note that N and T are uniquely&#xA;determined by qNext and thus redundant, but including&#xA;them as grouping keys allows them to be referred to without&#xA;subscripts.">19</a>]
 <div class="scrap"><span><a name="pfg-fw-set-new-queue">&#x3008; 94 Set new queue by extending all walks in the queue &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">  let $new-queue := 
-      for $w in $queue
+      for $w at $queue-num in $queue
       let $x := if ($w?state eq 'q0')
                 then $w('item')('from')
                 else $w('item')('to'),
           $qqNext := $w('follow-states')
+
+let $dummy := eri:notrace(eri:sXei($w('item')),
+'find-walks:  walk ' || $queue-num || ' in queue starts with: ') 
 
       for $qNext in $qqNext
       let $symbol := $eiParent('rule')//*[@xml:id=$qNext],
@@ -4425,7 +4440,10 @@ the nonterminal (or terminal) we are seeking to match (here <i>N</i> and
 
       let $dummy := if (exists($T)) then eri:notrace($T,
           'find-walks: seeking completion items for this terminal:')
-          else ()
+          else if (exists($N)) then eri:notrace($N, 
+          'find-walks:  seeking completion items for this nonterminal:')
+          else eri:notrace($symbol,
+          'find-walks:  symbol broke my classification:')
 
       group by $x, $qNext, $N, $T
 </pre>
@@ -4453,6 +4471,8 @@ their rule index, we take only one of them.
                       or (.?ri eq '#terminal')
                       or starts-with(.?ri, '#ins_')]
                      [.?to le $eiParent('to')],
+$dummy := for $i in $items0 return eri:notrace($i,
+'find-walks:  found follow-on completions.'),
           $items  := for $i at $index in $items0
                      where not(
                        some $j in 1 to ($index - 1) 
@@ -4467,6 +4487,10 @@ their rule index, we take only one of them.
                      )
                      return $i
 
+, $dummy := for $i in $items return eri:notrace($i,
+'find-walks:  deduped list of follow-on completions.')
+
+
 </pre>
 <span class="scrapcontinuations"></span>
 
@@ -4476,10 +4500,11 @@ their rule index, we take only one of them.
 For each such item, we extend the walk we started with:
 <div class="scrap"><span><a name="d3e3511">&#x3008; 96 Extend the walk [continues <a href="#pfg-fw-set-new-queue">94 Set new queue by extending all walks in the queue</a>]  &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">      for $i in $items
+      for $walk-index in 1 to count($w)
       let $fNull := ($i('to') eq $i('from')),
           $leiDups := if ($fNull)
                       then epi:dups-from-walk(
-                               $qNext, $i, $w[1], ()
+                               $qNext, $i, $w[$walk-index], ()
                            )
                       else ()
 
@@ -4501,7 +4526,7 @@ For each such item, we extend the walk we started with:
                  'follow-states' : $qqNextfollow,
                  'final' : $f-qnext-final,
                  'mark'  : $symbol-mark,
-                 'pred'  : $w[1]
+                 'pred'  : $w[$walk-index]
              }
 
 </pre>
@@ -7887,13 +7912,13 @@ representation, with annotations describing each RHS as
 an FSA.
 <div class="scrap"><span><a name="d3e4950">&#x3008; 191 Location of ixml grammar [continues <a href="#aparecium-variables">13 Variables (of interest only for maintainer)</a>]  &#x3009;  &#x2261;</a></span>
 <pre class="scrapbody">declare variable $aparecium:ixml.ixml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-28.ixml';
+  := $aparecium:libloc || '/ixml.2022-06-07.ixml';
 
 declare variable $aparecium:ixml.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-28.01.inlined.xml';
+  := $aparecium:libloc || '/ixml.2022-06-07.01.inlined.xml';
   
 declare variable $aparecium:ixml.gl.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-28.inlined.compiled.xml';  
+  := $aparecium:libloc || '/ixml.2022-06-07.inlined.compiled.xml';  
 </pre>
 <span class="scrapcontinuations"></span>
 
@@ -9677,7 +9702,7 @@ program is not finished. Hence the following to-do lists.</div>
 
 <h3><a class="selflink" name="to-do-large" id="to-do-large" href="#to-do-large"></a>Overall plans</h3>
 
-<div class="Real-P">At the moment (28 July 2022), the primary concerns are to
+<div class="Real-P">At the moment (30 July 2022), the primary concerns are to
 improve performance and robustness.</div>
 <ul><li>
 <div class="Real-P"><b>Bug fixes</b>.  Clear all test-case failures.</div>

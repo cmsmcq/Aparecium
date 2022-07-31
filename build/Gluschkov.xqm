@@ -198,6 +198,7 @@ then let $gi := name($E)
            [child::*[self::inclusion
                      or self::exclusion 
                      or self::literal 
+                     or self::insertion 
                      or self::nonterminal 
                      or self::alts]]
           ) then

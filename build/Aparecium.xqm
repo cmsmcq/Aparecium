@@ -631,11 +631,11 @@ declare variable $aparecium:options
 declare variable $aparecium:libloc as xs:string
   := '../lib';
 declare variable $aparecium:ixml.ixml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-28.ixml';
+  := $aparecium:libloc || '/ixml.2022-06-07.ixml';
 
 declare variable $aparecium:ixml.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-28.01.inlined.xml';
+  := $aparecium:libloc || '/ixml.2022-06-07.01.inlined.xml';
   
 declare variable $aparecium:ixml.gl.xml as xs:string
-  := $aparecium:libloc || '/ixml.2022-05-28.inlined.compiled.xml';  
+  := $aparecium:libloc || '/ixml.2022-06-07.inlined.compiled.xml';  
 
