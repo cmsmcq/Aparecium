@@ -525,7 +525,10 @@ at "../build/Aparecium.xqm";
 declare variable $file as xs:string external;
 
 let $xml-grammar := doc($file),
-    $compiled-grammar := aparecium:compile-grammar-from-xml($xml-grammar/ixml)
+    $compiled-grammar := 
+        aparecium:compile-grammar-from-xml(
+            $xml-grammar/ixml
+        )
 return $compiled-grammar
 </scrap></p>
 </div>
@@ -555,6 +558,10 @@ at "Earley-recognizer.xqm";
 import module namespace eri =
 "http://blackmesatech.com/2019/iXML/Earley-rec-internals"
 at "Earley-rec-internals.xqm";
+
+import module namespace d2x = 
+'http://blackmesatech.com/2019/iXML/d2x'
+at "d2x.xqm";
 
 declare namespace ap = 
 "http://blackmesatech.com/2019/iXML/Aparecium";
@@ -1139,7 +1146,8 @@ declare function aparecium:parse-string(
          aparecium:parse-string-with-compiled-grammar(
              $sI, $cG, $options
          )
-         &STAT;, 'parse-string:  parsing input string:') &TATS;
+         &STAT;, 'parse-string:  '
+         || 'parsing input string:') &TATS;
 };
 </scrap>
 </p>
@@ -1808,12 +1816,19 @@ if ($E/self::inclusion or $E/self::exclusion
 then
       let $id := if ($E/self::insertion)
                  then '_ins_' 
-                 || (1 + count(($E/preceding::* | $E/ancestor::*)
+                 || (1 + count(
+                    ($E/preceding::* | $E/ancestor::*)
                     [self::insertion])) 
                  || '.'
-                 || (string-join(string-to-codepoints($E/@string), '.'))
+                 || (string-join(
+                        string-to-codepoints(
+                            $E/@string
+                        ), 
+                        '.')
+                    )
                  else '_t_' 
-                 || (1 + count(($E/preceding::* | $E/ancestor::*)
+                 || (1 + count(
+                    ($E/preceding::* | $E/ancestor::*)
                     [self::inclusion 
                     or self::exclusion
 		    or self::literal])), 
@@ -1829,7 +1844,8 @@ then
          attribute nullable { false() },
          attribute first { $id },
          attribute last { $id },
-         attribute {QName($gl:follow-ns, "follow:" || $id)} { },
+         attribute {QName($gl:follow-ns, 
+                          "follow:" || $id)} { },
 	 attribute regex { $re },
          $children
       }
@@ -1893,7 +1909,8 @@ if ($E/self::option
               or self::nonterminal 
 	      or self::alts]])
 then
-     let $id := 'exp_option_' || (1 + count($E/preceding::option))
+     let $id := 'exp_option_' 
+                || (1 + count($E/preceding::option))
      return element option {
        $E/(@* except (@xml:id, 
                      @nullable, 
@@ -2675,7 +2692,8 @@ comments or pragmas.
        name="Check for structural problems">
   let $lee-struc := (
       let $le0 := $G/*
-          [not(self::prolog or self::rule or self::comment or self::pragma)]
+          [not(self::prolog or self::rule 
+           or self::comment or self::pragma)]
       for $e in $le0 
       return element aparecium:error {
         attribute id { "ap:tbd08" },
@@ -2774,7 +2792,34 @@ error case cannot arise.</p>
                attribute id { "ap:tbd11" },
                $nt || " is not allowed as an XML name."
                || " It must be marked as hidden."
+             },
+
+      for $n in $G//nonterminal
+                [starts-with(lower-case(@name), 'xml')
+                and not(@mark eq '-')]
+      let $nt := $n/@name/string(),
+          $r := $G/rule[@name eq $nt],
+          $ok := ($r/@mark eq '-')
+      where not($ok)
+      return element aparecium:error {
+               attribute id { "ap:tbd46" },
+               $nt || " is not allowed as an XML name:  "
+               || " it begins with 'xml'."            
+               || "&#xA;It must be marked as hidden,"            
+               || " or changed."            
              }
+
+
+  
+for $n in $G//nonterminal[starts-with(lower-case(@name), 'xml')
+          and not(@mark eq '-')]
+let $nt := $n/@name/string(),
+    $r := $G/rule[@name eq $nt],
+    $ok := ($r/@mark eq '-')
+where not($ok)
+return element aparecium:error { 'yow!' }	     
+
+
   ) 
 </scrap></p>
 <p>The only problem with the code just given is that
@@ -2809,7 +2854,19 @@ nonterminals, not just those which are not hidden.
                attribute id { "ap:tbd11" },
                $nt || " is not allowed as an XML name."
                || " It must be marked as hidden."
-          }
+          }, 
+
+      for $r in $G/rule
+                [starts-with(lower-case(@name), 'xml')]
+      let $nt := $r/@name/string(),
+      return element aparecium:error {
+               attribute id { "ap:tbd46" },
+               $nt || " is not allowed as an XML name:  "
+               || " it begins with 'xml'."            
+               || "&#xA;Aparecium does not support such "
+               || "names even if hidden."            
+             }
+
   ) 
 </scrap>
 This is stricter than is warranted by the spec, so it's non-conforming
@@ -2905,7 +2962,8 @@ characters FFFE and FFFF in every plane).
                   $G//member/@hex,
                   $G//member/(@from | @to)
                       [starts-with(., '#') 
-                      and string-length(.) gt 1]
+                      and string-length(.) gt 1],
+                  $G//insertion/@hex
 		  )
       let $nt := string($hexref/ancestor::rule/@name),
           $hexstring := if (starts-with($hexref, '#'))
@@ -2917,7 +2975,15 @@ characters FFFE and FFFF in every plane).
                     -1 (: out of range, assume too big :)
                   } catch * {  
                     -2 (: who knows?  Assume bad hex :)
-                  }
+                  },
+          $sval := try {
+                     codepoints-to-string($int)
+                   } catch err:FOCH0001 {
+                     'FOCH0001'
+                   } catch * {
+                      'other-hex-error'
+                   }
+
       return <ptr target="ap-grok-hexref-cases"/>
 </scrap>
 </p>
@@ -2936,6 +3002,7 @@ the appropriate error element.  First we check for the value
 	} 
 </scrap>
 </p>
+
 <p>Then we check for any other errors we encountered; I have
 no real idea what they might be, so diagnosing it as a bad
 hex value is kind of a stab in the dark.
@@ -2999,6 +3066,32 @@ positives in detecting the BOM.
 	     "(it is a non-character)."
         }
 </scrap></p>
+<!--
+<p>A final check is just to try converting the codepoint
+to a string.
+<scrap prev="ap-grok-hexref-cases"
+       name="Check for conversion to XDM string">
+        else if ($sval eq "FOCH0001")
+        then element aparecium:error {
+             attribute id { "ap:tbd39" },
+             attribute code { "ixml:D04" },
+             "Hex value ", $hexstring, 
+             "( = ", string($int), ")", 
+             "in the definition of", $nt,
+             "is not an XML character."
+        }
+        else if ($sval eq "other-hex-error")
+        then element aparecium:error {
+             attribute id { "ap:tbd40" },
+             attribute code { "ixml:D04" },
+             "Hex value ", $hexstring, 
+             "( = ", string($int), ")", 
+             "in the definition of", $nt,
+             "is not an XML character."
+        }
+</scrap>
+</p>
+-->
 <p>If none of the above apply, then we have found no error
 and return nothing.
 <scrap prev="ap-grok-hexref-cases"
@@ -3125,8 +3218,17 @@ declare function ep:parse(
               &STAT;'0a recognize(): '),&TATS;
       $completion-item := $map('Completions'),
       $pfg := <ptr target="epp-make-pfg"/>,
+      $dynamic-errors := <ptr target="epp-check-pfg"/>,
       $ast0 := <ptr target="epp-make-ast"/>,
-      $ast := <ptr target="epp-ep-versioncheck"/>
+      $ast1 := <ptr target="epp-check-ast"/>,
+      $ast2 := <ptr target="epp-ep-versioncheck"/>,
+      $ast  := if (count($dynamic-errors) gt 1)
+               then element ap:dynamic-errors {
+                      $dynamic-errors
+                    }
+               else if (count($dynamic-errors) eq 1)
+               then $dynamic-errors
+               else $ast2
 
   return if ($options('return-tree') 
             and not($options('return-pfg'))
@@ -3160,7 +3262,8 @@ declare function ep:parse(
 </scrap>
 </p>
 
-<p>We make the pfg ...
+<p>We make the parse-forest grammar whether the user has asked
+for it or for a tree or not. 
 <scrap id="epp-make-pfg"
        name="Make parse-forest grammar or dummy">
 
@@ -3217,12 +3320,12 @@ we can extract a parse-tree from it.
     },
     element p {
       "The parser gave up at character",
-      string($high-water) || ": ",
-      "parsing succeeded up through", 
+      string($high-water) || ":&#xA;",
+      "parsing succeeded up through ", 
       element q {
           replace($sL,'&amp;#xA;','&amp;amp;#xA;')
       },
-      "but failed on",
+      "&#xA;but failed on ",
       element q {
           replace($sR, '&amp;#xA;', '&amp;amp;#xA;')
       }
@@ -3239,6 +3342,134 @@ we can extract a parse-tree from it.
   }
 </scrap>
 </p>
+
+
+<div id="sec-epi-check-pfg">
+<head>Checking the PFG for dynamic errors</head>
+
+<p>In some cases, parsing goes fine but we cannot serialize the parse
+tree because some elements or attributes have non-XML names, or some
+literals to be inserted into the XML include non-XML characters.
+In these cases, we want to return an <gi>aparcium:serialization-error</gi>
+element with appropriate diagnostics.
+<scrap id="epp-check-pfg"
+       name="Check PFG to detect dynamic errors">
+      for $ins in $pfg//insertion[@hex]
+      let $int := d2x:x2d($ins/@hex)
+      let $sval := try {
+                       codepoints-to-string($int)
+                   } catch err:FOCH0001 {
+                       'FOCH0001'
+                   } catch * {
+                       'other-hex-error'
+                   }
+      return if ($sval eq "FOCH0001")
+             then element ap:error {
+                    attribute id { "ap:tbd39" },
+                    attribute code { "ixml:D04" },
+                    "Hex value ", $ins/@ex/string(), 
+                    "( = " || string($int) || ")", 
+                    "in the definition of", 
+                    $ins/ancestor::rule/@name/string(),
+                    "is not an XML character."
+             }
+             else if ($sval eq "other-hex-error")
+             then element ap:error {
+                    attribute id { "ap:tbd40" },
+                    attribute code { "ixml:D04" },
+                    "Hex value ", $ins/@ex/string(), 
+                    "( = " || string($int) || ")", 
+                    "in the definition of", 
+                    $ins/ancestor::rule/@name/string(),
+                    "is not an XML character."
+             }
+             else ()
+</scrap> 
+</p>
+</div>
+
+<div id="sec-epi-check-ast">
+<head>Checking the abstract syntax tree</head>
+
+<p>Some dynamic errors are easier to detect by looking
+at the results of <ident>epi:tree-from-pfg()</ident>
+than by looking at the PFG.  So we look at the AST, and
+wrap it in an error if need be.
+<scrap id="epp-check-ast"
+       name="Check abstract syntax tree">
+      if (empty($ast0))
+      then element ap:dynamic-error {
+             attribute id { "ap:tbd44" },
+             attribute code { "???" },
+             element ap:empty-parse-tree {
+               $ast0
+             }
+      }  
+      else if (count($ast0) gt 1)
+      then element ap:dynamic-error {
+             attribute id { "ap:tbd41" },
+             attribute code { "ixml:D06" },
+             element ap:multiple-roots {
+               $ast0
+             }
+      }  
+      else if ($ast0 instance of attribute())
+      then element ap:dynamic-error {
+             attribute id { "ap:tbd42" },
+             attribute code { "ixml:D05" },
+             element ap:attribute-root {
+               $ast0
+             }
+      }  
+      else if ($ast0 instance of text())
+      then element ap:dynamic-error {
+             attribute id { "ap:tbd43" },
+             attribute code { "ixml:D06" },
+             element ap:no-element-at-root {
+               $ast0
+             }
+      } 
+      else if (($ast0 instance of document-node())
+               and 
+               (count($ast0/*) eq 0)
+              )
+      then element ap:dynamic-error {
+             attribute id { "ap:tbd43b" },
+             attribute code { "ixml:D06" },
+             element ap:no-element-root {
+               $ast0
+             }
+      }  
+      else if (($ast0 instance of document-node())
+               and 
+               (count($ast0/*) gt 1)
+              )
+      then element ap:dynamic-error {
+             attribute id { "ap:tbd41b" },
+             attribute code { "ixml:D06" },
+             element ap:multiple-roots {
+               $ast0
+             }
+      }  
+      else if (count($ast0/descendant-or-self::*
+               /attribute::*
+               [starts-with(lower-case(name()), 'xml')])
+	       gt 0
+              )
+      then element ap:dynamic-error {
+             attribute id { "ap:tbd45" },
+             attribute code { "ixml:D07" },
+             element ap:description {
+               "Names beginning 'xml' are reserved."
+             },
+             element ap:reserved-name {
+               $ast0
+             }
+      }  
+      else $ast0
+</scrap> 
+</p>
+</div>
 </div>
 
 <div id="hi-earley-set">
@@ -3822,7 +4053,8 @@ declare function epi:make-pfg-rules(
   else 
   let $ei := head($leiQueue)
   
-  let $dummy := eri:notrace(eri:sXei($ei), 'Making production rule for item: ')
+  let $dummy := eri:notrace(eri:sXei($ei), 
+      'Making production rule for item: ')
 
   <ptr target="epi-mpr-find-walk"/>
   <ptr target="epi-mpr-make-rule"/>
@@ -4036,10 +4268,12 @@ walk with a single step.  And if the parent FSA is nullable, we add that walk to
                 )
 
    let $dummy := if (count($walks) gt 0)
-                 then (eri:notrace(count($walks), 'Find-walks found # walks'
+                 then (eri:notrace(count($walks), 
+                       'Find-walks found # walks'
                        || ' for ' || eri:sXei($ei)),
                      for $w at $walknum in $walks 
-                     return eri:notrace($w, 'Walk no. ' || $walknum || ' is:'))
+                     return eri:notrace($w, 
+                         'Walk no. ' || $walknum || ' is:'))
                  else ()
 </scrap>
 The <q><kw>follow-states</kw></q> and <q><kw>final</kw></q>
@@ -4264,9 +4498,13 @@ two two-way ambiguities does not guarantee four trees.</p>
   if (($options('tree-count') ne -1)
       and 
       (count($acc) ge $options('tree-count')))
-  then (eri:notrace((), 'find-walks:  returning ' || count($acc) || ' walks, maxed.'), $acc)
+  then (eri:notrace((), 
+        'find-walks:  returning ' || count($acc) 
+        || ' walks, maxed.'), $acc)
   else if (empty($queue))
-  then (eri:notrace((), 'find-walks:  returning ' || count($acc) || ' walks, queue 0.'), $acc)
+  then (eri:notrace((), 
+       'find-walks:  returning ' || count($acc) 
+       || ' walks, queue 0.'), $acc)
 </scrap>
 </p>
 
@@ -4302,9 +4540,11 @@ let $dummy := eri:notrace(eri:sXei($w('item')),
 	  $symbol-mark := $symbol/(@mark, @tmark)/string()
 
       let $dummy := if (exists($T)) then eri:notrace($T,
-          'find-walks: seeking completion items for this terminal:')
+          'find-walks: seeking completion items '
+          || 'for this terminal:')
           else if (exists($N)) then eri:notrace($N, 
-          'find-walks:  seeking completion items for this nonterminal:')
+          'find-walks:  seeking completion items '
+          || 'for this nonterminal:')
           else eri:notrace($symbol,
           'find-walks:  symbol broke my classification:')
 
@@ -4519,7 +4759,9 @@ then we return an error.
        name="Otherwise, something has gone very wrong">
 
   else 
-let $dummy := eri:trace($w('item'), 'rhs-from-walk:  item fell through!') return
+let $dummy := eri:trace($w('item'), 
+              'rhs-from-walk:  item fell through!'
+              ) return
        element ap:error {
            attribute id { "ap:tbd25" },
            element p { 'Unexpected disaster 83' },
@@ -4687,7 +4929,9 @@ the tree we return with <code>ixml:state="ambiguous"</code>.
                            attribute ixml:state { "failed" },
                            attribute id { "ap:tbd31" },
                            attribute code { "ixml:D01" },
-                           attribute ap:desc { "Dynamic error: ill-formed output" },
+                           attribute ap:desc { 
+                             "Dynamic error: ill-formed output" 
+                           },
                            $tree0
                          }
                     else $tree0
@@ -4863,19 +5107,23 @@ being asked to serialize two attribute nodes with the same name.
                                  'attribute',
                                  ()
                       )
-let $dummy := eri:notrace(count($lnAtts), 'Gathering attributes, found #: ')
-let $dummy := eri:notrace($lnAtts, 'Gathering attributes, found these: ')
+let $dummy := eri:notrace(count($lnAtts), 
+              'Gathering attributes, found #: ')
+let $dummy := eri:notrace($lnAtts, 
+              'Gathering attributes, found these: ')
                    let $lnAok := 
                        $lnAtts
                        [every $i in 1 to (position() - 1)
                         satisfies
                         $lnAtts[$i]/name() ne ./name()]
-let $dummy := eri:notrace(count($lnAok), 'Of these some are OK: ')
+let $dummy := eri:notrace(count($lnAok), 
+              'Of these some are OK: ')
 	           let $lnAdups := $lnAtts
                        [some $i in 1 to (position() - 1)
                         satisfies
                         $lnAtts[$i]/name() eq ./name()]
-let $dummy := eri:notrace(count($lnAdups), 'Of these some are dups: ')
+let $dummy := eri:notrace(count($lnAdups), 
+              'Of these some are dups: ')
                    return ($lnAok,
 		       for $n in $lnAdups
                        return element ap:error {
@@ -5050,7 +5298,11 @@ attribute.
        let $s := if (exists($pfg/@string))
            then string($pfg/@string)
            else if (exists($pfg/@hex))
-           then eri:charXhex($pfg/@hex)
+           then try {
+                  eri:charXhex($pfg/@hex) 
+                } catch * {
+                  '〔U+' || $pfg/@hex || '〕'
+                }
            else '&amp;#x1D350;' (: tetragram for failure U+1D350 :)
 
        return if ($nodetype = ('attribute'))
@@ -5349,8 +5601,10 @@ declare function ixi:lsymExpectedXEi(
       $r := $E('rule'),
       $sFollowset := if ($symCur = 'q0') 
                      then $r/@first
-                     else $r/@follow:*[local-name()=$symCur],
-      $lsymFollow := tokenize($sFollowset,'\s+')[normalize-space(.)]
+                     else $r/@follow:*
+                          [local-name()=$symCur],
+      $lsymFollow := tokenize($sFollowset,'\s+')
+                     [normalize-space(.)]
   for $sym in $lsymFollow
   let $e := $r//*[@xml:id = $sym]
   return $e
@@ -6317,15 +6571,15 @@ both ends of the range (if <att>from</att> is greater than #10FFFF or
 we return nothing at all.
 <scrap id="eri-sym-reXT-range"
        name="Make positive character group for range">
-                      <ptr target="eri-sym-reXT-from"/>
-                      <ptr target="eri-sym-reXT-to"/>
-                      return if (exists($cpFrom)
-                          and exists($cpTo)
-                          and ($cpFrom le $cpTo))
-                      then ixi:sceXS($sFrom)
-                           || "-"
-                           || ixi:sceXS($sTo)
-                      else ()
+      <ptr target="eri-sym-reXT-from"/>
+      <ptr target="eri-sym-reXT-to"/>
+      return if (exists($cpFrom)
+          and exists($cpTo)
+          and ($cpFrom le $cpTo))
+      then ixi:sceXS($sFrom)
+           || "-"
+           || ixi:sceXS($sTo)
+      else ()
 </scrap></p>
 <p>
 To handle a non-XML <att>from</att> value, we bump it up to
@@ -7635,7 +7889,9 @@ the user asks for a verbose dump we provide it.
                     else '...'
              )
   return     
-  &lt;ap:no-parse xmlns:ixml="http://invisiblexml.org/NS" ixml:state="failed">
+  &lt;ap:no-parse 
+        xmlns:ixml="http://invisiblexml.org/NS" 
+        ixml:state="failed">
     &lt;p>Sorry, no parse for this string and grammar.&lt;/p>
     &lt;p>The parser gave up at character {$high-water}:
         parsing succeeded up through &lt;q>{
@@ -7659,16 +7915,22 @@ the user asks for a verbose dump we provide it.
     then &lt;dump>
     &lt;p>The map is:&lt;/p>
    
-    &lt;Initial-Item>{eri:eXei($mapResult('Initial-Item'))}&lt;/Initial-Item>
+    &lt;Initial-Item>{
+        eri:eXei($mapResult('Initial-Item'))
+    }&lt;/Initial-Item>
     &lt;Input>{$mapResult('Input')}&lt;/Input>
-    &lt;Input-Length>{$mapResult('Input-Length')}&lt;/Input-Length>
+    &lt;Input-Length>{
+        $mapResult('Input-Length')
+    }&lt;/Input-Length>
     &lt;Completions>{
        for $ei in $mapResult('Completions')
        return eri:eXei($ei)
     }&lt;/Completions>
     &lt;Result>{$mapResult('Result')}&lt;/Result>
     &lt;Closure>{$closure}&lt;/Closure>
-    &lt;grammar>{(: 'Omitted.' :) $mapResult('Grammar') }&lt;/grammar>
+    &lt;grammar>{
+        (: 'Omitted.' :) $mapResult('Grammar') 
+    }&lt;/grammar>
     &lt;/dump>
     else ()
   }&lt;/ap:no-parse>
@@ -7699,7 +7961,9 @@ the required XML.
                       'epi:earley-parse() has result') 
 
         let $lpt := &STAT;prof:time(&TATS;
-                    epi:all-trees($leiCompletions, $meiClosure, $I)
+                    epi:all-trees($leiCompletions, 
+                                  $meiClosure, 
+                                  $I)
                     &STAT;, '0b making trees: ')&TATS;
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
@@ -7757,7 +8021,11 @@ a call to extract the tree.
        name="Construct one tree via parse-forest-grammar">
 
         let $pfg := &STAT;prof:time(&TATS;
-                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I, $options),
+                    epi:parse-forest-grammar(
+                        $leiCompletions, 
+                        $meiClosure, 
+                        $I, 
+                        $options),
                     &STAT;'0b making pfg: '),&TATS;
             $ast := &STAT;prof:time(&TATS;
                     epi:tree-from-pfg($pfg, 'document', ())
@@ -7782,10 +8050,15 @@ a call to extract the tree.
                       'epi:earley-parse() has result') 
 
         let $pfg := &STAT;prof:time(&TATS;
-                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I, $options)
+                    epi:parse-forest-grammar(
+                        $leiCompletions, 
+                        $meiClosure, 
+                        $I, 
+                        $options)
                     &STAT;, '0b making pfg: ')&TATS;
         let $dummy := eri:notrace((), 
-                      'epi:earley-parse() returning a parse-forest grammart') 
+                      'epi:earley-parse() returning'
+                      || ' a parse-forest grammart') 
         return $pfg
 </scrap>
 </p>
@@ -7825,8 +8098,8 @@ attribute on the root element with the value
        name="Check results for version mismatch">
 if ( ($G/prolog/version/@string
            /string(), "1.0")[1] eq "1.0")
-      then $ast0 (: $leResults0 :)
-      else for $item in $ast0 (: $leResults0 :)
+      then $ast1 (: $leResults0 :)
+      else for $item in $ast1 (: $leResults0 :)
            return if ($item instance of element())
            then element {name($item)} {
                   ($item/@* except 
@@ -7992,7 +8265,9 @@ do is return them.
        name="Return the raw parse trees">
   for $parsetree in $parsetrees
   let $dummy := eri:notrace($parsetree,
-    'all-trees got this parsetree back from item Ec = ' || eri:sXei($Ec))
+    'all-trees got this parsetree back '
+    || 'from item Ec = ' 
+    || eri:sXei($Ec))
   return $parsetree 
 </scrap></p>
 </div>
@@ -8345,12 +8620,15 @@ recur on each of them, pushing the newly created parse node
                        || 'unscanning terminal symbol '
 		       || $riCur) 
          let $cSymlength := eri:match-length($sym),
-             $pMedial := xs:integer($Ecur('to')) - $cSymlength,
+             $pMedial := xs:integer($Ecur('to')) 
+                         - $cSymlength,
              $leiPrev := $meiClosure('to')($pMedial)[ 
                 eri:fScanrelEE(.,$Ecur)
                 (: and xs:integer(.('to')) eq $pMedial :)
              ],
-	     $sVal := substring($I,$pMedial+1,$cSymlength),
+	     $sVal := substring($I,
+                                $pMedial+1,
+                                $cSymlength),
 	     
              $textnode := element { 
                 (: Rename the terminal to reduce confusion
@@ -8376,12 +8654,14 @@ recur on each of them, pushing the newly created parse node
 	               then eri:notrace(eri:sXei($Ecur),
                             'all-node-seqs (case 3b) finds '
 			    || count($leiPrev)
-                            || ' predecessors, now recurring on eiPrev='
+                            || ' predecessors, '
+                            || 'now recurring on eiPrev='
 			    || eri:sXei($eiPrev))
 		       else eri:notrace(eri:sXei($Ecur),
                             'all-node-seqs (case 3b) finds '
 		            || count($leiPrev)
-                            || ' predecessors, now recurring on eiPrev='
+                            || ' predecessors, '
+                            || 'now recurring on eiPrev='
 			    || eri:sXei($eiPrev))
 
          return epi:all-node-sequences($eiPrev,

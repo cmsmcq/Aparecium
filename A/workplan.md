@@ -4,16 +4,6 @@ started 2021-11-05, most recent rev. 2022-06-06
 
 The current work plan for Aparecium is:
 
-* Add new functionality for insertions.  This has several steps:
-
-    * Add insertions to the grammar compiler.
-
-    * Add insertions to the parser.
-
-    * Add insertions to the parse-forest grammar constructor.
-
-    * Add insertions to the parse-tree extractor.
-
 * Work to support more XQuery processors.
 
   Aparecium currently works with BaseX and Saxon (PE and EE).
@@ -28,15 +18,32 @@ The current work plan for Aparecium is:
     * Mark Logic
 
   Note that Berkeley DB XML, XQilla, and Xidel do not support
-  Aparecium because they support XQuery 1.0 or XQuery 3.0, and thus
-  lack support for maps.  Making Aparecium work with them and other
-  1.0 or 3.0 processors will require a new representation of items.
-  That work is not in the plan at this time (but anyone who would like
-  to be able to use Aparecium with such a processor is welcome to
-  encourage me to add it to the plan).
+  Aparecium because they support XQuery 1.0 or XQuery 3.0, not XQuery
+  3.1, and thus lack support for maps.  Making Aparecium work with
+  them and other 1.0 or 3.0 processors will require a new
+  representation of items.  That work is not in the plan at this time
+  (but anyone who would like to be able to use Aparecium with such a
+  processor is welcome to encourage me to add it to the plan).
 
 * Improve performance.
 
+  * Make a useful set of performance tests.
+
+      * Performance tests from existing test suite (tests/performance)
+      
+      * Additional tests from existing test suite selected to have a
+        range of speeds (by current measure)
+	
+      * A selection of real-world (or at least realistic) data for
+        selected real-world grammars:
+
+        * XPath
+	* Ariadne (examples from paper)
+	* Oberon (compiler)
+	* vCard (need data)
+	* first-order predicate calculus (MLCD papers; examples
+	  from any logic textbook)
+	
   * Try to do something about the performance issues:
     Measure. Think. Try something. Repeat.
 
@@ -88,7 +95,8 @@ improve performance.
     grammar (input that does not conform to the ixml grammar for ixml
     grammars); work on error detection and error messages.
 
-  * Create test-coverage tools to measure positive and negative coverage according to various measures.
+  * Create test-coverage tools to measure positive and negative
+    coverage according to various measures.
 
 * Improve the source code.
 
@@ -111,6 +119,10 @@ improve performance.
 
 * Sample applications.
 
+* Rework treatment of follow-set information as described in notes of
+  19 June 2022 (email under subject line "cardboard project manager /
+  policy question"), to accept non-XML names if they are hidden.
+
 ## Done
 
 Not complete, but I want to remind myself that some things do get
@@ -131,3 +143,5 @@ done, sometimes.
 
 * Rewrote top-level functions to accept user-supplied options and pass
   the options into the internals (29 July 2022).
+
+* Added new functionality for insertions (31 July 2022). 

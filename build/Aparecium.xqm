@@ -113,7 +113,8 @@ declare function aparecium:parse-string(
          aparecium:parse-string-with-compiled-grammar(
              $sI, $cG, $options
          )
-         (:stat ..., 'parse-string:  parsing input string:') ... tats:)
+         (:stat ..., 'parse-string:  '
+         || 'parsing input string:') ... tats:)
 };
 
 (: ......................................................
@@ -382,7 +383,8 @@ declare function aparecium:grammar-ok(
                 'grammar-ok() called on grammar for: ') :)
     let $lee-struc := (
       let $le0 := $G/*
-          [not(self::prolog or self::rule or self::comment or self::pragma)]
+          [not(self::prolog or self::rule 
+           or self::comment or self::pragma)]
       for $e in $le0 
       return element aparecium:error {
         attribute id { "ap:tbd08" },
@@ -430,7 +432,24 @@ declare function aparecium:grammar-ok(
                attribute id { "ap:tbd11" },
                $nt || " is not allowed as an XML name."
                || " It must be marked as hidden."
-          }
+          }, 
+
+      for $n in $G//nonterminal
+                [starts-with(lower-case(@name), 'xml')
+                and not(@mark eq '-')]
+      let $nt := $n/@name/string(),
+          $r := $G/rule[@name eq $nt],
+          $ok := ($r/@mark eq '-')
+      where not($ok)
+      return element aparecium:error {
+               attribute id { "ap:tbd46" },
+               $nt || " is not allowed as an XML name:  "
+               || " it begins with 'xml'."            
+               || "
+It must be marked as hidden,"            
+               || " or changed."            
+             }
+
   ) 
 
     let $lee-uniqdef := (
@@ -478,7 +497,8 @@ declare function aparecium:grammar-ok(
                   $G//member/@hex,
                   $G//member/(@from | @to)
                       [starts-with(., '#') 
-                      and string-length(.) gt 1]
+                      and string-length(.) gt 1],
+                  $G//insertion/@hex
 		  )
       let $nt := string($hexref/ancestor::rule/@name),
           $hexstring := if (starts-with($hexref, '#'))
@@ -490,7 +510,15 @@ declare function aparecium:grammar-ok(
                     -1 (: out of range, assume too big :)
                   } catch * {  
                     -2 (: who knows?  Assume bad hex :)
-                  }
+                  },
+          $sval := try {
+                     codepoints-to-string($int)
+                   } catch err:FOCH0001 {
+                     'FOCH0001'
+                   } catch * {
+                      'other-hex-error'
+                   }
+
       return         if ($int eq -1)
         then element aparecium:error {
              attribute id { "ap:tbd18" },

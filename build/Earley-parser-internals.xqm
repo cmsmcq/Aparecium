@@ -66,7 +66,9 @@ declare function epi:earley-parse(
                       'epi:earley-parse() has result') 
 
         let $lpt := (:stat ...prof:time(... tats:)
-                    epi:all-trees($leiCompletions, $meiClosure, $I)
+                    epi:all-trees($leiCompletions, 
+                                  $meiClosure, 
+                                  $I)
                     (:stat ..., '0b making trees: ')... tats:)
         let $dummy := eri:notrace((), 
                       'epi:earley-parse() returning a result') 
@@ -88,10 +90,15 @@ declare function epi:earley-parse(
                       'epi:earley-parse() has result') 
 
         let $pfg := (:stat ...prof:time(... tats:)
-                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I, $options)
+                    epi:parse-forest-grammar(
+                        $leiCompletions, 
+                        $meiClosure, 
+                        $I, 
+                        $options)
                     (:stat ..., '0b making pfg: ')... tats:)
         let $dummy := eri:notrace((), 
-                      'epi:earley-parse() returning a parse-forest grammart') 
+                      'epi:earley-parse() returning'
+                      || ' a parse-forest grammart') 
         return $pfg
 
        else (: default to any-tree :)
@@ -111,7 +118,11 @@ declare function epi:earley-parse(
 
         else 
         let $pfg := (:stat ...prof:time(... tats:)
-                    epi:parse-forest-grammar($leiCompletions, $meiClosure, $I, $options),
+                    epi:parse-forest-grammar(
+                        $leiCompletions, 
+                        $meiClosure, 
+                        $I, 
+                        $options),
                     (:stat ...'0b making pfg: '),... tats:)
             $ast := (:stat ...prof:time(... tats:)
                     epi:tree-from-pfg($pfg, 'document', ())
@@ -156,7 +167,9 @@ declare function epi:earley-parse(
                     else '...'
              )
   return     
-  <ap:no-parse xmlns:ixml="http://invisiblexml.org/NS" ixml:state="failed">
+  <ap:no-parse 
+        xmlns:ixml="http://invisiblexml.org/NS" 
+        ixml:state="failed">
     <p>Sorry, no parse for this string and grammar.</p>
     <p>The parser gave up at character {$high-water}:
         parsing succeeded up through <q>{
@@ -180,16 +193,22 @@ declare function epi:earley-parse(
     then <dump>
     <p>The map is:</p>
    
-    <Initial-Item>{eri:eXei($mapResult('Initial-Item'))}</Initial-Item>
+    <Initial-Item>{
+        eri:eXei($mapResult('Initial-Item'))
+    }</Initial-Item>
     <Input>{$mapResult('Input')}</Input>
-    <Input-Length>{$mapResult('Input-Length')}</Input-Length>
+    <Input-Length>{
+        $mapResult('Input-Length')
+    }</Input-Length>
     <Completions>{
        for $ei in $mapResult('Completions')
        return eri:eXei($ei)
     }</Completions>
     <Result>{$mapResult('Result')}</Result>
     <Closure>{$closure}</Closure>
-    <grammar>{(: 'Omitted.' :) $mapResult('Grammar') }</grammar>
+    <grammar>{
+        (: 'Omitted.' :) $mapResult('Grammar') 
+    }</grammar>
     </dump>
     else ()
   }</ap:no-parse>
@@ -277,7 +296,9 @@ declare function epi:all-trees(
   )
     for $parsetree in $parsetrees
   let $dummy := eri:notrace($parsetree,
-    'all-trees got this parsetree back from item Ec = ' || eri:sXei($Ec))
+    'all-trees got this parsetree back '
+    || 'from item Ec = ' 
+    || eri:sXei($Ec))
   return $parsetree 
 
 }; 
@@ -359,7 +380,8 @@ declare function epi:make-pfg-rules(
   else 
   let $ei := head($leiQueue)
   
-  let $dummy := eri:notrace(eri:sXei($ei), 'Making production rule for item: ')
+  let $dummy := eri:notrace(eri:sXei($ei), 
+      'Making production rule for item: ')
 
   
   let $r0 := $ei('rule')
@@ -384,10 +406,12 @@ declare function epi:make-pfg-rules(
                 )
 
    let $dummy := if (count($walks) gt 0)
-                 then (eri:notrace(count($walks), 'Find-walks found # walks'
+                 then (eri:notrace(count($walks), 
+                       'Find-walks found # walks'
                        || ' for ' || eri:sXei($ei)),
                      for $w at $walknum in $walks 
-                     return eri:notrace($w, 'Walk no. ' || $walknum || ' is:'))
+                     return eri:notrace($w, 
+                         'Walk no. ' || $walknum || ' is:'))
                  else ()
 
     let $rule := element rule {
@@ -507,9 +531,13 @@ declare function epi:find-walks(
     if (($options('tree-count') ne -1)
       and 
       (count($acc) ge $options('tree-count')))
-  then (eri:notrace((), 'find-walks:  returning ' || count($acc) || ' walks, maxed.'), $acc)
+  then (eri:notrace((), 
+        'find-walks:  returning ' || count($acc) 
+        || ' walks, maxed.'), $acc)
   else if (empty($queue))
-  then (eri:notrace((), 'find-walks:  returning ' || count($acc) || ' walks, queue 0.'), $acc)
+  then (eri:notrace((), 
+       'find-walks:  returning ' || count($acc) 
+       || ' walks, queue 0.'), $acc)
 
   else 
 
@@ -541,9 +569,11 @@ let $dummy := eri:notrace(eri:sXei($w('item')),
 	  $symbol-mark := $symbol/(@mark, @tmark)/string()
 
       let $dummy := if (exists($T)) then eri:notrace($T,
-          'find-walks: seeking completion items for this terminal:')
+          'find-walks: seeking completion items '
+          || 'for this terminal:')
           else if (exists($N)) then eri:notrace($N, 
-          'find-walks:  seeking completion items for this nonterminal:')
+          'find-walks:  seeking completion items '
+          || 'for this nonterminal:')
           else eri:notrace($symbol,
           'find-walks:  symbol broke my classification:')
 
@@ -697,7 +727,9 @@ declare function epi:rhs-from-walk(
        return epi:rhs-from-walk($next-step, $I, $new-acc)
 
   else 
-let $dummy := eri:trace($w('item'), 'rhs-from-walk:  item fell through!') return
+let $dummy := eri:trace($w('item'), 
+              'rhs-from-walk:  item fell through!'
+              ) return
        element ap:error {
            attribute id { "ap:tbd25" },
            element p { 'Unexpected disaster 83' },
@@ -768,7 +800,9 @@ declare function epi:tree-from-pfg(
                            attribute ixml:state { "failed" },
                            attribute id { "ap:tbd31" },
                            attribute code { "ixml:D01" },
-                           attribute ap:desc { "Dynamic error: ill-formed output" },
+                           attribute ap:desc { 
+                             "Dynamic error: ill-formed output" 
+                           },
                            $tree0
                          }
                     else $tree0
@@ -857,19 +891,23 @@ else error(QName(
                                  'attribute',
                                  ()
                       )
-let $dummy := eri:notrace(count($lnAtts), 'Gathering attributes, found #: ')
-let $dummy := eri:notrace($lnAtts, 'Gathering attributes, found these: ')
+let $dummy := eri:notrace(count($lnAtts), 
+              'Gathering attributes, found #: ')
+let $dummy := eri:notrace($lnAtts, 
+              'Gathering attributes, found these: ')
                    let $lnAok := 
                        $lnAtts
                        [every $i in 1 to (position() - 1)
                         satisfies
                         $lnAtts[$i]/name() ne ./name()]
-let $dummy := eri:notrace(count($lnAok), 'Of these some are OK: ')
+let $dummy := eri:notrace(count($lnAok), 
+              'Of these some are OK: ')
 	           let $lnAdups := $lnAtts
                        [some $i in 1 to (position() - 1)
                         satisfies
                         $lnAtts[$i]/name() eq ./name()]
-let $dummy := eri:notrace(count($lnAdups), 'Of these some are dups: ')
+let $dummy := eri:notrace(count($lnAdups), 
+              'Of these some are dups: ')
                    return ($lnAok,
 		       for $n in $lnAdups
                        return element ap:error {
@@ -994,7 +1032,11 @@ let $dummy := eri:notrace(count($lnAdups), 'Of these some are dups: ')
   then        let $s := if (exists($pfg/@string))
            then string($pfg/@string)
            else if (exists($pfg/@hex))
-           then eri:charXhex($pfg/@hex)
+           then try {
+                  eri:charXhex($pfg/@hex) 
+                } catch * {
+                  '〔U+' || $pfg/@hex || '〕'
+                }
            else '&#x1D350;' (: tetragram for failure U+1D350 :)
 
        return if ($nodetype = ('attribute'))
@@ -1077,12 +1119,15 @@ declare function epi:all-node-sequences(
                        || 'unscanning terminal symbol '
 		       || $riCur) 
          let $cSymlength := eri:match-length($sym),
-             $pMedial := xs:integer($Ecur('to')) - $cSymlength,
+             $pMedial := xs:integer($Ecur('to')) 
+                         - $cSymlength,
              $leiPrev := $meiClosure('to')($pMedial)[ 
                 eri:fScanrelEE(.,$Ecur)
                 (: and xs:integer(.('to')) eq $pMedial :)
              ],
-	     $sVal := substring($I,$pMedial+1,$cSymlength),
+	     $sVal := substring($I,
+                                $pMedial+1,
+                                $cSymlength),
 	     
              $textnode := element { 
                 (: Rename the terminal to reduce confusion
@@ -1108,12 +1153,14 @@ declare function epi:all-node-sequences(
 	               then eri:notrace(eri:sXei($Ecur),
                             'all-node-seqs (case 3b) finds '
 			    || count($leiPrev)
-                            || ' predecessors, now recurring on eiPrev='
+                            || ' predecessors, '
+                            || 'now recurring on eiPrev='
 			    || eri:sXei($eiPrev))
 		       else eri:notrace(eri:sXei($Ecur),
                             'all-node-seqs (case 3b) finds '
 		            || count($leiPrev)
-                            || ' predecessors, now recurring on eiPrev='
+                            || ' predecessors, '
+                            || 'now recurring on eiPrev='
 			    || eri:sXei($eiPrev))
 
          return epi:all-node-sequences($eiPrev,

@@ -193,8 +193,10 @@ declare function ixi:lsymExpectedXEi(
       $r := $E('rule'),
       $sFollowset := if ($symCur = 'q0') 
                      then $r/@first
-                     else $r/@follow:*[local-name()=$symCur],
-      $lsymFollow := tokenize($sFollowset,'\s+')[normalize-space(.)]
+                     else $r/@follow:*
+                          [local-name()=$symCur],
+      $lsymFollow := tokenize($sFollowset,'\s+')
+                     [normalize-space(.)]
   for $sym in $lsymFollow
   let $e := $r//*[@xml:id = $sym]
   return $e
@@ -755,7 +757,7 @@ declare function ixi:reXTerminal(
           for $e in $le
           return if ($e/self::range
                     or $e/self::member/@from)
-                 then                       
+                 then       
         let $cpFrom0 := 
                if (matches($e/@from, 
                            '^#[0-9a-fA-F]+$'))
@@ -774,7 +776,7 @@ declare function ixi:reXTerminal(
                },
             $sFrom := codepoints-to-string($cpFrom)
 
-                      
+      
         let $cpTo0 :=
                if (matches($e/@to, 
                            '^#[0-9a-fA-F]+$'))
@@ -793,13 +795,13 @@ declare function ixi:reXTerminal(
                },
             $sTo := codepoints-to-string($cpTo)
 
-                      return if (exists($cpFrom)
-                          and exists($cpTo)
-                          and ($cpFrom le $cpTo))
-                      then ixi:sceXS($sFrom)
-                           || "-"
-                           || ixi:sceXS($sTo)
-                      else ()
+      return if (exists($cpFrom)
+          and exists($cpTo)
+          and ($cpFrom le $cpTo))
+      then ixi:sceXS($sFrom)
+           || "-"
+           || ixi:sceXS($sTo)
+      else ()
 
                  else if ($e/self::literal
                     or $e/self::member/@string

@@ -457,7 +457,7 @@ each other.
 up variables and options 〉 ≡</a></span>
 <pre class=
 "scrapbody">let $catalog-index := 'bogons' (: which catalog to run? short name :)
-    (: bogons 439. 
+    (: bogons ???. 
        test0 2s, test1 5s, hygiene 12s, zeroes 20s.  
        misc 78s, gxxx 153s, wisp-A 100s.
        test2 745s
@@ -540,6 +540,10 @@ catalogs, roughly simple to complex.
                /&gt;&lt;!-- ??? s --&gt;
       &lt;catalog n="local-evens-and-odds" 
                path="{$apadir}evens-and-odds-test-catalog.xml"
+               /&gt;&lt;!-- ??? s --&gt;
+               
+      &lt;catalog n="bogons" 
+               path="{$apadir}bogons-20220731-catalog.xml"
                /&gt;&lt;!-- ??? s --&gt;               
       
     
@@ -2620,7 +2624,8 @@ repetition.
                  /self::tc:assert-not-a-sentence)
         then "pass"
         else if (($parse-tree/self::ap:no-parse
-                 or $parse-tree/self::ap:error)
+                 or $parse-tree/self::ap:error
+                 or $parse-tree/self::ap:dynamic-error)
                  and $expectations
                  /self::tc:assert-dynamic-error)
         then "pass"

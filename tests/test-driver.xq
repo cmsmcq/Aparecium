@@ -14,7 +14,7 @@ declare namespace db =
 declare option db:chop "false";
 
 let $catalog-index := 'bogons' (: which catalog to run? short name :)
-    (: bogons 439. 
+    (: bogons ???. 
        test0 2s, test1 5s, hygiene 12s, zeroes 20s.  
        misc 78s, gxxx 153s, wisp-A 100s.
        test2 745s
@@ -54,6 +54,10 @@ let $invdir := "../../cmsmcq-ixml/tests/",
                /><!-- ??? s -->
       <catalog n="local-evens-and-odds" 
                path="{$apadir}evens-and-odds-test-catalog.xml"
+               /><!-- ??? s -->
+	       
+      <catalog n="bogons" 
+               path="{$apadir}bogons-20220731-catalog.xml"
                /><!-- ??? s -->	       
       
     

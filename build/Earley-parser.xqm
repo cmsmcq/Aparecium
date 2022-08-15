@@ -15,6 +15,10 @@ import module namespace eri =
 "http://blackmesatech.com/2019/iXML/Earley-rec-internals"
 at "Earley-rec-internals.xqm";
 
+import module namespace d2x = 
+'http://blackmesatech.com/2019/iXML/d2x'
+at "d2x.xqm";
+
 declare namespace ap = 
 "http://blackmesatech.com/2019/iXML/Aparecium";
 
@@ -50,6 +54,37 @@ declare function ep:parse(
               }
               (:stat ..., '0b making pfg: ')... tats:)
 ,
+      $dynamic-errors :=       for $ins in $pfg//insertion[@hex]
+      let $int := d2x:x2d($ins/@hex)
+      let $sval := try {
+                       codepoints-to-string($int)
+                   } catch err:FOCH0001 {
+                       'FOCH0001'
+                   } catch * {
+                       'other-hex-error'
+                   }
+      return if ($sval eq "FOCH0001")
+             then element ap:error {
+                    attribute id { "ap:tbd39" },
+                    attribute code { "ixml:D04" },
+                    "Hex value ", $ins/@ex/string(), 
+                    "( = " || string($int) || ")", 
+                    "in the definition of", 
+                    $ins/ancestor::rule/@name/string(),
+                    "is not an XML character."
+             }
+             else if ($sval eq "other-hex-error")
+             then element ap:error {
+                    attribute id { "ap:tbd40" },
+                    attribute code { "ixml:D04" },
+                    "Hex value ", $ins/@ex/string(), 
+                    "( = " || string($int) || ")", 
+                    "in the definition of", 
+                    $ins/ancestor::rule/@name/string(),
+                    "is not an XML character."
+             }
+             else ()
+,
       $ast0 :=               (:stat ...prof:time(... tats:)
               if (exists($pfg/self::ixml))
               then epi:tree-from-pfg($pfg, 'document', ())
@@ -77,12 +112,14 @@ declare function ep:parse(
     },
     element p {
       "The parser gave up at character",
-      string($high-water) || ": ",
-      "parsing succeeded up through", 
+      string($high-water) || ":
+",
+      "parsing succeeded up through ", 
       element q {
           replace($sL,'&#xA;','&amp;#xA;')
       },
-      "but failed on",
+      "
+but failed on ",
       element q {
           replace($sR, '&#xA;', '&amp;#xA;')
       }
@@ -101,10 +138,81 @@ declare function ep:parse(
               (:stat ..., '0c extracting tree: ')... tats:)
 
 ,
-      $ast := if ( ($G/prolog/version/@string
+      $ast1 :=       if (empty($ast0))
+      then element ap:dynamic-error {
+             attribute id { "ap:tbd44" },
+             attribute code { "???" },
+             element ap:empty-parse-tree {
+               $ast0
+             }
+      }  
+      else if (count($ast0) gt 1)
+      then element ap:dynamic-error {
+             attribute id { "ap:tbd41" },
+             attribute code { "ixml:D06" },
+             element ap:multiple-roots {
+               $ast0
+             }
+      }  
+      else if ($ast0 instance of attribute())
+      then element ap:dynamic-error {
+             attribute id { "ap:tbd42" },
+             attribute code { "ixml:D05" },
+             element ap:attribute-root {
+               $ast0
+             }
+      }  
+      else if ($ast0 instance of text())
+      then element ap:dynamic-error {
+             attribute id { "ap:tbd43" },
+             attribute code { "ixml:D06" },
+             element ap:no-element-at-root {
+               $ast0
+             }
+      } 
+      else if (($ast0 instance of document-node())
+               and 
+               (count($ast0/*) eq 0)
+              )
+      then element ap:dynamic-error {
+             attribute id { "ap:tbd43b" },
+             attribute code { "ixml:D06" },
+             element ap:no-element-root {
+               $ast0
+             }
+      }  
+      else if (($ast0 instance of document-node())
+               and 
+               (count($ast0/*) gt 1)
+              )
+      then element ap:dynamic-error {
+             attribute id { "ap:tbd41b" },
+             attribute code { "ixml:D06" },
+             element ap:multiple-roots {
+               $ast0
+             }
+      }  
+      else if (count($ast0/descendant-or-self::*
+               /attribute::*
+               [starts-with(lower-case(name()), 'xml')])
+	       gt 0
+              )
+      then element ap:dynamic-error {
+             attribute id { "ap:tbd45" },
+             attribute code { "ixml:D07" },
+             element ap:description {
+               "Names beginning 'xml' are reserved."
+             },
+             element ap:reserved-name {
+               $ast0
+             }
+      }  
+      else $ast0
+,
+      $ast2 := if ( ($G/prolog/version/@string
            /string(), "1.0")[1] eq "1.0")
-      then $ast0 (: $leResults0 :)
-      else for $item in $ast0 (: $leResults0 :)
+      then $ast1 (: $leResults0 :)
+      else for $item in $ast1 (: $leResults0 :)
            return if ($item instance of element())
            then element {name($item)} {
                   ($item/@* except 
@@ -124,7 +232,14 @@ declare function ep:parse(
                   $item/child::node()
                 }
            else $item
-
+,
+      $ast  := if (count($dynamic-errors) gt 1)
+               then element ap:dynamic-errors {
+                      $dynamic-errors
+                    }
+               else if (count($dynamic-errors) eq 1)
+               then $dynamic-errors
+               else $ast2
 
   return if ($options('return-tree') 
             and not($options('return-pfg'))

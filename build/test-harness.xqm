@@ -645,7 +645,8 @@ declare function t:run-test-case(
                  /self::tc:assert-not-a-sentence)
         then "pass"
         else if (($parse-tree/self::ap:no-parse
-                 or $parse-tree/self::ap:error)
+                 or $parse-tree/self::ap:error
+                 or $parse-tree/self::ap:dynamic-error)
                  and $expectations
                  /self::tc:assert-dynamic-error)
         then "pass"

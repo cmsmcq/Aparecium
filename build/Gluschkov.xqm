@@ -41,12 +41,19 @@ else if ($E/self::class) then $E
 then
       let $id := if ($E/self::insertion)
                  then '_ins_' 
-                 || (1 + count(($E/preceding::* | $E/ancestor::*)
+                 || (1 + count(
+                    ($E/preceding::* | $E/ancestor::*)
                     [self::insertion])) 
                  || '.'
-                 || (string-join(string-to-codepoints($E/@string), '.'))
+                 || (string-join(
+                        string-to-codepoints(
+                            $E/@string
+                        ), 
+                        '.')
+                    )
                  else '_t_' 
-                 || (1 + count(($E/preceding::* | $E/ancestor::*)
+                 || (1 + count(
+                    ($E/preceding::* | $E/ancestor::*)
                     [self::inclusion 
                     or self::exclusion
 		    or self::literal])), 
@@ -62,7 +69,8 @@ then
          attribute nullable { false() },
          attribute first { $id },
          attribute last { $id },
-         attribute {QName($gl:follow-ns, "follow:" || $id)} { },
+         attribute {QName($gl:follow-ns, 
+                          "follow:" || $id)} { },
 	 attribute regex { $re },
          $children
       }
@@ -94,7 +102,8 @@ then
               or self::nonterminal 
 	      or self::alts]])
 then
-     let $id := 'exp_option_' || (1 + count($E/preceding::option))
+     let $id := 'exp_option_' 
+                || (1 + count($E/preceding::option))
      return element option {
        $E/(@* except (@xml:id, 
                      @nullable, 
