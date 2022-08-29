@@ -1,0 +1,13 @@
+<tc:test-catalog xmlns:tc="https://github.com/invisibleXML/ixml/test-catalog"
+		 xmlns:ixml="http://invisiblexml.org/NS"
+		 name="vcards"
+		 release-date="2022-08-11"
+		 >
+  <tc:description>
+    <tc:p>A collection of tests using the vCard grammar developed
+    by Dave Pawson and Michael Sperberg-McQueen.</tc:p>
+  </tc:description>
+
+  <tc:test-set name=""
+  
+</tc:test-catalog>

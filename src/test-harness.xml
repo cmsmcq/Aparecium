@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
+<!ENTITY date.last.touched '20 August 2022' >
 <!ENTITY date.last.touched '28 July 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
@@ -35,6 +36,8 @@ form of this document.</p>
 </fileDesc>
 <revisionDesc>
 <list>
+<item>2022-08-20 : CMSMcQ : add pointers to performance tests</item>
+<item>2022-07 : CMSMcQ : ?</item>
 <item>2022-06-01/2022-06-06 : CMSMcQ : get Aparecium and test driver to work in Saxon in Oxygen</item>
 <item>2022-06-01 : CMSMcQ : Flip to new test-catalog namespace.</item>
 <item>2022-03-16 : CMSMcQ : record a to-do item:  the grammar
@@ -299,6 +302,7 @@ let $catalog-index := 'bogons' (: which catalog to run? short name :)
 
 let $invdir := "../../cmsmcq-ixml/tests/",
     $apadir := "../../Aparecium/tests/",
+    $perdir := "../../Aparecium/tests/perf",
     $ixtdir := "../../ixml-tests/tests-straw/",
     $itwdir := "../../ixml-tests/tests-wood/",
     $outdir := resolve-uri($apadir 
@@ -354,16 +358,47 @@ simple to complex.
       &lt;catalog n="expr1" path="{$apadir}expr1-20220415.xml"/>&lt;!-- ??? s -->
 
       &lt;!-- local performance tests (cut off the slow ones for now) -->
-      &lt;catalog n="local-doubling" 
-               path="{$apadir}doubling-test-catalog.xml"
+      &lt;catalog n="perf-doubling" 
+               path="{$invdir}performance/doubling-test-catalog.xml"
                />&lt;!-- ??? s -->
-      &lt;catalog n="local-tens"
-	       path="{$apadir}tenfold-test-catalog.xml"
+      &lt;catalog n="perf-evens-and-odds" 
+               path="{$invdir}performance/evens-and-odds-test-catalog.xml"
                />&lt;!-- ??? s -->
-      &lt;catalog n="local-evens-and-odds" 
-               path="{$apadir}evens-and-odds-test-catalog.xml"
+      &lt;catalog n="perf-centisec" 
+               path="{$perdir}stratified/stratum-E-minus-2-catalog.xml"
                />&lt;!-- ??? s -->
-	       
+      &lt;catalog n="perf-decisec" 
+               path="{$perdir}stratified/stratum-E-minus-1-catalog.xml"
+               />&lt;!-- ??? s -->
+      &lt;catalog n="perf-seconds" 
+               path="{$perdir}stratified/stratum-E-plus-0-catalog.xml"
+               />&lt;!-- ??? s -->
+      &lt;catalog n="perf-decasec" 
+               path="{$perdir}stratified/stratum-E-plus-1-catalog.xml"
+               />&lt;!-- ??? s -->
+      &lt;catalog n="perf-hectosec" 
+               path="{$perdir}stratified/stratum-E-plus-2-catalog.xml"
+               />&lt;!-- ??? s -->
+      &lt;catalog n="perf-kilosec" 
+               path="{$perdir}stratified/stratum-E-plus-3-catalog.xml"
+               />&lt;!-- ??? s -->
+
+      &lt;catalog n="perf-xpath" 
+               path="{$perdir}xpath/xpath-test-catalog.xml"
+               />&lt;!-- ??? s -->
+      &lt;catalog n="perf-oberon" 
+               path="{$perdir}oberon/oberon-test-catalog.xml"
+               />&lt;!-- ??? s -->
+      &lt;catalog n="perf-vcards" 
+               path="{$perdir}vcards/vcards-test-catalog.xml"
+               />&lt;!-- ??? s -->
+      &lt;catalog n="perf-ariadne" 
+               path="{$perdir}ariadne/ariadne-test-catalog.xml"
+               />&lt;!-- ??? s -->
+      &lt;catalog n="perf-fopc" 
+               path="{$perdir}fopc/fopc-test-catalog.xml"
+               />&lt;!-- ??? s -->
+
       &lt;catalog n="bogons" 
                path="{$apadir}bogons-20220731-catalog.xml"
                />&lt;!-- ??? s -->	       

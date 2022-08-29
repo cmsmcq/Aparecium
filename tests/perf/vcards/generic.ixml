@@ -1,0 +1,223 @@
+{ Generic vCard syntax
+  Adapted from https://datatracker.ietf.org/doc/html/rfc6350#section-3.3 
+  by eliminating all specific keywords and just recording their values.
+
+  0 first version
+  1 fix ambiguity in value for case of a single field.
+    hide CRLF for legibility
+    hide ALPHA etc. for legibility
+  2 allow invisible line breaks within quoted values (!)
+    hide the BEGIN/END literals
+  3 make 'name' more complicated to ensure that 'BEGIN' and 'END'
+    are not recognized as names but force the recognition of vcard
+    boundaries.  There ought to be a simpler way.
+  4 Hide magic character sequences, invisible line breaks, and
+    other apparatus, since they appear to be working correctly.
+    Also hide the internals of quoted parameter values.
+  5 allow colons to be escaped, too, make the CRLF rules at the
+    end of a card less pedantic.
+
+  2022-06-24/2022-06-25, Michael Sperberg-McQueen and Dave Pawson
+
+}
+
+                       { A collection of vcards is one or more cards. }
+              vcards = vcard+.
+
+                       { A vcard is a BEGIN:VCARD, a sequence of
+                         content lines, and and END:VCARD.  The RFC
+                         requires that certain fields occur, and
+                         writes them into the grammar, but we will
+                         accept any fields as long as they conform to
+                         the generic syntax. }
+               vcard = -"BEGIN:VCARD", CRLF,
+                       property+,
+                       -"END:VCARD", CRLF*.
+
+                       { A property (the RFC calls it a 'contentline')
+                         is represented by an optional group marker, a
+                         property name, optional parameters, and one
+                         or more comma-separated values, ending with a
+                         CRLF. Note that the values may contain
+                         line-continuations and escaped characters (\,
+                         for comma, \; for semi-colon, \n for newline,
+                         \\ for backslash), which should be unescaped
+                         by the parser. }
+
+              property = (@group, -".")?, name,
+                         (-";", param)*,
+                         -":", value ++ -",",
+                         CRLF.
+
+                 group = (ALPHA | DIGIT | "-")+.
+
+                         { In principle name could be very simple.
+                           But we want to distinguish normal names
+                           from x-names, and we want to ensure that
+                           BEGIN and END are not recognized as names
+                           but as keywords. So we have a more complicated
+                           definition. }
+                 @name = not-an-x-name
+		       | not-begin
+		       | not-end
+		       | normal-name
+                       | x-name
+                       .
+
+                         { not-an-x-name, though it begins with X }
+        -not-an-x-name = ["Xx"], (~["-"], (ALPHA | DIGIT | "-")*)?.
+	
+                         { not-begin, though it begins with B... }
+            -not-begin = "BEGIN", (ALPHA | DIGIT | "-")+
+	    	       | "BEGI", (~["nN"], (ALPHA | DIGIT | "-")*)?
+	               | "BEG", (~["iI"], (ALPHA | DIGIT | "-")*)?
+	               | "BE", (~["gG"], (ALPHA | DIGIT | "-")*)?
+	               | "B", (~["eE"], (ALPHA | DIGIT | "-")*)?
+		       .
+		       
+                         { not-end, though it begins with E or EN }
+              -not-end = ["Ee"], ["Nn"], ["Dd"], (ALPHA | DIGIT | "-")+
+	      	       | ["Ee"], ["Nn"], (~["Dd"], (ALPHA | DIGIT | "-")*)?
+	               | ["Ee"], (~["Nn"], (ALPHA | DIGIT | "-")*)?
+		       .
+		       
+                         { normal-name: does not look like x-name, 
+                           begin, or end at any point }
+          -normal-name = ~["XxBbEe"], (ALPHA | DIGIT | "-")*.
+
+                         { Note that ~["XxBbEe"] is a simplification
+                           and broadens the language.  If we needed to
+                           be careful to accept only legal vCards,
+                           we'd need to write ["a"; "cd"; "f-w"; "yz";
+                           "A"; "CD"; "F-W"; "YZ"; "0"-"9"; "-"]
+                           instead.  And similarly for the exclusions
+                           used in not-an-x-name, not-begin, and
+                           not-end.
+
+                           But our goal is not to check the input for
+                           correct vCard syntax; it's to recognize the
+                           structure of correct vCards.  That allows us
+                           some simplifications.
+                         }
+
+
+{ The spec defines a lot of names as part of the grammar, and expects
+  the parser to adjust its parsing based on the name.  It also requires
+  case insensitivity.  But since all of the names explicitly specified
+  also match the general rules for iana-tokens, the grammar is 
+  hopelessly ambiguous.  So we leave recognition of the known fields
+  and their semantics to the application.
+
+name  = "SOURCE" | "KIND" | "FN" | "N" | "NICKNAME"
+      | "PHOTO" | "BDAY" | "ANNIVERSARY" | "GENDER" | "ADR" | "TEL"
+      | "EMAIL" | "IMPP" | "LANG" | "TZ" | "GEO" | "TITLE" | "ROLE"
+      | "LOGO" | "ORG" | "MEMBER" | "RELATED" | "CATEGORIES"
+      | "NOTE" | "PRODID" | "REV" | "SOUND" | "UID" | "CLIENTPIDMAP"
+      | "URL" | "KEY" | "FBURL" | "CALADRURI" | "CALURI" | "XML"
+      | iana-token | x-name.
+
+iana-token = (ALPHA | DIGIT | "-")+.
+     { identifier registered with IANA }
+
+An alternative approach would be to assume that the input data uses
+only the known field names and x-names, and does not use any
+IANA-registered tokens.  The cost : benefit ratio of that approach
+seems too high, so we go generic instead.
+}
+
+              x-name = ["xX"], "-", (ALPHA | DIGIT | "-")+.	      
+                       { Names that begin with "x-" or "X-" are
+                         reserved for experimental use, not intended
+                         for released products, or for use in
+                         bilateral agreements. }
+
+               param = name, -"=", param-value ++ -",".
+         param-value = pv-char* | quoted-pvalue.
+      -quoted-pvalue = -DQUOTE, qpv-char*, -DQUOTE.
+            -pv-char = SAFE-CHAR | magic.
+           -qpv-char = QSAFE-CHAR | magic.
+
+               value = -field
+                     | field, (-";", field)+.
+               field = data-char*.
+
+          -data-char = non-special-char
+                     | -visible-blank
+                     | tab
+                     | magic
+                     .
+		       { 'Magic' sequences are those requiring special
+                         handling }
+            -magic   = INVISIBLE-1
+                     | INVISIBLE-2
+                     | INVISIBLE-3
+                     | esc-NL { newline }
+                     | esc-SEMICOLON
+                     | esc-COLON
+                     | esc-COMMA
+                     | esc-BS
+                     .
+
+        -INVISIBLE-1 = CRLF, tab.
+        -INVISIBLE-2 = CRLF, invisible-blank.
+        -INVISIBLE-3 = INVISIBLE-2, visible-blank.
+   -non-special-char = ~[#0D; #0A; #09; #20; ";"; ","; #5C].
+                       { non-special =
+                         not whitespace (meaningful for line folding)
+                         not semicolon or comma or backslash (need 
+                             escaping) 
+                       }
+             -esc-NL = -"\n", +#0A.
+      -esc-SEMICOLON = -#5C, ";".
+          -esc-COLON = -#5C, ":".
+          -esc-COMMA = -#5C, ",".
+             -esc-BS = -#5C, #5C.
+      -visible-blank = #20.
+    -invisible-blank = -#20.
+                 tab = -#09.
+
+
+          -SAFE-CHAR = WSP
+	             | "!"
+		     | [#23-#2B; #2D-#39; #3C-#5B; #5D-#7E]
+	             | NON-ASCII
+		     .		     
+                       { Any character except CTLs, DQUOTE, ";", ":",
+                         comma, and backspace }
+
+          -NON-ASCII = UTF8-2 | UTF8-3 | UTF8-4.
+
+         -QSAFE-CHAR = visible-blank
+	             | tab
+	             | "!"
+		     | [#23-#5B; #5D-#7E]		     
+		     | NON-ASCII
+		     .
+                       { Any character except CTLs, DQUOTE, 
+                         backslash }
+
+               -CRLF = -#D?, -#A. { strictly speaking the RFC requires the #D }
+                 WSP = SP | HTAB.
+                  SP = #20.
+                HTAB = #09.
+              DQUOTE = -#22.
+              -ALPHA = ['A'-'Z'; 'a'-'z'].
+              -DIGIT = ['0'-'9'].
+
+{ Definitions (adapted) from RFC 5234 }
+{ Depending on how the ixml processor reads the file,
+  this may or may not work correctly.  Time will tell. }
+
+              UTF8-2 = [#C2-#DF], UTF8-tail.
+
+              UTF8-3 = #E0, [#A0-#BF], UTF8-tail
+                     | [#E1-#EC], UTF8-tail, UTF8-tail 
+                     | #ED, [#80-#9F], UTF8-tail
+                     | [#EE-#EF], UTF8-tail, UTF8-tail
+                     .   
+              UTF8-4 = #F0, [#90-#BF], UTF8-tail, UTF8-tail
+                     | [#F1-#F3], UTF8-tail, UTF8-tail, UTF8-tail
+                     | #F4, [#80-#8F], UTF8-tail, UTF8-tail
+                     .
+          -UTF8-tail = [#80-#BF].
+	  

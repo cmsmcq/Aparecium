@@ -1,0 +1,98 @@
+<timingdata xmlns:t="http://blackmesatech.com/2022/iXML/test-harness">
+  <p>Gathered from a-start doubling test catalog 2022-07-12f.</p>
+  <p>Times in milliseconds as reported by BaseX prof:track() on the call
+  to ap:parse-grammar-from-string().</p>
+  <p>For each grammar in each series, the ratio of its time to the
+  preceding grammar in the series is given; as may be seen, as the
+  size of the input grammar increases the times converge to something
+  like 4.</p>
+  <p>It looks as if a quadratic term comes to dominate the others as
+  input rises about a thousand characters or so.</p>
+
+  <group>
+    <p>m.lc: single comments added in multiple places to increase size
+    of input grammar.</p>
+    <parsetime name="G.b1.m.lc" t:parsetime="392.31"/>
+    <parsetime name="G.b2.m.lc" t:parsetime="252.03" ratio="0.6424256327903953"/>
+    <parsetime name="G.b3.m.lc" t:parsetime="277.75" ratio="1.1020513430940762"/>
+    <parsetime name="G.b4.m.lc" t:parsetime="361.59" ratio="1.3018541854185417"/>
+    <parsetime name="G.b5.m.lc" t:parsetime="637.58" ratio="1.763267789485329"/>
+    <parsetime name="G.b6.m.lc" t:parsetime="1425.83" ratio="2.236315442767966"/>
+    <parsetime name="G.b7.m.lc" t:parsetime="5449.87" ratio="3.8222438860172674"/>
+    <parsetime name="G.b8.m.lc" t:parsetime="20108.7" ratio="3.689757737340524"/>
+    <parsetime name="G.b9.m.lc" t:parsetime="95510.92" ratio="4.749731210868927"/>
+    <parsetime name="G.b10.m.lc" t:parsetime="444871.65" ratio="4.657809285053479"/>
+  </group>
+  
+  <group>
+    <p>m.sc: many small comments added in multiple places to increase
+    size of input grammar.</p>    
+    <parsetime name="G.b2.m.sc" t:parsetime="306.52"/>
+    <parsetime name="G.b3.m.sc" t:parsetime="450.47" ratio="1.4696267780242727"/>
+    <parsetime name="G.b4.m.sc" t:parsetime="772.56" ratio="1.7150087686194417"/>
+    <parsetime name="G.b5.m.sc" t:parsetime="1687.18" ratio="2.183882158020089"/>
+    <parsetime name="G.b6.m.sc" t:parsetime="4361.73" ratio="2.585219123033701"/>
+    <parsetime name="G.b7.m.sc" t:parsetime="14064.07" ratio="3.224424712212815"/>
+    <parsetime name="G.b8.m.sc" t:parsetime="57041.67" ratio="4.055843720914359"/>
+    <parsetime name="G.b9.m.sc" t:parsetime="274108.74" ratio="4.805412253883871"/>
+    <parsetime name="G.b10.m.sc" t:parsetime="1.22544146E6" ratio="4.470639863581146"/>
+  </group>
+  
+  <group>
+    <p>m.ws: whitespace added in multiple places to increase size of
+    input grammar.</p>
+    <parsetime name="G.b2.m.ws" t:parsetime="510.8"/>
+    <parsetime name="G.b3.m.ws" t:parsetime="920.77" ratio="1.8026037588097101"/>
+    <parsetime name="G.b4.m.ws" t:parsetime="1940.65" ratio="2.107638172399188"/>
+    <parsetime name="G.b5.m.ws" t:parsetime="4509.25" ratio="2.3235771519851594"/>
+    <parsetime name="G.b6.m.ws" t:parsetime="11600.99" ratio="2.572709430614847"/>
+    <parsetime name="G.b7.m.ws" t:parsetime="36958.23" ratio="3.1857824202934406"/>
+    <parsetime name="G.b8.m.ws" t:parsetime="149276.69" ratio="4.0390649119289534"/>
+    <parsetime name="G.b9.m.ws" t:parsetime="636291.59" ratio="4.262497982772795"/>
+    <parsetime name="G.b10.m.ws" t:parsetime="2.606890.16" ratio="4.097005525406992"/>
+  </group>
+  
+  <group>
+    <p>s.lc: size of input grammar increased by adding single comment at top.</p>
+    <parsetime name="G.b1.s.lc" t:parsetime="187.1"/>
+    <parsetime name="G.b2.s.lc" t:parsetime="159.01" ratio="0.8498663816141101"/>
+    <parsetime name="G.b3.s.lc" t:parsetime="181.09" ratio="1.1388591912458337"/>
+    <parsetime name="G.b4.s.lc" t:parsetime="279.83" ratio="1.5452537412336407"/>
+    <parsetime name="G.b5.s.lc" t:parsetime="521.66" ratio="1.864203266268806"/>
+    <parsetime name="G.b6.s.lc" t:parsetime="1403.04" ratio="2.6895679178008667"/>
+    <parsetime name="G.b7.s.lc" t:parsetime="5070.27" ratio="3.613774375641465"/>
+    <parsetime name="G.b8.s.lc" t:parsetime="17018.39" ratio="3.3565056693233295"/>
+    <parsetime name="G.b9.s.lc" t:parsetime="94241.78" ratio="5.537643690149303"/>
+    <parsetime name="G.b10.s.lc" t:parsetime="477926.48" ratio="5.071280275054227"/>
+  </group>
+  
+  <group>
+    <p>s.lc: size of input grammar increased by adding many small
+    comments at top.</p>
+    <parsetime name="G.b1.s.sc" t:parsetime="150.53"/>
+    <parsetime name="G.b2.s.sc" t:parsetime="176.12" ratio="1.1699993356805953"/>
+    <parsetime name="G.b3.s.sc" t:parsetime="274.8" ratio="1.5602997955939133"/>
+    <parsetime name="G.b4.s.sc" t:parsetime="524.39" ratio="1.9082605531295487"/>
+    <parsetime name="G.b5.s.sc" t:parsetime="1120.08" ratio="2.1359675051011653"/>
+    <parsetime name="G.b6.s.sc" t:parsetime="3286.44" ratio="2.934111849153632"/>
+    <parsetime name="G.b7.s.sc" t:parsetime="11880.28" ratio="3.6149389613076766"/>
+    <parsetime name="G.b8.s.sc" t:parsetime="50331.85" ratio="4.236587858198628"/>
+    <parsetime name="G.b9.s.sc" t:parsetime="251679.97" ratio="5.00041166776107"/>
+    <parsetime name="G.b10.s.sc" t:parsetime="1141209.74" ratio="4.534368547485125"/>
+  </group>
+  
+  <group>
+    <p>s.ws: size of input grammar increased by adding blanks and
+    newlines at top.</p>
+    <parsetime name="G.b1.s.ws" t:parsetime="181.37"/>
+    <parsetime name="G.b2.s.ws" t:parsetime="248.79" ratio="1.3717263053426696"/>
+    <parsetime name="G.b3.s.ws" t:parsetime="448.54" ratio="1.802885968085534"/>
+    <parsetime name="G.b4.s.ws" t:parsetime="931.1" ratio="2.0758460783876576"/>
+    <parsetime name="G.b5.s.ws" t:parsetime="3999.19" ratio="4.295124046826334"/>
+    <parsetime name="G.b6.s.ws" t:parsetime="6573.64" ratio="1.6437428579287305"/>
+    <parsetime name="G.b7.s.ws" t:parsetime="25347.94" ratio="3.855997590376108"/>
+    <parsetime name="G.b8.s.ws" t:parsetime="116140.15" ratio="4.581837814039326"/>
+    <parsetime name="G.b9.s.ws" t:parsetime="526724.22" ratio="4.535246596461258"/>
+    <parsetime name="G.b10.s.ws" t:parsetime="2310351.09" ratio="4.386263251763893"/>
+  </group>
+</timingdata>

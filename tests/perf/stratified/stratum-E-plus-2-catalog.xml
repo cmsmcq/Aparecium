@@ -1,0 +1,144 @@
+<tc:test-catalog xmlns:tc="https://github.com/invisibleXML/ixml/test-catalog"
+		 xmlns:ixml="http://invisiblexml.org/NS"
+		 name="E2-hecto"
+		 release-date="2022-08-10"
+		 >
+  <tc:description>
+    <tc:p>A collection of tests which (at the outset of an effort to
+    improve performance) run in less than one thousand seconds
+    (so: in a single-digit number of hectoseconds).</tc:p>
+  </tc:description>
+
+
+
+  <tc:test-set name="bnf">
+    <tc:created by="SP" on="2021-12-16"/>
+    <tc:ixml-grammar-ref href="../../../../cmsmcq-ixml/tests/ixml/bnf.ixml"/>
+    <tc:test-case name="bnf">
+      <tc:created by="SP" on="2021-12-16"/>
+      <tc:modified
+	  by="MSM"
+	  on="2022-01-01"
+	  change="stripped non-significant whitespace from result"/>
+      <tc:test-string-ref href="../../../../cmsmcq-ixml/tests/ixml/bnf.inp"/>
+      <tc:result>
+	<tc:assert-xml-ref href="../../../../cmsmcq-ixml/tests/ixml/bnf.output.xml"/>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+
+  <tc:test-set name="ixml-one-line">
+    <tc:created by="SP" on="2021-12-16"/>
+    <tc:ixml-grammar-ref href="../../../../cmsmcq-ixml/tests/ixml/ixml-one-line.ixml"/>
+    <tc:test-case name="ixml-one-line">
+      <tc:created by="SP" on="2021-12-16"/>
+      <tc:modified by="SP" on="2021-12-21"
+		change="replace input, output"/>
+      <tc:modified
+	  by="MSM"
+	  on="2021-12-30"
+	  change="stripped non-significant whitespace from result"/>
+      <tc:modified
+	  by="MSM"
+	  on="2022-01-01"
+	  change="replace expected result"/>
+      <tc:description>
+	<tc:p>Note that the input and the grammar are the same.</tc:p>
+	<tc:p>The expected result supplied in tests.zip cannot be
+	right: it excludes the delimiter characters like ":" and
+	",", although they are not marked hidden in the grammar, and
+	it marks whitespace as "s", not as "S".  It appears to be
+	parsing the input with a different grammar more like the
+	current ixml grammar.  It has been replaced by output
+	thought correct.  However, the old file has been left in
+	place, in case of disputes over correctness.</tc:p>
+	<tc:p>The comment text "allcharacters,quotesmustbedoubled"
+	looks like a possible error, but the comments in the input
+	are also missing inter-word spaces.</tc:p>
+      </tc:description>
+      <tc:test-string-ref href="../../../../cmsmcq-ixml/tests/ixml/ixml-one-line.inp"/>
+      <tc:result>
+	<!-- <assert-xml-ref href="../../../../cmsmcq-ixml/tests/ixml/ixml-one-line.output.xml"/> -->
+	<tc:assert-xml-ref href="../../../../cmsmcq-ixml/tests/ixml/ixml-one-line.corr.output.xml"/>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+  
+
+  <tc:test-set name="ixml-old">
+    <tc:created by="SP" on="2021-12-16"/>
+    <tc:ixml-grammar-ref href="../../../../cmsmcq-ixml/tests/ixml/ixml.ixml"/>
+    <tc:test-case name="ixml">
+      <tc:created by="SP" on="2021-12-16"/>
+      <tc:modified
+	  by="MSM"
+	  on="2021-12-30"
+	  change="stripped non-significant whitespace from result"/>
+      <tc:test-string-ref href="../../../../cmsmcq-ixml/tests/ixml/ixml.inp"/>
+      <tc:result>
+	<tc:assert-xml-ref href="../../../../cmsmcq-ixml/tests/ixml/ixml.output.xml"/>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+  
+  <tc:test-set name="ixml">
+    <tc:created by="CMSMcQ" on="2022-08-22"/>
+    <tc:ixml-grammar-ref href="../../../lib/ixml.2022-06-07.ixml"/>
+    <tc:test-case name="ixml">
+      <tc:created by="CMSMcQ" on="2022-08-22"/>
+      <tc:test-string-ref href="../../../lib/ixml.2022-06-07.ixml"/>
+      <tc:result>
+	<tc:assert-xml-ref href="ixml.2022-06-07.ixml.xml"/>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>  
+
+  <tc:test-set name="sample.grammar.41">
+    <tc:created on="2022-02-08" by="cmsmcq"/>
+    <tc:description>
+      <tc:p>
+	Sample grammar from Niklaus Wirth, Grundlagen und Techniken des
+	Compilerbaus (Bonn: Addison-Wesley, 1996), pp. 36-37.
+      </tc:p>
+      <tc:p>
+	Grammar for Oberon-0, the subset of Oberon for which the book
+	describes a compiler.
+      </tc:p>
+      <tc:p>	
+	Rules for whitespace and comments added for usability; Wirth
+	assumes a lexer to eat whitespace.  This grammar experiments
+	with a pattern in which nonterminals normally begin and end
+	with non-whitespace characters, so in the XML any whitespace
+	goes outside the tags, not inside.  (A different style is
+	shown in sample.grammar.41bis.)
+      </tc:p>
+      <tc:p>
+	(For what it's worth: in some ways the raw parse tree produced
+	by this grammar is nicer than the raw parse tree produced by
+	grammar 41bis, but optional nonterminals and nonterminals
+	which can produce the empty string cause ambiguity unless they
+	are handled specially.)
+      </tc:p>
+    </tc:description>
+    
+    <tc:ixml-grammar-ref href="../../../../cmsmcq-ixml/tests/misc/grammars/sample.grammar.41.ixml"/>
+    <tc:grammar-test>
+      <tc:result>
+	<tc:assert-xml-ref href="../../../../cmsmcq-ixml/tests/misc/parse-trees/sample.grammar.41.xml"/>
+      </tc:result>
+    </tc:grammar-test>
+    <tc:test-case name="g41.c00">
+      <tc:created by="cmsmcq" on="2022-06-15"/>
+      <tc:description>
+	<tc:p>Sample Oberon-0 module from the same source as the
+	grammar, pp. 37-38.</tc:p>
+      </tc:description>
+      <tc:test-string-ref href="../../../../cmsmcq-ixml/tests/misc/inputs/Samples.oberon-0"/>
+      <tc:result>
+	<tc:assert-xml-ref href="../../../../cmsmcq-ixml/tests/misc/parse-trees/Samples.oberon-0.g41.xml"/>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>  
+  
+  
+</tc:test-catalog>

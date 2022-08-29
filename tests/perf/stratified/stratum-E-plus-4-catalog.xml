@@ -1,0 +1,14 @@
+<tc:test-catalog xmlns:tc="https://github.com/invisibleXML/ixml/test-catalog"
+		 xmlns:ixml="http://invisiblexml.org/NS"
+		 name="E4-kilo"
+		 release-date="2022-08-10"
+		 >
+  <tc:description>
+    <tc:p>A collection of tests which (at the outset of an effort to
+    improve performance) run in less than ten to one hundred thousand seconds
+    (so: in a double-digit number of kiloseconds).</tc:p>
+  </tc:description>
+
+  
+  
+</tc:test-catalog>

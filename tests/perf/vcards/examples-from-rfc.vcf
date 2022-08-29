@@ -1,0 +1,136 @@
+BEGIN:VCARD
+VERSION:4.0
+KIND:individual
+FN:Jane Doe
+ORG:ABC\, Inc.;North American Division;Marketing
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+KIND:org
+FN:ABC Marketing
+ORG:ABC\, Inc.;North American Division;Marketing
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+KIND:group
+FN:The Doe family
+MEMBER:urn:uuid:03a0e51f-d1aa-4385-8a53-e29025acd8af
+MEMBER:urn:uuid:b8767877-b4a1-4c70-9acc-505d3819e519
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+FN:John Doe
+UID:urn:uuid:03a0e51f-d1aa-4385-8a53-e29025acd8af
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+FN:Jane Doe
+UID:urn:uuid:b8767877-b4a1-4c70-9acc-505d3819e519
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+KIND:group
+FN:Funky distribution list
+MEMBER:mailto:subscriber1@example.com
+MEMBER:xmpp:subscriber2@example.com
+MEMBER:sip:subscriber3@example.com
+MEMBER:tel:+1-418-555-5555
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+EMAIL;PID=4.2,5.1:jdoe@example.com
+CLIENTPIDMAP:1;urn:uuid:3eef374e-7179-4196-a914-27358c3e6527
+CLIENTPIDMAP:2;urn:uuid:42bcd5a7-1699-4514-87b4-056edf68e9cc
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+EMAIL;PID=5.1,5.2:john@example.com
+CLIENTPIDMAP:1;urn:uuid:0c75c629-6a8d-4d5e-a07f-1bb35846854d
+CLIENTPIDMAP:2;urn:uuid:3eef374e-7179-4196-a914-27358c3e6527
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+UID:urn:uuid:4fbe8971-0bc3-424c-9c26-36c3e1eff6b1
+FN;PID=1.1:J. Doe
+N:Doe;J.;;;
+EMAIL;PID=1.1:jdoe@example.com
+CLIENTPIDMAP:1;urn:uuid:53e374d9-337e-4727-8803-a1e9c14e0556
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+UID:urn:uuid:4fbe8971-0bc3-424c-9c26-36c3e1eff6b1
+FN;PID=1.1:J. Doe
+N:Doe;J.;;;
+EMAIL;PID=1.1:jdoe@example.com
+TEL;PID=1.1;VALUE=uri:tel:+1-555-555-5555
+CLIENTPIDMAP:1;urn:uuid:53e374d9-337e-4727-8803-a1e9c14e0556
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+UID:urn:uuid:4fbe8971-0bc3-424c-9c26-36c3e1eff6b1
+FN;PID=1.1:J. Doe
+N:Doe;J.;;;
+EMAIL;PID=1.1:jdoe@example.com
+EMAIL;PID=2.1:boss@example.com
+TEL;PID=1.1;VALUE=uri:tel:+1-555-555-5555
+TEL;PID=2.1;VALUE=uri:tel:+1-666-666-6666
+CLIENTPIDMAP:1;urn:uuid:53e374d9-337e-4727-8803-a1e9c14e0556
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+UID:urn:uuid:4fbe8971-0bc3-424c-9c26-36c3e1eff6b1
+FN;PID=1.1:J. Doe
+N:Doe;J.;;;
+EMAIL;PID=1.1:jdoe@example.com
+EMAIL;PID=2.2:ceo@example.com
+TEL;PID=1.1;VALUE=uri:tel:+1-555-555-5555
+TEL;PID=2.2;VALUE=uri:tel:+1-666-666-6666
+CLIENTPIDMAP:1;urn:uuid:53e374d9-337e-4727-8803-a1e9c14e0556
+CLIENTPIDMAP:2;urn:uuid:1f762d2b-03c4-4a83-9a03-75ff658a6eee
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+UID:urn:uuid:4fbe8971-0bc3-424c-9c26-36c3e1eff6b1
+FN:J. Doe
+N:Doe;J.;;;
+EMAIL;PID=1.1:jdoe@example.com
+EMAIL;PID=2.1:boss@example.com
+EMAIL;PID=2.2:ceo@example.com
+TEL;PID=1.1;VALUE=uri:tel:+1-555-555-5555
+TEL;PID=2.1,2.2;VALUE=uri:tel:+1-666-666-6666
+CLIENTPIDMAP:1;urn:uuid:53e374d9-337e-4727-8803-a1e9c14e0556
+CLIENTPIDMAP:2;urn:uuid:1f762d2b-03c4-4a83-9a03-75ff658a6eee
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+UID:urn:uuid:4fbe8971-0bc3-424c-9c26-36c3e1eff6b1
+FN:J. Doe
+N:Doe;J.;;;
+EMAIL;PID=1.1:jdoe@example.com
+EMAIL;PID=2.1:boss@example.com
+EMAIL;PID=3.1:ceo@example.com
+TEL;PID=1.1;VALUE=uri:tel:+1-555-555-5555
+TEL;PID=2.1;VALUE=uri:tel:+1-666-666-6666
+CLIENTPIDMAP:1;urn:uuid:53e374d9-337e-4727-8803-a1e9c14e0556
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+FN:Simon Perreault
+N:Perreault;Simon;;;ing. jr,M.Sc.
+BDAY:--0203
+ANNIVERSARY:20090808T1430-0500
+GENDER:M
+LANG;PREF=1:fr
+LANG;PREF=2:en
+ORG;TYPE=work:Viagenie
+ADR;TYPE=work:;Suite D2-630;2875 Laurier;
+ Quebec;QC;G1V 2M2;Canada
+TEL;VALUE=uri;TYPE="work,voice";PREF=1:tel:+1-418-656-9254;ext=102
+TEL;VALUE=uri;TYPE="work,cell,voice,video,text":tel:+1-418-262-6501
+EMAIL;TYPE=work:simon.perreault@viagenie.ca
+GEO;TYPE=work:geo:46.772673,-71.282945
+KEY;TYPE=work;VALUE=uri:
+http://www.viagenie.ca/simon.perreault/simon.asc
+TZ:-0500
+URL;TYPE=home:http://nomis80.org
+END:VCARD

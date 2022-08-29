@@ -1,0 +1,194 @@
+<tc:test-catalog xmlns:tc="https://github.com/invisibleXML/ixml/test-catalog"
+		 xmlns:ixml="http://invisiblexml.org/NS"
+		 name="E1-deka"
+		 release-date="2022-08-10"
+		 >
+  <tc:description>
+    <tc:p>A collection of tests which (at the outset of an effort to
+    improve performance) take between one and ten seconds
+    (so: in a single-digit number of dekaseconds).</tc:p>
+  </tc:description>
+
+
+  <tc:test-set name="sample.grammar.39">
+    <tc:created on="2022-02-08" by="cmsmcq"/>
+    <tc:modified on="2022-06-13" by="cmsmcq"
+		 change="mark delimiters and space as hidden, correct space-handling blunders"/>
+    <tc:description>
+      <tc:p>
+	Sample grammar from Niklaus Wirth, Grundlagen und Techniken des
+	Compilerbaus (Bonn: Addison-Wesley, 1996, p. 8.
+      </tc:p>
+      <tc:p>
+	Grammar for EBNF as Wirth uses it.  Rules for ws added for
+	convenience; Wirth assumes the lexer eats whitespace.
+      </tc:p>
+    </tc:description>
+    <tc:ixml-grammar>
+      syntax:  S?, production**S, S?.
+      production: identifier, S?, "=", S?, expression, S?, ".".
+      expression: term++(S?, -"|", S?).
+      term: factor++S.
+      factor: identifier; string;
+      "(", S?, expression, S?, ")";
+      "[", S?, expression, S?, "]";
+      "{", S?, expression, S?, "}".
+
+      identifier: letter, (letter; digit)*.
+      string: '"', character*, '"'.
+      -letter: ["A"-"Z"; "a"-"z"].
+      -digit: ["0"-"9"].
+
+      { Wirth does not define character. }
+      -character: ~['"'].
+
+      { Wirth does not define empty-set symbol. }
+      nil: .
+
+      -S: -[" "; #09; #0A; #0D]+.
+
+    </tc:ixml-grammar>
+      <tc:grammar-test>
+	<tc:result>
+	  <tc:assert-xml-ref href="parse-trees/sample.grammar.39.xml"/>
+	</tc:result>
+      </tc:grammar-test>
+    <tc:test-case name="g39.c02">
+      <tc:test-string>
+      A = T | A "+" T.
+      T = F | T "*" F.
+      F = V | "(" A ")".
+      V = "a" | "b" | "c" | "d".	
+      </tc:test-string>
+      <tc:result>
+	<tc:assert-xml-ref href="parse-trees/g39.c02.xml"/>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+
+  <tc:test-set name="sample.grammar.38">
+    <tc:created on="2022-02-08" by="cmsmcq"/>
+    <tc:description>
+      <tc:p>Sample grammar from Niklaus Wirth, Grundlagen und Techniken des
+      Compilerbaus (Bonn: Addison-Wesley, 1996, p. 7.
+      </tc:p>
+      <tc:p>Grammar for BNF as Wirth uses it.  Rules for ws added for
+      convenience; Wirth assumes the lexer eats whitespace.</tc:p>
+      <tc:p>We write 'nil' for Wirth's empty-set symbol.</tc:p>
+    </tc:description>
+    <tc:ixml-grammar>
+      syntax:  S?, production, syntax; nil.
+      production: identifier, S?, -"=", S?, expression, S?, -".", S?.
+      expression: term; expression, S?, -"|", S?, term.
+      term: factor; term, S, factor.
+      factor: identifier; string.
+
+      identifier: letter; identifier, letter; identifier, digit.
+      string: stringhead, -'"'.
+      stringhead: -'"'; stringhead, character.
+      letter: ["A"-"Z"; "a"-"z"].
+      digit: ["0"-"9"].
+
+      { Wirth does not define character. }
+      character: ~['"'].
+
+      { Wirth does not define empty-set symbol. }
+      nil: .
+
+      -S: -[" "; #09; #0A; #0D]+.
+    </tc:ixml-grammar>
+    <tc:grammar-test>
+      <tc:result>
+	<tc:assert-xml-ref href="parse-trees/sample.grammar.38.xml"/>
+      </tc:result>
+    </tc:grammar-test>
+    <tc:test-case name="g38.c01">
+      <tc:test-string/>
+      <tc:result>
+	<tc:assert-xml>
+	  <syntax><nil/></syntax>
+	</tc:assert-xml>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+
+  <tc:test-set name="json">
+    <tc:created by="SP" on="2021-12-16"/>
+    <tc:ixml-grammar-ref href="../../../../cmsmcq-ixml/tests/correct/json.ixml"/>
+    <tc:test-case name="json">
+      <tc:created by="SP" on="2021-12-16"/>
+      <tc:modified by="MSM" on="2022-01-01"
+		change="removed non-significant whitespace
+			from expected result"/>
+      <tc:test-string-ref href="../../../../cmsmcq-ixml/tests/correct/json.inp"/>
+      <tc:result>
+	<tc:assert-xml-ref href="../../../../cmsmcq-ixml/tests/correct/json.output.xml"/>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+
+  <tc:test-set name="address">
+    <tc:created by="SP" on="2021-12-16"/>
+    <tc:ixml-grammar-ref href="../../../../cmsmcq-ixml/tests/correct/address.ixml"/>
+    <tc:test-case name="address">
+      <tc:created by="SP" on="2021-12-16"/>
+      <tc:modified by="MSM" on="2021-12-30"
+		change="remove all but one trailing LF from input"/>
+      <tc:modified by="MSM" on="2022-01-01"
+		change="remove nonsignificant whitespace from
+			expected result"/>
+      <tc:test-string-ref href="../../../../cmsmcq-ixml/tests/correct/address.inp"/>
+      <tc:result>
+	<tc:assert-xml-ref href="../../../../cmsmcq-ixml/tests/correct/address.output.xml"/>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+
+
+  <tc:test-set name="sample.grammar.33">
+    <tc:created on="2022-02-08" by="cmsmcq"/>
+    <tc:description>
+      <tc:p>Grammar for the toy programming language Tosca. </tc:p>
+      <tc:p>From Susan Stepney, High integrity compilation: a case study. Hemel 
+      Hempstead: Prentice Hall International, 1993. Web edition.  Tosca is 
+      defined in chapter 4; the concrete syntax is specified using Z, not 
+      using a grammar, and leaves some things undefined, so the grammar
+      given here is a bit of a reconstruction.</tc:p>
+      <tc:p>
+      </tc:p>
+    </tc:description>
+    <tc:ixml-grammar-ref href="../../../../cmsmcq-ixml/tests/misc/grammars/sample.grammar.33.ixml"/>
+    <tc:grammar-test>
+      <tc:result>
+	<tc:assert-xml-ref href="../../../../cmsmcq-ixml/tests/misc/parse-trees/sample.grammar.33.xml"/>
+      </tc:result>
+    </tc:grammar-test>
+    <tc:test-case name="g33.c01">
+      <tc:created by="cmsmcq" on="2022-06-12"/>
+      <tc:description>
+	<tc:p>This sample 'squares' program is Stepney's running
+	example.  The input string is transcribed from the concrete-syntax
+	version on page 44.</tc:p>
+      </tc:description>
+      <tc:test-string>
+	n : int ; sq : int ; limit : int ;
+        begin
+	     n := 1 ; sq := 1 ;
+	     input limit ;
+             output sq ;
+             while ( n &lt; limit ) do
+             begin
+                  sq := ( ( sq + 1 ) + ( n + n ) ) ;
+                  n := ( n + 1 ) ;
+                  output sq ;
+             end ;
+	end
+      </tc:test-string>
+      <tc:result>
+	<tc:assert-xml-ref href="../../../../cmsmcq-ixml/tests/misc/parse-trees/g33.c01.xml"/>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>  
+
+  
+</tc:test-catalog>

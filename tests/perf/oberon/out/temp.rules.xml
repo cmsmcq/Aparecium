@@ -1,0 +1,68 @@
+<temp xmlns:follow="foo">
+  
+  <comment>identdef = _ident_, STAR?.</comment>
+  <rule name="identdef"
+	xml:id="identdef"
+	nullable="false"
+	first="ident_3"
+	last="ident_3 s_4 visible_1"
+	follow:ident_3=" s_4 visible_1"
+	follow:s_4=" visible_1"
+	follow:visible_1="">
+    <alt xml:id="exp_alt_15"
+	 nullable="false"
+	 first="ident_3"
+	 last="ident_3 s_4 visible_1"
+	 follow:ident_3=" s_4 visible_1"
+	 follow:s_4=" visible_1"
+	 follow:visible_1="">
+      <nonterminal mark="@" name="ident" xml:id="ident_3" nullable="false" first="ident_3" last="ident_3"
+		   follow:ident_3=""/>
+      <option xml:id="exp_option_7" nullable="true" first="s_4" last="s_4" follow:s_4="">
+        <nonterminal name="s" xml:id="s_4" nullable="false" first="s_4" last="s_4" follow:s_4=""/>
+      </option>
+      <option xml:id="exp_option_8" nullable="true" first="visible_1" last="visible_1" follow:visible_1="">
+        <nonterminal mark="@" name="visible" xml:id="visible_1" nullable="false"
+		     first="visible_1" last="visible_1" follow:visible_1=""/>
+      </option>
+    </alt>
+  </rule>
+  <rule mark="@"
+	name="visible"
+	xml:id="visible"
+	nullable="false"
+	first="STAR_1"
+	last="STAR_1"
+	follow:STAR_1="">
+    <alt xml:id="exp_alt_16" nullable="false" first="STAR_1" last="STAR_1" follow:STAR_1="">
+      <nonterminal mark="-" name="STAR" xml:id="STAR_1" nullable="false"
+		   first="STAR_1" last="STAR_1" follow:STAR_1=""/>
+    </alt>
+  </rule>
+
+  
+  <comment>HEXMARK and STAR are handled specially. Literal value
+  is retained, nonterminal is hidden.  And for HEXMARK,
+  no trailing space.</comment>
+  
+  <rule mark="-"
+	name="STAR"
+	xml:id="STAR"
+	nullable="false"
+	first="_t_40"
+	last=""
+	follow:_t_40=""
+	>
+    <alt xml:id="exp_alt_211" nullable="false" first="_t_40" last="" follow:_t_40="">
+      <literal string="*" xml:id="_t_40" nullable="false" first="_t_40" last="_t_40"
+	       follow:_t_40="" regex="\*"/>
+      <ap:error xmlns:ap="http://blackmesatech.com/2019/iXML/Aparecium" id="ap:tbd35">
+        <desc>Element option with unexpected content:</desc>
+        <option>
+          <nonterminal name="s"/>
+          <comment>when not used as multiplication operator</comment>
+        </option>
+      </ap:error>
+    </alt>
+  </rule>
+</temp>

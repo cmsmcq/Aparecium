@@ -1,0 +1,60 @@
+<timingdata xmlns:t="http://blackmesatech.com/2022/iXML/test-harness">
+  <p>Gathered from a-star doubling test catalog 2022-07-14.</p>
+  <p>Times in milliseconds as reported by BaseX prof:track() on the call
+  to ap:parse-string-with-compiled-grammar().</p>
+  <p>For each positive test case in each series, the ratio of its time
+  to the preceding positive case in the series is given, and similarly
+  for the negative test cases.</p>
+  <p>It looks as if a quadratic term comes to dominate the others as
+  input rises about a thousand characters or so.</p>
+
+  <group>
+    <parsetime name="P-0" t:parsetime="27.36"/>
+    <parsetime name="N-0" t:parsetime="27.54"/>
+    
+    <parsetime name="Pb00" t:parsetime="27.27" ratio="0.9967105263157895"/>
+    <parsetime name="Nb00" t:parsetime="27.18" ratio="0.9869281045751634"/>
+    
+    <parsetime name="Pb01" t:parsetime="27.45" ratio="1.0066006600660067"/>
+    <parsetime name="Nb01" t:parsetime="27.72" ratio="1.019867549668874"/>
+    
+    <parsetime name="Pb02" t:parsetime="27.71" ratio="1.009471766848816"/>
+    <parsetime name="Nb02" t:parsetime="27.91" ratio="1.006854256854257"/>
+    
+    <parsetime name="Pb03" t:parsetime="28.62" ratio="1.0328401299169976"/>
+    <parsetime name="Nb03" t:parsetime="28.45" ratio="1.0193479039770692"/>
+    
+    <parsetime name="Pb04" t:parsetime="29.24" ratio="1.0216631726065688"/>
+    <parsetime name="Nb04" t:parsetime="29.69" ratio="1.043585237258348"/>
+    
+    <parsetime name="Pb05" t:parsetime="35.29" ratio="1.2069083447332423"/>
+    <parsetime name="Nb05" t:parsetime="32.91" ratio="1.1084540249242167"/>
+    
+    <parsetime name="Pb06" t:parsetime="51.42" ratio="1.4570699914990084"/>
+    <parsetime name="Nb06" t:parsetime="44.51" ratio="1.3524764509267702"/>
+    
+    <parsetime name="Pb07" t:parsetime="107.87" ratio="2.0978218591987554"/>
+    <parsetime name="Nb07" t:parsetime="82.35" ratio="1.8501460345989664"/>
+    
+    <parsetime name="Pb08" t:parsetime="323.75" ratio="3.0012978585334196"/>
+    <parsetime name="Nb08" t:parsetime="204.89" ratio="2.4880388585306616"/>
+    
+    <parsetime name="Pb09" t:parsetime="945.42" ratio="2.920216216216216"/>
+    <parsetime name="Nb09" t:parsetime="610.5" ratio="2.9796476157938407"/>
+    
+    <parsetime name="Pb10" t:parsetime="3206.17" ratio="3.3912652577690343"/>
+    <parsetime name="Nb10" t:parsetime="2063.49" ratio="3.3799999999999994"/>
+    
+    <parsetime name="Pb11" t:parsetime="12905.95" ratio="4.025348000885792"/>
+    <parsetime name="Nb11" t:parsetime="7990.43" ratio="3.8722891799814882"/>
+    
+    <parsetime name="Pb12" t:parsetime="69189.7" ratio="5.361069894118604"/>
+    <parsetime name="Nb12" t:parsetime="40736.73" ratio="5.098189959739338"/>
+    
+    <parsetime name="Pb13" t:parsetime="358793.68" ratio="5.185651621556388"/>
+    <parsetime name="Nb13" t:parsetime="206885.2" ratio="5.078591236950045"/>
+    
+    <parsetime name="Pb14" t:parsetime="600001.2" ratio="1.672273603035594"/>
+    <parsetime name="Nb14" t:parsetime="600018.54" ratio="2.900248736980702"/>
+  </group>
+</timingdata>

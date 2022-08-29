@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<locatingRules xmlns="http://thaiopensource.com/ns/locating-rules/1.0">
+  <uri resource="all-tests-catalog.xml" typeId="Invisible XML Test Catalog (ixml)"/>
+  <uri resource="stratum-E-2-catalog.xml" typeId="Invisible XML Test Catalog (ixml)"/>
+</locatingRules>

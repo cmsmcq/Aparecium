@@ -1,0 +1,35 @@
+<tc:test-catalog xmlns:tc="https://github.com/invisibleXML/ixml/test-catalog"
+		 xmlns:ixml="http://invisiblexml.org/NS"
+		 name="E3-kilo"
+		 release-date="2022-08-10"
+		 >
+  <tc:description>
+    <tc:p>A collection of tests which (at the outset of an effort to
+    improve performance) run in less than ten thousand seconds
+    (so: in a single-digit number of kiloseconds).</tc:p>
+  </tc:description>
+
+  <tc:test-set name="xpath">
+    <tc:created by="SP" on="2021-12-16"/>
+    <tc:ixml-grammar-ref href="../../../../cmsmcq-ixml/tests/correct/xpath.ixml"/>
+    <tc:test-case name="xpath">
+      <tc:created by="SP" on="2021-12-16"/>
+      <tc:modified by="MSM" on="2021-12-30"
+		   change="remove trailing whitespace from input"/>
+      <tc:modified by="MSM" on="2021-01-01"
+		   change="mark as not-a-sentence"/>
+      <tc:description>
+	<tc:p>The input is <tc:code>a[.!='']</tc:code> but the grammar does
+	not provide for predicates.  So although the input is a
+	perfectly fine XPath expression, it is not a sentence in the
+	language defined by the grammar specified for the test.</tc:p>
+      </tc:description>
+      <tc:test-string-ref href="../../../../cmsmcq-ixml/tests/correct/xpath.inp"/>
+      <tc:result>
+	<tc:assert-not-a-sentence/>
+	<!-- <assert-xml-ref href="xpath.output.xml"/> -->
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>  
+  
+</tc:test-catalog>

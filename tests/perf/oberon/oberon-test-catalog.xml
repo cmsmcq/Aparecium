@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tc:test-catalog xmlns:tc="https://github.com/invisibleXML/ixml/test-catalog"
+		 xmlns:ixml="http://invisiblexml.org/NS"
+		 name="Oberon-performance-tests"
+		 release-date="2022-08-28"
+		 >
+  <tc:description>
+    <tc:p>A collection of tests for use in measuring performance
+    of an invisible XML processor.</tc:p>
+  </tc:description>
+ 
+  <tc:test-set name="Oberon">
+    <tc:created by="cmsmcq" on="2022-08-25"/>
+    <tc:description>
+      <tc:p>The grammar is an edited translation of Wirth's grammar.
+      The test cases are drawn from materials available from
+      Project Oberon 2013.</tc:p>
+    </tc:description>
+   
+    <!-- the real grammar: -->
+    <!--
+    <tc:ixml-grammar-ref href="../../../../cmsmcq-ixml/samples/Oberon/Grammars/Oberon.ixml"/>
+    -->
+
+    <!-- a temporary stopgap -->
+    <!-- <tc:vxml-grammar-ref href="out/Oberon.ixml.runon.xml"/> -->
+    <tc:vxml-grammar-ref href="out/Oberon.aparecium.ixml.xml"/>
+
+    <!-- full, unreduced parse tree:
+    <tc:ixml-grammar-ref href="../../../../cmsmcq-ixml/samples/XPath/XPath.ixml"/>
+    -->
+
+    <tc:grammar-test>
+      <tc:result>
+	<tc:assert-xml-ref href="out/Oberon.ixml.runon.xml"/>
+      </tc:result>
+    </tc:grammar-test>
+
+    <tc:test-case name="ORB">
+      <tc:created on="2022-08-28" by="cmsmcq"/>
+      <tc:test-string-ref
+	  href="../../../../cmsmcq-ixml/samples/Oberon/Project-Oberon-2013-materials/ORB.Mod.txt"/>
+      <tc:result>
+	<tc:assert-xml-ref href="out/ORB.Mod.txt.oberon.xml"/>
+      </tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="ORG">
+      <tc:created on="2022-08-28" by="cmsmcq"/>
+      <tc:test-string-ref
+	  href="../../../../cmsmcq-ixml/samples/Oberon/Project-Oberon-2013-materials/ORG.Mod.txt"/>
+      <tc:result>
+	<tc:assert-xml-ref href="out/ORG.Mod.txt.oberon.xml"/>
+      </tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="ORP">
+      <tc:created on="2022-08-28" by="cmsmcq"/>
+      <tc:test-string-ref
+	  href="../../../../cmsmcq-ixml/samples/Oberon/Project-Oberon-2013-materials/ORP.Mod.txt"/>
+      <tc:result>
+	<tc:assert-xml-ref href="out/ORP.Mod.txt.oberon.xml"/>
+      </tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="ORS">
+      <tc:created on="2022-08-28" by="cmsmcq"/>
+      <tc:test-string-ref
+	  href="../../../../cmsmcq-ixml/samples/Oberon/Project-Oberon-2013-materials/ORS.Mod.txt"/>
+      <tc:result>
+	<tc:assert-xml-ref href="out/ORS.Mod.txt.oberon.xml"/>
+      </tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="ORTool">
+      <tc:created on="2022-08-28" by="cmsmcq"/>
+      <tc:test-string-ref
+	  href="../../../../cmsmcq-ixml/samples/Oberon/Project-Oberon-2013-materials/ORTool.Mod.txt"/>
+      <tc:result>
+	<tc:assert-xml-ref href="out/ORTool.Mod.txt.oberon.xml"/>
+      </tc:result>
+    </tc:test-case>
+    
+  </tc:test-set>
+  
+</tc:test-catalog>

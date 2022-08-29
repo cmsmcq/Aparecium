@@ -1,0 +1,1206 @@
+<collection>
+  <p>This collection of XPath expressions was made 10 August 2022
+  by querying the @select attribute in Gingersnap/src/*.xsl, using
+  the following query:
+  <eg><![CDATA[for $e in //@select
+  let $s := string($e),
+      $len := string-length(normalize-space($s))
+  group by $s
+  order by count($e) descending, $len[1] ascending, count($e) descending
+  return <xpath n="{count($e)}" len="{$len[1]}">{$s}</xpath>
+  ]]></eg>
+  </p>
+  
+  <xpath n="134" len="1">.</xpath>
+  
+  <xpath n="44" len="18">current-dateTime()</xpath>
+  <xpath n="40" len="2">@*</xpath>
+
+  <xpath n="32" len="8">$grammar</xpath>
+
+  <xpath n="21" len="2">()</xpath>
+  <xpath n="20" len="5">@name</xpath>
+  
+  <xpath n="16" len="9">$lsStates</xpath>
+  <xpath n="15" len="7">false()</xpath>
+  <xpath n="14" len="1">*</xpath>
+  <xpath n="13" len="11">base-uri(/)</xpath>
+  <xpath n="12" len="3">'-'</xpath>
+  <xpath n="12" len="7">$nmDest</xpath>
+  <xpath n="12" len="8">$lsFinal</xpath>
+  <xpath n="12" len="20">concat('_more_', $N)</xpath>
+  <xpath n="11" len="2">$G</xpath>
+  <xpath n="11" len="2">$n</xpath>
+  <xpath n="11" len="4">$acc</xpath>
+  <xpath n="11" len="13">string(@name)</xpath>
+  <xpath n="10" len="2">$N</xpath>
+  <xpath n="10" len="2">$k</xpath>
+  <xpath n="10" len="8">$fissile</xpath>
+  <xpath n="10" len="12">$non-fissile</xpath>
+  <xpath n="10" len="13">'dummy value'</xpath>
+  
+  <xpath n="9" len="6">true()</xpath>
+  <xpath n="9" len="6">name()</xpath>
+  <xpath n="9" len="26">gt:generate-nonterminal(.)</xpath>
+  <xpath n="8" len="2">$E</xpath>
+  <xpath n="8" len="20">* except nonterminal</xpath>
+  <xpath n="8" len="22">$G/rule[@name = $name]</xpath>
+  <xpath n="8" len="26">nonterminal/@name/string()</xpath>
+  <xpath n="7" len="3"> '-' </xpath>
+  <xpath n="7" len="12">$lnmPolarity</xpath>
+  <xpath n="7" len="15">@* except @gl:*</xpath>
+  <xpath n="6" len="5">$when</xpath>
+  <xpath n="6" len="9">$rule/alt</xpath>
+  <xpath n="6" len="10">$alpha/alt</xpath>
+  <xpath n="6" len="11">$lnChildren</xpath>
+  <xpath n="6" len="12">$lnmCoverage</xpath>
+  <xpath n="6" len="15">'tc-flattening'</xpath>
+  <xpath n="6" len="20">ancestor::rule/@name</xpath>
+  
+  <xpath n="5" len="2">$s</xpath>
+  <xpath n="5" len="3">$id</xpath>
+  <xpath n="5" len="4">rule</xpath>
+  <xpath n="5" len="4">$pos</xpath>
+  <xpath n="5" len="6">$queue</xpath>
+  <xpath n="5" len="6">$round</xpath>
+  <xpath n="5" len="6">$sFrom</xpath>
+  <xpath n="5" len="10">base-uri()</xpath>
+  <xpath n="5" len="10">$this-task</xpath>
+  <xpath n="5" len="11">base-uri(.)</xpath>
+  <xpath n="5" len="13">child::node()</xpath>
+  
+  <xpath n="4" len="1">1</xpath>
+  <xpath n="4" len="2">$c</xpath>
+  <xpath n="4" len="3">$nt</xpath>
+  <xpath n="4" len="3">sep</xpath>
+  <xpath n="4" len="4">$who</xpath>
+  <xpath n="4" len="5">@code</xpath>
+  <xpath n="4" len="5">'arc'</xpath>
+  <xpath n="4" len="6"> '#all' </xpath>
+  <xpath n="4" len="6">$start</xpath>
+  <xpath n="4" len="6">node()</xpath>
+  <xpath n="4" len="6">$affix</xpath>
+  <xpath n="4" len="8">$linkage</xpath>
+  <xpath n="4" len="8">$lnUndef</xpath>
+  <xpath n="4" len="9">$filename</xpath>
+  <xpath n="4" len="10">'positive'</xpath>
+  <xpath n="4" len="10">'negative'</xpath>
+  <xpath n="4" len="11">$leAll-arcs</xpath>
+  <xpath n="4" len="11">$task/@name</xpath>
+  <xpath n="4" len="11">$live-paths</xpath>
+  <xpath n="4" len="11">$new-ngused</xpath>
+  <xpath n="4" len="13">lower-case(.)</xpath>
+  <xpath n="4" len="14">@name/string()</xpath>
+  <xpath n="4" len="14">gt:nodename(.)</xpath>
+  <xpath n="4" len="18">$stylesheet, $doc0</xpath>
+  <xpath n="4" len="20">concat(@mark, @name)</xpath>
+  <xpath n="4" len="20">@* except @gt:ranges</xpath>
+  <xpath n="4" len="21">(* except comment)[1]</xpath>
+  <xpath n="4" len="22">string-join($ls, '; ')</xpath>
+  <xpath n="4" len="23">following-sibling::*[1]</xpath>
+  <xpath n="4" len="27">/ixml/rule/alt[nonterminal]</xpath>
+  <xpath n="4" len="30">'Recursive transition network'</xpath>
+  <xpath n="4" len="33">1 + count(preceding-sibling::alt)</xpath>
+  <xpath n="4" len="44">concat('    ',  gt:nodedecl(string(@name)),  ';')</xpath>
+  
+  <xpath n="3" len="2"> '' </xpath>
+  <xpath n="3" len="2">$T</xpath>
+  <xpath n="3" len="3">$r0</xpath>
+  <xpath n="3" len="4">$nmQ</xpath>
+  <xpath n="3" len="4">$new</xpath>
+  <xpath n="3" len="4">$sTo</xpath>
+  <xpath n="3" len="5">$code</xpath>
+  <xpath n="3" len="5">/ixml</xpath>
+  <xpath n="3" len="5">$name</xpath>
+  <xpath n="3" len="6">@tmark</xpath>
+  <xpath n="3" len="6">alts/*</xpath>
+  <xpath n="3" len="6">$nmArc</xpath>
+  <xpath n="3" len="6">$lr[1]</xpath>
+  <xpath n="3" len="7"> false() </xpath>
+  <xpath n="3" len="8">option/*</xpath>
+  <xpath n="3" len="8">$maxfail</xpath>
+  <xpath n="3" len="9">$queue[1]</xpath>
+  <xpath n="3" len="9">$new-rule</xpath>
+  <xpath n="3" len="9">$coverage</xpath>
+  <xpath n="3" len="9">$polarity</xpath>
+  <xpath n="3" len="9">$nmSource</xpath>
+  <xpath n="3" len="9">$basename</xpath>
+  <xpath n="3" len="11">nonterminal</xpath>
+  <xpath n="3" len="11">$leLiterals</xpath>
+  <xpath n="3" len="11">'arc-final'</xpath>
+  <xpath n="3" len="13">$follow-state</xpath>
+  <xpath n="3" len="13">count($lsNew)</xpath>
+  <xpath n="3" len="13">local-name(.)</xpath>
+  <xpath n="3" len="14">$easy-solution</xpath>
+  <xpath n="3" len="14">local-name($E)</xpath>
+  <xpath n="3" len="14">$lr[1], $lr[2]</xpath>
+  <xpath n="3" len="14">count($ngused)</xpath>
+  <xpath n="3" len="15">@* except @gt:*</xpath>
+  <xpath n="3" len="15">$starting-names</xpath>
+  <xpath n="3" len="15">$task/@basename</xpath>
+  <xpath n="3" len="15">gt:serialize(.)</xpath>
+  <xpath n="3" len="15">d2x:d2x($lr[1])</xpath>
+  <xpath n="3" len="16"> '#non-recursive' </xpath>
+  <xpath n="3" len="17">count($lsReached)</xpath>
+  <xpath n="3" len="18">$keep-non-fissiles</xpath>
+  <xpath n="3" len="18">current-group()[1]</xpath>
+  <xpath n="3" len="19">concat('_', $g, $n)</xpath>
+  <xpath n="3" len="21">$queue/@name/string()</xpath>
+  <xpath n="3" len="23">$lnRef[not(. = $lnDef)]</xpath>
+  <xpath n="3" len="23">$rhs/(* except comment)</xpath>
+  <xpath n="3" len="25">$pipeline/(* except desc)</xpath>
+  <xpath n="3" len="25">@* except (@mark, @tmark)</xpath>
+  <xpath n="3" len="28">$e/*[gt:fIsexpression(.)][1]</xpath>
+  <xpath n="3" len="28">$lsStates[not(. = $lsFinal)]</xpath>
+  <xpath n="3" len="28">codepoints-to-string($lr[1])</xpath>
+  <xpath n="3" len="32">$lnChildren[gt:fIsexpression(.)]</xpath>
+  <xpath n="3" len="38"> 'https://github.com/cmsmcq/ixml-tests' </xpath>
+  <xpath n="3" len="49">($E/@gt:expname/string(),      $E/@xml:id/string())[1]</xpath>
+  <xpath n="3" len="51">rule[      alt[empty(* except comment)]      ]/@name/string()</xpath>
+  <xpath n="3" len="54">$leCandidates         [index-of($leCandidates/@name,@name)[1]]</xpath>
+  <xpath n="3" len="185">if ($gi eq 'alts')          then 'or'          else if ($gi eq 'alt')          then 'xx'          else if ($gi eq 'repeat0')          then 'star'          else if ($gi eq 'repeat1')          then 'plus'          else if ($gi eq 'option')          then 'opt'          else $gi</xpath>
+  
+  <xpath n="2" len="1">0</xpath>
+  <xpath n="2" len="1">2</xpath>
+  <xpath n="2" len="1">3</xpath>
+  <xpath n="2" len="2">/*</xpath>
+  <xpath n="2" len="2">20</xpath>
+  <xpath n="2" len="3"> '"' </xpath>
+  <xpath n="2" len="3"> "'" </xpath>
+  <xpath n="2" len="3"> '∅' </xpath>
+  <xpath n="2" len="3">$lr</xpath>
+  <xpath n="2" len="3">$eT</xpath>
+  <xpath n="2" len="3">$q0</xpath>
+  <xpath n="2" len="3">@to</xpath>
+  <xpath n="2" len="4">$doc</xpath>
+  <xpath n="2" len="4">$ePT</xpath>
+  <xpath n="2" len="4">$seq</xpath>
+  <xpath n="2" len="4">$le0</xpath>
+  <xpath n="2" len="5">$leCh</xpath>
+  <xpath n="2" len="5"> ' | ' </xpath>
+  <xpath n="2" len="5">$eAST</xpath>
+  <xpath n="2" len="5">$lsFS</xpath>
+  <xpath n="2" len="5">$desc</xpath>
+  <xpath n="2" len="5">$doc0</xpath>
+  <xpath n="2" len="5">$doc1</xpath>
+  <xpath n="2" len="5">@from</xpath>
+  <xpath n="2" len="6">$R/sep</xpath>
+  <xpath n="2" len="6">'#all'</xpath>
+  <xpath n="2" len="6">$trace</xpath>
+  <xpath n="2" len="6">$lsAcc</xpath>
+  <xpath n="2" len="6">$le[1]</xpath>
+  <xpath n="2" len="6"> true() </xpath>
+  <xpath n="2" len="7">comment</xpath>
+  <xpath n="2" len="7"> 'state' </xpath>
+  <xpath n="2" len="7">@xml:id</xpath>
+  <xpath n="2" len="7">'state'</xpath>
+  <xpath n="2" len="7">rule[1]</xpath>
+  <xpath n="2" len="7">$lrA[1]</xpath>
+  <xpath n="2" len="7">$lrA[2]</xpath>
+  <xpath n="2" len="7">$lrB[1]</xpath>
+  <xpath n="2" len="7">$lrB[2]</xpath>
+  <xpath n="2" len="7">$tokens</xpath>
+  <xpath n="2" len="7">$cFails</xpath>
+  <xpath n="2" len="7">$lsAcc2</xpath>
+  <xpath n="2" len="7">$ws-ref</xpath>
+  <xpath n="2" len="7">$factor</xpath>
+  <xpath n="2" len="8">$e/@name</xpath>
+  <xpath n="2" len="8">$cp, $cp</xpath>
+  <xpath n="2" len="8">$lnUnref</xpath>
+  <xpath n="2" len="8">$sRanges</xpath>
+  <xpath n="2" len="8">$T/@name</xpath>
+  <xpath n="2" len="8">../@name</xpath>
+  <xpath n="2" len="8"> 'string' </xpath>
+  <xpath n="2" len="9">$starters</xpath>
+  <xpath n="2" len="9">@gt:affix</xpath>
+  <xpath n="2" len="9">$ruleGen1</xpath>
+  <xpath n="2" len="9">$ruleGen2</xpath>
+  <xpath n="2" len="9">$ruleGen3</xpath>
+  <xpath n="2" len="9">$lidFirst</xpath>
+  <xpath n="2" len="9">$leRanges</xpath>
+  <xpath n="2" len="9"> 'pattern' </xpath>
+  <xpath n="2" len="10">$SEP/*, $E</xpath>
+  <xpath n="2" len="10">$new-affix</xpath>
+  <xpath n="2" len="10">$omega/alt</xpath>
+  <xpath n="2" len="10">$round + 1</xpath>
+  <xpath n="2" len="10">count($lr)</xpath>
+  <xpath n="2" len="10">position()</xpath>
+  <xpath n="2" len="10">$hex-value</xpath>
+  <xpath n="2" len="10">@rtn:stack</xpath>
+  <xpath n="2" len="11">$idReferrer</xpath>
+  <xpath n="2" len="11">name($step)</xpath>
+  <xpath n="2" len="11">$newgrammar</xpath>
+  <xpath n="2" len="11">$nmNew-from</xpath>
+  <xpath n="2" len="11">$lr[last()]</xpath>
+  <xpath n="2" len="11">count($acc)</xpath>
+  <xpath n="2" len="11">child::*[1]</xpath>
+  <xpath n="2" len="11">count($new)</xpath>
+  <xpath n="2" len="11">$max-passes</xpath>
+  <xpath n="2" len="11">$whitespace</xpath>
+  <xpath n="2" len="12">@mark, @name</xpath>
+  <xpath n="2" len="12">@gt:basename</xpath>
+  <xpath n="2" len="12">head($queue)</xpath>
+  <xpath n="2" len="12">count($used)</xpath>
+  <xpath n="2" len="12">$ln[self::*]</xpath>
+  <xpath n="2" len="12">* except sep</xpath>
+  <xpath n="2" len="13">$matching-RHS</xpath>
+  <xpath n="2" len="14">$leOverlapping</xpath>
+  <xpath n="2" len="14">$E, $SEP/*, $E</xpath>
+  <xpath n="2" len="14">$used, $ngused</xpath>
+  <xpath n="2" len="14">$leNewchildren</xpath>
+  <xpath n="2" len="15">string(@xml:id)</xpath>
+  <xpath n="2" len="15">$omega-dest/alt</xpath>
+  <xpath n="2" len="15">current-group()</xpath>
+  <xpath n="2" len="15">$extended-paths</xpath>
+  <xpath n="2" len="15">generate-id($e)</xpath>
+  <xpath n="2" len="15">@* except @mark</xpath>
+  <xpath n="2" len="16">$lePositive-arcs</xpath>
+  <xpath n="2" len="16">$leNegative-arcs</xpath>
+  <xpath n="2" len="16">$paths-to-extend</xpath>
+  <xpath n="2" len="16">gt:nodename($q0)</xpath>
+  <xpath n="2" len="16">* except comment</xpath>
+  <xpath n="2" len="17">alt/child::node()</xpath>
+  <xpath n="2" len="17">repeat0 | repeat1</xpath>
+  <xpath n="2" len="17">count($configdoc)</xpath>
+  <xpath n="2" len="17">$task/@old-states</xpath>
+  <xpath n="2" len="17">$new-follow-state</xpath>
+  <xpath n="2" len="18">$task/@name,     @mark</xpath>
+  <xpath n="2" len="18">count($leIncoming)</xpath>
+  <xpath n="2" len="18">count($live-paths)</xpath>
+  <xpath n="2" len="18">count($dead-paths)</xpath>
+  <xpath n="2" len="18">$lsReached, $lsNew</xpath>
+  <xpath n="2" len="18">$eFactor/@follow:*</xpath>
+  <xpath n="2" len="19">concat(@name, '_0')</xpath>
+  <xpath n="2" len="19">concat($f, '-', $t)</xpath>
+  <xpath n="2" len="19">string($step/@rule)</xpath>
+  <xpath n="2" len="19">rule/@name/string()</xpath>
+  <xpath n="2" len="19">$new except $leUsed</xpath>
+  <xpath n="2" len="20">gt:lnDescXGN(.., $n)</xpath>
+  <xpath n="2" len="20">count($active-paths)</xpath>
+  <xpath n="2" len="21"> 'right-factor-result' </xpath>
+  <xpath n="2" len="21">rule[@name eq $start]</xpath>
+  <xpath n="2" len="21">($n = $lnDescendants)</xpath>
+  <xpath n="2" len="21">($this-task, $leDone)</xpath>
+  <xpath n="2" len="21"> 'Gingersnap (CMSMcQ)' </xpath>
+  <xpath n="2" len="21">gt:extract-used($le0)</xpath>
+  <xpath n="2" len="21">$passes-remaining - 1</xpath>
+  <xpath n="2" len="21">(* except comment)[2]</xpath>
+  <xpath n="2" len="22">$G/rule/@name/string()</xpath>
+  <xpath n="2" len="22">$leDone/@name/string()</xpath>
+  <xpath n="2" len="22">count(current-group())</xpath>
+  <xpath n="2" len="22">count($extended-paths)</xpath>
+  <xpath n="2" len="22">$seq[position() le $n]</xpath>
+  <xpath n="2" len="22">gt:find-separator($le)</xpath>
+  <xpath n="2" len="23">'regular approximation'</xpath>
+  <xpath n="2" len="23">$lnDef[not(. = $lnRef)]</xpath>
+  <xpath n="2" len="24">gt:lnChildrenXGN(.., $n)</xpath>
+  <xpath n="2" len="25">concat('\p{', @code, '}')</xpath>
+  <xpath n="2" len="25">string-join($lsNew, ', ')</xpath>
+  <xpath n="2" len="25">gt:extract-elements($le0)</xpath>
+  <xpath n="2" len="26">tokenize(@gl:first, '\s+')</xpath>
+  <xpath n="2" len="26">doc('unicode-classes.xml')</xpath>
+  <xpath n="2" len="26">codepoints-to-string($lcp)</xpath>
+  <xpath n="2" len="26">subsequence($tokens, $pos)</xpath>
+  <xpath n="2" len="27">$R/(* except (sep|comment))</xpath>
+  <xpath n="2" len="27">parent::rule/@name/string()</xpath>
+  <xpath n="2" len="27">$arc/(* except nonterminal)</xpath>
+  <xpath n="2" len="27">count(($lsReached, $lsNew))</xpath>
+  <xpath n="2" len="29">random-number-generator(1712)</xpath>
+  <xpath n="2" len="30">gt:merge-element-ranges($leCh)</xpath>
+  <xpath n="2" len="30">gt:lnDescXGNAQ($G, $n, (), $n)</xpath>
+  <xpath n="2" len="30">$leChildren[self::nonterminal]</xpath>
+  <xpath n="2" len="31">tokenize($rule/@gl:last, '\s+')</xpath>
+  <xpath n="2" len="31">count($T/descendant-or-self::*)</xpath>
+  <xpath n="2" len="32">$lnCandidates      [ not( . = $acc) ]</xpath>
+  <xpath n="2" len="32">$active-paths except $dead-paths</xpath>
+  <xpath n="2" len="32">concat('    ',  gt:nodedecl(.),  ';')</xpath>
+  <xpath n="2" len="33">@* except (@mark, @tmark), node()</xpath>
+  <xpath n="2" len="35">1 + $max-passes - $passes-remaining</xpath>
+  <xpath n="2" len="36">exists(alt[empty(* except comment)])</xpath>
+  <xpath n="2" len="36">resolve-uri('external', base-uri(/))</xpath>
+  <xpath n="2" len="37">for $a in $e/alt          return gt:string($a)</xpath>
+  <xpath n="2" len="37">comment[not(preceding-sibling::rule)]</xpath>
+  <xpath n="2" len="37">(@gt:base-grammar,         'Test catalog')[1]</xpath>
+  <xpath n="2" len="38">($queue[position() gt 1],       $leNewtasks)</xpath>
+  <xpath n="2" len="41">(32, 55295,    57344, 65533,    65537, 1114111)</xpath>
+  <xpath n="2" len="42">$rule/alt          [(nonterminal/@name = $lsFinal)]</xpath>
+  <xpath n="2" len="42">gt:take-some(current-group(), $save-limit)</xpath>
+  <xpath n="2" len="43">gt:fIsPTrule($rule, $fissile, $non-fissile)</xpath>
+  <xpath n="2" len="44">concat(       "'", @from, "'",        '-',       "'", @to, "'")</xpath>
+  <xpath n="2" len="44">adjust-date-to-timezone(          current-date(),          ())</xpath>
+  <xpath n="2" len="44">for $s in $lsPieces       return tokenize($s, '/')</xpath>
+  <xpath n="2" len="46">gt:generate-nonterminal((repeat0, repeat1)[1])</xpath>
+  <xpath n="2" len="46">$rule/alt          [nonterminal[not(@name = $lsFinal)]]</xpath>
+  <xpath n="2" len="49">($G,          @gt:base-grammar,          '[grammar short-name]')[1]</xpath>
+  <xpath n="2" len="50">concat($left/@gt:trace,          ' + ',          $nmArc,          ' + error')</xpath>
+  <xpath n="2" len="53">string(        adjust-date-to-timezone(        current-date(), ()))</xpath>
+  <xpath n="2" len="60">for $s in $this/@gt:trace/string()       return tokenize($s, '\+')</xpath>
+  <xpath n="2" len="61">concat('    ',  gt:nodedecl(@name/string(), @mark/string()),  ';')</xpath>
+  <xpath n="2" len="62">(@gt:base-grammar,         $G,         base-uri(),         'unidentified grammar'         )[1]</xpath>
+  <xpath n="2" len="62">max(         for $D in $T/descendant::*         return count($D/ancestor::*)         )</xpath>
+  <xpath n="2" len="64">$leChildren[self::literal      or self::inclusion      or self::exclusion]</xpath>
+  <xpath n="2" len="71">for $e in $used       return       if (empty($e intersect $leUsed))       then $e       else ()</xpath>
+  <xpath n="2" len="75">distinct-values(      $G/rule[@name=$n]/descendant::nonterminal      /@name/string())</xpath>
+  <xpath n="2" len="79">distinct-values(      $G/rule[@name=$queue]/descendant::nonterminal      /@name/string())</xpath>
+  <xpath n="2" len="80">if (empty($lnNew))       then $acc       else gt:lnDescXGNAQ($G, $n, ($acc, $lnNew), $lnNew)</xpath>
+  
+  <xpath n="1" len="1">i</xpath>
+  <xpath n="1" len="1">o</xpath>
+  <xpath n="1" len="2">$e</xpath>
+  <xpath n="1" len="2"> 10 </xpath>
+  <xpath n="1" len="2">$r</xpath>
+  <xpath n="1" len="2">40</xpath>
+  <xpath n="1" len="2">10</xpath>
+  <xpath n="1" len="2">15</xpath>
+  <xpath n="1" len="3"> "'"</xpath>
+  <xpath n="1" len="3"> '"'</xpath>
+  <xpath n="1" len="3"> '😖' </xpath>
+  <xpath n="1" len="3">i/*</xpath>
+  <xpath n="1" len="3">$s0</xpath>
+  <xpath n="1" len="3"> '·' </xpath>
+  <xpath n="1" len="3">alt</xpath>
+  <xpath n="1" len="3">$ln</xpath>
+  <xpath n="1" len="3"> '*' </xpath>
+  <xpath n="1" len="3"> '+' </xpath>
+  <xpath n="1" len="3">$op</xpath>
+  <xpath n="1" len="3">$eG</xpath>
+  <xpath n="1" len="3">100</xpath>
+  <xpath n="1" len="3"> 'ǀ' </xpath>
+  <xpath n="1" len="3"> 'i' </xpath>
+  <xpath n="1" len="3">'f'</xpath>
+  <xpath n="1" len="3">$la</xpath>
+  <xpath n="1" len="3">$qt</xpath>
+  <xpath n="1" len="3">'s'</xpath>
+  <xpath n="1" len="3"> '9' </xpath>
+  <xpath n="1" len="3"> 'A' </xpath>
+  <xpath n="1" len="3"> 'D' </xpath>
+  <xpath n="1" len="4">$lrA</xpath>
+  <xpath n="1" len="4"> ', ' </xpath>
+  <xpath n="1" len="4">$le1</xpath>
+  <xpath n="1" len="4">$ttl</xpath>
+  <xpath n="1" len="4">$sN1</xpath>
+  <xpath n="1" len="4"> 'LR' </xpath>
+  <xpath n="1" len="4">$dir</xpath>
+  <xpath n="1" len="4"> 'Zs' </xpath>
+  <xpath n="1" len="4">$lit</xpath>
+  <xpath n="1" len="5"> 'top' </xpath>
+  <xpath n="1" len="5">child</xpath>
+  <xpath n="1" len="5">$task</xpath>
+  <xpath n="1" len="5"> '-·.' </xpath>
+  <xpath n="1" len="5"> '___' </xpath>
+  <xpath n="1" len="5">$sCov</xpath>
+  <xpath n="1" len="5">$sHex</xpath>
+  <xpath n="1" len="5">@test</xpath>
+  <xpath n="1" len="5">$r0/*</xpath>
+  <xpath n="1" len="5">$rule</xpath>
+  <xpath n="1" len="5"> 'pre' </xpath>
+  <xpath n="1" len="5">$used</xpath>
+  <xpath n="1" len="5">$tree</xpath>
+  <xpath n="1" len="5">*/sep</xpath>
+  <xpath n="1" len="6"> '#yes' </xpath>
+  <xpath n="1" len="6"> 'call' </xpath>
+  <xpath n="1" len="6">$e/sep</xpath>
+  <xpath n="1" len="6">$tmark</xpath>
+  <xpath n="1" len="6">$leSib</xpath>
+  <xpath n="1" len="6">$fKeep</xpath>
+  <xpath n="1" len="6">$lnRef</xpath>
+  <xpath n="1" len="6"> 'stub' </xpath>
+  <xpath n="1" len="6">$stack</xpath>
+  <xpath n="1" len="6">$alpha</xpath>
+  <xpath n="1" len="6">$leRec</xpath>
+  <xpath n="1" len="6">$lr[2]</xpath>
+  <xpath n="1" len="6">$lr[3]</xpath>
+  <xpath n="1" len="6">$lr[4]</xpath>
+  <xpath n="1" len="6">$newHi</xpath>
+  <xpath n="1" len="6">$loops</xpath>
+  <xpath n="1" len="6">$r0/@*</xpath>
+  <xpath n="1" len="6">$rhs/*</xpath>
+  <xpath n="1" len="6"> 'blue' </xpath>
+  <xpath n="1" len="6">$token</xpath>
+  <xpath n="1" len="7">$lrExcl</xpath>
+  <xpath n="1" len="7">$result</xpath>
+  <xpath n="1" len="7">$lrRule</xpath>
+  <xpath n="1" len="7">$leAlts</xpath>
+  <xpath n="1" len="7">$config</xpath>
+  <xpath n="1" len="7">$rule/*</xpath>
+  <xpath n="1" len="7">@string</xpath>
+  <xpath n="1" len="7">$whoami</xpath>
+  <xpath n="1" len="7">$eTrace</xpath>
+  <xpath n="1" len="7">$nmJoin</xpath>
+  <xpath n="1" len="7">@expect</xpath>
+  <xpath n="1" len="7">@result</xpath>
+  <xpath n="1" len="7"> 'first' </xpath>
+  <xpath n="1" len="7">$new[1]</xpath>
+  <xpath n="1" len="7">$height</xpath>
+  <xpath n="1" len="7">name(.)</xpath>
+  <xpath n="1" len="7">$ngused</xpath>
+  <xpath n="1" len="7">./alt/*</xpath>
+  <xpath n="1" len="7">$source</xpath>
+  <xpath n="1" len="7">$target</xpath>
+  <xpath n="1" len="7">$sep0/*</xpath>
+  <xpath n="1" len="8"> 'return' </xpath>
+  <xpath n="1" len="8">$rhsThat</xpath>
+  <xpath n="1" len="8">$rhsSame</xpath>
+  <xpath n="1" len="8">$rhsDiff</xpath>
+  <xpath n="1" len="8">$nmJoint</xpath>
+  <xpath n="1" len="8">doc($ln)</xpath>
+  <xpath n="1" len="8">$leRules</xpath>
+  <xpath n="1" len="8">@gt:name</xpath>
+  <xpath n="1" len="8">$leUsed0</xpath>
+  <xpath n="1" len="8">$lidLast</xpath>
+  <xpath n="1" len="8">$lsNames</xpath>
+  <xpath n="1" len="8">$SEP, $E</xpath>
+  <xpath n="1" len="8">rule/alt</xpath>
+  <xpath n="1" len="8">'option'</xpath>
+  <xpath n="1" len="8">$factor0</xpath>
+  <xpath n="1" len="9"> 'linkage' </xpath>
+  <xpath n="1" len="9">@rtn:item</xpath>
+  <xpath n="1" len="9">$lrMerged</xpath>
+  <xpath n="1" len="9">$base-uri</xpath>
+  <xpath n="1" len="9">$rulename</xpath>
+  <xpath n="1" len="9">$base-RHS</xpath>
+  <xpath n="1" len="9">$rRHS/alt</xpath>
+  <xpath n="1" len="9">$acc, $lr</xpath>
+  <xpath n="1" len="9">@gt:index</xpath>
+  <xpath n="1" len="9">$ancestor</xpath>
+  <xpath n="1" len="9">string(.)</xpath>
+  <xpath n="1" len="9"> 'block_7' </xpath>
+  <xpath n="1" len="9">$maxdepth</xpath>
+  <xpath n="1" len="9">$T1/@name</xpath>
+  <xpath n="1" len="9">$used-RHS</xpath>
+  <xpath n="1" len="9">$laFollow</xpath>
+  <xpath n="1" len="9">@follow:*</xpath>
+  <xpath n="1" len="9">$children</xpath>
+  <xpath n="1" len="9">$n mod 16</xpath>
+  <xpath n="1" len="10"> '#inherit' </xpath>
+  <xpath n="1" len="10">$rhsThis/*</xpath>
+  <xpath n="1" len="10">$configdoc</xpath>
+  <xpath n="1" len="10">$lsEpsilon</xpath>
+  <xpath n="1" len="10">$ruleStart</xpath>
+  <xpath n="1" len="10">$c idiv $n</xpath>
+  <xpath n="1" len="10">$acc, $lrB</xpath>
+  <xpath n="1" len="10">$acc, $lrA</xpath>
+  <xpath n="1" len="10">$new-rules</xpath>
+  <xpath n="1" len="10">$leUsed666</xpath>
+  <xpath n="1" len="10">$keyed-RHS</xpath>
+  <xpath n="1" len="10">./alts/alt</xpath>
+  <xpath n="1" len="10">$sBoxcolor</xpath>
+  <xpath n="1" len="10">$lidStates</xpath>
+  <xpath n="1" len="10">@gt:ranges</xpath>
+  <xpath n="1" len="10">'trailing'</xpath>
+  <xpath n="1" len="10">$empty-set</xpath>
+  <xpath n="1" len="10">gt:element</xpath>
+  <xpath n="1" len="11">$start-rule</xpath>
+  <xpath n="1" len="11"> 'recursion' </xpath>
+  <xpath n="1" len="11">$rhsThis/@*</xpath>
+  <xpath n="1" len="11"> base-uri(/) </xpath>
+  <xpath n="1" len="11">'rk-subset'</xpath>
+  <xpath n="1" len="11">$leRecipes0</xpath>
+  <xpath n="1" len="11">$leIncoming</xpath>
+  <xpath n="1" len="11">$prefix-RHS</xpath>
+  <xpath n="1" len="11">count($seq)</xpath>
+  <xpath n="1" len="11">($acc,  $lr)</xpath>
+  <xpath n="1" len="11">alts[1]/alt</xpath>
+  <xpath n="1" len="11">$choice/alt</xpath>
+  <xpath n="1" len="11">$le[last()]</xpath>
+  <xpath n="1" len="11"> 'recursive' </xpath>
+  <xpath n="1" len="11">string(@id)</xpath>
+  <xpath n="1" len="11">repeat0/sep</xpath>
+  <xpath n="1" len="11">repeat1/sep</xpath>
+  <xpath n="1" len="11">$first-rule</xpath>
+  <xpath n="1" len="12">gt:string(.)</xpath>
+  <xpath n="1" len="12">*/@gt:ranges</xpath>
+  <xpath n="1" len="12">head($steps)</xpath>
+  <xpath n="1" len="12">tail($steps)</xpath>
+  <xpath n="1" len="12">$task/@affix</xpath>
+  <xpath n="1" len="12">$task/@affix </xpath>
+  <xpath n="1" len="12">$occurrences</xpath>
+  <xpath n="1" len="12">test-set-nnn</xpath>
+  <xpath n="1" len="12">$leTerminals</xpath>
+  <xpath n="1" len="12">$lr[$iIndex]</xpath>
+  <xpath n="1" len="12">d2x:d2x($cp)</xpath>
+  <xpath n="1" len="12">$mark || $nt</xpath>
+  <xpath n="1" len="12">$E, $SEP, $E</xpath>
+  <xpath n="1" len="12">$accumulator</xpath>
+  <xpath n="1" len="13">string(@code)</xpath>
+  <xpath n="1" len="13">$lrComplement</xpath>
+  <xpath n="1" len="13">count($leSib)</xpath>
+  <xpath n="1" len="13">$terminalThat</xpath>
+  <xpath n="1" len="13">$step/@config</xpath>
+  <xpath n="1" len="13">count($stack)</xpath>
+  <xpath n="1" len="13"> 'state-final' </xpath>
+  <xpath n="1" len="13">$eThis-path/* </xpath>
+  <xpath n="1" len="13">($tree, .)[1]</xpath>
+  <xpath n="1" len="13">$lrMinuend[1]</xpath>
+  <xpath n="1" len="13">$lrMinuend[2]</xpath>
+  <xpath n="1" len="13">$baserule/alt</xpath>
+  <xpath n="1" len="13">$lsOld-states</xpath>
+  <xpath n="1" len="13">$le/@follow:*</xpath>
+  <xpath n="1" len="13">'sigma-union'</xpath>
+  <xpath n="1" len="13">@hex/string()</xpath>
+  <xpath n="1" len="13">$nonterminals</xpath>
+  <xpath n="1" len="13">$this-literal</xpath>
+  <xpath n="1" len="13">$lit, $ws-ref</xpath>
+  <xpath n="1" len="13">$ws-ref, $lit</xpath>
+  <xpath n="1" len="13">1 to ($n - 1)</xpath>
+  <xpath n="1" len="13">$sep, $factor</xpath>
+  <xpath n="1" len="14"> 'linkage-stub' </xpath>
+  <xpath n="1" len="14">$cpFrom, $cpTo</xpath>
+  <xpath n="1" len="14">$element-tests</xpath>
+  <xpath n="1" len="14">$lnDescendants</xpath>
+  <xpath n="1" len="14">$nRHS, $lnSeen</xpath>
+  <xpath n="1" len="14">$ruleStart/alt</xpath>
+  <xpath n="1" len="14">count($lsDone)</xpath>
+  <xpath n="1" len="14">$input-grammar</xpath>
+  <xpath n="1" len="14">$new-keyed-RHS</xpath>
+  <xpath n="1" len="14">$nullable-true</xpath>
+  <xpath n="1" len="14">'sigma-ranges'</xpath>
+  <xpath n="1" len="14">$leChildren[1]</xpath>
+  <xpath n="1" len="14">$leChildren[2]</xpath>
+  <xpath n="1" len="14">$codepoints[1]</xpath>
+  <xpath n="1" len="15"> 'grammar-final' </xpath>
+  <xpath n="1" len="15">name(parent::*)</xpath>
+  <xpath n="1" len="15"> 'stack-affixed' </xpath>
+  <xpath n="1" len="15">$nt, $lnm-stack</xpath>
+  <xpath n="1" len="15">@* except @name</xpath>
+  <xpath n="1" len="15">@gt:to/string()</xpath>
+  <xpath n="1" len="15">d2x:d2x($lr[2])</xpath>
+  <xpath n="1" len="15">$function-tests</xpath>
+  <xpath n="1" len="15">gt:serialize(*)</xpath>
+  <xpath n="1" len="15"> 'literal-token' </xpath>
+  <xpath n="1" len="15">'rule-addition'</xpath>
+  <xpath n="1" len="16">concat($n, '_0')</xpath>
+  <xpath n="1" len="16">concat($n, '_f')</xpath>
+  <xpath n="1" len="16">./ancestor::rule</xpath>
+  <xpath n="1" len="16"> 'linkage-return' </xpath>
+  <xpath n="1" len="16"> 'if-stack-empty' </xpath>
+  <xpath n="1" len="16">contains($n,'-')</xpath>
+  <xpath n="1" len="16">'no-config-file'</xpath>
+  <xpath n="1" len="16">('yes', 'no')[1]</xpath>
+  <xpath n="1" len="16">string(../@name)</xpath>
+  <xpath n="1" len="16">$acc, $lrMinuend</xpath>
+  <xpath n="1" len="16">$lrSubtrahend[1]</xpath>
+  <xpath n="1" len="16">$lrSubtrahend[2]</xpath>
+  <xpath n="1" len="16">$left, *, $right</xpath>
+  <xpath n="1" len="16">$rule/alt/node()</xpath>
+  <xpath n="1" len="16">$new-unkeyed-RHS</xpath>
+  <xpath n="1" len="16">$new except $rhs</xpath>
+  <xpath n="1" len="16">$eHead/@follow:*</xpath>
+  <xpath n="1" len="16">$lidReturnstates</xpath>
+  <xpath n="1" len="16">gt:nodename($id)</xpath>
+  <xpath n="1" len="16">'sigma-literals'</xpath>
+  <xpath n="1" len="17">$non-matching-RHS</xpath>
+  <xpath n="1" len="17">$leOverlapping[1]</xpath>
+  <xpath n="1" len="17">concat('#', @hex)</xpath>
+  <xpath n="1" len="17">$left/*, $right/*</xpath>
+  <xpath n="1" len="17">@*, child::node()</xpath>
+  <xpath n="1" len="17">gt:dnf(., $loops)</xpath>
+  <xpath n="1" len="17">$pseudo-terminals</xpath>
+  <xpath n="1" len="17">gt:generate-id(.)</xpath>
+  <xpath n="1" len="17">../@name/string()</xpath>
+  <xpath n="1" len="17">@gt:test-polarity</xpath>
+  <xpath n="1" len="17">($n - $r) idiv 16</xpath>
+  <xpath n="1" len="18">@* except @gt:info</xpath>
+  <xpath n="1" len="18"> 'regex annotation' </xpath>
+  <xpath n="1" len="18">gt:escape(@string)</xpath>
+  <xpath n="1" len="18">'testcase grammar'</xpath>
+  <xpath n="1" len="18">$eThis-path/@gt:to</xpath>
+  <xpath n="1" len="18">count($new-ngused)</xpath>
+  <xpath n="1" len="18">$lnTokens[. &lt;&lt; $e]</xpath>
+  <xpath n="1" len="18">tokenize(., '\s+')</xpath>
+  <xpath n="1" len="18">concat('#x', @hex)</xpath>
+  <xpath n="1" len="18">'sigma-inclusions'</xpath>
+  <xpath n="1" len="18">'sigma-exclusions'</xpath>
+  <xpath n="1" len="18">'sigma-complement'</xpath>
+  <xpath n="1" len="18">'sigma-neg-ranges'</xpath>
+  <xpath n="1" len="18">@* except rtn:item</xpath>
+  <xpath n="1" len="18">//rule[@name = $n]</xpath>
+  <xpath n="1" len="18">@gt:test-selection</xpath>
+  <xpath n="1" len="19">concat(@name, '_f')</xpath>
+  <xpath n="1" len="19">gt:string($eFactor)</xpath>
+  <xpath n="1" len="19">substring($s, ., 1)</xpath>
+  <xpath n="1" len="19">@* except @gt:regex</xpath>
+  <xpath n="1" len="19">empty($ls-maxedout)</xpath>
+  <xpath n="1" len="19">string-join($lv,'')</xpath>
+  <xpath n="1" len="19">$iMin + $iIncrement</xpath>
+  <xpath n="1" len="19">'Chomsky-transform'</xpath>
+  <xpath n="1" len="19">current-group()/alt</xpath>
+  <xpath n="1" len="19">$ruleGen2/@gt:theta</xpath>
+  <xpath n="1" len="19">$epsilon-transition</xpath>
+  <xpath n="1" len="19">$G/rule[@name=$sym]</xpath>
+  <xpath n="1" len="19">gt:nodename($posid)</xpath>
+  <xpath n="1" len="19"> 'r0-linkage-return' </xpath>
+  <xpath n="1" len="19">@* except @tmark, *</xpath>
+  <xpath n="1" len="20">$G/rule[@name = $n ]</xpath>
+  <xpath n="1" len="20">$rhsThis/nonterminal</xpath>
+  <xpath n="1" len="20">string($step/@where)</xpath>
+  <xpath n="1" len="20">string($step/@final)</xpath>
+  <xpath n="1" len="20">xs:integer($step/@k)</xpath>
+  <xpath n="1" len="20">string-join($lsT,'')</xpath>
+  <xpath n="1" len="20">@* except @rtn:stack</xpath>
+  <xpath n="1" len="20">gt:dnf($r, $ttl - 1)</xpath>
+  <xpath n="1" len="20">$ruleGen2/@gt:ranges</xpath>
+  <xpath n="1" len="20">$rhs/parent::rule/@*</xpath>
+  <xpath n="1" len="20">($cSeparator, -1)[1]</xpath>
+  <xpath n="1" len="20">$le[position() gt 1]</xpath>
+  <xpath n="1" len="20">* except $first-rule</xpath>
+  <xpath n="1" len="21">translate($n,'-','_')</xpath>
+  <xpath n="1" len="21">d2x:x2d(string(@hex))</xpath>
+  <xpath n="1" len="21">$rhsThis/*/@gt:ranges</xpath>
+  <xpath n="1" len="21">count($leOverlapping)</xpath>
+  <xpath n="1" len="21">concat($n, $stackdel)</xpath>
+  <xpath n="1" len="21">$left/*, $leTerminals</xpath>
+  <xpath n="1" len="21">rule[position() gt 1]</xpath>
+  <xpath n="1" len="21"> 'ardens-lemma-result' </xpath>
+  <xpath n="1" len="21">$tree/@*, @*, $tree/*</xpath>
+  <xpath n="1" len="21">gt:lrUnion($li, $acc)</xpath>
+  <xpath n="1" len="21">index-of($lb, true())</xpath>
+  <xpath n="1" len="21">descendant::inclusion</xpath>
+  <xpath n="1" len="21">descendant::exclusion</xpath>
+  <xpath n="1" len="21">distinct-values($li0)</xpath>
+  <xpath n="1" len="21">replace($s,'"', '""')</xpath>
+  <xpath n="1" len="21">replace(@to,'"','""')</xpath>
+  <xpath n="1" len="21">//rule[@name=$nt]/alt</xpath>
+  <xpath n="1" len="21">gt:nt-from-literal(.)</xpath>
+  <xpath n="1" len="22">1 to string-length($s)</xpath>
+  <xpath n="1" len="22">$eInclusion/@gt:ranges</xpath>
+  <xpath n="1" len="22">$rhsThat/*[@gt:ranges]</xpath>
+  <xpath n="1" len="22">string($step/@newdesc)</xpath>
+  <xpath n="1" len="22">current-grouping-key()</xpath>
+  <xpath n="1" len="22">concat(@name, '-', $n)</xpath>
+  <xpath n="1" len="22">1 + ($nR * $nT) mod $c</xpath>
+  <xpath n="1" len="22">alt except $prefix-RHS</xpath>
+  <xpath n="1" len="22">nonterminal/@rtn:stack</xpath>
+  <xpath n="1" len="22">$lnChildren[self::sep]</xpath>
+  <xpath n="1" len="22">$lnRHS[gt:fIstoken(.)]</xpath>
+  <xpath n="1" len="22">gt:last-of-seq($eHead)</xpath>
+  <xpath n="1" len="22"> 'unspecified.ixml.xml' </xpath>
+  <xpath n="1" len="23">rule except $start-rule</xpath>
+  <xpath n="1" len="23">//nonterminal[@name=$n]</xpath>
+  <xpath n="1" len="23">$queue[position() gt 1]</xpath>
+  <xpath n="1" len="23">index-of($stack, $code)</xpath>
+  <xpath n="1" len="23">/ixml/rule[@name = $nt]</xpath>
+  <xpath n="1" len="23">count($paths-to-extend)</xpath>
+  <xpath n="1" len="23">/*/@gt:ixml-grammar-ref</xpath>
+  <xpath n="1" len="23">/*/@gt:base-grammar-uri</xpath>
+  <xpath n="1" len="23">descendant::nonterminal</xpath>
+  <xpath n="1" len="23">rule[1]        /@name/string()</xpath>
+  <xpath n="1" len="23">/ixml/rule[@name=$name]</xpath>
+  <xpath n="1" len="23">$T/@*, $target/@*, $T/*</xpath>
+  <xpath n="1" len="23">replace(@from,'"','""')</xpath>
+  <xpath n="1" len="24">alt except $matching-RHS</xpath>
+  <xpath n="1" len="24">undeclared, unreferenced</xpath>
+  <xpath n="1" len="24">string-to-codepoints($c)</xpath>
+  <xpath n="1" len="24">../*[not(self::comment)]</xpath>
+  <xpath n="1" len="24">string-join($ls, $delim)</xpath>
+  <xpath n="1" len="24">$task/@basename/string()</xpath>
+  <xpath n="1" len="24">gt:first-of-seq($leTail)</xpath>
+  <xpath n="1" len="24">gt:nodename($rule/@name)</xpath>
+  <xpath n="1" len="24">'sigma-range-characters'</xpath>
+  <xpath n="1" len="24">(@mark/string(), '^')[1]</xpath>
+  <xpath n="1" len="24">$flat-rule/child::node()</xpath>
+  <xpath n="1" len="25">concat($rule/@name, '_f')</xpath>
+  <xpath n="1" len="25">string-join($lsAlt, '; ')</xpath>
+  <xpath n="1" len="25">count($occurrences) le $k</xpath>
+  <xpath n="1" len="25">concat(@tmark, '#', @hex)</xpath>
+  <xpath n="1" len="25">$left/*, $theta, $right/*</xpath>
+  <xpath n="1" len="25">distinct-values($lsArcs2)</xpath>
+  <xpath n="1" len="25">$lsArcs[not(. = $lsDone)]</xpath>
+  <xpath n="1" len="25">lower-case(string(@name))</xpath>
+  <xpath n="1" len="25">../../rule[@name = $nRHS]</xpath>
+  <xpath n="1" len="25">$ruleStart/@name/string()</xpath>
+  <xpath n="1" len="25">$G/rule[@name eq $nmJoin]</xpath>
+  <xpath n="1" len="25">codepoints-to-string($cp)</xpath>
+  <xpath n="1" len="25">max( ($hiThis, $hiNext) )</xpath>
+  <xpath n="1" len="25">$this-task/@name/string()</xpath>
+  <xpath n="1" len="25">$leRHS-G[gt:is-NN-RHS(.)]</xpath>
+  <xpath n="1" len="25">head(($leNew0, $leUsed0))</xpath>
+  <xpath n="1" len="25">$keyed-RHS intersect $new</xpath>
+  <xpath n="1" len="25">distinct-values($lTokens)</xpath>
+  <xpath n="1" len="25">tokenize(@gl:last, '\s+')</xpath>
+  <xpath n="1" len="26">string-join($lsTerm, ', ')</xpath>
+  <xpath n="1" len="26">gt:codeXnt($n, $configdoc)</xpath>
+  <xpath n="1" len="26">concat('state-pos-', $nmQ)</xpath>
+  <xpath n="1" len="26">concat('state-neg-', $nmQ)</xpath>
+  <xpath n="1" len="26">concat('arc-pos-', $nmArc)</xpath>
+  <xpath n="1" len="26">concat('arc-neg-', $nmArc)</xpath>
+  <xpath n="1" len="26">gt:lrUnion($lrA, $lrB, ())</xpath>
+  <xpath n="1" len="26">$G/rule[@name = $basename]</xpath>
+  <xpath n="1" len="26">index-of($tokens, $sN2)[1]</xpath>
+  <xpath n="1" len="26">index-of($tokens, $sN1)[1]</xpath>
+  <xpath n="1" len="26">(@gt:old-states, @name)[1]</xpath>
+  <xpath n="1" len="26">$leNewtasks/@name/string()</xpath>
+  <xpath n="1" len="26">gt:nodename(local-name(.))</xpath>
+  <xpath n="1" len="26">concat(   '\p{', @code, '}')</xpath>
+  <xpath n="1" len="26">distinct-values($literals)</xpath>
+  <xpath n="1" len="26">codepoints-to-string($li1)</xpath>
+  <xpath n="1" len="26">../@gt:polarity, @gt:trace</xpath>
+  <xpath n="1" len="26">*/(* except (sep|comment))</xpath>
+  <xpath n="1" len="27">concat('pop ', $idReferrer)</xpath>
+  <xpath n="1" len="27">string($step/@follow-state)</xpath>
+  <xpath n="1" len="27">../../rule[@name = $nmDest]</xpath>
+  <xpath n="1" len="27">distinct-values($lsStates1)</xpath>
+  <xpath n="1" len="27">$lsStates[not(. = $lsDone)]</xpath>
+  <xpath n="1" len="27">/*/comment[@gt:type='ixml']</xpath>
+  <xpath n="1" len="27">$lr[1 + ($nR * $nT) mod $c]</xpath>
+  <xpath n="1" len="27">parent::alts/parent::alt/@*</xpath>
+  <xpath n="1" len="27">(tail($queue), $leNewtasks)</xpath>
+  <xpath n="1" len="27">($this-task/@name, $lsDone)</xpath>
+  <xpath n="1" len="27">gt:extract-used($leResults)</xpath>
+  <xpath n="1" len="27">gt:last-of-seq($lnChildren)</xpath>
+  <xpath n="1" len="27">gt:last-of-seq-aux($le, ())</xpath>
+  <xpath n="1" len="27">concat(string(@name), '_0')</xpath>
+  <xpath n="1" len="27">ancestor::alt[parent::rule]</xpath>
+  <xpath n="1" len="27">gt:ensafen-literal(@string)</xpath>
+  <xpath n="1" len="27">gt:nt-from-literal(@string)</xpath>
+  <xpath n="1" len="28">not(gt:fIsRecursiverule($e))</xpath>
+  <xpath n="1" len="28">concat('state-final-', $nmQ)</xpath>
+  <xpath n="1" len="28">concat($nmSource, '˃', $pos)</xpath>
+  <xpath n="1" len="28">concat('arc-final-', $nmArc)</xpath>
+  <xpath n="1" len="28">alt[empty(* except comment)]</xpath>
+  <xpath n="1" len="28">$stack-operations, $stack-op</xpath>
+  <xpath n="1" len="28">concat($nmJoin, ' . ', $pos)</xpath>
+  <xpath n="1" len="28">codepoints-to-string($lr[2])</xpath>
+  <xpath n="1" len="28">$choice/preceding-sibling::*</xpath>
+  <xpath n="1" len="28">$choice/following-sibling::*</xpath>
+  <xpath n="1" len="28">$leCandidates/@name/string()</xpath>
+  <xpath n="1" len="28">$rhs/parent::rule/@*,       $rhs/*</xpath>
+  <xpath n="1" len="28">($new, $used)[1]/root()/ixml</xpath>
+  <xpath n="1" len="28">$target/preceding-sibling::*</xpath>
+  <xpath n="1" len="28">$target/following-sibling::*</xpath>
+  <xpath n="1" len="28">gt:first-of-seq($lnChildren)</xpath>
+  <xpath n="1" len="28">concat($nmParent, '_', $pos)</xpath>
+  <xpath n="1" len="28">gt:first-of-seq-aux($le, ())</xpath>
+  <xpath n="1" len="28">rule/descendant::nonterminal</xpath>
+  <xpath n="1" len="28">$rule/descendant::*[@id=$id]</xpath>
+  <xpath n="1" len="28">concat('\"', @dstring, '\"')</xpath>
+  <xpath n="1" len="29">descendant::*[gt:fIstoken(.)]</xpath>
+  <xpath n="1" len="29">concat($cpFrom, ' - ', $cpTo)</xpath>
+  <xpath n="1" len="29">child::rule[1]/@name/string()</xpath>
+  <xpath n="1" len="29">$seq[position() gt ($c - $n)]</xpath>
+  <xpath n="1" len="29">gt:follow-in-seq($lnChildren)</xpath>
+  <xpath n="1" len="29">1 + count($lnPrecedingtokens)</xpath>
+  <xpath n="1" len="29">gt:follow-in-seq-aux($le, ())</xpath>
+  <xpath n="1" len="29">$pos/ancestor::rule/@follow:*</xpath>
+  <xpath n="1" len="29">gt:nodename(string(../@name))</xpath>
+  <xpath n="1" len="30"> concat('pop ', 'extcall_', $n) </xpath>
+  <xpath n="1" len="30">tokenize($attFollowset, '\s+')</xpath>
+  <xpath n="1" len="30">gt:lrDiff($lrXMLchar, $lrRule)</xpath>
+  <xpath n="1" len="30">string($step/@pseudoterminals)</xpath>
+  <xpath n="1" len="30">$left/*, $theta-dest, $right/*</xpath>
+  <xpath n="1" len="30">concat(          $nmDest,          ' . ',          $pos          )</xpath>
+  <xpath n="1" len="30">string(current-grouping-key())</xpath>
+  <xpath n="1" len="30">$seq[(position() mod $r) eq 0]</xpath>
+  <xpath n="1" len="31"> concat('push ', 'extcall_', $n) </xpath>
+  <xpath n="1" len="31">$lrDifference[position() lt 21]</xpath>
+  <xpath n="1" len="31">string-join($pos-char-groups-0)</xpath>
+  <xpath n="1" len="31">tokenize($step/@delenda, '\s+')</xpath>
+  <xpath n="1" len="31">tokenize($step/@fissile, '\s+')</xpath>
+  <xpath n="1" len="31">concat('max-', $task/@basename)</xpath>
+  <xpath n="1" len="31">$left/*, $theta, tail($right/*)</xpath>
+  <xpath n="1" len="31">$left/*, $leTerminals, $right/*</xpath>
+  <xpath n="1" len="31">$leRHS-G[gt:is-terminal-RHS(.)]</xpath>
+  <xpath n="1" len="31">gt:extract-elements($leResults)</xpath>
+  <xpath n="1" len="31">$e/ancestor::rule/descendant::*</xpath>
+  <xpath n="1" len="31">xs:boolean($rule/@gt:recursive)</xpath>
+  <xpath n="1" len="31">gt:nodename(concat($sym, '_0'))</xpath>
+  <xpath n="1" len="31">($hide, '- (not specified)')[1]</xpath>
+  <xpath n="1" len="31">* except (nonterminal, comment)</xpath>
+  <xpath n="1" len="32">descendant::*[@xml:id=$lidFirst]</xpath>
+  <xpath n="1" len="32">concat('push ', string(@xml:id))</xpath>
+  <xpath n="1" len="32">nonterminal[@recursive = 'true']</xpath>
+  <xpath n="1" len="32">gt:lrDiff($lrXMLchar, $lrMerged)</xpath>
+  <xpath n="1" len="32">gt:merge-element-ranges($leAlts)</xpath>
+  <xpath n="1" len="32">($step/@polarity,      'negative')[1]</xpath>
+  <xpath n="1" len="32">concat(@name, $stackdel, $affix)</xpath>
+  <xpath n="1" len="32">concat(          $nmSource,          ' . ',          $pos          )</xpath>
+  <xpath n="1" len="32">gt:serialize-as-members($lr, ())</xpath>
+  <xpath n="1" len="32">gt:merge-element-ranges($le, ())</xpath>
+  <xpath n="1" len="32">key('lhs', $name, $grammar-node)</xpath>
+  <xpath n="1" len="32">$e/ancestor::rule/@name/string()</xpath>
+  <xpath n="1" len="32"> 'Grammar touched by relabel.xsl' </xpath>
+  <xpath n="1" len="32">repeat0/(* except (sep|comment))</xpath>
+  <xpath n="1" len="32">repeat1/(* except (sep|comment))</xpath>
+  <xpath n="1" len="32">($start, '- (not specified)')[1]</xpath>
+  <xpath n="1" len="33">$terminalThat/@gt:ranges/string()</xpath>
+  <xpath n="1" len="33">$lrIntersection[position() lt 21]</xpath>
+  <xpath n="1" len="33">($step/@coverage,      'arc-final')[1]</xpath>
+  <xpath n="1" len="33">/ixml/rule[@name=$task/@basename]</xpath>
+  <xpath n="1" len="33">gt:lrIntersection($lrA, $lrB, ())</xpath>
+  <xpath n="1" len="33">parent::alts/preceding-sibling::*</xpath>
+  <xpath n="1" len="33">parent::alts/following-sibling::*</xpath>
+  <xpath n="1" len="33">($options('maxfail'),$maxfail)[1]</xpath>
+  <xpath n="1" len="33">$new[parent::rule/@name eq $name]</xpath>
+  <xpath n="1" len="33">$ln[self::*][gt:fIsexpression(.)]</xpath>
+  <xpath n="1" len="33">distinct-values(($liPair, $iMid))</xpath>
+  <xpath n="1" len="33">($tokens, '- (not specified)')[1]</xpath>
+  <xpath n="1" len="34">concat(          gt:string($eFactor),          '?'          )</xpath>
+  <xpath n="1" len="34">string(d2x:x2d(substring($s0, 2)))</xpath>
+  <xpath n="1" len="34">xs:boolean($attRecursive) = true()</xpath>
+  <xpath n="1" len="34">('positive', 'negative', 'all')[1]</xpath>
+  <xpath n="1" len="34">gt:filter($leRecipes0, $pol, $cov)</xpath>
+  <xpath n="1" len="34">concat(        $nmNew-from,        ' . ',        $pos        )</xpath>
+  <xpath n="1" len="34">$eThis-path      /(@* except @gt:trace)</xpath>
+  <xpath n="1" len="34">1 + count($eTerminal/preceding::*)</xpath>
+  <xpath n="1" len="34">$rhs/nonterminal[1]/@name/string()</xpath>
+  <xpath n="1" len="34">$rhs/nonterminal[2]/@name/string()</xpath>
+  <xpath n="1" len="34">$eFactor/@gl:*, $eFactor/@follow:*</xpath>
+  <xpath n="1" len="34">gt:ensafen-pos-char-class(@string)</xpath>
+  <xpath n="1" len="34">distinct-values(//literal/@string)</xpath>
+  <xpath n="1" len="35">/descendant::rule[1]/@name/string()</xpath>
+  <xpath n="1" len="35">($step/@which/string(), 'first')[1]</xpath>
+  <xpath n="1" len="35">(xs:integer($step/@maxfail),      10)[1]</xpath>
+  <xpath n="1" len="35">$idStart, gt:lnDescXGN(., $idStart)</xpath>
+  <xpath n="1" len="35">$stack[index-of($stack, .)][$k + 1]</xpath>
+  <xpath n="1" len="35">concat($left/@gt:trace,          ' + error')</xpath>
+  <xpath n="1" len="35">rule      [alt[empty(* except comment)]]</xpath>
+  <xpath n="1" len="35">d2x:d2x(         string-to-codepoints($s)         )</xpath>
+  <xpath n="1" len="35">gt:lrIntersection($lrB, $lrA, $acc)</xpath>
+  <xpath n="1" len="35">($options('maxdepth'),$maxdepth)[1]</xpath>
+  <xpath n="1" len="35">$used[nonterminal/@name = $T/@name]</xpath>
+  <xpath n="1" len="35">$rhs/nonterminal[@name=$T/@name][1]</xpath>
+  <xpath n="1" len="35">$lnChildren[gt:fIsexpression(.)][1]</xpath>
+  <xpath n="1" len="35">$eFactor/@follow:*, $eSep/@follow:*</xpath>
+  <xpath n="1" len="35">descendant::inclusion/*[@gt:ranges]</xpath>
+  <xpath n="1" len="35">replace($s, '([\^\-\[\]])', '\\$1')</xpath>
+  <xpath n="1" len="35">($literals, '- (not specified)')[1]</xpath>
+  <xpath n="1" len="36">nonterminal      [not(@recursive='true')]</xpath>
+  <xpath n="1" len="36">gt:escape(gt:string-from-point(@to))</xpath>
+  <xpath n="1" len="36">(xs:integer($step/@maxdepth),      20)[1]</xpath>
+  <xpath n="1" len="36">concat($left/@gt:trace,          ' + error ')</xpath>
+  <xpath n="1" len="36">$left/*, $theta-dest, tail($right/*)</xpath>
+  <xpath n="1" len="36">gt:make-char-attribute('lit',$lr[1])</xpath>
+  <xpath n="1" len="36">gt:range-bound-to-char(@to/string())</xpath>
+  <xpath n="1" len="37">@*       except       (@xml:id, @gl:*, @follow:*)</xpath>
+  <xpath n="1" len="37">resolve-uri($step/@config, $base-uri)</xpath>
+  <xpath n="1" len="37">gt:filter($le1, $sPol, $sCov, (), ())</xpath>
+  <xpath n="1" len="37">gt:make-char-attribute('lit', $lr[1])</xpath>
+  <xpath n="1" len="37">concat(           '#',           $hex-1,            ' - #',           $hex-2                )</xpath>
+  <xpath n="1" len="37">$lnDescendants        [not(. = $lnChildren)]</xpath>
+  <xpath n="1" len="37">($new, $used, $ngused)[1]/root()/ixml</xpath>
+  <xpath n="1" len="37">@name, $rhs/parent::rule/@mark, @mark</xpath>
+  <xpath n="1" len="38">$rule/@follow:*[local-name() = $state]</xpath>
+  <xpath n="1" len="38">concat(          '\p{',          string($e/@code),          '}'          )</xpath>
+  <xpath n="1" len="38">gt:escape(gt:string-from-point(@from))</xpath>
+  <xpath n="1" len="38">replace($s0, '([\\\[\]\-\^])', '\\$1')</xpath>
+  <xpath n="1" len="38">(@gt:base-grammar-uri,         base-uri()         )[1]</xpath>
+  <xpath n="1" len="38">*[self::sep or preceding-sibling::sep]</xpath>
+  <xpath n="1" len="38">concat($left/@gt:trace,        ' + ',         $nmArc)</xpath>
+  <xpath n="1" len="38">concat($result-dir, '/',     $id, '.ixml')</xpath>
+  <xpath n="1" len="38">count($eTerminal/preceding-sibling::*)</xpath>
+  <xpath n="1" len="38">distinct-values(      rule/@name/string()      )</xpath>
+  <xpath n="1" len="38">string-join(($basename, $affix), $sep)</xpath>
+  <xpath n="1" len="38">gt:range-bound-to-char(@from/string())</xpath>
+  <xpath n="1" len="38">($whitespace, '- (none specified)')[1]</xpath>
+  <xpath n="1" len="38">concat(      "'", @from,      "' - '",      @to, "'")</xpath>
+  <xpath n="1" len="39">(xs:integer(      $step/@n/string()),      3      )[1]</xpath>
+  <xpath n="1" len="39">rule | comment[preceding-sibling::rule]</xpath>
+  <xpath n="1" len="39">gt:codeXnt($task/@basename, $configdoc)</xpath>
+  <xpath n="1" len="39">/ixml/rule[@name = $name]/@gt:recursive</xpath>
+  <xpath n="1" len="39">../rule[@name = concat('alpha-', $nmQ)]</xpath>
+  <xpath n="1" len="39">../rule[@name = concat('omega-', $nmQ)]</xpath>
+  <xpath n="1" len="39">$new intersect key('rhs', $T/@name, $G)</xpath>
+  <xpath n="1" len="39">xs:boolean($eSep/@gl:nullable) = true()</xpath>
+  <xpath n="1" len="39">gt:merge( (string(.), $lidFirstXTail) )</xpath>
+  <xpath n="1" len="39">* except (nonterminal[last()], comment)</xpath>
+  <xpath n="1" len="40">gt:lrDiff($lrMinuend, $lrSubtrahend, ())</xpath>
+  <xpath n="1" len="40">for $e in $queue return string($e/@name)</xpath>
+  <xpath n="1" len="40">for $e in $ngused return $e/@id/string()</xpath>
+  <xpath n="1" len="40">($idSilentpredecessor, $lidPredecessors)</xpath>
+  <xpath n="1" len="40">concat($result-dir, '/',     @name, '.ixml')</xpath>
+  <xpath n="1" len="41">(@dstring/string(),      @sstring/string())[1]</xpath>
+  <xpath n="1" len="41">gt:lrDiffSS(          string($lrA),           string($lrB)          )</xpath>
+  <xpath n="1" len="41">tokenize(      string($step/@starters),      '\s+')</xpath>
+  <xpath n="1" len="41">concat($result-dir, '/',     $id, '.ast.xml')</xpath>
+  <xpath n="1" len="41">descendant::rule      [not(@recursive='true')]</xpath>
+  <xpath n="1" len="41">subsequence($rng('permute')($seq), 1, $n)</xpath>
+  <xpath n="1" len="41">$task/@affix/string()      [normalize-space()]</xpath>
+  <xpath n="1" len="41">$lnChildren[self::*][gt:fIsexpression(.)]</xpath>
+  <xpath n="1" len="41">for $a in @follow:*      return local-name($a)</xpath>
+  <xpath n="1" len="42">$rule/descendant::*[@xml:id=$lidFollowset]</xpath>
+  <xpath n="1" len="42">($terminalThis/@gt:ranges/string(), '')[1]</xpath>
+  <xpath n="1" len="42">$G/rule/alt     [nonterminal/@name eq $nmDest]</xpath>
+  <xpath n="1" len="42">concat(        'omega-',        current-grouping-key()        )</xpath>
+  <xpath n="1" len="42">current-group()[position() le $save-limit]</xpath>
+  <xpath n="1" len="42">1 + count($eTerminal/preceding-sibling::*)</xpath>
+  <xpath n="1" len="42">concat(        'alpha-',        current-grouping-key()        )</xpath>
+  <xpath n="1" len="42">if ($fHex)       then concat('#', $sHex)       else $c</xpath>
+  <xpath n="1" len="42">xs:boolean($eFactor/@gl:nullable) = true()</xpath>
+  <xpath n="1" len="43">if ($flag eq 'no')      then false()      else true()</xpath>
+  <xpath n="1" len="43">$eThis-path/(* except nonterminal),          $eTrace</xpath>
+  <xpath n="1" len="43">string-join(('i', $basename, $affix),           $sep)</xpath>
+  <xpath n="1" len="43">distinct-values($ruleGen2/alt/*/@gt:ranges)</xpath>
+  <xpath n="1" len="43">$eFactor/@gl:* except $eFactor/@gl:nullable</xpath>
+  <xpath n="1" len="44">concat(          string($e/@mark),           string($e/@name)          )</xpath>
+  <xpath n="1" len="44">$steps-doc/grammar-pipeline          /(* except desc)</xpath>
+  <xpath n="1" len="44">if ($fFinal)           then 'positive'           else 'negative'</xpath>
+  <xpath n="1" len="44">$active-paths      [@gt:to/string() = $lsReached]</xpath>
+  <xpath n="1" len="44">$eThis-path          /(@* except (@gt:trace, @gt:to))</xpath>
+  <xpath n="1" len="44">gt:merge-element-ranges(tail($le), $new-acc)</xpath>
+  <xpath n="1" len="44">string-join((      'f',      $basename,      $affix),      $sep)</xpath>
+  <xpath n="1" len="44">($used, $ngused)[parent::rule/@name = $name]</xpath>
+  <xpath n="1" len="44">for $e in $new-ngused return $e/@id/string()</xpath>
+  <xpath n="1" len="44">gt:merge(($lsAcc, $eThis/@gl:last/string()))</xpath>
+  <xpath n="1" len="44">(@mark,       /ixml/rule[@name=$nt]/@mark,      '^')[1]</xpath>
+  <xpath n="1" len="44">($uri,         @gt:base-grammar-uri,         base-uri()         )[1]</xpath>
+  <xpath n="1" len="45">concat(          '(',          string-join($lsAlt, '; '),          ')'          )</xpath>
+  <xpath n="1" len="45">translate($n, $gt:trickychars, $gt:safechars)</xpath>
+  <xpath n="1" len="45">for $s in $lsArcs0       return normalize-space($s)</xpath>
+  <xpath n="1" len="45">gt:merge(($lsAcc, $eThis/@gl:first/string()))</xpath>
+  <xpath n="1" len="45">tokenize($hide, '\+|\s+')[normalize-space(.)]</xpath>
+  <xpath n="1" len="46">gt:escape(codepoints-to-string(d2x:x2d(@hex)))</xpath>
+  <xpath n="1" len="46">../../rule      [@name = concat('omega-', $nmDest)]      </xpath>
+  <xpath n="1" len="46">concat(          $nmDest,          ' . ',          $pos,          ' / ',          $nmDest          )</xpath>
+  <xpath n="1" len="46">$active-paths      [@gt:from/string() = $lsReached]</xpath>
+  <xpath n="1" len="46">gt:is-terminal-RHS($rhs)      or      gt:is-NN-RHS($rhs)</xpath>
+  <xpath n="1" len="46">codepoints-to-string(          d2x:x2d(@hex/string())          )</xpath>
+  <xpath n="1" len="47">$configdoc//nonterminal[@name=$n]      /@stack-trace</xpath>
+  <xpath n="1" len="47">* except *[self::sep or preceding-sibling::sep]</xpath>
+  <xpath n="1" len="47">gt:take-some(current-group(), $extension-limit)</xpath>
+  <xpath n="1" len="47">distinct-values(          $live-paths          /@gt:to/string()          )</xpath>
+  <xpath n="1" len="47">gt:take-some(current-group(),       $extension-limit)</xpath>
+  <xpath n="1" len="47">gt:lrUnion(           $lrA,           $lrB[position() gt 2],           $acc           )</xpath>
+  <xpath n="1" len="47">gt:lrUnion(       $lrA[position() gt 2],       $lrB,       $acc       )</xpath>
+  <xpath n="1" len="47">concat("'",      replace(@sstring, '"', '\\"'),      "'")</xpath>
+  <xpath n="1" len="47">tokenize($tokens, '\+|\s+')[normalize-space(.)]</xpath>
+  <xpath n="1" len="48">concat(          gt:nodename($n),          ' [label="',          $n,          '"]'          )</xpath>
+  <xpath n="1" len="48">concat($left/@gt:trace,          ' + ',          $right/@gt:trace)</xpath>
+  <xpath n="1" len="48">concat(          $nmSource,          ' . ',          $pos,          ' / ',          $nmDest          )</xpath>
+  <xpath n="1" len="48">distinct-values(          $live-paths/@gt:from/string()          )</xpath>
+  <xpath n="1" len="48">concat(     $nmSource,     ' . ',     $pos,     ' / ',     $nmDest     )</xpath>
+  <xpath n="1" len="48">every $r in $G/rule      satisfies gt:is-cnf-rule($r)</xpath>
+  <xpath n="1" len="48">$input-grammar          /rule[@name = $lsOld-states]          /alt</xpath>
+  <xpath n="1" len="49">gt:lrIntersectionSS(          string($lrA),           string($lrB)          )</xpath>
+  <xpath n="1" len="49">gt:expand-references($result, $new-queue, $fKeep)</xpath>
+  <xpath n="1" len="49">exists($eRule-dest/alt      [empty(* except comment)])</xpath>
+  <xpath n="1" len="49">if ($fDest-final)           then 'positive'           else 'negative'</xpath>
+  <xpath n="1" len="49">$le0[@gt:polarity = $sPol]      [@gt:coverage = $sCov]</xpath>
+  <xpath n="1" len="49">gt:nodedecl(string(@name), string(@mark), $final)</xpath>
+  <xpath n="1" len="49">substring('0123456789ABCDEF', ($n mod 16) + 1, 1)</xpath>
+  <xpath n="1" len="49">if ($q eq 0)        then $c        else concat(d2x:d2x($q), $c)</xpath>
+  <xpath n="1" len="50">(nonterminal/@name/string(),     ../@name/string())[1]</xpath>
+  <xpath n="1" len="50">gt:merge(for $e in $le return string($e/@gl:last))</xpath>
+  <xpath n="1" len="50">gt:first-of-seq-aux($le[position() gt 1], $lsAcc2)</xpath>
+  <xpath n="1" len="51">distinct-values(      /descendant::rule/@name/string()      )</xpath>
+  <xpath n="1" len="51">distinct-values(    /descendant::rule/@name/string()    )</xpath>
+  <xpath n="1" len="51">gt:merge(for $e in $le return string($e/@gl:first))</xpath>
+  <xpath n="1" len="51">replace($s, '([\^\-\[\]\{\}\.\\\?*+()\|])', '\\$1')</xpath>
+  <xpath n="1" len="52">concat($result-dir, '/',       $id, '.raw-parse-tree.xml')</xpath>
+  <xpath n="1" len="53">gt:serialize-range-list($lrDifference),    $follow-state</xpath>
+  <xpath n="1" len="53">concat(@tmark,                           '"',       replace(@string, '"', '""'),      '"')</xpath>
+  <xpath n="1" len="53">gt:filter(       tail($queue),       $sPol,       $sCov,       $acc,       $lsDone)</xpath>
+  <xpath n="1" len="53">alt[          *[last()]/self::nonterminal[@name = $rulename]          ]</xpath>
+  <xpath n="1" len="54">('state', 'arc',        'state-final', 'arc-final',        'all')[1]</xpath>
+  <xpath n="1" len="54">tokenize($task/@old-states, '\s+')      [normalize-space()]</xpath>
+  <xpath n="1" len="54">gt:last-of-seq-aux($le[position() lt last()], $lsAcc2)</xpath>
+  <xpath n="1" len="54">count($E/preceding::*)          + count($E/ancestor-or-self::*)</xpath>
+  <xpath n="1" len="55">gt:serialize-range-list($lrIntersection),    $follow-state</xpath>
+  <xpath n="1" len="55">$configdoc//nonterminal[@name=$n]      /@stack-code/string()</xpath>
+  <xpath n="1" len="55">if (exists($uriG))      then doc(string($uriG))/ixml      else ()</xpath>
+  <xpath n="1" len="55">count($eTerminal      /ancestor::rule      /preceding-sibling::*)</xpath>
+  <xpath n="1" len="55">distinct-values(descendant::nonterminal/@name/string())</xpath>
+  <xpath n="1" len="55">($basename, tokenize($affix, $sep))      [normalize-space()]</xpath>
+  <xpath n="1" len="55">if (exists($liPair))       then (sum($liPair) idiv 2)       else ()</xpath>
+  <xpath n="1" len="56">for $t in $e/*[gt:fIsexpression(.)]          return gt:string($t)</xpath>
+  <xpath n="1" len="56">gt:lrIntersection(           $lrA[position() gt 2],           $lrB,           ($acc)           )</xpath>
+  <xpath n="1" len="56">$map-lit-name      //map[@string = $s]      /@nonterminal/string()</xpath>
+  <xpath n="1" len="56">d2x:x2daux(reverse(string-to-codepoints($hexnum)), 0, 1)</xpath>
+  <xpath n="1" len="57">alt[          *[last()]/self::nonterminal[@name = $follow-state]          ]</xpath>
+  <xpath n="1" len="57">$G/rule/alt       [nonterminal/@name       eq       current-grouping-key()]</xpath>
+  <xpath n="1" len="57">if ($starters)        then $starters        else rule[1]/@name/string()</xpath>
+  <xpath n="1" len="58">$rhsThis/*      [not(self::nonterminal)      and not(self::comment)]</xpath>
+  <xpath n="1" len="58">if ($config eq 'no-config-file')      then ()      else doc($config)</xpath>
+  <xpath n="1" len="58">concat(      ../@name,      '˃',      1 + count(preceding-sibling::alt)      )</xpath>
+  <xpath n="1" len="58">$ln-trees/parse-tree-collection      /gt:element[@name = $name]</xpath>
+  <xpath n="1" len="59">gt:serialize-as-members(          $lr[position() gt 2],          ($acc, $e)          )</xpath>
+  <xpath n="1" len="59">for $e in $le      return ($e instance of element(gt:separator))</xpath>
+  <xpath n="1" len="59">gt:follow-in-seq-aux($le[position() gt 1], ($la, $laXHead))</xpath>
+  <xpath n="1" len="59">for $t       in tokenize(@gt:ranges, '\s+')       return xs:integer($t)       </xpath>
+  <xpath n="1" len="59">(@string/string(),          @dstring/string(),          @sstring/string())[1]</xpath>
+  <xpath n="1" len="60">if (self::nonterminal)      then 'pseudoterminal'      else 'terminal' </xpath>
+  <xpath n="1" len="60">$leIncoming         [not(parent::rule/@name         = ($lsReached, $lsNew))]</xpath>
+  <xpath n="1" len="60">concat(       $eThis-path/@gt:trace,       ' . ', $pos,       ' / ', $nmDest       )</xpath>
+  <xpath n="1" len="60">if (exists($literal-names))    then doc($literal-names)    else ()</xpath>
+  <xpath n="1" len="61">if (empty($e))        then false()        else xs:boolean($e/@gt:recursive)</xpath>
+  <xpath n="1" len="61">if (empty($e))      then false()      else xs:boolean($e/@gt:recursive)</xpath>
+  <xpath n="1" len="61">concat(          gt:quote-char($e/@from),           '-',          gt:quote-char($e/@to)          )</xpath>
+  <xpath n="1" len="61">gt:lrUnion(           $lrA[position() gt 2],           $lrB,           ($acc, $loA, $hiA)           )</xpath>
+  <xpath n="1" len="61">gt:lrUnion(       $lrA,       $lrB[position() gt 2],       ($acc, $loB, $hiB)       )</xpath>
+  <xpath n="1" len="61">gt:lrDiff(           $lrMinuend,           $lrSubtrahend[position() gt 2],           $acc           )</xpath>
+  <xpath n="1" len="61">gt:lrDiff(           $lrMinuend[position() gt 2],           $lrSubtrahend,           $acc           )</xpath>
+  <xpath n="1" len="61">tokenize($eSep/@gl:last,'\s+')      [not(normalize-space(.) = '')]</xpath>
+  <xpath n="1" len="61">if ($fFNullable)      then ($lidFLast, $lidSLast)      else ($lidFLast)</xpath>
+  <xpath n="1" len="61">distinct-values(      ..//nonterminal[@name = $N]/@mark/string()      )</xpath>
+  <xpath n="1" len="62">concat(          string($e/@mark),          string($e/@name),          ': ',          $sRHS,          '.'          )</xpath>
+  <xpath n="1" len="62">distinct-values(      rule/descendant::nonterminal/@name/string()      )</xpath>
+  <xpath n="1" len="62">count($leChildren) = 1      and count($leT) = 1      and count($leN) = 0      </xpath>
+  <xpath n="1" len="62">count($leChildren) = 2      and count($leT) = 0      and count($leN) = 2      </xpath>
+  <xpath n="1" len="62">tokenize($eSep/@gl:first,'\s+')      [not(normalize-space(.) = '')]</xpath>
+  <xpath n="1" len="62">if (self::repeat0)        then $nullable-true         else $eFactor/@nullable</xpath>
+  <xpath n="1" len="63">$character-classes/unicode-classes        /inclusion[@gt:code = $code]</xpath>
+  <xpath n="1" len="63">concat($left/@gt:trace,          ' + ',          $nmArc,          ' + ',          $right/@gt:trace)</xpath>
+  <xpath n="1" len="63">$random('permute')(current-group())    [position() le $save-limit]</xpath>
+  <xpath n="1" len="63">if ($iIndex mod 2 eq 1)          then $lr[$iIndex]          else $lr[$iIndex - 1]</xpath>
+  <xpath n="1" len="63">if ($iIndex mod 2 eq 1)          then $lr[$iIndex + 1]          else $lr[$iIndex]</xpath>
+  <xpath n="1" len="63">exists($e/nonterminal)      and (count($e/* except $e/comment) eq 1)</xpath>
+  <xpath n="1" len="63">gt:make-trees(          (), ($acc, $T),          $new, $used,          $cFails, $options          )</xpath>
+  <xpath n="1" len="63">gt:nodename(     concat(     $pos/ancestor::rule/@name/string(),     '_0'))</xpath>
+  <xpath n="1" len="64">string-to-codepoints($n)      =      string-to-codepoints($gt:trickychars)</xpath>
+  <xpath n="1" len="64">for $s in $lsArcs1[not(. eq '')]       return replace($s, ' \. ', '˃')</xpath>
+  <xpath n="1" len="64">concat(       $nmNew-from, ' . ', $pos,       ' / ',        $eThis-path/@gt:trace       )</xpath>
+  <xpath n="1" len="64">('first',    'last',    'better-than-nothing',    'random',     'guided'    )[3]</xpath>
+  <xpath n="1" len="64">tokenize($eFactor/@gl:last,'\s+')      [not(normalize-space(.) = '')]</xpath>
+  <xpath n="1" len="64">if ($fFNullable)      then ($lidFFirst, $lidSFirst)      else ($lidFFirst)</xpath>
+  <xpath n="1" len="65">gt:fIsPseudoterminal(         string(@name), $G, $fissile, $non-fissile        )</xpath>
+  <xpath n="1" len="65">concat(               gt:nodename($n),      ' [label="',      ($mark, '^')[1],      $n,      '"]'      )</xpath>
+  <xpath n="1" len="65">concat(        '    ',        gt:nodename($parent),        ' -&gt; ',        gt:nodename(.),        ';
+  '        )</xpath>
+  <xpath n="1" len="65">tokenize($eFactor/@gl:first,'\s+')      [not(normalize-space(.) = '')]</xpath>
+  <xpath n="1" len="66">if ($s eq $dq)      then concat($sq, $s, $sq)      else concat($dq, $s, $dq)</xpath>
+  <xpath n="1" len="66">count($leIncoming[not(parent::rule/@name =      ($lsReached, $lsNew))])</xpath>
+  <xpath n="1" len="66">concat($loThis,      ' le ', $hiThis,      ' lt ', $loNext,      ' le ', $hiNext)</xpath>
+  <xpath n="1" len="66">for $s in $ls return tokenize($s, '\s+')      [normalize-space() ne '']</xpath>
+  <xpath n="1" len="67">('mark', 'tmark', 'name', 'hex', 'string',        'whitespace', 'comment')</xpath>
+  <xpath n="1" len="68">if ($polarity eq 'all')      then ('positive', 'negative')      else $polarity</xpath>
+  <xpath n="1" len="68">$random('permute')(current-group())       [position() le $extension-limit]</xpath>
+  <xpath n="1" len="68">gt:lrIntersection(           $lrA,           $lrB[position() gt 2],           ($acc, $loB, $hiB)           )</xpath>
+  <xpath n="1" len="68">if ($cSeparator gt 0)      then subsequence($le, $cSeparator + 1)      else ()</xpath>
+  <xpath n="1" len="68">for $e in $used       return       if (empty($e intersect $rhs))       then $e       else ()</xpath>
+  <xpath n="1" len="68">for $cp in string-to-codepoints($s)         return concat('#', d2x:d2x($cp))</xpath>
+  <xpath n="1" len="69">tokenize(      gt:codeXnt($n, $configdoc),      $stackdel      )      [normalize-space()]</xpath>
+  <xpath n="1" len="69">concat(            'm-',            string-join(            for $state in $lsFS            return $state            ,            '˅')            )</xpath>
+  <xpath n="1" len="69">(@dstring/string(),      @sstring/string(),      concat('#', @hex/string()))[1]</xpath>
+  <xpath n="1" len="70">for $t      in tokenize($eTerminal/@gt:ranges, '\s+')      return xs:integer($t)</xpath>
+  <xpath n="1" len="70">gt:lrIntersection(           $lrA[position() gt 2],           ($lrB),           ($acc, $loB, $hiA)           )</xpath>
+  <xpath n="1" len="71">string-join(       ($stack-operations/string(),                                     @rtn:stack/string(.)),       ', '     )</xpath>
+  <xpath n="1" len="71">exists($r/alt)      and      (every $rhs in $r/alt      satisfies gt:is-cnf-RHS($rhs))</xpath>
+  <xpath n="1" len="71">max(for $n in $T1/descendant::nonterminal          return count($n/ancestor::*))</xpath>
+  <xpath n="1" len="71">if ($cSeparator gt 0)      then subsequence($le, 1, $cSeparator - 1)      else ()</xpath>
+  <xpath n="1" len="71">for $a     in $laFollow     [tokenize(., '\s+') = $posid]     return local-name($a)</xpath>
+  <xpath n="1" len="72">$new-rule/descendant::nonterminal          [not(@name = ($lsDone, $queue/@name))]</xpath>
+  <xpath n="1" len="73">gt:make-trees(          (), ($acc, $failure),          $new, $used,          $cFails + 1, $options          )</xpath>
+  <xpath n="1" len="73">if ($p = $lidFLast)        then gt:merge((string(.), $lidFFirst))        else string(.)</xpath>
+  <xpath n="1" len="74">if (string($step/@start) eq '')      then '#inherit'      else $step/@start/string()</xpath>
+  <xpath n="1" len="75">distinct-values(      /descendant::rule/descendant::nonterminal/@name/string()      )</xpath>
+  <xpath n="1" len="75">distinct-values(    /descendant::rule/descendant::nonterminal/@name/string()    )</xpath>
+  <xpath n="1" len="75">$eNextrule/alt[nonterminal]         [not(nonterminal/@name         = ($lsReached, $lsNew))]</xpath>
+  <xpath n="1" len="75">concat(        count($queue),        ' items in queue, ',        count($lsDone),        ' items done.')</xpath>
+  <xpath n="1" len="75">for $e in $used          return if ($e/nonterminal/@name = $T/@name)          then $e else ()</xpath>
+  <xpath n="1" len="76">if (exists($stepsfile))    then doc(resolve-uri($stepsfile, $base-uri))    else ()</xpath>
+  <xpath n="1" len="76">gt:filter(       tail($queue),       $sPol,       $sCov,       ($acc, $this),       ($lsDone, $lsNewArcs))</xpath>
+  <xpath n="1" len="76">gt:make-char-attribute('from', $lr[1]),      gt:make-char-attribute('to', $lr[2])</xpath>
+  <xpath n="1" len="76">gt:normalize-ordered-ranges(       ($loThis, $newHi,       $lr[position() gt 4]),       $acc       )</xpath>
+  <xpath n="1" len="76">for $e in $ngused      return      if (empty($e intersect $rhs))      then $e      else (),      $rhs</xpath>
+  <xpath n="1" len="76">gt:merge((        string(.),        $lidSFirst,        if ($fSNullable) then $lidFFirst else ()))</xpath>
+  <xpath n="1" len="76">gt:merge((        string(.),        $lidFFirst,        if ($fFNullable) then $lidSFirst else ()))</xpath>
+  <xpath n="1" len="77">gt:normalize-ordered-ranges(       $lr[position() gt 2],       ($acc, $loThis, $hiThis)       )</xpath>
+  <xpath n="1" len="78">gt:filter(       tail($queue),       $sPol,       $sCov,       ($acc, $this),       ($lsDone, $lsNewStates))</xpath>
+  <xpath n="1" len="78">concat(      '    ',      gt:nodename($parent),      ' -&gt; ',      gt:nodename(@name/string()),      ';
+  '      )</xpath>
+  <xpath n="1" len="78">gt:lrUnion(           $lrA[position() gt 2],           ($loA, $hiB, $lrB[position() gt 2]),           $acc           )</xpath>
+  <xpath n="1" len="78">gt:lrUnion(           ($loB, $hiA, $lrA[position() gt 2]),           $lrB[position() gt 2],           $acc           )</xpath>
+  <xpath n="1" len="79">for $t          in tokenize(@gt:ranges, '\s+')          [normalize-space()]          return xs:integer($t)          </xpath>
+  <xpath n="1" len="79">gt:lrDiff(       $lrMinuend[position() gt 2],       $lrSubtrahend,       ($acc, $loMin, $hiMin)       )</xpath>
+  <xpath n="1" len="80">gt:make-trees(          $T1, $acc,          ($new except $rhs),          ($used, $rhs),          $cFails, $options          )</xpath>
+  <xpath n="1" len="81">if (     tokenize($pos/ancestor::rule/@gl:first, '\s+')     = $posid     )     then $sPQ0 else ()</xpath>
+  <xpath n="1" len="82">if ($starters)        then $starters        else rule[xs:boolean(@gt:recursive)]        /@name/string()</xpath>
+  <xpath n="1" len="82">rule[      alt      [nonterminal]      [empty(*      except (comment | nonterminal))]      ]/@name/string()</xpath>
+  <xpath n="1" len="82">$new-rules/descendant::nonterminal          [not(@gt:name = ($leDone/@name, $queue/@name))]</xpath>
+  <xpath n="1" len="82">for $e in $ngused       return       if (empty($e intersect $leUsed))       then $e       else (),       $leUsed</xpath>
+  <xpath n="1" len="82">for $e in $ngused          return          if (empty($e intersect $leUsed))          then $e          else (),          $leUsed</xpath>
+  <xpath n="1" len="82">for $e in $ngused      return      if (empty($e intersect $leUsed))      then $e      else (),      $leUsed</xpath>
+  <xpath n="1" len="83">if (string-length($lrA) gt 50)       then concat(substring($lrA, 1, 40), '...')       else $lrA</xpath>
+  <xpath n="1" len="83">if (string-length($lrB) gt 50)     then concat(substring($lrB, 1, 40), '...')     else $lrB</xpath>
+  <xpath n="1" len="83">if (string($step/@fissile) eq '')      then '#all'      else tokenize(      $step/@fissile,      '\s+')</xpath>
+  <xpath n="1" len="83">if (string($step/@linkage) eq '')      then '#all'      else tokenize(      $step/@linkage,      '\s+')</xpath>
+  <xpath n="1" len="83">round(          ($iMax - $iMin)          * (min(($nT, $nR))          div          max(($nT, $nR)))          ) cast as xs:integer</xpath>
+  <xpath n="1" len="85">gt:lrDiff(       $lrMinuend[position() gt 2],       $lrSubtrahend,       ($acc, $loMin, ($loSub - 1))       )</xpath>
+  <xpath n="1" len="85">if (empty($nonterminals))        then distinct-values(//gt:element/@name)        else $nonterminals</xpath>
+  <xpath n="1" len="85">if (exists(nonterminal))      then gt:nodename(nonterminal[last()]/@name/string())      else ()</xpath>
+  <xpath n="1" len="88">concat(          gt:string($eFactor),          if ($e/self::repeat0)          then '*'          else '+',          gt:string($eSep)          )</xpath>
+  <xpath n="1" len="88">concat(      '    ',      gt:nodename(../@name/string()),      ' -&gt; ',      gt:nodename(@name/string()),      ';
+  '      )</xpath>
+  <xpath n="1" len="88">if ($coverage eq 'all')      then ('state', 'state-final',      'arc', 'arc-final')      else $coverage</xpath>
+  <xpath n="1" len="88">d2x:x2daux(    $codepoints[position() gt 1],           $accumulator + $value * $factor,           $factor * 16)</xpath>
+  <xpath n="1" len="89">for $t          in tokenize(head($le)/@gt:ranges, '\s+')          [normalize-space()]          return xs:integer($t)</xpath>
+  <xpath n="1" len="90">$new-rule/descendant::nonterminal          [@gt:affix]          [not(@name = ($leDone/@name, $queue/@name))]</xpath>
+  <xpath n="1" len="91">if (string-length(@to) gt 1)        then d2x:x2d(substring(@to, 2))        else string-to-codepoints(@to)</xpath>
+  <xpath n="1" len="92">concat(            'm-',            string-join(            for $state in $lsFS            return tokenize($state,'_')            [last()]            ,            '˅')            )</xpath>
+  <xpath n="1" len="92">sort(          $source-trees/descendant::gt:element          [@name=$name]          [not(descendant::nonterminal)]          )[1]</xpath>
+  <xpath n="1" len="95">sort(     distinct-values(     $ruleGen2     /alt[*/@gt:ranges = $sRanges]     /nonterminal     /@name/string()     )     )</xpath>
+  <xpath n="1" len="96">if (string-length($s) gt 1500)   then false()   else if (contains($s, '&#xD;'))   then false()   else true()</xpath>
+  <xpath n="1" len="97">if (string-length(@from) gt 1)        then d2x:x2d(substring(@from, 2))        else string-to-codepoints(@from)</xpath>
+  <xpath n="1" len="97">if (gt:ftraceXnt($task/@basename, $configdoc))      then concat($code, $task/@affix)      else $task/@affix</xpath>
+  <xpath n="1" len="98">if ($which eq 'first')      then alts[1]      else if ($which eq 'last')      then alts[last()]      else alts[$which]</xpath>
+  <xpath n="1" len="99">if (exists(/*/@gt:base-grammar-uri))      then resolve-uri(/*/@gt:base-grammar-uri,      base-uri(.))      else ()      </xpath>
+  <xpath n="1" len="100">gt:lrDiff(           ($hiSub + 1, $hiMin,           $lrMinuend[position() gt 2]),           $lrSubtrahend[position() gt 2],           $acc           )</xpath>
+  <xpath n="1" len="101">if (self::exclusion)         then concat('[^', $pos-char-groups, ']')         else concat('[',  $pos-char-groups, ']')         </xpath>
+  <xpath n="1" len="101">if (string($step/@non-fissile) eq '')      then '#non-recursive'      else tokenize(      $step/@non-fissile,      '\s+')</xpath>
+  <xpath n="1" len="103">if (string($step/@keep-non-fissiles) eq '')      then '#yes'      else tokenize(      $step/@keep-non-fissiles,      '\s+')</xpath>
+  <xpath n="1" len="103">gt:serialize-range-list(       for $t in tokenize($sRanges,'\s+')       [normalize-space()]       return xs:integer($t)       )</xpath>
+  <xpath n="1" len="103">$ruleGen2/alt           [exists(nonterminal)           and not(exists(literal)                    or exists(inclusion)           or exists(exclusion)) ]</xpath>
+  <xpath n="1" len="104">gt:serialize-range-list(      for $t      in tokenize(@gt:theta,'\s+')      [normalize-space()]      return xs:integer($t)      )</xpath>
+  <xpath n="1" len="105">head(      ((key('lhs', $name, $grammar-node)        intersect $new),       ($used, $ngused)[parent::rule/@name = $name])      )</xpath>
+  <xpath n="1" len="112">concat(               gt:nodename($n),      ' [label="',      ($mark, '^')[1],      $n,      '"',      if ($final)      then ' peripheries=2'      else '',      ']'      )</xpath>
+  <xpath n="1" len="112">for $s in $lsStates0       return normalize-space(       if (contains($s, ' . '))       then substring-before($s, ' . ')       else $s       )</xpath>
+  <xpath n="1" len="116">gt:serialize-range-list(      for $t      in tokenize($eRule-dest/@gt:theta,'\s+')      [normalize-space()]      return xs:integer($t)      )</xpath>
+  <xpath n="1" len="116">if (count($e/descendant-or-self::*) gt 50)   then false()   else if (contains(string($e), '&#xD;'))   then false()   else true()</xpath>
+  <xpath n="1" len="118">if (contains($affix, $stackdel))   then tokenize($affix, $stackdel)[normalize-space()]   else string-to-codepoints($affix)   </xpath>
+  <xpath n="1" len="118">$G/rule/@name/string()      [not(starts-with(., 'alpha-'))]      [not(starts-with(., 'omega-'))]      [not(starts-with(., 'theta-'))]      </xpath>
+  <xpath n="1" len="119">gt:fIstoken($e)      or      exists($e      [self::sep      or self::option      or self::repeat0       or self::repeat1       or self::alt       or self::alts       ])</xpath>
+  <xpath n="1" len="122">if ((count($lr) eq 2)              and ($lr[1] eq $lr[2]))          then $lr[1]          else if (count($lr) eq 0)          then ()          else gt:pick-codepoint($lr, .)          </xpath>
+  <xpath n="1" len="124">gt:lrDiff(       ($hiSub + 1, $hiMin,       $lrMinuend[position() gt 2]),       $lrSubtrahend[position() gt 2],       ($acc, $loMin, ($loSub - 1))       )</xpath>
+  <xpath n="1" len="126">if (exists($nt0))   then $nt0   else if ($s castable as xs:NCName)          then $s   else '__'                       || string-join(string-to-codepoints($s), '.')   </xpath>
+  <xpath n="1" len="129">$leSib[*[@gt:ranges]   [   exists(gt:lrIntersectionSS(string(@gt:ranges), $lrA))   and    exists(gt:lrDiffSS($lrA, string(@gt:ranges)))   ]]</xpath>
+  <xpath n="1" len="131">concat(       'gt:fAffixok(',       $affix, ', ', $n,       ') returns ',       count($occurrences) le $k,       ' with ',       count($occurrences), ' and k = ', $k       )</xpath>
+  <xpath n="1" len="132">exists($e      [self::nonterminal      or self::inclusion      or self::exclusion      or self::literal[empty(parent::inclusion | parent::exclusion)]      ])</xpath>
+  <xpath n="1" len="133">1 + count(      ancestor::*      [parent::parse-tree-collection]      /preceding-sibling::*      [self::gt:node      or self::gt:element      or self::gt:failure])</xpath>
+  <xpath n="1" len="134">gt:expand-references(      $grammar,      tokenize($step/@nonterminals, '\s+'),      if ($step/@keep=('yes', '1', 'true'))      then true()      else false()      )</xpath>
+  <xpath n="1" len="136">if (empty($lnChildren))         then false()         else if         (some $nCh in $lnChildren         satisfies xs:boolean($nCh/@gl:nullable))         then true()         else false()</xpath>
+  <xpath n="1" len="137">if ($sCov = 'state')      then $this/@gt:state/string()      else if ($sCov = 'arc')      then $this/@gt:arc/string()      else 'you-in-a-heap-a-trouble-boy'      </xpath>
+  <xpath n="1" len="139">    ($digit - string-to-codepoints('0'),           $digit + 10 - string-to-codepoints('A'),           $digit + 10 - string-to-codepoints('a')           )[. ge 0][. le 15][1]</xpath>
+  <xpath n="1" len="141">concat($loThis,      ' le ', $loNext,      ' le ', $hiNext,      ' le ', $hiThis,      ' OR: ',      $loThis,      ' le ', $loNext,      ' le ', $hiThis,      ' le ', $hiNext,       '.'      )</xpath>
+  <xpath n="1" len="143">gt:make-trees(          $T1, $acc,          ($new except $rhs),          (for $e in $used          return if (empty($e intersect $rhs))          then $e          else (),          $rhs),          $cFails, $options          )</xpath>
+  <xpath n="1" len="153">if (empty($lnExpressions))     then true()     else if     (every $nCh in $lnExpressions     satisfies (xs:boolean($nCh/@gl:nullable) = true()))     then true()     else false()</xpath>
+  <xpath n="1" len="156">concat(          string($e/@tmark),          if ($e/self::exclusion) then '~' else '',          '[',          string-join(          for $c in $e/*[not(self::comment)]          return gt:string($c),          '; '),          ']'          )</xpath>
+  <xpath n="1" len="157">gt:lrDiff(      for $t in tokenize($sA,'\s+')      [normalize-space()]      return xs:integer($t),       for $t in tokenize($sB,'\s+')       [normalize-space()]      return xs:integer($t)      )</xpath>
+  <xpath n="1" len="158">gt:lrUnion(      for $t in tokenize($sA,'\s+')      [normalize-space()]      return xs:integer($t),            for $t in tokenize($sB,'\s+')       [normalize-space()]      return xs:integer($t)      )</xpath>
+  <xpath n="1" len="160">if (contains($affix, $stackdel))   then tokenize($affix, $stackdel)[normalize-space()]   else for $s in string-to-codepoints($affix)        return codepoints-to-string($s)   </xpath>
+  <xpath n="1" len="163">for $L in descendant::literal         [not(ancestor::inclusion or ancestor::exclusion)]         return         for $numeral in tokenize($L/@gt:ranges,'\s+')[1]         return xs:integer($numeral)         </xpath>
+  <xpath n="1" len="164">if ($step/@config eq 'no-config-file')       then 'no-config-file'      else if (string($step/@config) eq '')       then 'no-config-file'            else resolve-uri(      $step/@config,      $base-uri)</xpath>
+  <xpath n="1" len="164">gt:make-trees(          $T1, $acc,          ($new except $newly-used),          (for $e in $used          return if (empty($e intersect $newly-used))          then $e          else (),          $newly-used),          $cFails, $options          )</xpath>
+  <xpath n="1" len="165">gt:lrIntersection(      for $t in tokenize($sA,'\s+')      [normalize-space()]      return xs:integer($t),            for $t in tokenize($sB,'\s+')       [normalize-space()]      return xs:integer($t)      )</xpath>
+  <xpath n="1" len="166">gt:make-trees((), (),        rule/alt, (),        0,        map{'maxdepth':  $maxdepth,        'maxfail':  $maxfail,         'pseudo-terminals':  $pseudo-terminals,         'start-symbol': rule[1]/@name/string()})</xpath>
+  <xpath n="1" len="184">if (string-length($s) eq 1)       then $s       else if (starts-with($s, '#') and (translate($s, '#0123456789abcdefABCDEF', '') eq ''))       then codepoints-to-string(d2x:x2d(substring($s, 2)))       else ''</xpath>
+  <xpath n="1" len="222">if (/descendant::rule/@gt:recursive)      then /descendant::rule[@recursive='true']      else      for $r in /descendant::rule      return let $n := $r/@name/string()      return let $ln := gt:lnDescXGN($G, $n)      return if ($n = $ln) then $r else ()      </xpath>
+  <xpath n="1" len="222">if (/descendant::rule/@gt:recursive)      then /descendant::rule[@recursive='true']      else      for $r in /descendant::rule      return let $n := $r/@name/string()      return let $ln := gt:lnDescXGN($G, $n)      return if ($n = $ln) then () else $r      </xpath>
+  <xpath n="1" len="308">
+if ($e/@dstring) then
+          concat(
+          string($e/@tmark),
+          '"' ,
+          string($e/@dstring),
+          '"'
+           )
+          else if ($e/@sstring) then
+          concat(
+          string($e/@tmark),
+           "'" ,
+           string($e/@sstring),
+          "'"
+          )
+          else if ($e/@string) then
+          concat(
+          string($e/@tmark),
+           "'" ,
+           string($e/@string),
+          "'"
+          )
+          else
+          concat(
+          string($e/@tmark),
+           '#',
+           string($e/@hex)
+          )
+          </xpath>
+</collection>

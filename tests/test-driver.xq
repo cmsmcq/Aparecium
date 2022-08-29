@@ -13,7 +13,7 @@ declare namespace db =
 
 declare option db:chop "false";
 
-let $catalog-index := 'bogons' (: which catalog to run? short name :)
+let $catalog-index := 'poberon' (: which catalog to run? short name :)
     (: bogons ???. 
        test0 2s, test1 5s, hygiene 12s, zeroes 20s.  
        misc 78s, gxxx 153s, wisp-A 100s.
@@ -44,6 +44,8 @@ let $invdir := "../../cmsmcq-ixml/tests/",
 
       <!-- need timing ........................................ -->
       <catalog n="expr1" path="{$apadir}expr1-20220415.xml"/><!-- ??? s -->
+      <catalog n="pxpath" path="{$apadir}/perf/xpath/xpath-test-catalog.xml"/>
+      <catalog n="poberon" path="{$apadir}/perf/oberon/oberon-test-catalog.xml"/>
 
       <!-- local performance tests (cut off the slow ones for now) -->
       <catalog n="local-doubling" 
@@ -256,7 +258,7 @@ let $invdir := "../../cmsmcq-ixml/tests/",
         )[1]
       },
       
-      attribute timeout { 600 }
+      attribute timeout { 6000 }
 
     }
 

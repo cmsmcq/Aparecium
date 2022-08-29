@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tc:test-catalog xmlns:tc="https://github.com/invisibleXML/ixml/test-catalog"
+		 xmlns:ixml="http://invisiblexml.org/NS"
+		 name="E-3-milli"
+		 release-date="2022-08-10"
+		 >
+  <tc:description>
+    <tc:p>A collection of tests which (at the outset of an effort to
+    improve performance) run in less than ten milliseconds.</tc:p>
+
+    <tc:p>This test collection is empty:  in the results I'm working
+    from, no tests ran (both grammar and instance) in less than ten
+    milliseconds.  Sigh.</tc:p>    
+  </tc:description>
+  
+</tc:test-catalog>

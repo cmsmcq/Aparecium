@@ -1,0 +1,73 @@
+<tc:test-catalog xmlns:tc="https://github.com/invisibleXML/ixml/test-catalog"
+		 xmlns:ixml="http://invisiblexml.org/NS"
+		 name="all-performance-tests"
+		 release-date="2022-08-20"
+		 >
+  <tc:description>
+    <tc:p>A collection of tests for use in measuring performance
+    of an invisible XML processor.</tc:p>
+  </tc:description>
+
+  <tc:test-set name="size-series">
+    <tc:created by="cmsmcq" on="2022-08-20"/>
+    <tc:description>
+      <tc:p>Part 1</tc:p>
+      <tc:p>Tests in the ixml test catalog for performance
+      measurement. The grammars are simple and the tests
+      vary systematically in the size of the input and
+      its parse tree.</tc:p>
+    </tc:description>
+    <tc:test-set-ref href=
+      "../../../cmsmcq-ixml/tests/performance/a-star/doubling-test-catalog.xml"
+      />
+    <!--
+    <tc:test-set-ref href=
+      "../../../cmsmcq-ixml/tests/performance/a-star/tenfold-test-catalog.xml"
+      />
+    -->
+
+    <tc:test-set-ref href=
+     "../../../cmsmcq-ixml/tests/performance/evens-and-odds/test-catalog.xml"
+     />
+
+  </tc:test-set>
+
+  <tc:test-set name="stratified">
+    <tc:created by="cmsmcq" on="2022-08-20"/>
+    <tc:description>
+      <tc:p>Part 2</tc:p>
+      <tc:p>Selected tests from the ixml test catalog with varying
+      performance.  Tests are grouped into strata based on how long
+      they took to run in BaseX in late July (time to parse grammar
+      plus time to parse instance); each stratum gathers tests for a
+      given range of total time (tens of milliseconds, hundreds, ...),
+      and where possible includes both tests where the overall time is
+      dominated by the grammar and tests where it is dominated by the
+      instance.</tc:p>
+    </tc:description>
+    <!-- minus-3 set is empty, pointless to run -->
+    <tc:test-set-ref href="stratified/stratum-E-minus-3-catalog.xml"/>
+    <tc:test-set-ref href="stratified/stratum-E-minus-2-catalog.xml"/>
+    <tc:test-set-ref href="stratified/stratum-E-minus-1-catalog.xml"/>
+    <tc:test-set-ref href="stratified/stratum-E-plus-0-catalog.xml"/>
+    <tc:test-set-ref href="stratified/stratum-E-plus-1-catalog.xml"/>
+    <tc:test-set-ref href="stratified/stratum-E-plus-2-catalog.xml"/>
+    <tc:test-set-ref href="stratified/stratum-E-plus-3-catalog.xml"/>
+    <tc:test-set-ref href="stratified/stratum-E-plus-4-catalog.xml"/>
+  </tc:test-set>
+  
+  <tc:test-set name="external">
+    <tc:created by="cmsmcq" on="2022-08-20"/>
+    <tc:description>
+      <tc:p>Part 3</tc:p>
+      <tc:p>Selected tests with grammars and data that have no
+      connection with ixml or testing.</tc:p>
+    </tc:description>
+    <tc:test-set-ref href="xpath/xpath-test-catalog.xml"/>    
+    <tc:test-set-ref href="oberon/oberon-test-catalog.xml"/>    
+    <tc:test-set-ref href="vcards/vcards-test-catalog.xml"/>    
+    <tc:test-set-ref href="ariadne/ariadne-test-catalog.xml"/>    
+    <tc:test-set-ref href="fopc/fopc-test-catalog.xml"/>    
+  </tc:test-set>
+  
+</tc:test-catalog>

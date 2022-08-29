@@ -1,0 +1,27 @@
+# Toy samples:
+
+  * DaveP.vcf (single card) via email in June.
+
+  * ertant.vcf from https://github.com/ertant/vCard
+
+  * examples-from-rfc.vcf from
+    https://datatracker.ietf.org/doc/html/rfc6350 (extracted manually)
+
+  * kimber.vcf from Eliot Kimber's email to xsl-list
+
+# Real-data samples:
+
+All received via email from the owners on 11 August.
+
+Do not redistribute, destroy when done.  If possible without affecting
+performance, use the fuzzed versions.
+
+  * DP.contacts.{xml,fuzzed.xml) from Dave Pawson 
+
+  * NormContacts.{xml,fuzzed.xml} from Norm Walsh
+  
+  * BTU-Addresses-20220811.{xml,fuzzed.xml} from Tommie Usdin
+
+The fuzzing of the real data was performed using
+Aparecium/tests/perf/lib/fuzz-vcf.xq (that should leave the size
+unchanged; it's not clear why the size is different).

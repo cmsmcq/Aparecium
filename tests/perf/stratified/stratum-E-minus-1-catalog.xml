@@ -1,0 +1,237 @@
+<tc:test-catalog xmlns:tc="https://github.com/invisibleXML/ixml/test-catalog"
+		 xmlns:ixml="http://invisiblexml.org/NS"
+		 name="E-1-deci"
+		 release-date="2022-08-20"
+		 >
+  <tc:description>
+    <tc:p>A collection of tests which (at the outset of an effort to
+    improve performance) run in less than one hundred milliseconds
+    (so: in a single-digit number of centiseconds).</tc:p>
+    <tc:p>Started 10 August, filled in 20 August 2022.</tc:p>
+  </tc:description>
+
+  <tc:test-set name="sample.grammar.10">
+    <tc:created on="2022-02-08" by="cmsmcq"/>
+    <tc:description>
+      <tc:p>Infinite ambiguity (loop).</tc:p>
+      <tc:p>L(G) = {''}.</tc:p>
+    </tc:description>
+    <tc:ixml-grammar>A: A; .</tc:ixml-grammar>
+    <tc:grammar-test>
+      <tc:result>
+	<tc:assert-xml
+	    ><ixml
+              ><rule name="A"
+		><alt
+		  ><nonterminal name="A"
+		/></alt
+		><alt
+              /></rule
+	    ></ixml>
+	</tc:assert-xml>
+      </tc:result>
+    </tc:grammar-test>
+    <tc:test-case name="g10c01">
+      <tc:test-string/>
+      <tc:result>
+	<tc:assert-xml><A ixml:state="ambiguous"/></tc:assert-xml>
+	<tc:assert-xml><A ixml:state="ambiguous"><A/></A></tc:assert-xml>
+	<tc:assert-xml><A ixml:state="ambiguous"><A><A/></A></A></tc:assert-xml>
+	<tc:assert-xml>
+	  <A ixml:state="ambiguous"><A><A><A/></A></A></A>
+	</tc:assert-xml>
+	<tc:assert-xml>
+	  <A ixml:state="ambiguous"><A><A><A><A/></A></A></A></A>
+	</tc:assert-xml>
+	<tc:assert-xml>
+	  <A ixml:state="ambiguous"><A><A><A><A><A/></A></A></A></A></A>
+	</tc:assert-xml>
+	<tc:assert-xml>
+	  <A ixml:state="ambiguous"><A><A><A><A><A><A/></A></A></A></A></A></A>
+	</tc:assert-xml>
+	<tc:assert-xml>
+	  <A ixml:state="ambiguous"><A><A><A><A><A><A><A/></A></A></A></A></A></A></A>
+	</tc:assert-xml>
+	<!-- ... etc. ... -->
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>  
+    
+  <tc:test-set name="prolog-1a">
+    <tc:created by="jwL" on="2022-05-16"/>
+    <tc:description>
+      <tc:p>A grammar with a simple version.</tc:p>
+    </tc:description>
+    <tc:ixml-grammar> 
+      ixml version "1.3".
+      P:["B"-"D"].  
+    </tc:ixml-grammar>
+    <tc:grammar-test>
+      <tc:result>
+      <tc:assert-xml>
+        <ixml xmlns=""
+          ><prolog
+            ><version string="1.3"
+          /></prolog
+          ><rule name="P"
+            ><alt
+              ><inclusion
+                ><member from="B" to="D"
+              /></inclusion
+            ></alt
+          ></rule
+        ></ixml>
+      </tc:assert-xml>
+      </tc:result>
+    </tc:grammar-test>
+
+    <tc:test-case name="BCD">
+      <tc:test-string>BCD</tc:test-string>
+      <tc:result>
+	<tc:assert-not-a-sentence ixml:state="version-mismatch"/>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+  
+  <tc:test-set name="sample.grammar.35">
+    <tc:created on="2022-02-08" by="cmsmcq"/>
+    <tc:description>
+      <tc:p>Sample grammar from Niklaus Wirth, Grundlagen und Techniken des 
+      Compilerbaus (Bonn: Addison-Wesley, 1996, p. 5. 
+      </tc:p>
+      <tc:p>An infinite language.
+      L = empty string, a, aa, aaa, aaaa, ... 
+      </tc:p>
+    </tc:description>
+    <tc:ixml-grammar>
+      S: A.
+      A: "a", A; .
+    </tc:ixml-grammar>
+    <tc:grammar-test>
+      <tc:result>
+	<tc:assert-xml>
+	    <ixml
+              ><rule name="S"
+		><alt
+		  ><nonterminal name="A"
+		/></alt
+              ></rule
+              ><rule name="A"
+		><alt
+		  ><literal string="a"
+		  /><nonterminal name="A"
+		/></alt
+		><alt
+              /></rule
+	    ></ixml>
+	</tc:assert-xml>
+      </tc:result>
+    </tc:grammar-test>
+    <tc:test-case name="g35.r05">
+      <tc:test-string>b</tc:test-string>
+      <tc:result>
+	<tc:assert-not-a-sentence/>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+  
+  <tc:test-set name="sample.grammar.36">
+    <tc:created on="2022-02-08" by="cmsmcq"/>
+    <tc:description>
+      <tc:p>Sample grammar from Niklaus Wirth, Grundlagen und Techniken des 
+      Compilerbaus (Bonn: Addison-Wesley, 1996, p. 6. 
+      </tc:p>
+      <tc:p>
+	An infinite language with center recursion.
+	L = b, abc, aabcc, aaabccc, ...
+      </tc:p>
+      <tc:p>
+      </tc:p>
+    </tc:description>
+    <tc:ixml-grammar>
+      S: A.
+      A: "a", A, "c"; "b".
+    </tc:ixml-grammar>
+    <tc:grammar-test>
+      <tc:result>
+	<tc:assert-xml>
+	    <ixml
+              ><rule name="S"
+		><alt
+		  ><nonterminal name="A"
+		/></alt
+	      ></rule
+	      ><rule name="A"
+		><alt
+		  ><literal string="a"
+		  /><nonterminal name="A"
+		  /><literal string="c"
+		/></alt
+		><alt
+		  ><literal string="b"
+		/></alt
+              ></rule
+	    ></ixml>
+	</tc:assert-xml>
+      </tc:result>
+    </tc:grammar-test>
+    <tc:test-case name="g36.c05">
+      <tc:test-string>ac</tc:test-string>
+      <tc:result>
+	<tc:assert-not-a-sentence/>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+
+  <tc:test-set name="sample.grammar.35-bis">
+    <tc:created on="2022-02-08" by="cmsmcq"/>
+    <tc:description>
+      <tc:p>Sample grammar from Niklaus Wirth, Grundlagen und Techniken des 
+      Compilerbaus (Bonn: Addison-Wesley, 1996, p. 5. 
+      </tc:p>
+      <tc:p>An infinite language.
+      L = empty string, a, aa, aaa, aaaa, ... 
+      </tc:p>
+    </tc:description>
+    <tc:ixml-grammar>
+      S: A.
+      A: "a", A; .
+    </tc:ixml-grammar>
+    <tc:grammar-test>
+      <tc:result>
+	<tc:assert-xml>
+	    <ixml
+              ><rule name="S"
+		><alt
+		  ><nonterminal name="A"
+		/></alt
+              ></rule
+              ><rule name="A"
+		><alt
+		  ><literal string="a"
+		  /><nonterminal name="A"
+		/></alt
+		><alt
+              /></rule
+	    ></ixml>
+	</tc:assert-xml>
+      </tc:result>
+    </tc:grammar-test>
+    <tc:test-case name="g35.c04">
+      <tc:test-string>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</tc:test-string>
+      <tc:result>
+	<tc:assert-xml>
+	  <S><A>a<A>a<A>a<A>a<A>a<A>a<A>a<A>a<A>a<A>a<A
+            >a<A>a<A>a<A>a<A>a<A>a<A>a<A>a<A>a<A>a<A
+            >a<A>a<A>a<A>a<A>a<A>a<A>a<A>a<A>a<A>a<A
+            >a<A>a<A>a<A>a<A>a<A>a<A/></A></A></A></A></A></A
+            ></A></A></A></A></A></A></A></A></A></A
+            ></A></A></A></A></A></A></A></A></A></A
+            ></A></A></A></A></A></A></A></A></A></A
+          ></S>
+	</tc:assert-xml>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+  
+</tc:test-catalog>

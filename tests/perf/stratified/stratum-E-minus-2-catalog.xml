@@ -1,0 +1,61 @@
+<tc:test-catalog xmlns:tc="https://github.com/invisibleXML/ixml/test-catalog"
+		 xmlns:ixml="http://invisiblexml.org/NS"
+		 name="E-2-centi"
+		 release-date="2022-08-10"
+		 >
+  <tc:description>
+    <tc:p>A collection of tests which (at the outset of an effort to
+    improve performance) run in less than one hundred milliseconds
+    (so: in a single-digit number of centiseconds).</tc:p>
+  </tc:description>
+
+  <tc:description>
+    <tc:p>All tests in this stratum are negative tests using
+    the specification grammar in vxml form.  That is, they are
+    ixml grammars with syntax errors, and the test cases do not
+    require that the spec grammar itself be parsed.</tc:p>
+    <tc:p>In all cases, the grammar processing is just a call to
+    doc(), and does not include compilation or checking.</tc:p>
+    <tc:p>And in all cases, the input is short.</tc:p>
+  </tc:description>
+
+  <tc:test-set name="syntax-xml-instance">
+    <tc:created by="SP" on="2021-12-16"/>
+    <tc:modified by="cmsmcq" on="2022-08-20"
+		 change="selected five tests"/>
+    
+
+    <tc:vxml-grammar-ref href="../../../lib/ixml.2022-06-07.ixml.xml"/>
+
+    <tc:test-case name="name-with-spaces">
+      <tc:test-string-ref href=
+	"../../../../cmsmcq-ixml/tests/syntax/name-with-spaces.ixml"/>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="rule9">
+      <tc:test-string-ref href="rule9.ixml"/>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="rule10">
+      <tc:test-string-ref href="rule10.ixml"/>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="nothexdigits">
+      <tc:created by="NDW" on="2022-06-02"/>
+      <tc:modified by="MSM" on="2022-06-03"
+		change="copied to instance tests"/>
+      <tc:test-string>S = #CAFFEINE.</tc:test-string>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>
+    
+    <tc:test-case name="rule7">
+      <tc:test-string-ref href="rule7.ixml"/>
+      <tc:result><tc:assert-not-a-sentence/></tc:result>
+    </tc:test-case>    
+      
+  </tc:test-set>
+  
+</tc:test-catalog>

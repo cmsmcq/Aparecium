@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="../src/local.xsl"?>
+<!DOCTYPE TEI.2 [
+<!ENTITY date.last.touched '20 August 2022' >
+<!ATTLIST item id ID #IMPLIED>
+<!ATTLIST bibl id ID #REQUIRED>
+<!ATTLIST div  id ID #REQUIRED>
+<!ATTLIST scrap id ID #IMPLIED>
+
+<!ENTITY mdash  "&#x2014;" ><!--=em dash-->
+
+<!ENTITY k "<ident>k</ident>">
+<!--* Reminder:
+      (progn
+        (make-variable-buffer-local 'nxml-child-indent)
+        (setq 'nxml-child-indent 0))
+
+      For now, do this manually.  I don't know how to
+      make Aquamacs do it using eval-last-sexp or eval-expression.
+      (set-variable 'nxml-child-indent 0)
+    *-->
+]>
+<TEI.2>
+<teiHeader>
+<fileDesc>
+<titleStmt>
+<title>Performance analysis work log</title>
+<author>C. M. Sperberg-McQueen</author>
+</titleStmt>
+<publicationStmt>
+<date>2022</date>
+</publicationStmt>
+<sourceDesc>
+<p>The XML document using the TEI P3 + Sweb vocabulary is the original
+form of this document.</p>
+</sourceDesc>
+</fileDesc>
+<revisionDesc>
+<list>
+<item>2022-08-20 : CMSMcQ : move into XML, try to push a little further</item>
+<item>2022-07-09 : CMSMcQ : do some initial thinking about big-oh analysis</item>
+</list>
+</revisionDesc>
+</teiHeader>
+
+<text>
+<front>
+<titlePage>
+<docTitle>
+<titlePart>Performance analysis work log</titlePart>
+<titlePart>for Aparecium</titlePart>
+</docTitle>
+
+<docAuthor>C. M. Sperberg-McQueen</docAuthor>
+<docDate>20 August 2022, last revised &date.last.touched;</docDate>
+</titlePage>
+
+<divGen type="toc"/>
+</front>
+
+<body>
+  <p>This document records work in performance improvements for
+  Aparecium, an Invisible-XML processor written in XQuery.</p>
+  <p>Part of it is a work log organized chronologically; parts of it
+  are non-chronological descriptions of ideas to try.</p>
+
+  <div id="log">
+    <head>Work log</head>
+    <div id="log-20220709">
+      <head>9 July 2022</head>
+      <p>Inspired perhaps by the discussion of big-O analysis in
+      Meyer's <title>Touch of class</title>, tried to see if I could
+      make any headway on a static analysis of Aparecium.  It is
+      doubtless an amateurish job, since I've never done it before,
+      and it seems to hover uneasily between an attempt to
+      characterize performance in some detail, at least potentially,
+      and the ruthlessly simple <q>linear, quadratic, or what?</q>
+      focus Meyer exhibits.</p>
+      <p>But I found it interesting enough to want to continue.</p>
+    </div>
+    <div id="log-20220820">
+      <head>20 August 2022</head>
+      <p>After Balisage, I decided to try to make improvements to
+      performance in Aparecium my rest-of-summer project, to see how
+      far I could get.  At the moment, it looks very grim -- not much
+      visible progress at all, and not much invisible progress,
+      either.</p>
+      <p>I have four tasks at the moment, three of which can be worked
+      on in parallel (or in rotation):
+      <list>
+	<item>
+	  <p><label>static analysis</label> of the code to try to
+	  understand where the hot spots are likely to be</p>
+	  <p>See <ref target="static-analysis">below</ref>.</p>
+	</item>
+	<item>
+	  <p>support for <label>additional XQuery engines</label>, to
+	  make it easier to avoid confusing optimizations that work
+	  across the board (like doing less work) from those that are
+	  implementation-dependent</p>
+	  <p>My current targets are eXist-db and Saxon HE.</p>
+	  <p>There are good reasons to want to support them in any
+	  case, but the reason to work <emph>now</emph> on supporting
+	  them is to make the performance work better.  I don't want
+	  to delay the actual work on performance indefinitely,
+	  though, so I plan to cap my time on them to 20 and 10 hours,
+	  respectively.</p>
+	  <p>So far, I think I have spent 8h billable to eXist-db
+	  (including filing two bug reports, which slows things down a
+	  good deal), and 2h on HE (mostly an inquiry on the Saxon
+	  forum about how to guard processor-specific code, which
+	  elicited the news that Saxon 10 and 11 make HE support
+	  higher-order functions).</p>
+	  <p>As I proceed, I should try to follow through on the idea
+	  of (a) wrapping each bit of processor-dependence in a
+	  function and (b) putting those functions in a separate
+	  utilities module.</p>
+	</item>
+	<item>
+	  <p>development and measurement of a set of
+	  <label>performance tests</label> (see <ref
+	  target="test-plan">below</ref>).</p>
+	</item>
+	<item>
+	  <p>figuring out <label>how to measure</label> performance
+	  for engines other than BaseX</p>
+	  <p>When I can run from bash, I can use the Bash
+	  <ident>time</ident> command, but I cannot run Saxon PE and
+	  HE from the shell, only from Oxygen.  So it may have to be
+	  file creation times (but that won't work with Saxon HE).</p>
+	</item>
+      </list>
+      </p>
+      <p>Today I am trying to spend some time on each of the first
+      three (analysis, new engines, test suite); my work on analysis today
+      has consisted so far in creating this document, beginning to
+      fill it in, and inserting the work done in July into the
+      section on <ptr target="static-analysis"/>.</p>
+
+    </div>
+  </div>
+  <div id="test-plan">
+    <head>Test suite and test plans</head>
+    <p>The test suite has three branches:
+    <list>
+      <item>
+	<p>The tests in <code>ixml/tests/performance/*</code>, which
+	are artificially simple tests (to try to keep them easy to
+	understand and analyse) with mechanically constructed inputs,
+	each input twice the size of its predecessor.</p>
+	<p>From the results, it seems clear that there is a quadratic
+	term in Aparecium performance even on deterministic
+	grammars.</p>
+      </item>
+      <item>
+	<p>A selection of tests from the existing ixml test suite,
+	some fast and some slow.  More specifically, a selection of
+	five to ten tests at each of various speeds (tens of
+	milliseconds, hundreds, thousands, ...), where possible with
+	some tests spending more of their time in the grammar and some
+	more of their time in the instance.</p>
+      </item>
+      <item>
+	<p>A seletion of <soCalled>realistic</soCalled> tests, with
+	grammars and inputs from projects unrelated to invisible XML
+	and Aparecium.</p>
+      </item>
+    </list>
+    </p>
+  </div>
+  <div id="static-analysis">
+    <head>Static analysis</head>
+    <p>As a first attempt, let's just try to walk through one possible
+    execution.  To execute <code>ap:parse-resource($I, $G)</code>,
+    what is the cost &k;?</p>
+    <p>[Note, 9 July.  This seems to be a plausible way to start.  It
+    illustrates just how many layers there are in the onion, and it
+    may start getting difficult just about where I have left off for
+    now.  But I think this is a start.]</p>
+    <list type="ordered">
+      <item id="parse-resource">
+	<p>k( parse-resource($I + $G) ) =
+	<lb/>
+	<lb/>k(unparsed-text($I))
+	<lb/>+ k(unparsed-text($G))
+	<lb/>+ k(parse-string($I2, $G2))  // <ptr target="parse-string"/></p>
+	<p>Conjecture: unparsed-text() is O(n) in bytecount of result.</p>
+	<p>Conjecture: unparsed-text() is negligeable compared to
+	parse-string, in all strata.</p>
+      </item>
+      <item id="parse-string">
+	<p>k(parse-string($I, $G)) =
+	<lb/>
+	<lb/>k(compile-grammar-from-string($G)) // <ptr target="compile-grammar-from-string"/>
+	<lb/>+ k(parse-string-with-compiled-grammar($I, $G2)) // <ptr target="parse-string-with-compiled-grammar"/>
+	</p>
+      </item>
+      <item id="compile-grammar-from-string">
+	<p>k(compile-grammar-from-string($G)) = 
+	<lb/>
+	<lb/>k(parse-grammar-from-string($G)) // <ptr target="parse-grammar-from-string"/>
+	<lb/>+ k(gluschkov($G2)) // <ptr target="gluschkov"/>
+	</p>
+      </item>
+      <item id="parse-string-with-compiled-grammar">
+	<p>k(parse-string-with-compiled-grammar($I, $CG))=
+	<lb/>
+	<lb/>k(grammar-ok($CG)) // <ptr target="grammar-ok"/>
+	<lb/>+ k(any-tree($I, $CG)) // <ptr target="any-tree"/>
+	</p>
+      </item>
+      <item id="parse-grammar-from-string">
+	<p>k(parse-grammar-from-string($G))
+	<lb/>
+	<lb/>k(doc($ap:ixml.gl.xml))
+	<lb/>+ k(parse-string-with-compiled-grammar($G, $ixml.gl)) // <ptr target="parse-string-with-compiled-grammar"/>
+	</p>
+	<p>Conjecture that doc() is linear in bytes of standard XML grammar.
+	(But is in any case out of my hands.)</p>
+      </item>
+      <item id="gluschkov">
+	<p>k(gluschkov($G2)) =
+	<lb/>
+	</p>
+	<p>Conjecture: this is a depth-first traversal and the cost is O(n) for n
+	= number of symbols in G, ≅ number of XML elements in $G//* except
+	$G//comment.
+	</p>
+      </item>
+      <item id="grammar-ok">
+	<p>k(grammar-ok($CG))
+	</p>
+      </item>
+      <item id="any-tree">
+	<p>k(any-tree($I, $CG)) =
+	<lb/>k(earley-parse($I, $CG)) // <ptr target="earley-parse"/>
+	</p>
+      </item>
+      <item id="earley-parse">
+	<p>k(earley-parse($I, $CG)) =
+	<lb/>k(er:recognizeX($I, $CG) <ptr target="er.recognizeX"/>
+	<lb/>+ k(epi:parse-forest-grammar(completions, closure, input)) // <ptr target="epi.parse-forest-grammar"/>
+	<lb/>+ k(epi:tree-from-pfg(pfg)) // <ptr target="epi.tree-from-pfg"/>
+	</p>
+      </item>
+      <item id="er.recognize">
+	<p>k(er:recognizeX($I, $CG) =
+	<lb/>???</p>
+      </item>
+      <item id="epi.parse-forest-grammar">
+	<p>+ k(epi:parse-forest-grammar(completions, closure, input)) =
+	<lb/>???</p>
+      </item>
+      <item id="epi.tree-from-pfg">
+	<p>k(epi:tree-from-pfg(pfg)) =
+	<lb/>???
+	</p>
+      </item>
+
+    </list>
+  </div>
+  
+</body>
+
+<back>
+<div id="indices">
+<head>Indices</head>
+<divGen type="index"/>
+</div>
+
+</back>
+</text>
+</TEI.2>

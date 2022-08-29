@@ -1,0 +1,325 @@
+<tc:test-catalog xmlns:tc="https://github.com/invisibleXML/ixml/test-catalog"
+		 xmlns:ixml="http://invisiblexml.org/NS"
+		 name="E0-seconds"
+		 release-date="2022-08-10"
+		 >
+  <tc:description>
+    <tc:p>A collection of tests which (at the outset of an effort to
+    improve performance) run in less than one hundred milliseconds
+    (so: in a single-digit number of centiseconds).</tc:p>
+  </tc:description>
+
+  <tc:test-set name="lf">
+    <tc:created by="SP" on="2021-12-16"/>
+    <tc:ixml-grammar-ref href="../../../../cmsmcq-ixml/tests/correct/lf.ixml"/>
+    <tc:test-case name="lf">
+      <tc:created by="SP" on="2021-12-16"/>
+      <tc:modified by="MSM" on="2021-12-30"
+		   change="Stripped whitespace from expected result"/>
+      <tc:modified by="MSM" on="2021-12-30"
+		   change="Stripped final empty line element from
+			   expected result, no trailing lf in input"/>
+      <tc:test-string-ref href="../../../../cmsmcq-ixml/tests/correct/lf.inp"/>
+      <tc:result>
+	<tc:assert-xml-ref href="../../../../cmsmcq-ixml/tests/correct/lf.output.xml"/>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+  
+  <tc:test-set name="whitespace-and-delimiters-inline">
+    <tc:created by="MSM" on="2022-05-30"/>
+    <tc:ixml-grammar>
+&#x9;S&#xD;={}a, b, c, d.&#xD;
+&#x9;a&#xA;=&#x20;'Don''t worry'&#xD;
+&#x9;      | 'Keep ''calm'''.&#xD;
+&#x9;b&#xD;={}[';,']?.&#xD;
+&#x9;&#x9;d = 'be ''happy''.'&#xD;
+        |{}; 'and carry on.'.{}c=#000000000000020.&#xD;
+    </tc:ixml-grammar>
+    <tc:grammar-test>
+      <tc:result><tc:assert-xml>
+	<ixml xmlns=""
+	  ><rule name="S"
+	    ><comment
+	    /><alt
+	      ><nonterminal name="a"
+	      /><nonterminal name="b"
+	      /><nonterminal name="c"
+	      /><nonterminal name="d"
+	    /></alt
+	  ></rule
+	  ><rule name="a"
+	    ><alt><literal string="Don't worry"/></alt
+	    ><alt><literal string="Keep 'calm'"/></alt
+	  ></rule
+	  ><rule name="b"
+	    ><comment
+	    /><alt><option><inclusion><member string=";,"/></inclusion></option></alt
+	  ></rule
+	  ><rule name="d"
+	    ><alt><literal string="be 'happy'."/></alt
+	    ><comment
+	    /><alt
+	    /><alt><literal string="and carry on."/></alt
+	  ></rule
+	  ><comment
+	  /><rule name="c"
+	    ><alt><literal hex="000000000000020"/></alt
+	  ></rule
+	></ixml>
+      </tc:assert-xml></tc:result>     
+    </tc:grammar-test>
+    <tc:test-case name="wd3">
+      <tc:test-string>Keep 'calm'; be 'happy'.</tc:test-string>
+      <tc:result><tc:assert-xml>
+	<S xmlns=""><a>Keep 'calm'</a><b>;</b><c> </c><d>be 'happy'.</d></S>
+      </tc:assert-xml></tc:result>
+    </tc:test-case> 
+    
+  </tc:test-set>
+  
+  <tc:test-set name="sample.grammar.55">
+    <tc:created on="2022-02-08" by="cmsmcq"/>
+    <tc:description>
+      <tc:p>A regular grammar.  An equivalent regular expression
+      is ac?(bc)*bc?a|aca.</tc:p>
+    </tc:description>
+    <tc:ixml-grammar>{ Sample grammar adapted from Dick Grune and Ceriel J. H. Jacobs,
+    Parsing techniques: A practical guide (New York: Ellis Horwood, 1990;
+    second edition New York:  Springer, 2008), pp. 109 (1e) and 142 (2e).
+
+    This is a regular grammar; C/J use it in their discussion of parsing
+    with regular grammars.
+    }
+
+    { Revisions:
+    2018-08-09 : CMSMcQ : made first transcription.
+    }
+
+    S: "a", A; "a", B.
+    A: "b", B
+     ; "b", C.
+    B: "c", A
+     ; "c", C.
+    C: "a".
+    </tc:ixml-grammar>
+    <tc:grammar-test>
+      <tc:result>
+	<tc:assert-xml>
+          <ixml
+            ><comment> Sample grammar adapted from Dick Grune and Ceriel J. H. Jacobs,
+    Parsing techniques: A practical guide (New York: Ellis Horwood, 1990;
+    second edition New York:  Springer, 2008), pp. 109 (1e) and 142 (2e).
+
+    This is a regular grammar; C/J use it in their discussion of parsing
+    with regular grammars.
+    </comment
+            ><comment> Revisions:
+    2018-08-09 : CMSMcQ : made first transcription.
+    </comment
+            ><rule name="S"
+              ><alt
+                ><literal string="a"
+                /><nonterminal name="A"
+              /></alt
+              ><alt
+                ><literal string="a"
+                /><nonterminal name="B"
+              /></alt
+            ></rule
+            ><rule name="A"
+              ><alt
+                ><literal string="b"
+                /><nonterminal name="B"
+              /></alt
+              ><alt
+                ><literal string="b"
+                /><nonterminal name="C"
+              /></alt
+            ></rule
+            ><rule name="B"
+              ><alt
+                ><literal string="c"
+                /><nonterminal name="A"
+              /></alt
+              ><alt
+                ><literal string="c"
+                /><nonterminal name="C"
+              /></alt
+            ></rule
+            ><rule name="C"
+              ><alt
+                ><literal string="a"
+              /></alt
+            ></rule
+          ></ixml>
+	</tc:assert-xml>
+      </tc:result>
+    </tc:grammar-test>
+    
+    <tc:test-case name="g55.c10">
+      <tc:test-string>abcbcbcbcba</tc:test-string>
+      <tc:result>
+	<tc:assert-xml>
+	  <S>a<A>b<B>c<A>b<B>c<A>b<B>c<A>b<B>c<A>b<C>a</C
+          ></A></B></A></B></A></B></A></B></A></S>
+	</tc:assert-xml>
+      </tc:result>
+    </tc:test-case>
+    
+  </tc:test-set>
+  
+  <tc:test-set name="vcard">
+    <tc:created by="SP" on="2021-12-16"/>
+    <tc:ixml-grammar-ref href="../../../../cmsmcq-ixml/tests/correct/vcard.ixml"/>
+    <tc:test-case name="vcard">
+      <tc:created by="SP" on="2021-12-16"/>
+      <tc:modified
+	  by="MSM"
+	  on="2021-12-30"
+	  change="stripped non-significant whitespace from result"/>
+      <tc:test-string-ref href="../../../../cmsmcq-ixml/tests/correct/vcard.inp"/>
+      <tc:result>
+	<tc:assert-xml-ref href="../../../../cmsmcq-ixml/tests/correct/vcard.output.xml"/>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+
+  
+  <tc:test-set name="sample.grammar.51">
+    <tc:created on="2022-02-08" by="cmsmcq"/>
+    <tc:description>
+      <tc:p>A grammar for numbers in scientific notation.</tc:p>
+    </tc:description>
+    <tc:ixml-grammar>{ Sample grammar adapted from Dick Grune and Ceriel J. H. Jacobs,
+    Parsing techniques: A practical guide (New York: Ellis Horwood, 1990;
+    second edition New York:  Springer, 2008), pp. 89 (1e) and 112 (2e).
+
+    They use this grammar to illustrate CYK parsing.
+    "This grammar describes the syntax of numbers in scientific notation."
+
+    Versions of this grammar after elimination of epsilon-rules, 
+    after eliminating unit rules, and after further cleanup (elimination
+    of unreachable non-terminals) are given in pp. 120-122 of 2e.  I
+    have not made test cases from them.  A Chomsky Normal Form equivalent
+    is sample grammar 54.
+    }
+
+    { Revisions:
+    2018-08-09 : CMSMcQ : made first transcription.
+    }
+
+    Number: Integer; Real.
+    Integer: Digit; Integer, Digit.
+    Real: Integer, Fraction, Scale.
+    Fraction:  ".", Integer.
+    Scale:  "e", Sign, Integer; Empty.
+    Digit:  ["0"-"9"].
+    Sign:  "+"; "-".
+    Empty: .
+
+    {e.g. 32.5e+1 }
+
+    { Hmm.  Required sign for scale? }
+
+
+    </tc:ixml-grammar>
+    <tc:grammar-test>
+      <tc:result>
+	<tc:assert-xml>
+	  <ixml
+            ><comment> Sample grammar adapted from Dick Grune and Ceriel J. H. Jacobs,
+    Parsing techniques: A practical guide (New York: Ellis Horwood, 1990;
+    second edition New York:  Springer, 2008), pp. 89 (1e) and 112 (2e).
+
+    They use this grammar to illustrate CYK parsing.
+    "This grammar describes the syntax of numbers in scientific notation."
+
+    Versions of this grammar after elimination of epsilon-rules, 
+    after eliminating unit rules, and after further cleanup (elimination
+    of unreachable non-terminals) are given in pp. 120-122 of 2e.  I
+    have not made test cases from them.  A Chomsky Normal Form equivalent
+    is sample grammar 54.
+    </comment><comment> Revisions:
+    2018-08-09 : CMSMcQ : made first transcription.
+    </comment
+            ><rule name="Number"
+              ><alt
+		><nonterminal name="Integer"
+              /></alt
+              ><alt
+		><nonterminal name="Real"
+              /></alt
+            ></rule
+            ><rule name="Integer"
+              ><alt
+		><nonterminal name="Digit"
+              /></alt
+              ><alt
+		><nonterminal name="Integer"
+		/><nonterminal name="Digit"
+              /></alt
+            ></rule
+            ><rule name="Real"
+              ><alt
+		><nonterminal name="Integer"
+		/><nonterminal name="Fraction"
+		/><nonterminal name="Scale"
+              /></alt
+            ></rule
+            ><rule name="Fraction"
+              ><alt
+		><literal string="."
+		/><nonterminal name="Integer"
+              /></alt
+            ></rule
+            ><rule name="Scale"
+              ><alt
+		><literal string="e"
+		/><nonterminal name="Sign"
+		/><nonterminal name="Integer"
+              /></alt
+              ><alt
+		><nonterminal name="Empty"
+              /></alt
+            ></rule
+            ><rule name="Digit"
+              ><alt
+		><inclusion
+		  ><member from="0" to="9"
+		/></inclusion
+              ></alt
+            ></rule
+            ><rule name="Sign"
+              ><alt
+		><literal string="+"
+              /></alt
+              ><alt
+		><literal string="-"
+              /></alt
+            ></rule
+            ><rule name="Empty"
+              ><alt
+            /></rule
+            ><comment>e.g. 32.5e+1 </comment
+            ><comment> Hmm.  Required sign for scale? </comment
+	  ></ixml>
+	</tc:assert-xml>
+      </tc:result>
+    </tc:grammar-test>
+    <tc:test-case name="g51.c01">
+      <tc:test-string>32.5e+1</tc:test-string>
+      <tc:result>
+	<tc:assert-xml>
+	  <Number><Real
+	    ><Integer><Integer><Digit>3</Digit></Integer><Digit>2</Digit></Integer
+	    ><Fraction>.<Integer><Digit>5</Digit></Integer></Fraction
+	    ><Scale>e<Sign>+</Sign><Integer><Digit>1</Digit></Integer></Scale
+	  ></Real></Number>
+	</tc:assert-xml>
+      </tc:result>
+    </tc:test-case>
+  </tc:test-set>
+  
+  
+</tc:test-catalog>

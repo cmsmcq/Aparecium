@@ -1,0 +1,377 @@
+<!DOCTYPE HTML><html>
+<!--Need to find a way to insert the current date-->
+<head><meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
+<title>Performance analysis work log</title>
+
+<style type="text/css">
+      p {
+      margin-top: 0.6em;      
+      margin-bottom: 0.6em;
+    }
+    p.bibl {
+      margin-top: 0.6em;      
+      margin-bottom: 0.6em;
+      margin-left: 2em;
+      text-indent: -2em;
+    }
+    .Real-P {
+      margin-top: 0.6em;      
+      margin-bottom: 0.6em;
+    }
+    div.sp {
+      margin-top: 0.6em;      
+      margin-bottom: 0.6em;
+    }
+    div.address {
+      margin-top: 0.6em;      
+      margin-bottom: 0.6em;
+      margin-left: 2em;
+    }
+    div.note {
+      margin-top: 1em;      
+      margin-left: 2em;
+      
+    }
+    pre {  
+      font-family: monospace;
+      margin-left: 2em 
+    }  
+    a:hover { 
+      background: #CCF 
+    }
+    td.no { 
+      background: #CCF 
+    }
+    .author { 
+      font-size: x-large
+    }
+    .bio { 
+      font-size: small;
+      font-style: italic
+    }
+    span.decision { 
+    }
+    span.result { 
+      font-weight: bold
+    }
+    span.aye { 
+      display: block;
+      margin-left: 2em;
+    }
+    span.nay { 
+      display: block;
+      margin-left: 2em;
+    }
+    span.abstain { 
+      display: block;
+      margin-left: 2em;
+    }
+    span.result { 
+      display: block;
+      margin-left: 2em;
+      font-weight: bold
+    }
+    span.speaker { 
+      display: inline;
+    }
+    span.typename { 
+      display: inline;
+      font-family: monospace;
+    }
+    a.selflink {
+      text-decoration: none; 
+      color: initial;
+    }
+   
+  div.scrap {
+    margin-top: 0.5em; 
+    background-color: #CFEFCF; 
+    background-color: #E7F7E7; 
+    padding: 0.6em;
+    margin-bottom: 0.5em;
+  }
+  pre.scrapbody {
+    margin-left: 0.5em; 
+    margin-bottom: 0.5em;
+  }
+  span.scrapcontinuations {
+    font-size:smaller; 
+  }
+  span.scrapinbound {
+    font-size:smaller;
+  }
+  span.scrapref {
+    display: inline-block;
+    text-indent: -0.3em;
+    font-family: New Times Roman, serif, Lucida Sans Unicode;
+  }
+  em.scrapptr {
+    font-family: New Times Roman, serif, Lucida Sans Unicode;
+  }
+  dl.desclist {
+    list-style-type: none;
+  }
+  dl.desclist > dt {
+    display: run-in;
+    padding-right: 0.5em;
+/*
+*/
+  }
+  dl.desclist > dd {
+    text-indent: -1em;
+    margin-left: 1em; 
+  }
+  ul.desclist { 
+    list-style-type: none;
+  }
+  ul.desclist > li {
+    margin-left: 2em;
+    text-indent: -2em;
+  }
+  div.epigraph .Real-P {margin-top: 0em; margin-bottom: 0em;} 
+  </style><link xmlns="http://www.w3.org/1999/xhtml" rel="stylesheet" href="../lib/local.css"></head><body><div class="doc">
+
+
+
+
+
+
+<h1>Performance analysis work log</h1>
+<h1>for Aparecium</h1>
+
+
+<h3>C. M. Sperberg-McQueen</h3>
+<h3>20 August 2022, last revised 20 August 2022</h3>
+
+
+<hr><a name="toc"></a>
+<ul><!-- and a 1! -->
+<li>1. <a href="#log">Work log</a><ul>
+<!-- and a 2! -->
+<li>1.1. <a href="#log-20220709">9 July 2022</a></li>
+<li>1.2. <a href="#log-20220820">20 August 2022</a></li>
+</ul></li><li>2. <a href="#test-plan">Test suite and test plans</a></li><li>3. <a href="#static-analysis">Static analysis</a></li><li>A. <a href="#indices">Indices</a></li>
+</ul>
+
+
+<hr>
+  <div class="Real-P">This document records work in performance improvements for
+  Aparecium, an Invisible-XML processor written in XQuery.</div>
+  <div class="Real-P">Part of it is a work log organized chronologically; parts of it
+  are non-chronological descriptions of ideas to try.</div>
+
+  
+<div class="div">
+
+    <div class="quicknav"><span class="arrow">&nbsp;</span><span class="arrow"><a href="#toc">&#x23f6;</a></span><span class="arrow"><a href="#test-plan">&#x23f5;</a></span></div><h2><a class="selflink" name="log" id="log" href="#log">1. </a>Work log</h2><ul><li>1.1. <a href="#log-20220709">9 July 2022</a></li><li>1.2. <a href="#log-20220820">20 August 2022</a></li></ul>
+    
+<div class="div">
+
+      <div class="quicknav"><span class="arrow">&nbsp;</span><span class="arrow"><a href="#log">&#x23f6;</a></span><span class="arrow"><a href="#log-20220820">&#x23f5;</a></span></div><h3><a class="selflink" name="log-20220709" id="log-20220709" href="#log-20220709">1.1. </a>9 July 2022</h3>
+      <div class="Real-P">Inspired perhaps by the discussion of big-O analysis in
+      Meyer's <em>Touch of class</em>, tried to see if I could
+      make any headway on a static analysis of Aparecium.  It is
+      doubtless an amateurish job, since I've never done it before,
+      and it seems to hover uneasily between an attempt to
+      characterize performance in some detail, at least potentially,
+      and the ruthlessly simple &#x201c;linear, quadratic, or what?&#x201d;
+      focus Meyer exhibits.</div>
+      <div class="Real-P">But I found it interesting enough to want to continue.</div>
+    </div>
+    
+<div class="div">
+
+      <div class="quicknav"><span class="arrow"><a href="#log-20220709">&#x23f4;</a></span><span class="arrow"><a href="#log">&#x23f6;</a></span><span class="arrow">&nbsp;</span></div><h3><a class="selflink" name="log-20220820" id="log-20220820" href="#log-20220820">1.2. </a>20 August 2022</h3>
+      <div class="Real-P">After Balisage, I decided to try to make improvements to
+      performance in Aparecium my rest-of-summer project, to see how
+      far I could get.  At the moment, it looks very grim -- not much
+      visible progress at all, and not much invisible progress,
+      either.</div>
+      <div class="Real-P">I have four tasks at the moment, three of which can be worked
+      on in parallel (or in rotation):
+      <ul><li>
+	  <div class="Real-P"><b>static analysis</b> of the code to try to
+	  understand where the hot spots are likely to be</div>
+	  <div class="Real-P">See <a href="#static-analysis">below</a>.</div>
+	</li>
+<li>
+	  <div class="Real-P">support for <b>additional XQuery engines</b>, to
+	  make it easier to avoid confusing optimizations that work
+	  across the board (like doing less work) from those that are
+	  implementation-dependent</div>
+	  <div class="Real-P">My current targets are eXist-db and Saxon HE.</div>
+	  <div class="Real-P">There are good reasons to want to support them in any
+	  case, but the reason to work <em>now</em> on supporting
+	  them is to make the performance work better.  I don't want
+	  to delay the actual work on performance indefinitely,
+	  though, so I plan to cap my time on them to 20 and 10 hours,
+	  respectively.</div>
+	  <div class="Real-P">So far, I think I have spent 8h billable to eXist-db
+	  (including filing two bug reports, which slows things down a
+	  good deal), and 2h on HE (mostly an inquiry on the Saxon
+	  forum about how to guard processor-specific code, which
+	  elicited the news that Saxon 10 and 11 make HE support
+	  higher-order functions).</div>
+	  <div class="Real-P">As I proceed, I should try to follow through on the idea
+	  of (a) wrapping each bit of processor-dependence in a
+	  function and (b) putting those functions in a separate
+	  utilities module.</div>
+	</li>
+<li>
+	  <div class="Real-P">development and measurement of a set of
+	  <b>performance tests</b> (see <a href="#test-plan">below</a>).</div>
+	</li>
+<li>
+	  <div class="Real-P">figuring out <b>how to measure</b> performance
+	  for engines other than BaseX</div>
+	  <div class="Real-P">When I can run from bash, I can use the Bash
+	  <i>time</i> command, but I cannot run Saxon PE and
+	  HE from the shell, only from Oxygen.  So it may have to be
+	  file creation times (but that won't work with Saxon HE).</div>
+	</li>
+</ul>
+      </div>
+      <div class="Real-P">Today I am trying to spend some time on each of the first
+      three (analysis, new engines, test suite); my work on analysis today
+      has consisted so far in creating this document, beginning to
+      fill it in, and inserting the work done in July into the
+      section on <a href="#static-analysis">Static analysis</a>.</div>
+
+    </div>
+  </div>
+  
+<div class="div">
+
+    <div class="quicknav"><span class="arrow"><a href="#log">&#x23f4;</a></span><span class="arrow"><a href="#toc">&#x23f6;</a></span><span class="arrow"><a href="#static-analysis">&#x23f5;</a></span></div><h2><a class="selflink" name="test-plan" id="test-plan" href="#test-plan">2. </a>Test suite and test plans</h2>
+    <div class="Real-P">The test suite has three branches:
+    <ul><li>
+	<div class="Real-P">The tests in <tt>ixml/tests/performance/*</tt>, which
+	are artificially simple tests (to try to keep them easy to
+	understand and analyse) with mechanically constructed inputs,
+	each input twice the size of its predecessor.</div>
+	<div class="Real-P">From the results, it seems clear that there is a quadratic
+	term in Aparecium performance even on deterministic
+	grammars.</div>
+      </li>
+<li>
+	<div class="Real-P">A selection of tests from the existing ixml test suite,
+	some fast and some slow.  More specifically, a selection of
+	five to ten tests at each of various speeds (tens of
+	milliseconds, hundreds, thousands, ...), where possible with
+	some tests spending more of their time in the grammar and some
+	more of their time in the instance.</div>
+      </li>
+<li>
+	<div class="Real-P">A seletion of &#x2018;realistic&#x2019; tests, with
+	grammars and inputs from projects unrelated to invisible XML
+	and Aparecium.</div>
+      </li>
+</ul>
+    </div>
+  </div>
+  
+<div class="div">
+
+    <div class="quicknav"><span class="arrow"><a href="#test-plan">&#x23f4;</a></span><span class="arrow"><a href="#toc">&#x23f6;</a></span><span class="arrow">&nbsp;</span></div><h2><a class="selflink" name="static-analysis" id="static-analysis" href="#static-analysis">3. </a>Static analysis</h2>
+    <div class="Real-P">As a first attempt, let's just try to walk through one possible
+    execution.  To execute <tt>ap:parse-resource($I, $G)</tt>,
+    what is the cost <i>k</i>?</div>
+    <div class="Real-P">[Note, 9 July.  This seems to be a plausible way to start.  It
+    illustrates just how many layers there are in the onion, and it
+    may start getting difficult just about where I have left off for
+    now.  But I think this is a start.]</div>
+    <ol><li><a name="parse-resource" id="parse-resource"></a>
+	<div class="Real-P">k( parse-resource($I + $G) ) =
+	<br>
+	<br>k(unparsed-text($I))
+	<br>+ k(unparsed-text($G))
+	<br>+ k(parse-string($I2, $G2))  // <a href="#parse-string"><!--* have no n *-->2</a></div>
+	<div class="Real-P">Conjecture: unparsed-text() is O(n) in bytecount of result.</div>
+	<div class="Real-P">Conjecture: unparsed-text() is negligeable compared to
+	parse-string, in all strata.</div>
+      </li>
+<li><a name="parse-string" id="parse-string"></a>
+	<div class="Real-P">k(parse-string($I, $G)) =
+	<br>
+	<br>k(compile-grammar-from-string($G)) // <a href="#compile-grammar-from-string"><!--* have no n *-->3</a>
+	<br>+ k(parse-string-with-compiled-grammar($I, $G2)) // <a href="#parse-string-with-compiled-grammar"><!--* have no n *-->4</a>
+	</div>
+      </li>
+<li><a name="compile-grammar-from-string" id="compile-grammar-from-string"></a>
+	<div class="Real-P">k(compile-grammar-from-string($G)) = 
+	<br>
+	<br>k(parse-grammar-from-string($G)) // <a href="#parse-grammar-from-string"><!--* have no n *-->5</a>
+	<br>+ k(gluschkov($G2)) // <a href="#gluschkov"><!--* have no n *-->6</a>
+	</div>
+      </li>
+<li><a name="parse-string-with-compiled-grammar" id="parse-string-with-compiled-grammar"></a>
+	<div class="Real-P">k(parse-string-with-compiled-grammar($I, $CG))=
+	<br>
+	<br>k(grammar-ok($CG)) // <a href="#grammar-ok"><!--* have no n *-->7</a>
+	<br>+ k(any-tree($I, $CG)) // <a href="#any-tree"><!--* have no n *-->8</a>
+	</div>
+      </li>
+<li><a name="parse-grammar-from-string" id="parse-grammar-from-string"></a>
+	<div class="Real-P">k(parse-grammar-from-string($G))
+	<br>
+	<br>k(doc($ap:ixml.gl.xml))
+	<br>+ k(parse-string-with-compiled-grammar($G, $ixml.gl)) // <a href="#parse-string-with-compiled-grammar"><!--* have no n *-->4</a>
+	</div>
+	<div class="Real-P">Conjecture that doc() is linear in bytes of standard XML grammar.
+	(But is in any case out of my hands.)</div>
+      </li>
+<li><a name="gluschkov" id="gluschkov"></a>
+	<div class="Real-P">k(gluschkov($G2)) =
+	<br>
+	</div>
+	<div class="Real-P">Conjecture: this is a depth-first traversal and the cost is O(n) for n
+	= number of symbols in G, &#x2245; number of XML elements in $G//* except
+	$G//comment.
+	</div>
+      </li>
+<li><a name="grammar-ok" id="grammar-ok"></a>
+	<div class="Real-P">k(grammar-ok($CG))
+	</div>
+      </li>
+<li><a name="any-tree" id="any-tree"></a>
+	<div class="Real-P">k(any-tree($I, $CG)) =
+	<br>k(earley-parse($I, $CG)) // <a href="#earley-parse"><!--* have no n *-->9</a>
+	</div>
+      </li>
+<li><a name="earley-parse" id="earley-parse"></a>
+	<div class="Real-P">k(earley-parse($I, $CG)) =
+	<br>k(er:recognizeX($I, $CG) <a href="#er.recognizeX"><span class="red">???</span></a>
+	<br>+ k(epi:parse-forest-grammar(completions, closure, input)) // <a href="#epi.parse-forest-grammar"><!--* have no n *-->11</a>
+	<br>+ k(epi:tree-from-pfg(pfg)) // <a href="#epi.tree-from-pfg"><!--* have no n *-->12</a>
+	</div>
+      </li>
+<li><a name="er.recognize" id="er.recognize"></a>
+	<div class="Real-P">k(er:recognizeX($I, $CG) =
+	<br>???</div>
+      </li>
+<li><a name="epi.parse-forest-grammar" id="epi.parse-forest-grammar"></a>
+	<div class="Real-P">+ k(epi:parse-forest-grammar(completions, closure, input)) =
+	<br>???</div>
+      </li>
+<li><a name="epi.tree-from-pfg" id="epi.tree-from-pfg"></a>
+	<div class="Real-P">k(epi:tree-from-pfg(pfg)) =
+	<br>???
+	</div>
+      </li>
+</ol>
+  </div>
+  
+
+
+<hr>
+
+<div class="div">
+
+<h2><a class="selflink" name="indices" id="indices" href="#indices">A. </a>Indices</h2>
+
+</div>
+
+
+
+</div></body></html>
+

@@ -1,0 +1,228 @@
+<timings>
+  <p>This is the set of grammar / test-case pairs for the timing data
+  of 12 April 2022, made by matching records in the grammar-test and
+  test-case timing data of that date.</p>
+  
+  <p>The XQuery was:
+  <eg><![CDATA[
+let $dir := '/home/cmsmcq/2022/github/Aparecium/A/',
+    $ugr := 'file:' || $dir || 'grammar-test-timing-data-0412.xml',
+    $utc := 'file:' || $dir || 'test-case-timing-data-0412.xml',
+    $ggg := doc($ugr),
+    $ccc := doc($utc)
+    
+(: return $ccc :)
+
+for $gr in $ggg//grammar-result
+let $G := $gr/@name/string(),
+    $gt0 := $gr/mean-parsetime/number(),
+    $gt := round($gt0)
+    
+for $tcr in $ccc//test-result[starts-with(@name, $G || '/' )]
+let $tcn := $tcr/@name/string(),
+    $tct0 := $tcr/mean-parsetime/number(),
+    $tct := round($tct0)
+    
+let $t := $gt + $tct
+
+order by $t ascending, $tcn ascending
+       
+return <pair n="{$tcn}" t="{$t}" gt="{$gt}" ct="{$tct}"/>
+
+]]></eg>
+  </p>
+  
+  <p>Some test cases appear not to have matching grammars: we have far
+  fewer pairs than test cases in the test-case results file.</p>
+
+  <p>Attributes: n for name (grammar/test-case), t = time in ms, gt =
+  mean parse time for grammar (rounded to the ms), ct = mean parse time
+  for test case (rounded). In all cases t = gt + ct.</p>
+
+  
+  <!-- Centisecond ... (cheat a bit, go up to 113 ms) -->
+
+  <pair n="sample.grammar.10/g10c01" t="76" gt="60" ct="16" r="4"/>
+  <pair n="sample.grammar.10/g10r02" t="76" gt="60" ct="16" r="4"/>
+  
+  <pair n="sample.grammar.19/g19c01" t="101" gt="83" ct="18" r="5"/>
+  <pair n="sample.grammar.19/g19c02" t="101" gt="83" ct="18" r="5"/>
+  <pair n="sample.grammar.19/g19c03" t="101" gt="83" ct="18" r="5"/>
+  <pair n="sample.grammar.08/g08c01" t="107" gt="91" ct="16" r="6"/>
+  <pair n="sample.grammar.08/g08c02" t="107" gt="91" ct="16" r="6"/>
+  <pair n="sample.grammar.08/g08r04" t="107" gt="91" ct="16" r="6"/>
+  <pair n="sample.grammar.07/g07c01" t="109" gt="93" ct="16" r="6"/>
+  <pair n="sample.grammar.07/g07c02" t="109" gt="93" ct="16" r="6"/>
+  <pair n="sample.grammar.07/g07r04" t="109" gt="93" ct="16" r="6"/>
+  <pair n="sample.grammar.07/g07c03" t="110" gt="93" ct="17" r="6"/>
+  <pair n="sample.grammar.08/g08c03" t="113" gt="91" ct="22" r="4"/>
+
+  
+  <!-- Decisecond ... -->
+  
+  <pair n="sample.grammar.15/g15c01" t="133" gt="116" ct="17" r="7"/>
+  <pair n="sample.grammar.15/g15c02" t="133" gt="116" ct="17" r="7"/>
+  <pair n="sample.grammar.15/g15c03" t="133" gt="116" ct="17" r="7"/>
+  <pair n="ambiguity-1/vowels-ok1" t="136" gt="116" ct="20" r="6"/>
+  <pair n="ambiguity-1/vowels-ok2" t="136" gt="116" ct="20" r="6"/>
+  <pair n="ambiguity-1/vowels-ok3" t="137" gt="116" ct="21" r="6"/>
+  <pair n="sample.grammar.15/g15c04" t="137" gt="116" ct="21" r="6"/>
+  <pair n="ambiguity-1/vowels-nok2" t="138" gt="116" ct="22" r="5"/>
+  <pair n="ambiguity-1/vowels-nok3" t="138" gt="116" ct="22" r="5"/>
+  <pair n="ambiguity-1/vowels-nok5" t="138" gt="116" ct="22" r="5"/>
+  <pair n="ambiguity-1/vowels-nok6" t="138" gt="116" ct="22" r="5"/>
+  <pair n="sample.grammar.15/g15c05" t="138" gt="116" ct="22" r="5"/>
+  <pair n="ambiguity-1/vowels-nok1" t="139" gt="116" ct="23" r="5"/>
+  <pair n="ambiguity-1/vowels-nok4" t="139" gt="116" ct="23" r="5"/>
+  <pair n="ambiguity-1/vowels-ok5" t="140" gt="116" ct="24" r="5"/>
+  <pair n="ambiguity-1/vowels-ok4" t="141" gt="116" ct="25" r="5"/>
+  <pair n="ambiguity-1/amb-1" t="149" gt="116" ct="33" r="3"/>
+  <pair n="sample.grammar.20/g20c02" t="150" gt="132" ct="18" r="7"/>
+  <pair n="sample.grammar.20/g20c03" t="150" gt="132" ct="18" r="7"/>
+  <pair n="sample.grammar.20/g20c01" t="151" gt="132" ct="19" r="7"/>
+  <pair n="sample.grammar.05/g05.r01" t="157" gt="141" ct="16" r="9"/>
+  <pair n="sample.grammar.05/g05.c01" t="159" gt="141" ct="18" r="8"/>
+  <pair n="sample.grammar.17/g17c03" t="172" gt="155" ct="17" r="9"/>
+  <pair n="sample.grammar.17/g17c01" t="173" gt="155" ct="18" r="9"/>
+  <pair n="sample.grammar.17/g17c02" t="173" gt="155" ct="18" r="9"/>
+  <pair n="sample.grammar.17/g17c04" t="173" gt="155" ct="18" r="9"/>
+  <pair n="sample.grammar.15/g15c06" t="182" gt="116" ct="66" r="2"/>
+  <pair n="sample.grammar.12/g12.r01" t="284" gt="268" ct="16" r="17"/>
+  <pair n="sample.grammar.12/g12.c02" t="287" gt="268" ct="19" r="14"/>
+  <pair n="sample.grammar.12/g12.c03" t="293" gt="268" ct="25" r="11"/>
+  <pair n="unreachable-1/unr-1" t="295" gt="272" ct="23" r="12"/>
+  <pair n="unreachable-1/unr-3" t="295" gt="272" ct="23" r="12"/>
+  <pair n="unreachable-1/unr-2" t="296" gt="272" ct="24" r="11"/>
+  <pair n="sample.grammar.12/g12.r06" t="308" gt="268" ct="40" r="7"/>
+  <pair n="vowels/vowels-nok2" t="326" gt="303" ct="23" r="13"/>
+  <pair n="vowels/vowels-nok1" t="327" gt="303" ct="24" r="13"/>
+  <pair n="vowels/vowels-nok6" t="327" gt="303" ct="24" r="13"/>
+  <pair n="vowels/vowels-ok1" t="327" gt="303" ct="24" r="13"/>
+  <pair n="vowels/vowels-ok2" t="327" gt="303" ct="24" r="13"/>
+  <pair n="vowels/vowels-ok5" t="327" gt="303" ct="24" r="12"/>
+  <pair n="vowels/vowels-nok3" t="328" gt="303" ct="25" r="12"/>
+  <pair n="vowels/vowels-ok4" t="328" gt="303" ct="25" r="12"/>
+  <pair n="vowels/vowels-nok4" t="329" gt="303" ct="26" r="12"/>
+  <pair n="vowels/vowels-nok5" t="329" gt="303" ct="26" r="12"/>
+  <pair n="vowels/vowels-ok3" t="330" gt="303" ct="27" r="11"/>
+  <pair n="sample.grammar.02/g02.r04" t="336" gt="321" ct="15" r="21"/>
+  <pair n="sample.grammar.02/g02.c03" t="337" gt="321" ct="16" r="20"/>
+  <pair n="sample.grammar.02/g02.r05" t="337" gt="321" ct="16" r="20"/>
+  <pair n="sample.grammar.02/g02.c01" t="338" gt="321" ct="17" r="19"/>
+  <pair n="sample.grammar.02/g02.c02" t="338" gt="321" ct="17" r="19"/>
+  <pair n="sample.grammar.06/g06.r01" t="343" gt="327" ct="16" r="21"/>
+  <pair n="sample.grammar.06/g06.r04" t="343" gt="327" ct="16" r="20"/>
+  <pair n="sample.grammar.06/g06.r06" t="343" gt="327" ct="16" r="20"/>
+  <pair n="sample.grammar.06/g06.c03" t="344" gt="327" ct="17" r="19"/>
+  <pair n="sample.grammar.06/g06.c02" t="345" gt="327" ct="18" r="18"/>
+  <pair n="sample.grammar.06/g06.r05" t="345" gt="327" ct="18" r="18"/>
+  <pair n="sample.grammar.12/g12.c04" t="443" gt="268" ct="175" r="2"/>
+  <pair n="sample.grammar.01/g01.r04" t="466" gt="451" ct="15" r="30"/>
+  <pair n="sample.grammar.01/g01.r05" t="466" gt="451" ct="15" r="29"/>
+  <pair n="sample.grammar.01/g01.r07" t="466" gt="451" ct="15" r="29"/>
+  <pair n="sample.grammar.01/g01.c01" t="467" gt="451" ct="16" r="28"/>
+  <pair n="sample.grammar.01/g01.c02" t="467" gt="451" ct="16" r="28"/>
+  <pair n="sample.grammar.01/g01.r06" t="467" gt="451" ct="16" r="29"/>
+  <pair n="sample.grammar.01/g01.r08" t="467" gt="451" ct="16" r="28"/>
+  <pair n="sample.grammar.01/g01.r09" t="467" gt="451" ct="16" r="28"/>
+  <pair n="sample.grammar.01/g01.c03" t="468" gt="451" ct="17" r="26"/>
+  <pair n="sample.grammar.14/g14c01" t="658" gt="642" ct="16" r="41"/>
+  <pair n="sample.grammar.14/g14c02" t="659" gt="642" ct="17" r="38"/>
+  <pair n="sample.grammar.14/g14c05" t="659" gt="642" ct="17" r="38"/>
+  <pair n="sample.grammar.14/g14c03" t="660" gt="642" ct="18" r="37"/>
+  <pair n="sample.grammar.14/g14c04" t="660" gt="642" ct="18" r="36"/>
+  <pair n="sample.grammar.14/g14c08" t="660" gt="642" ct="18" r="36"/>
+  <pair n="sample.grammar.14/g14c09" t="661" gt="642" ct="19" r="35"/>
+  <pair n="sample.grammar.14/g14c06" t="662" gt="642" ct="20" r="33"/>
+  <pair n="sample.grammar.14/g14c07" t="664" gt="642" ct="22" r="29"/>
+  <pair n="sample.grammar.16/g16c01" t="753" gt="737" ct="16" r="47"/>
+  <pair n="sample.grammar.16/g16c03" t="754" gt="737" ct="17" r="43"/>
+  <pair n="sample.grammar.16/g16c05" t="755" gt="737" ct="18" r="42"/>
+  <pair n="sample.grammar.16/g16c02" t="756" gt="737" ct="19" r="39"/>
+  <pair n="sample.grammar.16/g16c08" t="756" gt="737" ct="19" r="39"/>
+  <pair n="sample.grammar.16/g16c09" t="756" gt="737" ct="19" r="40"/>
+  <pair n="sample.grammar.16/g16c04" t="757" gt="737" ct="20" r="37"/>
+  <pair n="sample.grammar.16/g16c06" t="758" gt="737" ct="21" r="36"/>
+  <pair n="sample.grammar.16/g16c07" t="759" gt="737" ct="22" r="33"/>
+  <pair n="non-productive-1/np-1" t="789" gt="766" ct="23" r="33"/>
+  <pair n="non-productive-1/np-2" t="789" gt="766" ct="23" r="33"/>
+  <pair n="non-productive-1/np-3" t="791" gt="766" ct="25" r="31"/>
+  <pair n="sample.grammar.18/g18c01" t="862" gt="846" ct="16" r="52"/>
+  <pair n="sample.grammar.18/g18c02" t="864" gt="846" ct="18" r="46"/>
+  <pair n="sample.grammar.18/g18c05" t="865" gt="846" ct="19" r="44"/>
+  <pair n="sample.grammar.18/g18c08" t="865" gt="846" ct="19" r="45"/>
+  <pair n="sample.grammar.18/g18c09" t="865" gt="846" ct="19" r="44"/>
+  <pair n="sample.grammar.18/g18c03" t="866" gt="846" ct="20" r="43"/>
+  <pair n="sample.grammar.18/g18c06" t="866" gt="846" ct="20" r="43"/>
+  <pair n="sample.grammar.18/g18c07" t="867" gt="846" ct="21" r="41"/>
+  <pair n="sample.grammar.18/g18c04" t="870" gt="846" ct="24" r="36"/>
+
+
+  <!-- second ... -->
+  
+  <pair n="sample.grammar.13/g13c01" t="1019" gt="1004" ct="15" r="66"/>
+  <pair n="sample.grammar.13/g13c02" t="1020" gt="1004" ct="16" r="62"/>
+  <pair n="sample.grammar.13/g13c04" t="1021" gt="1004" ct="17" r="58"/>
+  <pair n="sample.grammar.13/g13c03" t="1022" gt="1004" ct="18" r="57"/>
+  <pair n="sample.grammar.13/g13c05" t="1023" gt="1004" ct="19" r="54"/>
+  <pair n="sample.grammar.13/g13c07" t="1023" gt="1004" ct="19" r="52"/>
+  <pair n="sample.grammar.13/g13c06" t="1026" gt="1004" ct="22" r="47"/>
+  <pair n="sample.grammar.13/g13c08" t="1027" gt="1004" ct="23" r="43"/>
+  <pair n="sample.grammar.13/g13c09" t="1027" gt="1004" ct="23" r="44"/>
+  <pair n="unreachable-2/unr-4" t="1039" gt="1015" ct="24" r="43"/>
+  <pair n="unreachable-2/unr-5" t="1040" gt="1015" ct="25" r="41"/>
+  <pair n="unreachable-2/unr-6" t="1040" gt="1015" ct="25" r="40"/>
+  <pair n="non-productive-2/np-4" t="1607" gt="1582" ct="25" r="63"/>
+  <pair n="non-productive-2/np-5" t="1608" gt="1582" ct="26" r="61"/>
+  <pair n="non-productive-2/np-6" t="1608" gt="1582" ct="26" r="62"/>
+  <pair n="non-productive-3/np-8" t="1743" gt="1720" ct="23" r="74"/>
+  <pair n="non-productive-3/np-7" t="1744" gt="1720" ct="24" r="73"/>
+  <pair n="non-productive-3/np-9" t="1744" gt="1720" ct="24" r="71"/>
+  <pair n="sample.grammar.09/g09r01" t="2018" gt="2003" ct="15" r="136"/>
+  <pair n="sample.grammar.09/g09c02" t="2019" gt="2003" ct="16" r="126"/>
+  <pair n="sample.grammar.09/g09c03" t="2023" gt="2003" ct="20" r="102"/>
+  <pair n="sample.grammar.09/g09c05" t="2023" gt="2003" ct="20" r="99"/>
+  <pair n="sample.grammar.09/g09c04" t="2027" gt="2003" ct="24" r="83"/>
+  <pair n="sample.grammar.09/g09c06" t="2058" gt="2003" ct="55" r="37"/>
+  <pair n="sample.grammar.04/g04.r09" t="6596" gt="6580" ct="16" r="417"/>
+  <pair n="sample.grammar.04/g04.r10" t="6596" gt="6580" ct="16" r="401"/>
+  <pair n="sample.grammar.04/g04.r11" t="6596" gt="6580" ct="16" r="419"/>
+  <pair n="sample.grammar.04/g04.r12" t="6597" gt="6580" ct="17" r="381"/>
+  <pair n="sample.grammar.04/g04.c01" t="6598" gt="6580" ct="18" r="362"/>
+  <pair n="sample.grammar.04/g04.c03" t="6600" gt="6580" ct="20" r="325"/>
+  <pair n="sample.grammar.04/g04.c05" t="6601" gt="6580" ct="21" r="316"/>
+  <pair n="sample.grammar.04/g04.c04" t="6602" gt="6580" ct="22" r="300"/>
+  <pair n="sample.grammar.04/g04.c06" t="6602" gt="6580" ct="22" r="294"/>
+  <pair n="sample.grammar.04/g04.r14" t="6603" gt="6580" ct="23" r="289"/>
+  <pair n="sample.grammar.04/g04.c02" t="6604" gt="6580" ct="24" r="272"/>
+  <pair n="sample.grammar.04/g04.r13" t="6606" gt="6580" ct="26" r="254"/>
+  <pair n="sample.grammar.04/g04.c07" t="6607" gt="6580" ct="27" r="244"/>
+  <pair n="sample.grammar.04/g04.c08" t="6615" gt="6580" ct="35" r="187"/>
+  <pair n="sample.grammar.04/g04.r15" t="6615" gt="6580" ct="35" r="188"/>
+
+
+  <!-- dekasecond ... -->
+  
+  <pair n="sample.grammar.03/g03.r07" t="11171" gt="11156" ct="15" r="731"/>
+  <pair n="sample.grammar.03/g03.r05" t="11172" gt="11156" ct="16" r="711"/>
+  <pair n="sample.grammar.03/g03.r06" t="11172" gt="11156" ct="16" r="710"/>
+  <pair n="sample.grammar.03/g03.r08" t="11173" gt="11156" ct="17" r="667"/>
+  <pair n="sample.grammar.03/g03.r11" t="11174" gt="11156" ct="18" r="617"/>
+  <pair n="sample.grammar.03/g03.r12" t="11174" gt="11156" ct="18" r="618"/>
+  <pair n="sample.grammar.03/g03.c01" t="11175" gt="11156" ct="19" r="598"/>
+  <pair n="sample.grammar.03/g03.r10" t="11175" gt="11156" ct="19" r="601"/>
+  <pair n="sample.grammar.03/g03.r09" t="11176" gt="11156" ct="20" r="559"/>
+  <pair n="sample.grammar.03/g03.c02" t="11180" gt="11156" ct="24" r="456"/>
+  <pair n="sample.grammar.03/g03.c03" t="11187" gt="11156" ct="31" r="364"/>
+  <pair n="sample.grammar.03/g03.c04" t="11193" gt="11156" ct="37" r="300"/>
+
+
+  <!-- hectosecond ... -->
+  <pair n="sample.grammar.12/g12.c05" t="266935" gt="268" ct="266667" r="0"/>
+  <pair n="sample.grammar.11/g11c01" t="268991" gt="2324" ct="266667" r="0"/>
+  <pair n="sample.grammar.11/g11c02" t="268991" gt="2324" ct="266667" r="0"/>
+  <pair n="a/a3" t="303036" gt="303012" ct="24" r="12766"/>
+  <pair n="a/a2" t="303038" gt="303012" ct="26" r="11857"/>
+  <pair n="a/a1" t="303039" gt="303012" ct="27" r="11256"/>
+  
+</timings>
