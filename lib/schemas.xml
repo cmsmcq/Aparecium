@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<locatingRules xmlns="http://thaiopensource.com/ns/locating-rules/1.0">
+  <uri resource="test.ixml.xml" uri="../../cmsmcq-ixml/schemas/ixml.rnc"/>
+<uri resource="ixml.2022-04-15.ixml.inlined.xml" uri="../../ixml/schemas/ixml.2022-04-15.rough.rnc"/>
+  <uri resource="testing-the-schema.xml" uri="testing.ixml-2022-01-25.rnc"/>
+  <uri resource="ixml.2022-01-25.modified.ixml.xml" uri="../../../ixml/misc/ixml-2021-12-14-manual.rnc"/>
+</locatingRules>
