@@ -445,7 +445,7 @@
  </xsl:template>
 
  <!--* Elements inside scraps *-->
- <xsl:template match="scrap/ptr | scrap/ref">
+ <xsl:template match="scrap/ptr | scrap/ref" priority="2">
   <!--* If you ever again have a desire to make SWeb work neatly 
       * in IE, with its mistreatment of whitespace nodes, 
       * this template will have to change. *-->
@@ -702,7 +702,7 @@
   </xsl:element>
  </xsl:template>
 
- <xsl:template match="ptr" name="implicit-scrapnumref">
+ <xsl:template match="scrap//ptr" name="implicit-scrapnumref" priority="0.5">
   <xsl:choose>
    <xsl:when test="count(@type)=0 and id(@target)/self::scrap">
     <xsl:call-template name="scrapnumref"/>

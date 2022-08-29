@@ -1717,10 +1717,16 @@
        <xsl:value-of select="$posTarget - $posN + $apparentN"/>
       </xsl:when>
       <xsl:otherwise>
-       <xsl:comment>* have no n *</xsl:comment>
+	<xsl:comment>* have no n *</xsl:comment>
        <xsl:apply-templates select="$target-elem" mode="find-position"/>
       </xsl:otherwise>
      </xsl:choose>
+    </xsl:when>
+    <xsl:when test="count($target-elem) = 0">
+      <xsl:element name="span">
+	<xsl:attribute name="class">red</xsl:attribute>
+	<xsl:text>???</xsl:text>
+      </xsl:element>
     </xsl:when>
    </xsl:choose>
    <xsl:apply-templates/>
