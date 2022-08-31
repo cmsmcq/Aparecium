@@ -149,7 +149,9 @@ declare function aparecium:parse-string-with-compiled-grammar(
                       ... tats:)
                  else element aparecium:error {
                    attribute id { "ap:tbd05" },
-                   "Compiled grammar flawed:",
+                   element p {
+                     "Compiled grammar flawed:"
+                   },
                    $cg-ok
                  }
 		 
@@ -405,7 +407,9 @@ declare function aparecium:grammar-ok(
   )
       
 
-    let $lee-comp := ()
+    let $lee-comp := (
+      $G//aparecium:error
+  )
 
     let $lee-names := (
       for $r in $G/rule
@@ -434,20 +438,16 @@ declare function aparecium:grammar-ok(
                || " It must be marked as hidden."
           }, 
 
-      for $n in $G//nonterminal
-                [starts-with(lower-case(@name), 'xml')
-                and not(@mark eq '-')]
-      let $nt := $n/@name/string(),
-          $r := $G/rule[@name eq $nt],
-          $ok := ($r/@mark eq '-')
-      where not($ok)
+      for $r in $G/rule
+                [starts-with(lower-case(@name), 'xml')]
+      let $nt := $r/@name/string()
       return element aparecium:error {
                attribute id { "ap:tbd46" },
                $nt || " is not allowed as an XML name:  "
                || " it begins with 'xml'."            
                || "
-It must be marked as hidden,"            
-               || " or changed."            
+Aparecium does not support such "
+               || "names even if hidden."            
              }
 
   ) 
@@ -612,21 +612,28 @@ It must be marked as hidden,"
 
     let $lee-productive := ()
 
-  let $lee-all := ($lee-struc, $lee-comp,
+  let $lee-all := ($lee-struc, 
                    $lee-names,  
                    $lee-uniqdef, $lee-charclass,
                    $lee-hex, $lee-ranges,
                    $lee-alldef, 
                    $lee-reachable, $lee-productive)
-  return if (empty($lee-all/self::aparecium:error))
-  then $G
-  else (: not(empty($lee-all/self::ap:error)) :)
-    element aparecium:error {
-      attribute id { "ap:tbd06" },
-      element p { "Errors found in grammar." },
-      $lee-all,
-      $G
-  }
+  return if (exists($lee-all/self::aparecium:error))
+         then element aparecium:error {
+             attribute id { "ap:tbd06a" },
+             element p { "Errors found in grammar." },
+             $lee-all,
+             $G
+         }
+         else if (exists($lee-comp))
+         then element aparecium:error {
+             attribute id { "ap:tbd06b" },
+             element p { "Errors in compiling grammar." },
+             $lee-comp,
+             $G
+         } 
+         else $G
+
   else (: not($G/self::ixml) :) 
     element aparecium:error {
       attribute id { "ap:tbd07" },

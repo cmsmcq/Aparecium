@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="local.xsl"?>
 <!DOCTYPE TEI.2 [
-<!ENTITY date.last.touched '30 July 2022' >
+<!ENTITY date.last.touched '31 August 2022' >
 <!ATTLIST bibl id ID #REQUIRED>
 <!ATTLIST div  id ID #REQUIRED>
 <!ATTLIST scrap id ID #IMPLIED>
@@ -1347,7 +1347,9 @@ declare function aparecium:parse-string-with-compiled-grammar(
                       &TATS;
                  else element aparecium:error {
                    attribute id { "ap:tbd05" },
-                   "Compiled grammar flawed:",
+                   element p {
+                     "Compiled grammar flawed:"
+                   },
                    $cg-ok
                  }
 		 
@@ -1750,7 +1752,12 @@ declare function gl:ME (
                    return if ($c/self::element())
                           then gl:ME($c, $options)
                           else $c,
-      $ch := $children[self::element()]
+      $ch := $children[self::element()],
+      $ixml-children := $ch 
+                        except 
+                        ($ch
+                        [self::comment
+			or namespace-uri() ne ''])
   return <ptr target="gl-ME-identity"/>
   else <ptr target="gl-ME-terminals"/>
   else <ptr target="gl-ME-nonterminal"/>
@@ -1763,6 +1770,7 @@ declare function gl:ME (
   else <ptr target="gl-ME-comment"/>
   else <ptr target="gl-ME-prolog"/>
   else <ptr target="gl-ME-ixml"/>
+  else <ptr target="gl-ME-qualified"/>
   else <ptr target="gl-ME-whahhh"/>
 };
 </scrap></p>
@@ -1901,7 +1909,7 @@ to the error case.
 <scrap id="gl-ME-option"
        name="Handle options">
 if ($E/self::option
-    [count(*) eq 1]
+    [count($ixml-children) eq 1]
     [child::*[self::inclusion
               or self::exclusion
               or self::literal
@@ -1910,7 +1918,8 @@ if ($E/self::option
 	      or self::alts]])
 then
      let $id := 'exp_option_' 
-                || (1 + count($E/preceding::option))
+                || (1 + count($E/preceding::option)),
+         $child := $ixml-children[1]
      return element option {
        $E/(@* except (@xml:id, 
                      @nullable, 
@@ -1919,9 +1928,9 @@ then
                      @follow:*)),
        attribute xml:id { $id },
        attribute nullable { true() },
-       attribute first { $children/@first },
-       attribute last { $children/@last },
-       for $follow-att in $children/@follow:* 
+       attribute first { $child/@first },
+       attribute last { $child/@last },
+       for $follow-att in $child/@follow:* 
        return $follow-att,
        $children
      }</scrap>
@@ -1980,19 +1989,19 @@ choice element is named <gi>alts</gi>:
 <scrap id="gl-ME-repeats"
        name="Handle repetitions">
 if ($E[self::repeat0 or self::repeat1]
-      [*[1]
+      [$ixml-children[1]
         [self::inclusion or self::exclusion
         or self::literal
         or self::insertion
         or self::nonterminal
 	or self::alts]]
-      [count(*) eq 1 
-      or child::*[2][self::sep]]) 
+      [(count($ixml-children) eq 1)
+      or ($ixml-children[2][self::sep])])
 then let $gi := name($E)
      let $id := 'exp_' || $gi || '_' 
                 || (1 + count($E/preceding::*[name() = $gi])),
-         $F := gl:notrace($ch[1], "F: "),
-         $G := gl:notrace($ch[2], "G: ")
+         $F := gl:notrace($ixml-children[1], "F: "),
+         $G := gl:notrace($ixml-children[2], "G: ")
      return element {$gi} {
        $E/(@* except (@xml:id, 
                      @nullable, 
@@ -2036,7 +2045,7 @@ with no additions.</item>
 </list>
 <scrap id="gl-ME-rep-follow"
        name="Calculate follow:* attributes for repetitions">
-       if (count($ch) eq 1)
+       if (count($ixml-children) eq 1)
        then
          let $lastF := tokenize($F/@last,'\s+'),
              $firstF := tokenize($F/@first,'\s+')
@@ -2073,7 +2082,7 @@ name and its follow-set within &F; or &G;.</item>
 </list>
 <scrap prev="gl-ME-rep-follow"
        name="Calculate follow-set for repetition with separator">
-       else (: count($children) eq 2 :)
+       else (: count($ixml-children) eq 2 :)
          let $lastF := tokenize($F/@last,'\s+'),
              $lastG := tokenize($G/@last,'\s+'),
              $firstF := tokenize($F/@first,'\s+'),
@@ -2163,8 +2172,8 @@ changes none of its properties.
 <scrap id="gl-ME-sep"
        name="Handle separator expressions">
 if ($E/self::sep
-           [count(*) eq 1]
-           [child::*[self::inclusion
+           [count($ixml-children) eq 1]
+           [$ixml-children[self::inclusion
                      or self::exclusion 
                      or self::literal 
                      or self::insertion 
@@ -2172,7 +2181,8 @@ if ($E/self::sep
                      or self::alts]]
           ) then
      let $id := 'exp_sep_'
-                || (1 + count($E/preceding::sep)) 
+                || (1 + count($E/preceding::sep)),
+         $child := $ixml-children[1]
      return element sep {
        $E/(@* except (@xml:id, 
                      @nullable, 
@@ -2180,10 +2190,10 @@ if ($E/self::sep
                      @last, 
                      @follow:*)),
        attribute xml:id { $id },
-       $ch/@nullable,
-       $ch/@first,
-       $ch/@last,
-       $ch/@follow:*,
+       $child/@nullable,
+       $child/@first,
+       $child/@last,
+       $child/@follow:*,
        $children
      }
 </scrap>
@@ -2241,14 +2251,14 @@ if ($E/self::alt) then
                      @follow:*)),
        attribute xml:id { $id },
        attribute nullable { 
-         every $c in $ch except $E/comment
+         every $c in $ixml-children
          satisfies (xs:boolean($c/@nullable) eq true())
        },
        attribute first { 
          string-join(
-           for $c at $pos in $ch
+           for $c at $pos in $ixml-children
            return if (every $lsib
-	              in $ch[position() lt $pos]
+	              in $ixml-children[position() lt $pos]
                       satisfies
 		      (xs:boolean($lsib/@nullable)
 		      eq true() ))
@@ -2259,9 +2269,9 @@ if ($E/self::alt) then
        },
        attribute last { 
          string-join(
-           for $c at $pos in $ch
+           for $c at $pos in $ixml-children
            return if (every $rsib
-	              in $ch[position() gt $pos]
+	              in $ixml-children[position() gt $pos]
                       satisfies
 		      (xs:boolean($rsib/@nullable)
 		      eq true() ))
@@ -2296,11 +2306,11 @@ And so forth.</item>
 
 <scrap id="gl-ME-alt-follow"
        name="Calculate follow:* attributes for alt">
-       for $c at $cpos in $ch 
+       for $c at $cpos in $ixml-children 
        for $a in $c/@follow:*
        let $p := local-name($a),
            $lastC := tokenize($c/@last,'\s+'),
-           $rightsibs := $ch[position() gt $cpos],
+           $rightsibs := $ixml-children[position() gt $cpos],
            $followset := if ($p = $lastC)
 	   then string-join(
              (  $a,
@@ -2360,7 +2370,7 @@ The properties should all be self-explanatory.
                      @follow:*)),
        attribute xml:id { $id },
        attribute nullable { 
-         some $c in $ch
+         some $c in $ixml-children
          satisfies
 	 (xs:boolean($c/@nullable) eq true() )
        },
@@ -2421,6 +2431,14 @@ require no annotation.
 <scrap id="gl-ME-comment"
        name="Handle comment elements">
 if ($E/self::comment) then
+    $E
+</scrap>
+</p>
+<p>Namespace-qualified elements
+require no annotation.
+<scrap id="gl-ME-qualified"
+       name="Handle namespace-qualified elements">
+if ($E/namespace-uri() ne '') then
     $E
 </scrap>
 </p>
@@ -2655,21 +2673,28 @@ declare function aparecium:grammar-ok(
   <ptr target="ap-grok-alldef"/>
   <ptr target="ap-grok-reach"/>
   <ptr target="ap-grok-prod"/>
-  let $lee-all := ($lee-struc, $lee-comp,
+  let $lee-all := ($lee-struc, 
                    $lee-names,  
                    $lee-uniqdef, $lee-charclass,
                    $lee-hex, $lee-ranges,
                    $lee-alldef, 
                    $lee-reachable, $lee-productive)
-  return if (empty($lee-all/self::aparecium:error))
-  then $G
-  else (: not(empty($lee-all/self::ap:error)) :)
-    element aparecium:error {
-      attribute id { "ap:tbd06" },
-      element p { "Errors found in grammar." },
-      $lee-all,
-      $G
-  }
+  return if (exists($lee-all/self::aparecium:error))
+         then element aparecium:error {
+             attribute id { "ap:tbd06a" },
+             element p { "Errors found in grammar." },
+             $lee-all,
+             $G
+         }
+         else if (exists($lee-comp))
+         then element aparecium:error {
+             attribute id { "ap:tbd06b" },
+             element p { "Errors in compiling grammar." },
+             $lee-comp,
+             $G
+         } 
+         else $G
+
   else (: not($G/self::ixml) :) 
     element aparecium:error {
       attribute id { "ap:tbd07" },
@@ -2732,14 +2757,19 @@ function which calls an RNG validator if one is available
 and performs some simple fallback checking otherwise.</hi>
 </p>
 <p>Since we cannot check the compilation of the grammar
-in detail, we limit ourselves to checking that every
-rule has the attributes assigned by the compiler.
+in detail, we limit ourselves to checking to see whether the
+compiler has embedded any <gi>ap:error</gi> elements in the
+grammar. 
 <scrap id="ap-grok-comp"
-       name="Check for compiler attributes">
-  let $lee-comp := ()
+       name="Check for compiler problems">
+  let $lee-comp := (
+      $G//aparecium:error
+  )
 </scrap>
-<hi>The data flow has gotten confused. Let's leave this out for
-now.</hi>
+<hi>At one point it seemed a good idea to check for the
+compiler-supplied attributes.  But <ident>grammar-ok()</ident> is also
+called on uncompiled grammars.  So this was a false start. Let's leave
+this out for now.</hi>
 <scrap name="Check for compiler attributes">
   let $lee-comp := (
       for $r in $G/rule[not(@xml:id)
@@ -2858,7 +2888,7 @@ nonterminals, not just those which are not hidden.
 
       for $r in $G/rule
                 [starts-with(lower-case(@name), 'xml')]
-      let $nt := $r/@name/string(),
+      let $nt := $r/@name/string()
       return element aparecium:error {
                attribute id { "ap:tbd46" },
                $nt || " is not allowed as an XML name:  "
@@ -9284,9 +9314,11 @@ vol. 19 (2017)</title>.
 <xref>https://doi.org/10.4242/BalisageVol19.Sperberg-McQueen01</xref>.
 </bibl>
 
-<bibl id="msm-2022" n="Sperberg-McQueen 2022">
+<bibl id="test-harness" n="Sperberg-McQueen 2022">
 <author>Sperberg-McQueen, C. M.</author> <title level="u">Test harness
-for Aparecium</title>.  Unpublished technical report, 2022.</bibl>
+for Aparecium</title>.  Unpublished technical report, 2022.  (<xref
+href="../src/test-harness.xml">XML</xref>, <xref
+href="../doc/test-harness.html">HTML</xref>)</bibl>
 </listBibl>
 </div>
 
@@ -9310,14 +9342,17 @@ improve performance and robustness.</p>
 <list>
 
 <item>
-<p><label>Bug fixes</label>.  Clear all test-case failures.</p>
+<p><label>Performance improvements</label>.
+Analyse the code and measure performance.
+Find ways to improve parsing speed; several are described
+elsewhere in this list.</p>
 </item>
 
 <item>
 <p><label>Vendor neutrality</label>.  Take time to make frameworks to
 run in multiple XQuery engines, both from whatever GUI interface they
-provide and from the command line.  Initial targets:  BaseX, Saxon, eXist-db,
-Xidel.
+provide and from the command line.  Initial targets:  BaseX, Saxon
+(EE, PE, HE), eXist-db.
 <!-- To do, if feasible:
 <list>
 <item>BaseX from BaseXGUI (done) and command line (I think this has worked in the past)</item>
@@ -9326,6 +9361,7 @@ Saxon HE from Oxygen GUI and command line</item>
 <item>(installed) eXist-db from GUI and from command line</item>
 <item>MarkLogic from GUI and from command line</item>
 <item>FusionDB from GUI and from command line</item>
+<item>Xidel</item>
 <item>(nogo) BerkeleyDB from command line (do they have a GUI?) 
 (installed, no map support)</item>
 <item>Zorba?</item>
@@ -9347,16 +9383,6 @@ desirable to pull the Recursive Descent task forward.  It will feel
 better worrying about vendor neutrality if the tool is actually
 useful.
 -->
-<p>Current complaints by Saxon, when attempting to run the test driver:
-<list>
-  <item>Namespace <q><code>prof</code></q> not declared (calls
-  to prof:time, prof:track).</item>
-  <item>Namespace <q><code>file</code></q> not declared (calls
-  to file:create-dir, file:write).</item>
-</list>
-Currently no complaint about xquery:eval, but that's presumably only a
-matter of time.
-</p>
 </item>
 
 <item><p><label>Brown Sugar</label> plan.<note place="foot">
@@ -9784,6 +9810,14 @@ scrapped, in order that Aparecium can run under Saxon.</p>
 <p><hi>Done in connection with parse-forest grammars, March
 2022.</hi></p>
 </item>
+
+<item>
+<p><label>Bug fixes</label>.  Clear all test-case failures.</p>
+<p><hi>All test-case failures have now been cleared, with the
+exception of those relating to nonterminals which are not legal
+XML names and to non-XML characters in the input, which fall
+into the category WONTFIX.</hi></p>
+</item>
 </list>
 
 </div>
@@ -9878,18 +9912,110 @@ of existing code.</p></item>
 <div id="known-bugs">
 <head>Known bugs and test failures</head>
 
-<p>As of June 2022, Aparecium passes almost all tests in the ixml community
-group's test catalog.  The exceptions are:
+<p>Aparecium passes almost all tests in the ixml community group's
+test catalog.  As of 31 August 2022, the known exceptions are:
+
 <list>
+<item><p>test set <ident>non-NCName-hidden</ident>
+<list>
+<item><p>grammar test</p>
+</item>
+</list></p>
+<p>Aparecium does not support nonterminals which are not legal XML
+NCNames, even if they are hidden.</p>
+<p>This will not change in the near future.</p></item>
+
+<item><p>test set <ident>non-XML-char-in-input-output-clear</ident>
+<list><item><p>test case <ident>SOH-RS-EOT</ident></p></item>
+<item><p>test case <ident>STX-ETX</ident></p></item></list></p>
+<p>test set <ident>non-XML-char-in-input-output-errors</ident>
+<list><item><p>test case <ident>SOH-RS-EOT</ident></p></item>
+<item><p> and test case <ident>STX-ETX</ident></p></item></list></p>
+<p>All four test cases are reported as not run.</p>
+<p>Because Aparecium loads input strings as instances of the XDM
+string type, it does not and cannot parse input containing non-XML
+characters.</p>
+<p>This will not change.  (Aparecium's error message could
+probably be improved, though.)  </p></item>
+
+<!--
 <item><p>On some tests involving dynamic errors, Aparecium
 fails with an uncaught exception instead of returning a result
 with a diagnostic message.</p></item>
 <item><p>Aparecium fails all tests involving textual
 insertions.</p></item>
+-->
 </list>
 </p>
-<p>The test harness used is described in a separate document
-(<ptr target="test-harness"/>).</p>
+
+<p>On some tests, the test harness erroneously reports a failure:
+<list>
+<item><p>test set <ident>nothexdigit</ident>
+<list><item><p>grammar test</p></item></list></p>
+<p>The test harness appears not to recognize the error code raised by
+checking the grammar.</p></item>
+
+<item><p>test set <ident>version-decl-two</ident>
+<list><item><p>test case <ident>empty</ident></p></item>
+<item><p>test case <ident>done</ident></p></item></list></p>
+<p>test set <ident>prolog-1a</ident>
+<list><item><p>test case <ident>B1</ident></p></item>
+<item><p>test case <ident>D</ident></p></item></list></p>
+<p>The test harness is confused by the presence of
+<att>ap:version-string</att> and <att>ap:version-used</att> attributes
+in the reported result.</p>
+<p>This is an error in the test harness and will be fixed, but
+it's not currently a very high priority as it only inconveniences
+the developer.</p></item>
+
+<item><p>test set <ident>non-NCName-not-hidden</ident>
+<list><item><p>grammar test</p></item></list></p>
+<p>Aparecium does not support nonterminals which are not legal XML
+NCNames, even if they are hidden.  The spec allows processors to
+reject this grammar, but the test catalog cannot currently show
+that as an option.</p>
+<p>This is a shortcoming in the design of the test catalog but is
+unlikely to be fixed.  (A schema change and corresponding changes to
+tooling would be required.)</p></item>
+
+<item><p>test set <ident>sample.grammar.11</ident>
+<list><item><p>test case <ident>g11c01</ident></p></item>
+<item><p>test case <ident>g11c02</ident></p></item></list></p>
+
+<p>test set <ident>sample.grammar.12</ident>
+<list>
+<item><p>test case <ident>g12.c05</ident></p></item>
+</list></p>
+
+<p>test set <ident>sample.grammar.27</ident>
+<list>
+<item><p>test case <ident>g27.c03</ident></p></item>
+</list></p>
+
+<p>test set <ident>sample.grammar.28</ident>
+<list>
+<item><p>test case <ident>g28.c02</ident></p></item>
+</list></p>
+
+<p>test set <ident>sample.grammar.52</ident>
+<list>
+<item><p>test case <ident>g52.c01</ident></p></item>
+</list></p>
+
+<p>The grammars in these tests are infinitely ambiguous and there is
+only a very low probability that Aparecium's randomly selected parse
+tree will match one of the trees listed in the test
+catalog.</p>
+<p>This is an unfortunate interaction between the design of
+the test catalog and Aparecium's handling of ambiguous sentences.
+It is likely to be fixed when tree cursors are implemented
+because they will extract parse trees deterministically.
+</p></item>
+
+</list>
+</p>
+<p>The test harness used is described in <ref target="test-harness">a
+separate document</ref>.</p>
 </div>
 
 <div id="change-logs">

@@ -30,7 +30,12 @@ declare function gl:ME (
                    return if ($c/self::element())
                           then gl:ME($c, $options)
                           else $c,
-      $ch := $children[self::element()]
+      $ch := $children[self::element()],
+      $ixml-children := $ch 
+                        except 
+                        ($ch
+                        [self::comment
+			or namespace-uri() ne ''])
   return if ($E/self::member) then $E
 else if ($E/self::range) then $E
 else if ($E/self::class) then $E
@@ -94,7 +99,7 @@ then
        $children
      }
   else if ($E/self::option
-    [count(*) eq 1]
+    [count($ixml-children) eq 1]
     [child::*[self::inclusion
               or self::exclusion
               or self::literal
@@ -103,7 +108,8 @@ then
 	      or self::alts]])
 then
      let $id := 'exp_option_' 
-                || (1 + count($E/preceding::option))
+                || (1 + count($E/preceding::option)),
+         $child := $ixml-children[1]
      return element option {
        $E/(@* except (@xml:id, 
                      @nullable, 
@@ -112,26 +118,26 @@ then
                      @follow:*)),
        attribute xml:id { $id },
        attribute nullable { true() },
-       attribute first { $children/@first },
-       attribute last { $children/@last },
-       for $follow-att in $children/@follow:* 
+       attribute first { $child/@first },
+       attribute last { $child/@last },
+       for $follow-att in $child/@follow:* 
        return $follow-att,
        $children
      }
   else if ($E[self::repeat0 or self::repeat1]
-      [*[1]
+      [$ixml-children[1]
         [self::inclusion or self::exclusion
         or self::literal
         or self::insertion
         or self::nonterminal
 	or self::alts]]
-      [count(*) eq 1 
-      or child::*[2][self::sep]]) 
+      [(count($ixml-children) eq 1)
+      or ($ixml-children[2][self::sep])])
 then let $gi := name($E)
      let $id := 'exp_' || $gi || '_' 
                 || (1 + count($E/preceding::*[name() = $gi])),
-         $F := gl:notrace($ch[1], "F: "),
-         $G := gl:notrace($ch[2], "G: ")
+         $F := gl:notrace($ixml-children[1], "F: "),
+         $G := gl:notrace($ixml-children[2], "G: ")
      return element {$gi} {
        $E/(@* except (@xml:id, 
                      @nullable, 
@@ -154,7 +160,7 @@ then let $gi := name($E)
          then concat($F/@last, ' ', $G/@last)
          else $F/@last
        },
-              if (count($ch) eq 1)
+              if (count($ixml-children) eq 1)
        then
          let $lastF := tokenize($F/@last,'\s+'),
              $firstF := tokenize($F/@first,'\s+')
@@ -166,7 +172,7 @@ then let $gi := name($E)
                gl:merge((tokenize($a,'\s+'), $firstF))    
              }
            else $a
-       else (: count($children) eq 2 :)
+       else (: count($ixml-children) eq 2 :)
          let $lastF := tokenize($F/@last,'\s+'),
              $lastG := tokenize($G/@last,'\s+'),
              $firstF := tokenize($F/@first,'\s+'),
@@ -203,8 +209,8 @@ then let $gi := name($E)
      }
    
   else if ($E/self::sep
-           [count(*) eq 1]
-           [child::*[self::inclusion
+           [count($ixml-children) eq 1]
+           [$ixml-children[self::inclusion
                      or self::exclusion 
                      or self::literal 
                      or self::insertion 
@@ -212,7 +218,8 @@ then let $gi := name($E)
                      or self::alts]]
           ) then
      let $id := 'exp_sep_'
-                || (1 + count($E/preceding::sep)) 
+                || (1 + count($E/preceding::sep)),
+         $child := $ixml-children[1]
      return element sep {
        $E/(@* except (@xml:id, 
                      @nullable, 
@@ -220,10 +227,10 @@ then let $gi := name($E)
                      @last, 
                      @follow:*)),
        attribute xml:id { $id },
-       $ch/@nullable,
-       $ch/@first,
-       $ch/@last,
-       $ch/@follow:*,
+       $child/@nullable,
+       $child/@first,
+       $child/@last,
+       $child/@follow:*,
        $children
      }
      
@@ -238,14 +245,14 @@ then let $gi := name($E)
                      @follow:*)),
        attribute xml:id { $id },
        attribute nullable { 
-         every $c in $ch except $E/comment
+         every $c in $ixml-children
          satisfies (xs:boolean($c/@nullable) eq true())
        },
        attribute first { 
          string-join(
-           for $c at $pos in $ch
+           for $c at $pos in $ixml-children
            return if (every $lsib
-	              in $ch[position() lt $pos]
+	              in $ixml-children[position() lt $pos]
                       satisfies
 		      (xs:boolean($lsib/@nullable)
 		      eq true() ))
@@ -256,9 +263,9 @@ then let $gi := name($E)
        },
        attribute last { 
          string-join(
-           for $c at $pos in $ch
+           for $c at $pos in $ixml-children
            return if (every $rsib
-	              in $ch[position() gt $pos]
+	              in $ixml-children[position() gt $pos]
                       satisfies
 		      (xs:boolean($rsib/@nullable)
 		      eq true() ))
@@ -267,11 +274,11 @@ then let $gi := name($E)
            ' '
          )
        },
-              for $c at $cpos in $ch 
+              for $c at $cpos in $ixml-children 
        for $a in $c/@follow:*
        let $p := local-name($a),
            $lastC := tokenize($c/@last,'\s+'),
-           $rightsibs := $ch[position() gt $cpos],
+           $rightsibs := $ixml-children[position() gt $cpos],
            $followset := if ($p = $lastC)
 	   then string-join(
              (  $a,
@@ -312,7 +319,7 @@ then let $gi := name($E)
                      @follow:*)),
        attribute xml:id { $id },
        attribute nullable { 
-         some $c in $ch
+         some $c in $ixml-children
          satisfies
 	 (xs:boolean($c/@nullable) eq true() )
        },
@@ -340,7 +347,7 @@ then let $gi := name($E)
                      @follow:*)),
        attribute xml:id { $id },
        attribute nullable { 
-         some $c in $ch
+         some $c in $ixml-children
          satisfies
 	 (xs:boolean($c/@nullable) eq true() )
        },
@@ -372,6 +379,9 @@ then let $gi := name($E)
       $E/@*,
       $children
     }
+
+  else if ($E/namespace-uri() ne '') then
+    $E
 
   else if ($E/self::option or $E/self::sep)
 then element ap:error {
