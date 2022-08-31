@@ -26,8 +26,9 @@ parsing input may take some tens of seconds.
 For grammars of a few thousand characters (like that for ixml itself),
 it currently takes tens of minutes to compile the grammar.
 
-Version 2022-06 passes all tests in the ixml test catalog as of 20
-June, with the exception of those involving insertions.
+Version 2022-08 passes all tests in the ixml test catalog as of the
+end of July, with the exception of those involving non-XML characters
+in the input and nonterminals which are not XML names (not supported).
 
 
 ## How to use Aparecium to experiment with ixml
