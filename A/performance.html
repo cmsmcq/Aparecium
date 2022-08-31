@@ -1,4 +1,4 @@
-<!DOCTYPE HTML><html>
+<html>
 <!--Need to find a way to insert the current date-->
 <head><meta http-equiv="Content-Type" content="text/html; charset=us-ascii">
 <title>Performance analysis work log</title>
@@ -129,7 +129,7 @@
     text-indent: -2em;
   }
   div.epigraph .Real-P {margin-top: 0em; margin-bottom: 0em;} 
-  </style><link xmlns="http://www.w3.org/1999/xhtml" rel="stylesheet" href="../lib/local.css"></head><body><div class="doc">
+  </style><link xmlns="http://www.w3.org/1999/xhtml" rel="stylesheet" href="../lib/local.css"></link></head><body><div class="doc">
 
 
 
@@ -150,8 +150,7 @@
 <!-- and a 2! -->
 <li>1.1. <a href="#log-20220709">9 July 2022</a></li>
 <li>1.2. <a href="#log-20220820">20 August 2022</a></li>
-</ul></li><li>2. <a href="#test-plan">Test suite and test plans</a></li><li>3. <a href="#static-analysis">Static analysis</a></li><li>A. <a href="#indices">Indices</a></li>
-</ul>
+</ul></li><li>2. <a href="#test-plan">Test suite and test plans</a></li><li>3. <a href="#static-analysis">Static analysis</a></li><li>4. <a href="#misc-conjectures">Miscellaneous queries and conjectures</a></li></ul>
 
 
 <hr>
@@ -163,25 +162,25 @@
   
 <div class="div">
 
-    <div class="quicknav"><span class="arrow">&nbsp;</span><span class="arrow"><a href="#toc">&#x23f6;</a></span><span class="arrow"><a href="#test-plan">&#x23f5;</a></span></div><h2><a class="selflink" name="log" id="log" href="#log">1. </a>Work log</h2><ul><li>1.1. <a href="#log-20220709">9 July 2022</a></li><li>1.2. <a href="#log-20220820">20 August 2022</a></li></ul>
+    <div class="quicknav"><span class="arrow">&#160;</span><span class="arrow"><a href="#toc">&#9206;</a></span><span class="arrow"><a href="#test-plan">&#9205;</a></span></div><h2><a class="selflink" name="log" id="log" href="#log">1. </a>Work log</h2><ul><li>1.1. <a href="#log-20220709">9 July 2022</a></li><li>1.2. <a href="#log-20220820">20 August 2022</a></li></ul>
     
 <div class="div">
 
-      <div class="quicknav"><span class="arrow">&nbsp;</span><span class="arrow"><a href="#log">&#x23f6;</a></span><span class="arrow"><a href="#log-20220820">&#x23f5;</a></span></div><h3><a class="selflink" name="log-20220709" id="log-20220709" href="#log-20220709">1.1. </a>9 July 2022</h3>
+      <div class="quicknav"><span class="arrow">&#160;</span><span class="arrow"><a href="#log">&#9206;</a></span><span class="arrow"><a href="#log-20220820">&#9205;</a></span></div><h3><a class="selflink" name="log-20220709" id="log-20220709" href="#log-20220709">1.1. </a>9 July 2022</h3>
       <div class="Real-P">Inspired perhaps by the discussion of big-O analysis in
       Meyer's <em>Touch of class</em>, tried to see if I could
       make any headway on a static analysis of Aparecium.  It is
       doubtless an amateurish job, since I've never done it before,
       and it seems to hover uneasily between an attempt to
       characterize performance in some detail, at least potentially,
-      and the ruthlessly simple &#x201c;linear, quadratic, or what?&#x201d;
+      and the ruthlessly simple &#8220;linear, quadratic, or what?&#8221;
       focus Meyer exhibits.</div>
       <div class="Real-P">But I found it interesting enough to want to continue.</div>
     </div>
     
 <div class="div">
 
-      <div class="quicknav"><span class="arrow"><a href="#log-20220709">&#x23f4;</a></span><span class="arrow"><a href="#log">&#x23f6;</a></span><span class="arrow">&nbsp;</span></div><h3><a class="selflink" name="log-20220820" id="log-20220820" href="#log-20220820">1.2. </a>20 August 2022</h3>
+      <div class="quicknav"><span class="arrow"><a href="#log-20220709">&#9204;</a></span><span class="arrow"><a href="#log">&#9206;</a></span><span class="arrow">&#160;</span></div><h3><a class="selflink" name="log-20220820" id="log-20220820" href="#log-20220820">1.2. </a>20 August 2022</h3>
       <div class="Real-P">After Balisage, I decided to try to make improvements to
       performance in Aparecium my rest-of-summer project, to see how
       far I could get.  At the moment, it looks very grim -- not much
@@ -242,7 +241,7 @@
   
 <div class="div">
 
-    <div class="quicknav"><span class="arrow"><a href="#log">&#x23f4;</a></span><span class="arrow"><a href="#toc">&#x23f6;</a></span><span class="arrow"><a href="#static-analysis">&#x23f5;</a></span></div><h2><a class="selflink" name="test-plan" id="test-plan" href="#test-plan">2. </a>Test suite and test plans</h2>
+    <div class="quicknav"><span class="arrow"><a href="#log">&#9204;</a></span><span class="arrow"><a href="#toc">&#9206;</a></span><span class="arrow"><a href="#static-analysis">&#9205;</a></span></div><h2><a class="selflink" name="test-plan" id="test-plan" href="#test-plan">2. </a>Test suite and test plans</h2>
     <div class="Real-P">The test suite has three branches:
     <ul><li>
 	<div class="Real-P">The tests in <tt>ixml/tests/performance/*</tt>, which
@@ -262,17 +261,34 @@
 	more of their time in the instance.</div>
       </li>
 <li>
-	<div class="Real-P">A seletion of &#x2018;realistic&#x2019; tests, with
+	<div class="Real-P">A seletion of &#8216;realistic&#8217; tests, with
 	grammars and inputs from projects unrelated to invisible XML
-	and Aparecium.</div>
+	and Aparecium.
+	<ul><li>XPath</li>
+<li>Oberon</li>
+<li>vCards</li>
+<li>Ariadne</li>
+<li>first-order predicate calculus</li>
+</ul></div>
       </li>
+</ul>
+    </div>
+    <div class="Real-P">For each grammar and test case, measure:
+    <ul><li>size in characters</li>
+<li>size in AST nodes (count nodes, elements, attributes; I
+      think |nodes| = |elements| + |attributes| + |comment
+      elements|)</li>
+<li>size in raw parse-tree nodes (to measure this, change all
+      marks in the governing grammar to ^)</li>
+<li>size of PFG (elements, nodes, rules)</li>
+<li>number of Earley items generated</li>
 </ul>
     </div>
   </div>
   
 <div class="div">
 
-    <div class="quicknav"><span class="arrow"><a href="#test-plan">&#x23f4;</a></span><span class="arrow"><a href="#toc">&#x23f6;</a></span><span class="arrow">&nbsp;</span></div><h2><a class="selflink" name="static-analysis" id="static-analysis" href="#static-analysis">3. </a>Static analysis</h2>
+    <div class="quicknav"><span class="arrow"><a href="#test-plan">&#9204;</a></span><span class="arrow"><a href="#toc">&#9206;</a></span><span class="arrow"><a href="#misc-conjectures">&#9205;</a></span></div><h2><a class="selflink" name="static-analysis" id="static-analysis" href="#static-analysis">3. </a>Static analysis</h2>
     <div class="Real-P">As a first attempt, let's just try to walk through one possible
     execution.  To execute <tt>ap:parse-resource($I, $G)</tt>,
     what is the cost <i>k</i>?</div>
@@ -286,9 +302,12 @@
 	<br>k(unparsed-text($I))
 	<br>+ k(unparsed-text($G))
 	<br>+ k(parse-string($I2, $G2))  // <a href="#parse-string"><!--* have no n *-->2</a></div>
-	<div class="Real-P">Conjecture: unparsed-text() is O(n) in bytecount of result.</div>
-	<div class="Real-P">Conjecture: unparsed-text() is negligeable compared to
-	parse-string, in all strata.</div>
+	<div class="Real-P"><b>Conjecture:</b> unparsed-text() is O(n) in
+	bytecount of result.  (Test by ad-hoc testing.)  And in any
+	case I can't do anything about its speed.</div>
+	<div class="Real-P"><b>Conjecture:</b> unparsed-text() is negligible
+	compared to parse-string, in all strata.  (Test in BaseX by
+	timing calls, selectively.)</div>
       </li>
 <li><a name="parse-string" id="parse-string"></a>
 	<div class="Real-P">k(parse-string($I, $G)) =
@@ -296,6 +315,7 @@
 	<br>k(compile-grammar-from-string($G)) // <a href="#compile-grammar-from-string"><!--* have no n *-->3</a>
 	<br>+ k(parse-string-with-compiled-grammar($I, $G2)) // <a href="#parse-string-with-compiled-grammar"><!--* have no n *-->4</a>
 	</div>
+	<div class="Real-P"><b>Query:</b> What is relative cost of these?</div>
       </li>
 <li><a name="compile-grammar-from-string" id="compile-grammar-from-string"></a>
 	<div class="Real-P">k(compile-grammar-from-string($G)) = 
@@ -303,75 +323,135 @@
 	<br>k(parse-grammar-from-string($G)) // <a href="#parse-grammar-from-string"><!--* have no n *-->5</a>
 	<br>+ k(gluschkov($G2)) // <a href="#gluschkov"><!--* have no n *-->6</a>
 	</div>
+	<div class="Real-P"><b>Query:</b> What is relative cost of these?</div>
+	<div class="Real-P"><b>Conjecture:</b> parsing is more expensive than compiling.</div>
       </li>
 <li><a name="parse-string-with-compiled-grammar" id="parse-string-with-compiled-grammar"></a>
 	<div class="Real-P">k(parse-string-with-compiled-grammar($I, $CG))=
 	<br>
 	<br>k(grammar-ok($CG)) // <a href="#grammar-ok"><!--* have no n *-->7</a>
-	<br>+ k(any-tree($I, $CG)) // <a href="#any-tree"><!--* have no n *-->8</a>
+	<br>+ k(earley:parse($I, $CG)) // <a href="#earley-parse"><!--* have no n *-->8</a>
 	</div>
+	<div class="Real-P"><b>Conjecture:</b> grammar-ok() is O(n) in nodes of
+	grammar, and negligible compared to earley:parse().</div>
+	<div class="Real-P"><b>N.B.:</b> earley-parse() should be O(n) in size
+	of grammar (in nodes) plus size of input (in characters), when
+	the grammar is deterministic, and worst-case cubic with a
+	maximally non-deterministic grammar.  It's currently quadratic
+	when the grammar is deterministic.  Why?</div>
+	<div class="Real-P"><b>To do:</b> find a maximally non-deterministic
+	grammar in Grune and Jacobs, and check existing a-star and
+	even/odds grammars for determinism.</div>
       </li>
 <li><a name="parse-grammar-from-string" id="parse-grammar-from-string"></a>
 	<div class="Real-P">k(parse-grammar-from-string($G))
 	<br>
-	<br>k(doc($ap:ixml.gl.xml))
+	<br>k(doc($ap:ixml.gl.xml)) // not further analysed
 	<br>+ k(parse-string-with-compiled-grammar($G, $ixml.gl)) // <a href="#parse-string-with-compiled-grammar"><!--* have no n *-->4</a>
 	</div>
-	<div class="Real-P">Conjecture that doc() is linear in bytes of standard XML grammar.
-	(But is in any case out of my hands.)</div>
+	<div class="Real-P"><b>Conjecture</b> that doc() is linear in bytes of
+	the XML document being loaded.  Or alternatively, linear in
+	nodes of the document.  But it is in any case out of my hands.
+	Worth a few minutes to try to test the conjecture, but not
+	more.</div>
       </li>
 <li><a name="gluschkov" id="gluschkov"></a>
 	<div class="Real-P">k(gluschkov($G2)) =
 	<br>
 	</div>
-	<div class="Real-P">Conjecture: this is a depth-first traversal and the cost is O(n) for n
-	= number of symbols in G, &#x2245; number of XML elements in $G//* except
-	$G//comment.
+	<div class="Real-P"><b>Conjecture:</b> this is a depth-first traversal
+	and the cost is O(n) for n = number of symbols in G, &#8773; number
+	of XML elements in $G//* except $G//comment.</div>
+	<div class="Real-P">
 	</div>
       </li>
 <li><a name="grammar-ok" id="grammar-ok"></a>
 	<div class="Real-P">k(grammar-ok($CG))
 	</div>
-      </li>
-<li><a name="any-tree" id="any-tree"></a>
-	<div class="Real-P">k(any-tree($I, $CG)) =
-	<br>k(earley-parse($I, $CG)) // <a href="#earley-parse"><!--* have no n *-->9</a>
-	</div>
+	<div class="Real-P"><b>Conjecture:</b> this involves ten searches
+	through the entire grammar for elements of particular kinds.
+	It will be O(n) for n = number of symbols in G, &#8773; number of
+	XML elements in $G//* excluding comments and
+	namespace-qualified elements).</div>
       </li>
 <li><a name="earley-parse" id="earley-parse"></a>
-	<div class="Real-P">k(earley-parse($I, $CG)) =
+	<div class="Real-P">k(earley:parse($I, $CG)) = ???
 	<br>k(er:recognizeX($I, $CG) <a href="#er.recognizeX"><span class="red">???</span></a>
-	<br>+ k(epi:parse-forest-grammar(completions, closure, input)) // <a href="#epi.parse-forest-grammar"><!--* have no n *-->11</a>
-	<br>+ k(epi:tree-from-pfg(pfg)) // <a href="#epi.tree-from-pfg"><!--* have no n *-->12</a>
+	<br>+ k(epi:parse-forest-grammar(completions, closure, input)) // <a href="#epi.parse-forest-grammar"><!--* have no n *-->10</a>
+	<br>+ k(checking PFG insertions) // linear in |PFG| + |insertions|
+	<br>+ k(epi:tree-from-pfg(pfg)) // <a href="#epi.tree-from-pfg"><!--* have no n *-->11</a>
+	<br>+ k(checking AST for non-XML names) // linear in |AST|
+	<br>+ k(version check) // O(1)
 	</div>
+	<div class="Real-P"><b>Conjecture:</b> recognition takes over half the
+	time (50-70%), construction of PFG and extraction of tree the
+	rest of the time, other items are negligible.</div>
+	<div class="Real-P"><b>Conjecture:</b> Construction of PFG takes more
+	than twice as long as extraction of AST.  (Rationale: Element
+	construction dominates the time [<i>check this how?</i>].
+	For every element and attribute node in the AST, two elements
+	[rule and reference to it] are constructed in the PFG.)</div>
+	<div class="Real-P"><b>Conjecture:</b> Making the PFG a map will speed
+	up construction of PFG (by eliminating element
+	construction).</div>
       </li>
 <li><a name="er.recognize" id="er.recognize"></a>
 	<div class="Real-P">k(er:recognizeX($I, $CG) =
-	<br>???</div>
+	<br>
+	<br>k(initialization)
+	<br>+ k(ixi:earley-closure) // <a href="#earley-closure"><!--* have no n *-->12</a>
+	</div>
+	<div class="Real-P"><b>Conjecture:</b> earley-closure() takes all the
+	time.</div>
       </li>
 <li><a name="epi.parse-forest-grammar" id="epi.parse-forest-grammar"></a>
-	<div class="Real-P">+ k(epi:parse-forest-grammar(completions, closure, input)) =
-	<br>???</div>
+	<div class="Real-P">k(epi:parse-forest-grammar(completions, closure, input)) =
+	<br>k(make-pfg-rules) // <a href="#make-pfg-rules"><!--* have no n *-->13</a></div>
+	<div class="Real-P"><b>Conjecture:</b> Time is dominated by (a) searches in
+	Earley set and (b) construction of elements.</div>
+	<div class="Real-P"><b>Query:</b> what is the relative proportion of
+	those two?</div>
+	<div class="Real-P"><b>Conjecture:</b> Earley searches will be improved
+	by making lookup faster.  (Additional indexing?)</div>
+	<div class="Real-P"><b>Conjecture:</b> Construction will be improved
+	by making PFG be a map instead of an XML document.</div>
       </li>
 <li><a name="epi.tree-from-pfg" id="epi.tree-from-pfg"></a>
 	<div class="Real-P">k(epi:tree-from-pfg(pfg)) =
+	<br>O(n) in number of elements in pfg,
+	proportional to number of elements in AST
+	</div>
+	<div class="Real-P"><b>Conjecture:</b> Construction will be faster if
+	the PFG becomes a map, because search for relevant rules will
+	be O(1) instead of O(n).</div>
+      </li>
+<li><a name="earley-closure" id="earley-closure"></a>
+	<div class="Real-P">k(ixi:earley-closure($EI, $I, $G)) =
+	<br>???
+	</div>
+      </li>
+<li><a name="make-pfg-rules" id="make-pfg-rules"></a>
+	<div class="Real-P">k(epi:make-pfg-rules(work-queue, set, input, accumulator)) =
 	<br>???
 	</div>
       </li>
 </ol>
   </div>
   
-
-
-<hr>
-
 <div class="div">
 
-<h2><a class="selflink" name="indices" id="indices" href="#indices">A. </a>Indices</h2>
+    <div class="quicknav"><span class="arrow"><a href="#static-analysis">&#9204;</a></span><span class="arrow"><a href="#toc">&#9206;</a></span><span class="arrow">&#160;</span></div><h2><a class="selflink" name="misc-conjectures" id="misc-conjectures" href="#misc-conjectures">4. </a>Miscellaneous queries and conjectures</h2>
+    <div class="Real-P"><b>Conjecture:</b> current time for
+    parse-grammar-from-string() or the equivalent is roughly equal to
+    parsing input-grammar string against the vxml spec grammar.</div>
+    <div class="Real-P">If so, that means I can continue to compare the run time for
+    parsing grammars with Earley vs parsing with bespoke parser.</div>
+  </div>
+  
 
-</div>
 
 
 
 </div></body></html>
+
 

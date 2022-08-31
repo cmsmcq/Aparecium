@@ -163,8 +163,27 @@ form of this document.</p>
       <item>
 	<p>A seletion of <soCalled>realistic</soCalled> tests, with
 	grammars and inputs from projects unrelated to invisible XML
-	and Aparecium.</p>
+	and Aparecium.
+	<list>
+	  <item>XPath</item>
+	  <item>Oberon</item>
+	  <item>vCards</item>
+	  <item>Ariadne</item>
+	  <item>first-order predicate calculus</item>
+	</list></p>
       </item>
+    </list>
+    </p>
+    <p>For each grammar and test case, measure:
+    <list>
+      <item>size in characters</item>
+      <item>size in AST nodes (count nodes, elements, attributes; I
+      think |nodes| = |elements| + |attributes| + |comment
+      elements|)</item>
+      <item>size in raw parse-tree nodes (to measure this, change all
+      marks in the governing grammar to ^)</item>
+      <item>size of PFG (elements, nodes, rules)</item>
+      <item>number of Earley items generated</item>
     </list>
     </p>
   </div>
@@ -184,9 +203,12 @@ form of this document.</p>
 	<lb/>k(unparsed-text($I))
 	<lb/>+ k(unparsed-text($G))
 	<lb/>+ k(parse-string($I2, $G2))  // <ptr target="parse-string"/></p>
-	<p>Conjecture: unparsed-text() is O(n) in bytecount of result.</p>
-	<p>Conjecture: unparsed-text() is negligeable compared to
-	parse-string, in all strata.</p>
+	<p><label>Conjecture:</label> unparsed-text() is O(n) in
+	bytecount of result.  (Test by ad-hoc testing.)  And in any
+	case I can't do anything about its speed.</p>
+	<p><label>Conjecture:</label> unparsed-text() is negligible
+	compared to parse-string, in all strata.  (Test in BaseX by
+	timing calls, selectively.)</p>
       </item>
       <item id="parse-string">
 	<p>k(parse-string($I, $G)) =
@@ -194,6 +216,7 @@ form of this document.</p>
 	<lb/>k(compile-grammar-from-string($G)) // <ptr target="compile-grammar-from-string"/>
 	<lb/>+ k(parse-string-with-compiled-grammar($I, $G2)) // <ptr target="parse-string-with-compiled-grammar"/>
 	</p>
+	<p><label>Query:</label> What is relative cost of these?</p>
       </item>
       <item id="compile-grammar-from-string">
 	<p>k(compile-grammar-from-string($G)) = 
@@ -201,67 +224,140 @@ form of this document.</p>
 	<lb/>k(parse-grammar-from-string($G)) // <ptr target="parse-grammar-from-string"/>
 	<lb/>+ k(gluschkov($G2)) // <ptr target="gluschkov"/>
 	</p>
+	<p><label>Query:</label> What is relative cost of these?</p>
+	<p><label>Conjecture:</label> parsing is more expensive than compiling.</p>
       </item>
       <item id="parse-string-with-compiled-grammar">
 	<p>k(parse-string-with-compiled-grammar($I, $CG))=
 	<lb/>
 	<lb/>k(grammar-ok($CG)) // <ptr target="grammar-ok"/>
-	<lb/>+ k(any-tree($I, $CG)) // <ptr target="any-tree"/>
+	<lb/>+ k(earley:parse($I, $CG)) // <ptr target="earley-parse"/>
 	</p>
+	<p><label>Conjecture:</label> grammar-ok() is O(n) in nodes of
+	grammar, and negligible compared to earley:parse().</p>
+	<p><label>N.B.:</label> earley-parse() should be O(n) in size
+	of grammar (in nodes) plus size of input (in characters), when
+	the grammar is deterministic, and worst-case cubic with a
+	maximally non-deterministic grammar.  It's currently quadratic
+	when the grammar is deterministic.  Why?</p>
+	<p><label>To do:</label> find a maximally non-deterministic
+	grammar in Grune and Jacobs, and check existing a-star and
+	even/odds grammars for determinism.</p>
       </item>
       <item id="parse-grammar-from-string">
 	<p>k(parse-grammar-from-string($G))
 	<lb/>
-	<lb/>k(doc($ap:ixml.gl.xml))
+	<lb/>k(doc($ap:ixml.gl.xml)) // not further analysed
 	<lb/>+ k(parse-string-with-compiled-grammar($G, $ixml.gl)) // <ptr target="parse-string-with-compiled-grammar"/>
 	</p>
-	<p>Conjecture that doc() is linear in bytes of standard XML grammar.
-	(But is in any case out of my hands.)</p>
+	<p><label>Conjecture</label> that doc() is linear in bytes of
+	the XML document being loaded.  Or alternatively, linear in
+	nodes of the document.  But it is in any case out of my hands.
+	Worth a few minutes to try to test the conjecture, but not
+	more.</p>
       </item>
       <item id="gluschkov">
 	<p>k(gluschkov($G2)) =
 	<lb/>
 	</p>
-	<p>Conjecture: this is a depth-first traversal and the cost is O(n) for n
-	= number of symbols in G, ≅ number of XML elements in $G//* except
-	$G//comment.
+	<p><label>Conjecture:</label> this is a depth-first traversal
+	and the cost is O(n) for n = number of symbols in G, ≅ number
+	of XML elements in $G//* except $G//comment.</p>
+	<p>
 	</p>
       </item>
       <item id="grammar-ok">
 	<p>k(grammar-ok($CG))
 	</p>
+	<p><label>Conjecture:</label> this involves ten searches
+	through the entire grammar for elements of particular kinds.
+	It will be O(n) for n = number of symbols in G, ≅ number of
+	XML elements in $G//* excluding comments and
+	namespace-qualified elements).</p>
       </item>
+      <!--
       <item id="any-tree">
 	<p>k(any-tree($I, $CG)) =
 	<lb/>k(earley-parse($I, $CG)) // <ptr target="earley-parse"/>
 	</p>
       </item>
+      -->
       <item id="earley-parse">
-	<p>k(earley-parse($I, $CG)) =
+	<p>k(earley:parse($I, $CG)) = ???
 	<lb/>k(er:recognizeX($I, $CG) <ptr target="er.recognizeX"/>
 	<lb/>+ k(epi:parse-forest-grammar(completions, closure, input)) // <ptr target="epi.parse-forest-grammar"/>
+	<lb/>+ k(checking PFG insertions) // linear in |PFG| + |insertions|
 	<lb/>+ k(epi:tree-from-pfg(pfg)) // <ptr target="epi.tree-from-pfg"/>
+	<lb/>+ k(checking AST for non-XML names) // linear in |AST|
+	<lb/>+ k(version check) // O(1)
 	</p>
+	<p><label>Conjecture:</label> recognition takes over half the
+	time (50-70%), construction of PFG and extraction of tree the
+	rest of the time, other items are negligible.</p>
+	<p><label>Conjecture:</label> Construction of PFG takes more
+	than twice as long as extraction of AST.  (Rationale: Element
+	construction dominates the time [<hi>check this how?</hi>].
+	For every element and attribute node in the AST, two elements
+	[rule and reference to it] are constructed in the PFG.)</p>
+	<p><label>Conjecture:</label> Making the PFG a map will speed
+	up construction of PFG (by eliminating element
+	construction).</p>
       </item>
       <item id="er.recognize">
 	<p>k(er:recognizeX($I, $CG) =
-	<lb/>???</p>
+	<lb/>
+	<lb/>k(initialization)
+	<lb/>+ k(ixi:earley-closure) // <ptr target="earley-closure"/>
+	</p>
+	<p><label>Conjecture:</label> earley-closure() takes all the
+	time.</p>
       </item>
       <item id="epi.parse-forest-grammar">
-	<p>+ k(epi:parse-forest-grammar(completions, closure, input)) =
-	<lb/>???</p>
+	<p>k(epi:parse-forest-grammar(completions, closure, input)) =
+	<lb/>k(make-pfg-rules) // <ptr target="make-pfg-rules"/></p>
+	<p><label>Conjecture:</label> Time is dominated by (a) searches in
+	Earley set and (b) construction of elements.</p>
+	<p><label>Query:</label> what is the relative proportion of
+	those two?</p>
+	<p><label>Conjecture:</label> Earley searches will be improved
+	by making lookup faster.  (Additional indexing?)</p>
+	<p><label>Conjecture:</label> Construction will be improved
+	by making PFG be a map instead of an XML document.</p>
       </item>
       <item id="epi.tree-from-pfg">
 	<p>k(epi:tree-from-pfg(pfg)) =
+	<lb/>O(n) in number of elements in pfg,
+	proportional to number of elements in AST
+	</p>
+	<p><label>Conjecture:</label> Construction will be faster if
+	the PFG becomes a map, because search for relevant rules will
+	be O(1) instead of O(n).</p>
+      </item>
+      <item id="earley-closure">
+	<p>k(ixi:earley-closure($EI, $I, $G)) =
+	<lb/>???
+	</p>
+      </item>
+      <item id="make-pfg-rules">
+	<p>k(epi:make-pfg-rules(work-queue, set, input, accumulator)) =
 	<lb/>???
 	</p>
       </item>
 
     </list>
   </div>
+  <div id="misc-conjectures">
+    <head>Miscellaneous queries and conjectures</head>
+    <p><label>Conjecture:</label> current time for
+    parse-grammar-from-string() or the equivalent is roughly equal to
+    parsing input-grammar string against the vxml spec grammar.</p>
+    <p>If so, that means I can continue to compare the run time for
+    parsing grammars with Earley vs parsing with bespoke parser.</p>
+  </div>
   
 </body>
 
+<!--
 <back>
 <div id="indices">
 <head>Indices</head>
@@ -269,5 +365,6 @@ form of this document.</p>
 </div>
 
 </back>
+-->
 </text>
 </TEI.2>

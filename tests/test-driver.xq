@@ -13,7 +13,7 @@ declare namespace db =
 
 declare option db:chop "false";
 
-let $catalog-index := 'poberon' (: which catalog to run? short name :)
+let $catalog-index := 'ixml-all' (: which catalog to run? short name :)
     (: bogons ???. 
        test0 2s, test1 5s, hygiene 12s, zeroes 20s.  
        misc 78s, gxxx 153s, wisp-A 100s.
@@ -258,7 +258,7 @@ let $invdir := "../../cmsmcq-ixml/tests/",
         )[1]
       },
       
-      attribute timeout { 6000 }
+      attribute timeout { 1200 }
 
     }
 
