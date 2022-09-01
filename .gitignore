@@ -1,3 +1,4 @@
 *~
 tmp/*.xqm
 zzz*
+/tests/perf/vcards/hidden/

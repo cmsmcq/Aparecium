@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<tc:test-catalog xmlns:tc="https://github.com/invisibleXML/ixml/test-catalog"
+		 xmlns:ixml="http://invisiblexml.org/NS"
+		 name="Oberon-performance-tests"
+		 release-date="2022-08-30"
+		 >
+  <tc:description>
+    <tc:p>A collection of tests for use in measuring performance
+    of an invisible XML processor.</tc:p>
+  </tc:description>
+ 
+  <tc:test-set name="Oberon">
+    <tc:created by="cmsmcq" on="2022-08-25"/>
+    <tc:description>
+      <tc:p>The grammar is an edited translation of Wirth's grammar.
+      The test cases are drawn from materials available from
+      Project Oberon 2013.</tc:p>
+    </tc:description>
+   
+    <!-- the real grammar: -->
+    <!--
+    <tc:ixml-grammar-ref href="../../../../cmsmcq-ixml/samples/Oberon/Grammars/Oberon.ixml"/>
+    -->
+
+    <!-- a temporary stopgap -->
+    <!-- <tc:vxml-grammar-ref href="out/Oberon.ixml.runon.xml"/> -->
+    <tc:vxml-grammar-ref href="out/Oberon.aparecium.ixml.xml"/>
+
+    <!-- full, unreduced parse tree:
+    <tc:ixml-grammar-ref href="../../../../cmsmcq-ixml/samples/XPath/XPath.ixml"/>
+    -->
+
+    <tc:grammar-test>
+      <tc:result>
+	<tc:assert-xml-ref href="out/Oberon.ixml.runon.xml"/>
+      </tc:result>
+    </tc:grammar-test>
+
+    <tc:test-case name="ob-01">
+      <tc:created on="2022-08-30" by="cmsmcq"/>
+      <tc:test-string-ref href="in/oberon-01.Mod.txt"/>
+      <tc:result>
+	<tc:assert-xml-ref href="out/oberon-01.xml"/>
+      </tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="ob-02">
+      <tc:created on="2022-08-30" by="cmsmcq"/>
+      <tc:test-string-ref href="in/oberon-02.Mod.txt"/>
+      <tc:result>
+	<tc:assert-xml-ref href="out/oberon-02.xml"/>
+      </tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="ob-03">
+      <tc:created on="2022-08-30" by="cmsmcq"/>
+      <tc:test-string-ref href="in/oberon-03.Mod.txt"/>
+      <tc:result>
+	<tc:assert-xml-ref href="out/oberon-03.xml"/>
+      </tc:result>
+    </tc:test-case>
+
+    <tc:test-case name="ob-04">
+      <tc:created on="2022-08-30" by="cmsmcq"/>
+      <tc:test-string-ref href="in/oberon-04.Mod.txt"/>
+      <tc:result>
+	<tc:assert-xml-ref href="out/oberon-04.xml"/>
+      </tc:result>
+    </tc:test-case>
+    
+    <tc:test-case name="ob-05">
+      <tc:created on="2022-08-30" by="cmsmcq"/>
+      <tc:test-string-ref href="in/oberon-05.Mod.txt"/>
+      <tc:result>
+	<tc:assert-xml-ref href="out/oberon-05.xml"/>
+      </tc:result>
+    </tc:test-case>
+    
+    <tc:test-case name="ob-06">
+      <tc:created on="2022-08-30" by="cmsmcq"/>
+      <tc:test-string-ref href="in/oberon-06.Mod.txt"/>
+      <tc:result>
+	<tc:assert-xml-ref href="out/oberon-06.xml"/>
+      </tc:result>
+    </tc:test-case>
+    
+    <tc:test-case name="ob-07">
+      <tc:created on="2022-08-30" by="cmsmcq"/>
+      <tc:test-string-ref href="in/oberon-07.Mod.txt"/>
+      <tc:result>
+	<tc:assert-xml-ref href="out/oberon-07.xml"/>
+      </tc:result>
+    </tc:test-case>
+    
+    <tc:test-case name="ob-08">
+      <tc:created on="2022-08-30" by="cmsmcq"/>
+      <tc:test-string-ref href="in/oberon-08.Mod.txt"/>
+      <tc:result>
+	<tc:assert-xml-ref href="out/oberon-08.xml"/>
+      </tc:result>
+    </tc:test-case>
+    
+    <tc:test-case name="ob-09">
+      <tc:created on="2022-08-30" by="cmsmcq"/>
+      <tc:test-string-ref href="in/oberon-09.Mod.txt"/>
+      <tc:result>
+	<tc:assert-xml-ref href="out/oberon-09.xml"/>
+      </tc:result>
+    </tc:test-case>
+    
+    <tc:test-case name="ob-10">
+      <tc:created on="2022-08-30" by="cmsmcq"/>
+      <tc:test-string-ref href="in/oberon-10.Mod.txt"/>
+      <tc:result>
+	<tc:assert-xml-ref href="out/oberon-10.xml"/>
+      </tc:result>
+    </tc:test-case>
+    
+  </tc:test-set>
+  
+</tc:test-catalog>

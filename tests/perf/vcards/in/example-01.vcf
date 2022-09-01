@@ -1,0 +1,19 @@
+BEGIN:VCARD
+VERSION:3.0
+FN:me Pawson
+N:Pawson;me;;;
+X-PHONETIC-FIRST-NAME:01733233746
+item1.EMAIL;TYPE=INTERNET:dave.pawson@gmail.com
+item1.X-ABLabel:
+item2.TEL:01733233746
+item2.X-ABLabel:landline
+item3.TEL:0750 606 8120
+item3.X-ABLabel:pixel6
+item4.TEL:07526 532851
+item4.X-ABLabel:motoG9
+item2.URL:http\://www.google.com/profiles/110910421382031219293
+item5.ADR:;Orton Southgate;38 Glencoe Way;Peterborough;;PE2 6SJ;GB;38 Glenc
+ oe Way\nOrton Southgate\nPeterborough\nPE2 6SJ\nGB
+item5.X-ABLabel:
+CATEGORIES:myContacts
+END:VCARD
