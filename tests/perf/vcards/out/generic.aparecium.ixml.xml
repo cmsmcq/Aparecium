@@ -1,0 +1,87 @@
+<ixml><comment> Generic vCard syntax
+  Adapted from https://datatracker.ietf.org/doc/html/rfc6350#section-3.3 
+  by eliminating all specific keywords and just recording their values.
+
+  0 first version
+  1 fix ambiguity in value for case of a single field.
+    hide CRLF for legibility
+    hide ALPHA etc. for legibility
+  2 allow invisible line breaks within quoted values (!)
+    hide the BEGIN/END literals
+  3 make 'name' more complicated to ensure that 'BEGIN' and 'END'
+    are not recognized as names but force the recognition of vcard
+    boundaries.  There ought to be a simpler way.
+  4 Hide magic character sequences, invisible line breaks, and
+    other apparatus, since they appear to be working correctly.
+    Also hide the internals of quoted parameter values.
+  5 allow colons to be escaped, too, make the CRLF rules at the
+    end of a card less pedantic.
+
+  2022-06-24/2022-06-25, Michael Sperberg-McQueen and Dave Pawson
+
+</comment><comment> A collection of vcards is one or more cards. </comment><rule name="vcards"><alt><repeat1><nonterminal name="vcard"/></repeat1></alt></rule><comment> A vcard is a BEGIN:VCARD, a sequence of
+                         content lines, and and END:VCARD.  The RFC
+                         requires that certain fields occur, and
+                         writes them into the grammar, but we will
+                         accept any fields as long as they conform to
+                         the generic syntax. </comment><rule name="vcard"><alt><literal tmark="-" string="BEGIN:VCARD"/><nonterminal name="CRLF"/><repeat1><nonterminal name="property"/></repeat1><literal tmark="-" string="END:VCARD"/><repeat0><nonterminal name="CRLF"/></repeat0></alt></rule><comment> A property (the RFC calls it a 'contentline')
+                         is represented by an optional group marker, a
+                         property name, optional parameters, and one
+                         or more comma-separated values, ending with a
+                         CRLF. Note that the values may contain
+                         line-continuations and escaped characters (\,
+                         for comma, \; for semi-colon, \n for newline,
+                         \\ for backslash), which should be unescaped
+                         by the parser. </comment><rule name="property"><alt><option><alts><alt><nonterminal mark="@" name="group"/><literal tmark="-" string="."/></alt></alts></option><nonterminal name="name"/><repeat0><alts><alt><literal tmark="-" string=";"/><nonterminal name="param"/></alt></alts></repeat0><literal tmark="-" string=":"/><repeat1><nonterminal name="value"/><sep><literal tmark="-" string=","/></sep></repeat1><nonterminal name="CRLF"/></alt></rule><rule name="group"><alt><repeat1><alts><alt><nonterminal name="ALPHA"/></alt><alt><nonterminal name="DIGIT"/></alt><alt><literal string="-"/></alt></alts></repeat1></alt></rule><comment> In principle name could be very simple.
+                           But we want to distinguish normal names
+                           from x-names, and we want to ensure that
+                           BEGIN and END are not recognized as names
+                           but as keywords. So we have a more complicated
+                           definition. </comment><rule mark="@" name="name"><alt><nonterminal name="not-an-x-name"/></alt><alt><nonterminal name="not-begin"/></alt><alt><nonterminal name="not-end"/></alt><alt><nonterminal name="normal-name"/></alt><alt><nonterminal name="x-name"/></alt></rule><comment> not-an-x-name, though it begins with X </comment><rule mark="-" name="not-an-x-name"><alt><inclusion><member string="Xx"/></inclusion><option><alts><alt><exclusion><member string="-"/></exclusion><repeat0><alts><alt><nonterminal name="ALPHA"/></alt><alt><nonterminal name="DIGIT"/></alt><alt><literal string="-"/></alt></alts></repeat0></alt></alts></option></alt></rule><comment> not-begin, though it begins with B... </comment><rule mark="-" name="not-begin"><alt><literal string="BEGIN"/><repeat1><alts><alt><nonterminal name="ALPHA"/></alt><alt><nonterminal name="DIGIT"/></alt><alt><literal string="-"/></alt></alts></repeat1></alt><alt><literal string="BEGI"/><option><alts><alt><exclusion><member string="nN"/></exclusion><repeat0><alts><alt><nonterminal name="ALPHA"/></alt><alt><nonterminal name="DIGIT"/></alt><alt><literal string="-"/></alt></alts></repeat0></alt></alts></option></alt><alt><literal string="BEG"/><option><alts><alt><exclusion><member string="iI"/></exclusion><repeat0><alts><alt><nonterminal name="ALPHA"/></alt><alt><nonterminal name="DIGIT"/></alt><alt><literal string="-"/></alt></alts></repeat0></alt></alts></option></alt><alt><literal string="BE"/><option><alts><alt><exclusion><member string="gG"/></exclusion><repeat0><alts><alt><nonterminal name="ALPHA"/></alt><alt><nonterminal name="DIGIT"/></alt><alt><literal string="-"/></alt></alts></repeat0></alt></alts></option></alt><alt><literal string="B"/><option><alts><alt><exclusion><member string="eE"/></exclusion><repeat0><alts><alt><nonterminal name="ALPHA"/></alt><alt><nonterminal name="DIGIT"/></alt><alt><literal string="-"/></alt></alts></repeat0></alt></alts></option></alt></rule><comment> not-end, though it begins with E or EN </comment><rule mark="-" name="not-end"><alt><inclusion><member string="Ee"/></inclusion><inclusion><member string="Nn"/></inclusion><inclusion><member string="Dd"/></inclusion><repeat1><alts><alt><nonterminal name="ALPHA"/></alt><alt><nonterminal name="DIGIT"/></alt><alt><literal string="-"/></alt></alts></repeat1></alt><alt><inclusion><member string="Ee"/></inclusion><inclusion><member string="Nn"/></inclusion><option><alts><alt><exclusion><member string="Dd"/></exclusion><repeat0><alts><alt><nonterminal name="ALPHA"/></alt><alt><nonterminal name="DIGIT"/></alt><alt><literal string="-"/></alt></alts></repeat0></alt></alts></option></alt><alt><inclusion><member string="Ee"/></inclusion><option><alts><alt><exclusion><member string="Nn"/></exclusion><repeat0><alts><alt><nonterminal name="ALPHA"/></alt><alt><nonterminal name="DIGIT"/></alt><alt><literal string="-"/></alt></alts></repeat0></alt></alts></option></alt></rule><comment> normal-name: does not look like x-name, 
+                           begin, or end at any point </comment><rule mark="-" name="normal-name"><alt><exclusion><member string="XxBbEe"/></exclusion><repeat0><alts><alt><nonterminal name="ALPHA"/></alt><alt><nonterminal name="DIGIT"/></alt><alt><literal string="-"/></alt></alts></repeat0></alt></rule><comment> Note that ~["XxBbEe"] is a simplification
+                           and broadens the language.  If we needed to
+                           be careful to accept only legal vCards,
+                           we'd need to write ["a"; "cd"; "f-w"; "yz";
+                           "A"; "CD"; "F-W"; "YZ"; "0"-"9"; "-"]
+                           instead.  And similarly for the exclusions
+                           used in not-an-x-name, not-begin, and
+                           not-end.
+
+                           But our goal is not to check the input for
+                           correct vCard syntax; it's to recognize the
+                           structure of correct vCards.  That allows us
+                           some simplifications.
+                         </comment><comment> The spec defines a lot of names as part of the grammar, and expects
+  the parser to adjust its parsing based on the name.  It also requires
+  case insensitivity.  But since all of the names explicitly specified
+  also match the general rules for iana-tokens, the grammar is 
+  hopelessly ambiguous.  So we leave recognition of the known fields
+  and their semantics to the application.
+
+name  = "SOURCE" | "KIND" | "FN" | "N" | "NICKNAME"
+      | "PHOTO" | "BDAY" | "ANNIVERSARY" | "GENDER" | "ADR" | "TEL"
+      | "EMAIL" | "IMPP" | "LANG" | "TZ" | "GEO" | "TITLE" | "ROLE"
+      | "LOGO" | "ORG" | "MEMBER" | "RELATED" | "CATEGORIES"
+      | "NOTE" | "PRODID" | "REV" | "SOUND" | "UID" | "CLIENTPIDMAP"
+      | "URL" | "KEY" | "FBURL" | "CALADRURI" | "CALURI" | "XML"
+      | iana-token | x-name.
+
+iana-token = (ALPHA | DIGIT | "-")+.
+     <comment> identifier registered with IANA </comment>
+
+An alternative approach would be to assume that the input data uses
+only the known field names and x-names, and does not use any
+IANA-registered tokens.  The cost : benefit ratio of that approach
+seems too high, so we go generic instead.
+</comment><rule name="x-name"><alt><inclusion><member string="xX"/></inclusion><literal string="-"/><repeat1><alts><alt><nonterminal name="ALPHA"/></alt><alt><nonterminal name="DIGIT"/></alt><alt><literal string="-"/></alt></alts></repeat1></alt></rule><comment> Names that begin with "x-" or "X-" are
+                         reserved for experimental use, not intended
+                         for released products, or for use in
+                         bilateral agreements. </comment><rule name="param"><alt><nonterminal name="name"/><literal tmark="-" string="="/><repeat1><nonterminal name="param-value"/><sep><literal tmark="-" string=","/></sep></repeat1></alt></rule><rule name="param-value"><alt><repeat0><nonterminal name="pv-char"/></repeat0></alt><alt><nonterminal name="quoted-pvalue"/></alt></rule><rule mark="-" name="quoted-pvalue"><alt><nonterminal mark="-" name="DQUOTE"/><repeat0><nonterminal name="qpv-char"/></repeat0><nonterminal mark="-" name="DQUOTE"/></alt></rule><rule mark="-" name="pv-char"><alt><nonterminal name="SAFE-CHAR"/></alt><alt><nonterminal name="magic"/></alt></rule><rule mark="-" name="qpv-char"><alt><nonterminal name="QSAFE-CHAR"/></alt><alt><nonterminal name="magic"/></alt></rule><rule name="value"><alt><nonterminal mark="-" name="field"/></alt><alt><nonterminal name="field"/><repeat1><alts><alt><literal tmark="-" string=";"/><nonterminal name="field"/></alt></alts></repeat1></alt></rule><rule name="field"><alt><repeat0><nonterminal name="data-char"/></repeat0></alt></rule><rule mark="-" name="data-char"><alt><nonterminal name="non-special-char"/></alt><alt><nonterminal mark="-" name="visible-blank"/></alt><alt><nonterminal name="tab"/></alt><alt><nonterminal name="magic"/></alt></rule><comment> 'Magic' sequences are those requiring special
+                         handling </comment><rule mark="-" name="magic"><alt><nonterminal name="INVISIBLE-1"/></alt><alt><nonterminal name="INVISIBLE-2"/></alt><alt><nonterminal name="INVISIBLE-3"/></alt><alt><nonterminal name="esc-NL"><comment> newline </comment></nonterminal></alt><alt><nonterminal name="esc-SEMICOLON"/></alt><alt><nonterminal name="esc-COLON"/></alt><alt><nonterminal name="esc-COMMA"/></alt><alt><nonterminal name="esc-BS"/></alt></rule><rule mark="-" name="INVISIBLE-1"><alt><nonterminal name="CRLF"/><nonterminal name="tab"/></alt></rule><rule mark="-" name="INVISIBLE-2"><alt><nonterminal name="CRLF"/><nonterminal name="invisible-blank"/></alt></rule><rule mark="-" name="INVISIBLE-3"><alt><nonterminal name="INVISIBLE-2"/><nonterminal name="visible-blank"/></alt></rule><rule mark="-" name="non-special-char"><alt><exclusion><member hex="0D"/><member hex="0A"/><member hex="09"/><member hex="20"/><member string=";"/><member string=","/><member hex="5C"/></exclusion></alt></rule><comment> non-special =
+                         not whitespace (meaningful for line folding)
+                         not semicolon or comma or backslash (need 
+                             escaping) 
+                       </comment><rule mark="-" name="esc-NL"><alt><literal tmark="-" string="\n"/><insertion hex="0A"/></alt></rule><rule mark="-" name="esc-SEMICOLON"><alt><literal tmark="-" hex="5C"/><literal string=";"/></alt></rule><rule mark="-" name="esc-COLON"><alt><literal tmark="-" hex="5C"/><literal string=":"/></alt></rule><rule mark="-" name="esc-COMMA"><alt><literal tmark="-" hex="5C"/><literal string=","/></alt></rule><rule mark="-" name="esc-BS"><alt><literal tmark="-" hex="5C"/><literal hex="5C"/></alt></rule><rule mark="-" name="visible-blank"><alt><literal hex="20"/></alt></rule><rule mark="-" name="invisible-blank"><alt><literal tmark="-" hex="20"/></alt></rule><rule name="tab"><alt><literal tmark="-" hex="09"/></alt></rule><rule mark="-" name="SAFE-CHAR"><alt><nonterminal name="WSP"/></alt><alt><literal string="!"/></alt><alt><inclusion><member from="#23" to="#2B"/><member from="#2D" to="#39"/><member from="#3C" to="#5B"/><member from="#5D" to="#7E"/></inclusion></alt><alt><nonterminal name="NON-ASCII"/></alt></rule><comment> Any character except CTLs, DQUOTE, ";", ":",
+                         comma, and backspace </comment><rule mark="-" name="NON-ASCII"><alt><nonterminal name="UTF8-2"/></alt><alt><nonterminal name="UTF8-3"/></alt><alt><nonterminal name="UTF8-4"/></alt></rule><rule mark="-" name="QSAFE-CHAR"><alt><nonterminal name="visible-blank"/></alt><alt><nonterminal name="tab"/></alt><alt><literal string="!"/></alt><alt><inclusion><member from="#23" to="#5B"/><member from="#5D" to="#7E"/></inclusion></alt><alt><nonterminal name="NON-ASCII"/></alt></rule><comment> Any character except CTLs, DQUOTE, 
+                         backslash </comment><rule mark="-" name="CRLF"><alt><option><literal tmark="-" hex="D"/></option><literal tmark="-" hex="A"/></alt></rule><comment> strictly speaking the RFC requires the #D </comment><rule name="WSP"><alt><nonterminal name="SP"/></alt><alt><nonterminal name="HTAB"/></alt></rule><rule name="SP"><alt><literal hex="20"/></alt></rule><rule name="HTAB"><alt><literal hex="09"/></alt></rule><rule name="DQUOTE"><alt><literal tmark="-" hex="22"/></alt></rule><rule mark="-" name="ALPHA"><alt><inclusion><member from="A" to="Z"/><member from="a" to="z"/></inclusion></alt></rule><rule mark="-" name="DIGIT"><alt><inclusion><member from="0" to="9"/></inclusion></alt></rule><comment> Definitions (adapted) from RFC 5234 </comment><comment> Depending on how the ixml processor reads the file,
+  this may or may not work correctly.  Time will tell. </comment><rule name="UTF8-2"><alt><inclusion><member from="#C2" to="#DF"/></inclusion><nonterminal name="UTF8-tail"/></alt></rule><rule name="UTF8-3"><alt><literal hex="E0"/><inclusion><member from="#A0" to="#BF"/></inclusion><nonterminal name="UTF8-tail"/></alt><alt><inclusion><member from="#E1" to="#EC"/></inclusion><nonterminal name="UTF8-tail"/><nonterminal name="UTF8-tail"/></alt><alt><literal hex="ED"/><inclusion><member from="#80" to="#9F"/></inclusion><nonterminal name="UTF8-tail"/></alt><alt><inclusion><member from="#EE" to="#EF"/></inclusion><nonterminal name="UTF8-tail"/><nonterminal name="UTF8-tail"/></alt></rule><rule name="UTF8-4"><alt><literal hex="F0"/><inclusion><member from="#90" to="#BF"/></inclusion><nonterminal name="UTF8-tail"/><nonterminal name="UTF8-tail"/></alt><alt><inclusion><member from="#F1" to="#F3"/></inclusion><nonterminal name="UTF8-tail"/><nonterminal name="UTF8-tail"/><nonterminal name="UTF8-tail"/></alt><alt><literal hex="F4"/><inclusion><member from="#80" to="#8F"/></inclusion><nonterminal name="UTF8-tail"/><nonterminal name="UTF8-tail"/></alt></rule><rule mark="-" name="UTF8-tail"><alt><inclusion><member from="#80" to="#BF"/></inclusion></alt></rule></ixml>

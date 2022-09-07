@@ -34,10 +34,10 @@ declare function local:fuzz($s as xs:string) as xs:string {
    Otherwise, fuzz the data (after the colon).
 :)
 let $dir := 'file:///home/cmsmcq/2022/github/Aparecium/tests/perf/vcards/hidden/',
-    $fn := ('DP.06.contacts.vcf',
+    $fn := ('DP.contacts.vcf',
             'NormContacts.vcf',
             'BTU-Addresses-20220811.vcf'
-          )[1],
+          )[3],
     $vcf := unparsed-text-lines($dir || $fn)
     
 for $line in $vcf

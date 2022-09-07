@@ -1,0 +1,85 @@
+BEGIN:VCARD
+VERSION:9.9
+FN:xx Xxxxxx
+N:Xxxxxx;xx;;;
+X-PHONETIC-FIRST-NAME:99999999999
+item1.EMAIL;TYPE=INTERNET:xxxx.xxxxxx@xxxxx.xxx
+item1.X-ABLabel:
+item2.TEL:99999999999
+item2.X-ABLabel:xxxxxxxx
+item3.TEL:9999 999 9999
+item3.X-ABLabel:xxxxx9
+item4.TEL:99999 999999
+item4.X-ABLabel:xxxxX9
+item5.ADR:;Xxxxx Xxxxxxxxx;99 Xxxxxxx Xxx;Xxxxxxxxxxxx;;XX9 9XX;XX;99 Xxxxx
+ xx Xxx\nXxxxx Xxxxxxxxx\nXxxxxxxxxxxx\nXX9 9XX\nXX
+item5.X-ABLabel:
+CATEGORIES:xxXxxxxxxx
+END:VCARD
+BEGIN:VCARD
+VERSION:9.9
+FN:XX Xxxxxxxxx Xxxxx
+N:Xxxxx;XX Xxxxxxxxx;;;
+TEL;TYPE=CELL:9999 999 9999
+BDAY:99999999
+CATEGORIES:xxXxxxxxxx
+END:VCARD
+BEGIN:VCARD
+VERSION:9.9
+FN:Xxxxxxxxxxxxxx XxxxxxXxxxxxx
+N:XxxxxxXxxxxxx;Xxxxxxxxxxxxxx;;;
+item1.ADR:XX99 9XX\, ;;Xxxxxxxxxxx\,;Xx Xxxxxxxx Xxxxxx\,;;;XX;Xxxxxxxxxxx
+ \nXX99 9XX\nXx Xxxxxxxx Xxxxxx\nXX
+item1.X-ABLabel:
+CATEGORIES:xxXxxxxxxx
+END:VCARD
+BEGIN:VCARD
+VERSION:9.9
+FN:Xxxx Xxxxx
+N:Xxxxx;Xxxx;;;
+item1.EMAIL;TYPE=INTERNET:xxxx.xxxxx@xxxxxxxxxx.xxx
+item1.X-ABLabel:
+CATEGORIES:xxXxxxxxxx
+END:VCARD
+BEGIN:VCARD
+VERSION:9.9
+FN:Xxxx Xxxxx
+N:Xxxxx;Xxxx;;;
+TEL;TYPE=CELL:+99 9999 999999
+CATEGORIES:xxXxxxxxxx
+END:VCARD
+BEGIN:VCARD
+VERSION:9.9
+FN:Xxxx Xxxxxx
+N:Xxxxxx;Xxxx;;;
+EMAIL;TYPE=INTERNET;TYPE=HOME:xxxx@xxxxx-xx.xxx
+CATEGORIES:xxXxxxxxxx
+END:VCARD
+BEGIN:VCARD
+VERSION:9.9
+FN:Xxxxxx Xxxxxx, Xxxxxx Xxxxxx
+N:Xxxxxx;Xxxxxx;Xxxxxx\, Xxxxxx;;
+item1.EMAIL;TYPE=INTERNET:xxxxxxxxxxxx99@xxxxx.xxx
+item1.X-ABLabel:
+CATEGORIES:xxXxxxxxxx
+END:VCARD
+BEGIN:VCARD
+VERSION:9.9
+FN:Xx Xxxxxx
+N:Xxxxxx;Xx;;;
+EMAIL;TYPE=INTERNET:Xxxxxx.X.Xxxxxx@xxxx.xxx
+TEL;TYPE=CELL:99999 999999
+NOTE:xxxxx: xxxxxxxx
+CATEGORIES:xxXxxxxxxx
+END:VCARD
+BEGIN:VCARD
+VERSION:9.9
+FN:Xxxx Xxxxxxx
+N:Xxxxxxx;Xxxx;;;
+item1.EMAIL;TYPE=INTERNET:xxx999@xxxxx.xxx
+item1.X-ABLabel:
+item2.URL:xxxx\://xxx.xxxxxx.xxx/xxxxxxxx/999999999999999999999
+item2.X-ABLabel:XXXXXXX
+NOTE:\n9999 XX 99xx Xx\, Xxx X-9\nXxxx Xxxxx  XX  99999\nXXX
+CATEGORIES:xxXxxxxxxx,xxxxxxx
+END:VCARD

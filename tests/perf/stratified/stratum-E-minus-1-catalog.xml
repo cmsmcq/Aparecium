@@ -5,8 +5,8 @@
 		 >
   <tc:description>
     <tc:p>A collection of tests which (at the outset of an effort to
-    improve performance) run in less than one hundred milliseconds
-    (so: in a single-digit number of centiseconds).</tc:p>
+    improve performance) run in less than one thousand milliseconds
+    (so: in a single-digit number of deciseconds).</tc:p>
     <tc:p>Started 10 August, filled in 20 August 2022.</tc:p>
   </tc:description>
 
