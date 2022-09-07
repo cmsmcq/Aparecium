@@ -4791,7 +4791,7 @@ EMAIL;type=INTERNET;type=HOME;type=pref:xxxxx@xxxx.xxx.xxx.xxx
 TEL;type=WORK;type=VOICE;type=pref:999/999-9999
 TEL;type=CELL;type=VOICE:999-999-9999
 ADR;type=WORK;type=pref:;;99 Xxxxxx Xxxxx 9X999;Xxxxxxxx;XX;99999;
-NOTE:Xxx-xxxxxxx.xxxx.xxx.xxx.xxx\xxxxxxxxx: xxxxxxxx\xxxxxxxxx: 9Xx%xxx\x
+NOTE:Xxx-xxxxxxx.xxxx.xxx.xxx.xxx\nxxxxxxxx: xxxxxxxx\nxxxxxxxx: 9Xx%xxx\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -4812,7 +4812,7 @@ FN:Xxxxxxxx Xxxxxxxx
 EMAIL;type=INTERNET;type=HOME;type=pref:xxxxxxxx.xxxxxxxx@xxxxx.xxx
 TEL;type=HOME;type=VOICE;type=pref:(999) 999-9999
 ADR;type=HOME;type=pref:;;9999 Xxxxx Xxxxxx;Xxxxxxxxx;Xx;99999;
-NOTE:xxxx: Xxx\, Xxxx\, Xxxxx\xXxxxxxx: Xxxxxxx\x
+NOTE:xxxx: Xxx\, Xxxx\, Xxxxx\nXxxxxxx: Xxxxxxx\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -4820,7 +4820,7 @@ PRODID:-//Xxxxx Xxx.//xxxXX 99.9.9//XX
 N:Xxxxxxx;Xxxx\, Xxxxx\, Xxxxx;;;
 FN:Xxxx\, Xxxxx\, Xxxxx Xxxxxxx
 ADR;type=HOME;type=pref:;;999 Xxxxxxxxx;;;;
-NOTE:xxxxxxxxx\x\xxxxxxx xxxxxx xxx xxxx xxxxx\, Xxxxxxxx 9999\x\x(Xxxxx xx xxxx!)
+NOTE:xxxxxxxxx\n\nxxxxxx xxxxxx xxx xxxx xxxxx\, Xxxxxxxx 9999\n\n(Xxxxx xx xxxx!)
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -6664,7 +6664,7 @@ EMAIL;type=INTERNET;type=pref:xxxx@xxxxxxxxxxxxxxxxxxxx.xxx
 EMAIL;type=INTERNET:Xxxxxxxx.Xxxxxxxxxx@xxx.xxx
 TEL;type=WORK;type=VOICE;type=pref:(999) 999-9999
 TEL;type=CELL;type=VOICE:(999) 999-9999
-ADR;type=WORK;type=pref:;;99999 Xxxxxxxxx Xxxx\xXxxxx 999;Xxxxxxxxx;XX;99999;Xxxxxx Xxxxxx xx Xxxxxxx
+ADR;type=WORK;type=pref:;;99999 Xxxxxxxxx Xxxx\nXxxxx 999;Xxxxxxxxx;XX;99999;Xxxxxx Xxxxxx xx Xxxxxxx
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -6791,7 +6791,7 @@ N:Xxxxxxxx;Xxx;;;
 FN:Xxx Xxxxxxxx
 NICKNAME:XXxxxxxxx
 EMAIL;type=INTERNET;type=HOME;type=pref:xxxxxxxx@x9.xxx
-NOTE:\x
+NOTE:\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -6824,7 +6824,7 @@ N:Xxxxx;Xxxx;;;
 FN:Xxxx Xxxxx
 NICKNAME:XXxxxx
 EMAIL;type=INTERNET;type=HOME;type=pref:xxxxx@xxxx.xxx
-NOTE:Xxxx : Xxxx\x\x
+NOTE:Xxxx : Xxxx\n\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -8779,7 +8779,7 @@ N:Xxxçxxx;Xxxxx;;;
 FN:Xxxxx Xxxçxxx
 EMAIL;type=INTERNET;type=HOME;type=pref:<xxxxxxxx@xxxxx.xxx>
 ADR;type=HOME;type=pref:;;999 Xxxxxxxxx;;;;
-NOTE:xxxxxxxx -- Xxxx (Xxxx?)\xxxxxxxx: Xxxx Xxxxxxxx\xxxxx: Xxxx (xxxx Xxxx 9999)
+NOTE:xxxxxxxx -- Xxxx (Xxxx?)\nxxxxxxx: Xxxx Xxxxxxxx\nxxxx: Xxxx (xxxx Xxxx 9999)
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -11450,7 +11450,7 @@ N:Xxxxxxx;Xxx;;;
 FN:Xxx Xxxxxxx
 NICKNAME:XXxxxxxx
 EMAIL;type=INTERNET;type=HOME;type=pref:xxx@xxxxxxx.x-xxx.xxx
-NOTE:\x\x\x
+NOTE:\n\n\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -11792,7 +11792,7 @@ FN:Xxxxxx Xxxxxx
 ORG:Xxxxxx Xxxxxxx Xxx Xxxx;
 TEL;type=CELL;type=VOICE;type=pref:9999999999
 TEL;type=WORK;type=VOICE:(999) 999-9999
-NOTE:Xxxxxx’x xxx\x
+NOTE:Xxxxxx’x xxx\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -11818,7 +11818,7 @@ N:Xxxxxxx;Xxxxx;;;
 FN:Xxxxx Xxxxxxx
 NICKNAME:xxxxxxx
 EMAIL;type=INTERNET;type=HOME;type=pref:xxxxx@xxxxx.xxx
-ADR;type=WORK;type=pref:;;999 Xxxxxxx Xxxxxxx\xXxxxx 999;Xxxxxxx;XX;99999;XXX
+ADR;type=WORK;type=pref:;;999 Xxxxxxx Xxxxxxx\nXxxxx 999;Xxxxxxx;XX;99999;XXX
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -12465,7 +12465,7 @@ N:Xxxxxxxx;Xxxx;;;
 FN:Xxxx Xxxxxxxx
 NICKNAME:Xxxxxxxx
 EMAIL;type=INTERNET;type=HOME;type=pref:xxxxxxxxxx@xxx.xxx.xxx
-NOTE:\x\x
+NOTE:\n\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -12509,7 +12509,7 @@ FN:Xxxxx Xxxxxx
 TEL;type=HOME;type=VOICE;type=pref:(999) 999-9999
 TEL;type=CELL;type=VOICE:(999) 999-9999
 ADR;type=HOME;type=pref:;;99999 Xxxxxx Xx;Xxxxxxxx Xxxxx;XX;99999;
-NOTE:Xxxx’x xxxx:  (999) 999-9999\x\xxxxxxxx xxxxxxx Xxxxxxxxx 9999
+NOTE:Xxxx’x xxxx:  (999) 999-9999\n\nxxxxxxx xxxxxxx Xxxxxxxxx 9999
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -13759,7 +13759,7 @@ FN:Xxxxxx (Xxxxx) Xxxxx
 ORG:Xxxxxxx Xxxxxx (Xxxxxx);
 EMAIL;type=INTERNET;type=WORK;type=pref:Xxxxxx.Xxxxx@XxxxxxxXxxxxx.xxx
 TEL;type=CELL;type=VOICE;type=pref:999-999-9999
-NOTE:9xx xxxxxxxx xxx Xxxxxx xxxxx. Xxxxx xx Xxxxxxxxxxxx\, xxxxxx xxxx xx XX xxxx.\x
+NOTE:9xx xxxxxxxx xxx Xxxxxx xxxxx. Xxxxx xx Xxxxxxxxxxxx\, xxxxxx xxxx xx XX xxxx.\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -13769,7 +13769,7 @@ FN:Xxxx Xxxxxxx
 NICKNAME:Xxxx
 EMAIL;type=INTERNET;type=HOME;type=pref:xxx.xxxx@xxx.xxx
 ADR;type=HOME;type=pref:;;999 Xxxxxx Xxxx Xxxx;Xxxxxx;XX;99999;
-NOTE:Xxxx Xxxxx\xxxxxxxxxxxxx@xxxxxxxx.xxx
+NOTE:Xxxx Xxxxx\nxxxxxxxxxxxx@xxxxxxxx.xxx
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -13787,7 +13787,7 @@ N:Xxxxxx;Xxx;;;
 FN:Xxx Xxxxxx
 NICKNAME:XXxxxxx
 EMAIL;type=INTERNET;type=HOME;type=pref:xxxxxxxx@XxxxxXxxxxxxxxxx.xxx
-NOTE:\x
+NOTE:\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -14618,7 +14618,7 @@ PRODID:-//Xxxxx Xxx.//xxxXX 99.9.9//XX
 N:Xxxxx;Xxxxx;;;
 FN:Xxxxx Xxxxx
 TEL;type=WORK;type=VOICE;type=pref:999.999.9999
-ADR;type=WORK;type=pref:;;9999 Xxxxxxxxx Xxxx.\xXxxxx 999;Xxxxxxxxx;XX;;
+ADR;type=WORK;type=pref:;;9999 Xxxxxxxxx Xxxx.\nXxxxx 999;Xxxxxxxxx;XX;;
 NOTE:xxxxxxxxxxxx
 END:VCARD
 BEGIN:VCARD
@@ -20033,7 +20033,7 @@ N:;;;;
 FN:Xxx Xxxx Xxxxxx Xxxxxx
 ORG:Xxx Xxxx Xxxxxx Xxxxxx;
 ADR;type=WORK;type=pref:;;9999 Xxxxxxx Xx;Xxxxxx Xxxxxx;XX;99999;
-NOTE:XxxXxxx @Xxxxx Xxxx\xXxxxx Xxxx --> Xxxxxxx <Xxxxxxx 
+NOTE:XxxXxxx @Xxxxx Xxxx\nXxxxx Xxxx --> Xxxxxxx <Xxxxxxx 
 X-ABShowAs:XXXXXXX
 END:VCARD
 BEGIN:VCARD
@@ -22894,7 +22894,7 @@ FN:XXXX Xxxxxx
 ORG:Xxxxxxxxx Xxxx Xxxxxx Xxxx;
 TEL;type=CELL;type=VOICE;type=pref:999-999-9999
 ADR;type=HOME;type=pref:;;9999 Xxxxx Xxxx XX;Xxxxxxxxx;xx;99999;
-NOTE:Xxxxx XxXxxxxxxxx <xxxxxxxxxxxxx@xxxxx.xxx>\x\xxxxx xx xxx xxxx xxxxxxxxx xxxx xxxx\, xx xxx xxxxx xx xxxx\x\x
+NOTE:Xxxxx XxXxxxxxxxx <xxxxxxxxxxxxx@xxxxx.xxx>\n\nxxxx xx xxx xxxx xxxxxxxxx xxxx xxxx\, xx xxx xxxxx xx xxxx\n\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -24074,7 +24074,7 @@ N:Xxxxxxxxxx;Xxxx;;;
 FN:Xxxx Xxxxxxxxxx
 EMAIL;type=INTERNET;type=pref:xxxxxxxx@xxxxx.xxx
 ADR;type=HOME;type=pref:;;99 Xxxxx Xx;Xxxxxxxxx;XX;99999;
-NOTE:xxxx: Xxx\x
+NOTE:xxxx: Xxx\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -24127,7 +24127,7 @@ FN:Xxxxx Xxxxxxx
 EMAIL;type=INTERNET;type=HOME;type=pref:Xxxxxxxx@xxx.xxx
 TEL;type=HOME;type=VOICE;type=pref:999-999-9999
 ADR;type=HOME;type=pref:;;999 Xxxxxxxx Xxxxx;Xxxxxxxxx;XX;99999;
-NOTE:Xxxx xxxxx xx Xxxxxxxxx xxxx xxxxx xxxx xxx xxxxx.\x
+NOTE:Xxxx xxxxx xx Xxxxxxxxx xxxx xxxxx xxxx xxx xxxxx.\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -24137,7 +24137,7 @@ FN:Xxxxxx Xxxxxxxxx
 ORG:XXXXXX;
 EMAIL;type=INTERNET;type=WORK;type=pref:xxxxxx.xxxxxxxxx@xxxxxx.xxx
 TEL;type=WORK;type=VOICE;type=pref:999-999-9999
-ADR;type=WORK;type=pref:;;999 Xxxxxx Xxxxx\xXxxxx 999;Xxxxxxxxx;XX;99999;
+ADR;type=WORK;type=pref:;;999 Xxxxxx Xxxxx\nXxxxx 999;Xxxxxxxxx;XX;99999;
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -24205,7 +24205,7 @@ FN:Xxxxx Xxxxxxx
 ORG:Xxxxxxx;
 TEL;type=WORK;type=VOICE;type=pref:(999) 999-9999
 TEL;type=CELL;type=VOICE:9999999999
-ADR;type=WORK;type=pref:;;9999 Xxxxxxxxx Xxx XX\xXxxxx 999;Xxxxxxxxxx;XX;99999;Xxxxxx Xxxxxx
+ADR;type=WORK;type=pref:;;9999 Xxxxxxxxx Xxx XX\nXxxxx 999;Xxxxxxxxxx;XX;99999;Xxxxxx Xxxxxx
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -24274,7 +24274,7 @@ FN:Xxxx Xxxxxxx
 NICKNAME:XXxxxxxx
 EMAIL;type=INTERNET;type=HOME;type=pref:xxxx.xxxxxxx@xxxxxxx.xxx
 ADR;type=HOME;type=pref:;;999 Xxxxxxxxx Xx.;Xxxxxx;XX;99999;
-NOTE:Xxxx Xxxxxxx Xxxxx\x\x
+NOTE:Xxxx Xxxxxxx Xxxxx\n\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -24298,7 +24298,7 @@ TEL;type=CELL;type=VOICE:(999) 999-9999
 TEL;type=CELL;type=VOICE:(999) 999-9999
 ADR;type=HOME;type=pref:;;99999 Xxxxxxxxxx Xxxx;Xxxxxxx;XX;99999;
 ADR:;;9999 XX 99xx Xxx;Xxxxxxxx;XX;99999-9999;
-NOTE:XX Xxxxxxxxxx Xxxxxxxxxxxx\, Xxxxxx Xxxxxxxxx Xxxxxxxx\x\xxx Xxxxxx\, xxx Xxxxxxxx.
+NOTE:XX Xxxxxxxxxx Xxxxxxxxxxxx\, Xxxxxx Xxxxxxxxx Xxxxxxxx\n\nxx Xxxxxx\, xxx Xxxxxxxx.
 PHOTO;ENCODING=b;TYPE=JPEG:/9x/9XXXXxXXXxXXXXXXxXXXXXX/9XX9XXxxXxXXXX9XXxXX
  XXxXXXXxXXXXXXXXXXXXXxXxXXXXXXXXXXXXXxXxXXXXXXXXXXXXXXxxXXXXXXXXXXXXXxXXXX
  XXXXXXXXXXXXXXXXXXXXXXXXXxXxXXXXXXXXXXXXxxXxXXXXXXXXXXXXxXXXXX/+9XXXXxx9Xx
@@ -24653,7 +24653,7 @@ N:Xxxxx;Xxxx;;;
 FN:Xxxx Xxxxx
 ORG:Xxxxxxxx & Xxxxxxx Xxx.;
 EMAIL;type=INTERNET;type=pref:xxxxxx@xxxxxxxx.xxx
-ADR;type=WORK;type=pref:;;999 Xxxx Xxxxxx Xxxxx\xXxxxx 999;Xxxxxxxx;Xxxxxxxxxx;99999;
+ADR;type=WORK;type=pref:;;999 Xxxx Xxxxxx Xxxxx\nXxxxx 999;Xxxxxxxx;Xxxxxxxxxx;99999;
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -24671,7 +24671,7 @@ N:;;;;
 FN:Xxxxx Xxxxxx
 ORG:Xxxxx Xxxxxx;
 TEL;type=WORK;type=VOICE;type=pref:(999) 999-9999
-NOTE:Xxxxxx xxx xxxxxxxxxx x xxxxx xxxxxx xx xxx x xxxxxx xxxx xx xxxxxxxxx xxx xxxxxxxxx xx xxxxxx xxx xxxxxx xx xxxxxxxx xxx.xxxxx.xxx/xxxxxx\, xx xxxxxxx “XXX” xx 99999 (xxxxxxxxx xxxx xxxxx xxxx “XXX XXXXXX” xx 99999 xx xxxx-xx xxx xxx xxxxxxx)\, xx xx xxxxxxx 9-999-999-9999.\x\x
+NOTE:Xxxxxx xxx xxxxxxxxxx x xxxxx xxxxxx xx xxx x xxxxxx xxxx xx xxxxxxxxx xxx xxxxxxxxx xx xxxxxx xxx xxxxxx xx xxxxxxxx xxx.xxxxx.xxx/xxxxxx\, xx xxxxxxx “XXX” xx 99999 (xxxxxxxxx xxxx xxxxx xxxx “XXX XXXXXX” xx 99999 xx xxxx-xx xxx xxx xxxxxxx)\, xx xx xxxxxxx 9-999-999-9999.\n\n
 X-ABShowAs:XXXXXXX
 END:VCARD
 BEGIN:VCARD
@@ -29191,7 +29191,7 @@ N:;;;;
 FN:Xxxxxx Xxxxx Xxxxxxxxx
 ORG:Xxxxxx Xxxxx Xxxxxxxxx;
 TEL;type=WORK;type=VOICE;type=pref:(999) 999-9999
-NOTE:Xxxxx xxxxxx\x
+NOTE:Xxxxx xxxxxx\n
 X-ABShowAs:XXXXXXX
 END:VCARD
 BEGIN:VCARD
@@ -36271,7 +36271,7 @@ PRODID:-//Xxxxx Xxx.//xxxXX 99.9.9//XX
 N:;;;;
 FN:Xxxxxxxxx
 ORG:Xxxxxxxxx;
-NOTE:Xxxxxxxxx: 999\xXxxxxx x Xxxxxx Xxxx: 999-999-9999\xXxxx xx Xxxxxxxxx Xxxxxx Xxxxx: 999-999-9999\xXxxxx Xxxx Xxxxxx/Xxxxx Xxxx Xxxxxxxxx: 999-999-9999\xXxxxxxxxx Xxxxxx\, xxx xxxxxxxxx: 999-999-9999\xXxxxxxxxx Xxxx Xxxx: 999-999-9999\xXxxxx Xxxxxx xx Xxxx Xxxx xx Xxxxx:9-999-999-9999\xXxxxxxxxxx Xxxxxx Xxxxxxxxxxx Xxxxxx (xxxxxx xx xxxx): 999-999-9999\x\x
+NOTE:Xxxxxxxxx: 999\nXxxxxx x Xxxxxx Xxxx: 999-999-9999\nXxxx xx Xxxxxxxxx Xxxxxx Xxxxx: 999-999-9999\nXxxxx Xxxx Xxxxxx/Xxxxx Xxxx Xxxxxxxxx: 999-999-9999\nXxxxxxxxx Xxxxxx\, xxx xxxxxxxxx: 999-999-9999\nXxxxxxxxx Xxxx Xxxx: 999-999-9999\nXxxxx Xxxxxx xx Xxxx Xxxx xx Xxxxx:9-999-999-9999\nXxxxxxxxxx Xxxxxx Xxxxxxxxxxx Xxxxxx (xxxxxx xx xxxx): 999-999-9999\n\n
 X-ABShowAs:XXXXXXX
 END:VCARD
 BEGIN:VCARD
@@ -36287,7 +36287,7 @@ VERSION:9.9
 PRODID:-//Xxxxx Xxx.//xxxXX 99.9.9//XX
 N:Xxxxxx;Xxxxxx;;;
 FN:Xxxxxx Xxxxxx
-NOTE:Xxxxxx & Xxxx xxx Xxxxx'x xxxxxxxxx\x(xxxx xxx xx xxxx xx xxxx #\, xxx'x xxxx)
+NOTE:Xxxxxx & Xxxx xxx Xxxxx'x xxxxxxxxx\n(xxxx xxx xx xxxx xx xxxx #\, xxx'x xxxx)
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -36298,7 +36298,7 @@ NICKNAME:XXxxxxxxxx
 ORG:Xxxxx Xxx.;
 EMAIL;type=INTERNET;type=HOME;type=pref:xxxxx@xxxxx.xxx
 TEL;type=CELL;type=VOICE;type=pref:999 999 9999
-ADR;type=WORK;type=pref:;;999 Xxxxxxx Xxxxxxx\xXxxxx 999;Xxxxxxx;XX;99999;XXX
+ADR;type=WORK;type=pref:;;999 Xxxxxxx Xxxxxxx\nXxxxx 999;Xxxxxxx;XX;99999;XXX
 PHOTO;ENCODING=b;TYPE=JPEG:/9x/9XXXXxXXXxXXXXXXxXXXXXX/9XX9XXxxXxXXXX9XXxXX
  XXxXXXXxXXXXXXXXXXXXXxXxXXXXXXXXXXXXXxXxXXXXXXXXXXXXXXxxXXXXXXXXXXXXXxXXXX
  XXXXXXXXXXXXXXXXXXXXXXXXXxXxXXXXXXXXXXXXxxXxXXXXXXXXXXXXxXXXXX/+9XXXXxx9Xx
@@ -36642,7 +36642,7 @@ N:Xxxxxxxx;Xxxxxx;;;
 FN:Xxxxxx Xxxxxxxx
 ORG:Xxxxxxxxxxxx -- Xxxxxxxx Xxxxx;
 TEL;type=WORK;type=VOICE;type=pref:(999) 999-9999
-ADR;type=WORK;type=pref:;;9999 Xxxxxxxxx Xx\xXxxxx 999;Xxxxxxxx;XX;99999;Xxxxxx Xxxxxx
+ADR;type=WORK;type=pref:;;9999 Xxxxxxxxx Xx\nXxxxx 999;Xxxxxxxx;XX;99999;Xxxxxx Xxxxxx
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -38289,7 +38289,7 @@ PRODID:-//Xxxxx Xxx.//xxxXX 99.9.9//XX
 N:Xx.Xxxxxxx;Xxxxx;;;
 FN:Xxxxx Xx.Xxxxxxx
 TEL;type=CELL;type=VOICE;type=pref:+9 999 999 9999\,
-NOTE:Xxx xxx xxxx xxx +9 999 999 9999\, xxxxxx xxx xxx xxx xxxxxxxx xxxx xxxxx.\x
+NOTE:Xxx xxx xxxx xxx +9 999 999 9999\, xxxxxx xxx xxx xxx xxxxxxxx xxxx xxxxx.\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -38326,7 +38326,7 @@ FN:Xxxx Xxxxxx
 EMAIL;type=INTERNET;type=HOME;type=pref:Xxxxxxx Xxxxxx <x_xxxxxx@xxxxx.xxx>
 TEL;type=pref:+99999999999
 ADR;type=HOME;type=pref:;;9999 Xxxxx Xxxxxx;Xxxxxxxxx;XX;99999;
-NOTE:xxxxxxxx xxxxxx xxxxxx\x
+NOTE:xxxxxxxx xxxxxx xxxxxx\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -38336,7 +38336,7 @@ FN:Xxxxxx Xxxx
 ORG:xxxxxxxx;
 EMAIL;type=INTERNET;type=HOME;type=pref:xxxxxx.xxxx@xxxxx.xxx
 ADR;type=HOME;type=pref:;;9999 Xxxxx Xxxxxx;Xxxxxxxxx;XX;99999;
-NOTE:Xxxxxxxx Xxxxxx\, Xxxxx xxx Xxxxx (xxx)\x
+NOTE:Xxxxxxxx Xxxxxx\, Xxxxx xxx Xxxxx (xxx)\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -38415,7 +38415,7 @@ FN:Xxxxxx Xxxxxxxx
 ORG:Xxxxxx xxx Xxx & Xxxxxxx xx Xxxxxx Xxxxxxxxx\, Xxx Xxxxxxxxxx xx Xxxxx;
 EMAIL;type=INTERNET;type=HOME;type=pref:xxxxxxxx@xxxxx-x.xx.xx
 TEL;type=CELL;type=VOICE;type=pref:999-9999-9999
-ADR;type=WORK;type=pref:;;Xxxxxxxxxxxx Xxxxxxxxxx xx Xxxxxxxxxxx Xxxxxxx\xXxx Xxxxxxxxxx xx Xxxxx\x9-9-9 Xxxxx Xxxxxx-xx;Xxxxx;;999-9999;XXXXX
+ADR;type=WORK;type=pref:;;Xxxxxxxxxxxx Xxxxxxxxxx xx Xxxxxxxxxxx Xxxxxxx\nXxx Xxxxxxxxxx xx Xxxxx\n9-9-9 Xxxxx Xxxxxx-xx;Xxxxx;;999-9999;XXXXX
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -38451,7 +38451,7 @@ N:Xxxxxx;Xxx;;;
 FN:Xxx Xxxxxx
 NICKNAME:XXxxxxx
 EMAIL;type=INTERNET;type=HOME;type=pref:xxxx@xxxx-xxxx.xxx
-NOTE:\x
+NOTE:\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -38475,7 +38475,7 @@ N:Xxxxx;;;;
 FN:Xxxxx
 EMAIL;type=INTERNET;type=HOME;type=pref:xxxxxx@xxxxx.xxx
 ADR;type=HOME;type=pref:;;9999 Xxxxx Xx;Xxxxxxxxx;XX;99999;
-NOTE:Xxxxxxxx\, Xxxx\, Xxxxx\, Xxxxx\, Xxxxxxx (xxx Xxxxx xx xxx xxxxx) xxx xx Xxxxxx\x
+NOTE:Xxxxxxxx\, Xxxx\, Xxxxx\, Xxxxx\, Xxxxxxx (xxx Xxxxx xx xxx xxxxx) xxx xx Xxxxxx\n
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -39351,7 +39351,7 @@ FN:Xxx - Xxxxxx Xxxxxxx Xxx Xxxx
 ORG:Xxx - Xxxxxx Xxxxxxx Xxx Xxxx;
 TEL;type=WORK;type=VOICE;type=pref:(999) 999-9999
 ADR;type=WORK;type=pref:;;99999 Xxxxxxxxxx Xx;Xxxxxxxxxxxx;XX;99999;
-NOTE:Xx. Xxxxxx xx Xxxxxx'x xxx\x
+NOTE:Xx. Xxxxxx xx Xxxxxx'x xxx\n
 X-ABShowAs:XXXXXXX
 END:VCARD
 BEGIN:VCARD
@@ -39797,7 +39797,7 @@ N:Xxxxxxxxxxx;Xxxxxx;;;
 FN:Xxxxxx Xxxxxxxxxxx
 ORG:XX Xxxxxxxxxx xx Xxxxx;
 ADR;type=WORK;type=pref:;;9999 X Xxxxxx\, XX;Xxxxxxxxxx;XX;99999;
-NOTE:Xxxx xxx xxx xxxxxxx xx xxxx xx 9999 xxx Xx. Xxxxxxxxxxx.  Xx xxx xxxxxxxx xx xxx Xxxxxx xx xxx Xxxxxxxxx xxxx X xxxxxxxxxx xxxx xxx x xxxxxxx xxxxxxx.  (xx:  999-999-9999)\x\xXxxxxx Xxxxxxxxxxx\xXX Xxxxxxxxxx xx Xxxxx\xXxxxxx xx Xxxxxx Xxxxxxx\xXxxxxx xx xxx Xxxxxxxxx\xXX/XX\x9999 X Xxxxxx\, XX\xXxxxxxxxxx\, XX  99999
+NOTE:Xxxx xxx xxx xxxxxxx xx xxxx xx 9999 xxx Xx. Xxxxxxxxxxx.  Xx xxx xxxxxxxx xx xxx Xxxxxx xx xxx Xxxxxxxxx xxxx X xxxxxxxxxx xxxx xxx x xxxxxxx xxxxxxx.  (xx:  999-999-9999)\n\nXxxxxx Xxxxxxxxxxx\nXX Xxxxxxxxxx xx Xxxxx\nXxxxxx xx Xxxxxx Xxxxxxx\nXxxxxx xx xxx Xxxxxxxxx\nXX/XX\n9999 X Xxxxxx\, XX\nXxxxxxxxxx\, XX  99999
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9
@@ -41768,7 +41768,7 @@ item1.X-ABLabel:_$!<Xxxxx>!$_
 TEL;type=CELL;type=VOICE;type=pref:999 99 9999 9999‬99
 TEL;type=HOME;type=VOICE:(+99) 9999 999999
 ADR;type=HOME;type=pref:;;XXXXXXXX;Xxxxxxxxxx;Xxxxxxxxxxxxxxxxxxxx;XX99 9XX;Xxxxxx Xxxxxxx
-NOTE:(999 99) 999 999 9999 xx xxxx \x\xx.x.xxxxxxxxx@xxx.xxx.xx xx xxxxxxxx xxxx-xxxxxxx xxxxxxx
+NOTE:(999 99) 999 999 9999 xx xxxx \n\nx.x.xxxxxxxxx@xxx.xxx.xx xx xxxxxxxx xxxx-xxxxxxx xxxxxxx
 END:VCARD
 BEGIN:VCARD
 VERSION:9.9

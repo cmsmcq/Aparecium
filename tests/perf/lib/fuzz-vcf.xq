@@ -2,6 +2,7 @@
 vCard is retained but data are fuzzed so they cannot be read.  
 
 Revisions:
+2022-08-31 : CMSMcQ : be careful around \n
 2022-08-11 : CMSMcQ : made first version, for performance testing with vCard
                       data.  I need realistic data, but I don't actually need
                       to read people's Rolodexes.
@@ -12,14 +13,17 @@ with all letters (a to z) replaced by x and all digits by 9.  Leave
 punctuation and non-ASCII characters alone.
 :)
 declare function local:fuzz($s as xs:string) as xs:string {
-  translate($s,
-               'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 
-            || 'abcdefghijklmnopqrstuvwxyz'
-            || '0123456789',
-               'XXXXXXXXXXXXXXXXXXXXXXXXXX' 
-            || 'xxxxxxxxxxxxxxxxxxxxxxxxxx'
-            || '9999999999'
-  )
+  let $strings0 := tokenize($s, '\\n'),
+      $strings1 := for $s0 in $strings0
+                   return translate($s0,
+                                    'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 
+                                 || 'abcdefghijklmnopqrstuvwxyz'
+                                 || '0123456789',
+                                    'XXXXXXXXXXXXXXXXXXXXXXXXXX' 
+                                 || 'xxxxxxxxxxxxxxxxxxxxxxxxxx'
+                                 || '9999999999'
+                          )
+  return string-join($strings1, '\n')
 };
 
 (: Read the file, line by line.
@@ -29,8 +33,8 @@ declare function local:fuzz($s as xs:string) as xs:string {
    If it has no colon, something is wrong, so flag it
    Otherwise, fuzz the data (after the colon).
 :)
-let $dir := 'file:///home/cmsmcq/2022/github/Aparecium/tests/perf/vcards/',
-    $fn := ('DP.contacts.vcf',
+let $dir := 'file:///home/cmsmcq/2022/github/Aparecium/tests/perf/vcards/hidden/',
+    $fn := ('DP.06.contacts.vcf',
             'NormContacts.vcf',
             'BTU-Addresses-20220811.vcf'
           )[1],

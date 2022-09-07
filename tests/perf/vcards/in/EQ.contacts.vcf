@@ -12,7 +12,7 @@ item3.X-ABLabel:xxxxx9
 item4.TEL:99999 999999
 item4.X-ABLabel:xxxxX9
 item5.ADR:;Xxxxx Xxxxxxxxx;99 Xxxxxxx Xxx;Xxxxxxxxxxxx;;XX9 9XX;XX;99 Xxxxx
- xx Xxx\xXxxxx Xxxxxxxxx\xXxxxxxxxxxxx\xXX9 9XX\xXX
+ xx Xxx\nXxxxx Xxxxxxxxx\nXxxxxxxxxxxx\nXX9 9XX\nXX
 item5.X-ABLabel:
 CATEGORIES:xxXxxxxxxx
 END:VCARD
@@ -29,7 +29,7 @@ VERSION:9.9
 FN:Xxxxxxxxxxxxxx XxxxxxXxxxxxx
 N:XxxxxxXxxxxxx;Xxxxxxxxxxxxxx;;;
 item1.ADR:XX99 9XX\, ;;Xxxxxxxxxxx\,;Xx Xxxxxxxx Xxxxxx\,;;;XX;Xxxxxxxxxxx
- \xXX99 9XX\xXx Xxxxxxxx Xxxxxx\xXX
+ \nXX99 9XX\nXx Xxxxxxxx Xxxxxx\nXX
 item1.X-ABLabel:
 CATEGORIES:xxXxxxxxxx
 END:VCARD
@@ -80,7 +80,7 @@ item1.EMAIL;TYPE=INTERNET:xxx999@xxxxx.xxx
 item1.X-ABLabel:
 item2.URL:xxxx\://xxx.xxxxxx.xxx/xxxxxxxx/999999999999999999999
 item2.X-ABLabel:XXXXXXX
-NOTE:\x9999 XX 99xx Xx\, Xxx X-9\xXxxx Xxxxx  XX  99999\xXXX
+NOTE:\n9999 XX 99xx Xx\, Xxx X-9\nXxxx Xxxxx  XX  99999\nXXX
 CATEGORIES:xxXxxxxxxx,xxxxxxx
 END:VCARD
 BEGIN:VCARD
@@ -200,7 +200,7 @@ item1.ORG:Xxxxx
 item1.X-ABLabel:
 item2.URL:xxxx\://xxx.xxxxxx.xxx/xxxxxxxx/999999999999999999999
 item2.X-ABLabel:XXXXXXX
-NOTE:9999 xx Xxxxxxxxx\xXxx + 99 999 999 999\x\x9/99 Xxxxxxxxx xxxxxx\, Xxx
+NOTE:9999 xx Xxxxxxxxx\nXxx + 99 999 999 999\n\n9/99 Xxxxxxxxx xxxxxx\, Xxx
  xxxxxxx XXX
 PHOTO:xxxxx://xx9.xxxxxxxxxxxxxxxxx.xxx/xxxxxxxx/XXxxxxx9x9Xxx9xxxXxXXxxxXX
  xXxxx-X9XxxXxX9XXXxxxXX9XX99Xx
@@ -222,7 +222,7 @@ FN:Xxxx X
 N:X;Xxxx;;;
 item1.EMAIL;TYPE=INTERNET:xxxx@xxxxxxxxxxxxxxxxx.xxx
 item1.X-ABLabel:
-item2.ADR:;;;Xxxxxxxxx;;XX99 9XX.;XX;Xxxxxxxxx\xXX99 9XX.\xXX
+item2.ADR:;;;Xxxxxxxxx;;XX99 9XX.;XX;Xxxxxxxxx\nXX99 9XX.\nXX
 item2.X-ABLabel:
 item3.TITLE:Xxxxxxx
 item3.X-ABLabel:
@@ -306,7 +306,7 @@ FN:Xxxxx Xxxxxx
 N:Xxxxxx;Xxxxx;;;
 EMAIL;TYPE=INTERNET;TYPE=HOME:xxxxxxxx@xxxxx.xxx
 item1.ADR:;;9 Xx Xxxxx Xxxxx;Xxxxxxxxx Xxxxxxxx;;XX99 9XX;XX;9 Xx Xxxxx Xxx
- xx\xXxxxxxxxx Xxxxxxxx\xXX99 9XX\xXX
+ xx\nXxxxxxxxx Xxxxxxxx\nXX99 9XX\nXX
 item1.X-ABLabel:
 item2.URL:xxxx\://xxx.xxxxxx.xxx/xxxxxxxx/999999999999999999999
 item2.X-ABLabel:XXXXXXX
@@ -438,7 +438,7 @@ FN:Xxxxx Xxxxx
 N:Xxxxx;Xxxxx;;;
 TEL;TYPE=HOME:99999 999999
 ADR;TYPE=HOME:;;99 Xxxxxxx Xxxxx Xxx;Xxxxxxxxx Xxxxxxxxx;;;;99 Xxxxxxx Xxxx
- x Xxx\, Xxxxxxxxx\x
+ x Xxx\, Xxxxxxxxx\n
 CATEGORIES:xxXxxxxxxx
 END:VCARD
 BEGIN:VCARD
@@ -534,8 +534,8 @@ item2.EMAIL;TYPE=INTERNET:xxxxxxxxxxxxxx@xxxxxxxxxx.xxx
 item2.X-ABLabel:Xxxxxxxx
 item3.TEL:99999 999999
 item3.X-ABLabel:
-item4.ADR:;;9 Xxx Xxxxx;Xxxxxxx;;XX99 9XX;;9 Xxx Xxxxx\xXxxxxxx\xXX99 9XX\x
- \x
+item4.ADR:;;9 Xxx Xxxxx;Xxxxxxx;;XX99 9XX;;9 Xxx Xxxxx\nXxxxxxx\nXX99 9XX\n
+ \n
 item4.X-ABLabel:
 CATEGORIES:xxXxxxxxxx
 END:VCARD
@@ -671,8 +671,8 @@ item1.EMAIL;TYPE=INTERNET:x9xxx@xxxxxxx.xxx
 item1.X-ABLabel:
 item2.TEL:99999999999
 item2.X-ABLabel:
-item3.ADR:;;99 Xxxx Xxxx;Xxxxxxxx;;XX99 9XX;XX;99 Xxxx Xxxx\xXxxxxxxx\xXX99
-  9XX\xXX
+item3.ADR:;;99 Xxxx Xxxx;Xxxxxxxx;;XX99 9XX;XX;99 Xxxx Xxxx\nXxxxxxxx\nXX99
+  9XX\nXX
 item3.X-ABLabel:
 CATEGORIES:Xxxx-xxxxxxx,xxXxxxxxxx
 END:VCARD
@@ -760,7 +760,7 @@ BEGIN:VCARD
 VERSION:9.9
 item1.EMAIL;TYPE=INTERNET:xxxxxxxxxxx@xxx.xxx
 item1.X-ABLabel:
-NOTE: 99\, Xxx Xxxxxxxx\, Xxxxxx\, Xxxx\, XX9 9XX\x99999999999
+NOTE: 99\, Xxx Xxxxxxxx\, Xxxxxx\, Xxxx\, XX9 9XX\n99999999999
 CATEGORIES:xxXxxxxxxx
 END:VCARD
 BEGIN:VCARD
@@ -904,7 +904,7 @@ item1.X-ABLabel:
 TEL;TYPE=CELL:99999 999999
 TEL;TYPE=HOME:99999 999999
 ADR;TYPE=HOME:;;99 Xxxxxxxx Xx;Xxxxxxxxx\, Xxxxxxxx;;XX9 9XX;XX;99 Xxxxxxxx
-  Xx\xXxxxxxxxx\, Xxxxxxxx\xXX9 9XX\xXX
+  Xx\nXxxxxxxxx\, Xxxxxxxx\nXX9 9XX\nXX
 item2.ORG:Xxxx
 item2.X-ABLabel:xxxxxxx
 CATEGORIES:xxxxXxxxxxxxx,xxXxxxxxxx
@@ -989,7 +989,7 @@ FN:Xxxxx Xxxx
 N:Xxxx;Xxxxx;;;
 EMAIL;TYPE=INTERNET;TYPE=HOME:xxxxx.xxxx9@xxxxxxx.xx.xx
 item1.ADR:;Xxxxx Xxxxxxx\,;99 Xxxxxxx Xxxx\,;Xxxxxxxxxx\,;;XX99 9XX;XX;99 X
- xxxxxx Xxxx\xXxxxx Xxxxxxx\xXxxxxxxxxx\xXX99 9XX\xXX
+ xxxxxx Xxxx\nXxxxx Xxxxxxx\nXxxxxxxxxx\nXX99 9XX\nXX
 item1.X-ABLabel:
 CATEGORIES:xxXxxxxxxx
 END:VCARD
@@ -1221,9 +1221,9 @@ FN:Xxxxx Xxxx
 N:Xxxx;Xxxxx ;;;
 EMAIL;TYPE=INTERNET;TYPE=HOME:xxxxxxx
 EMAIL;TYPE=INTERNET;TYPE=HOME:xxxxx999@xxxxxxxxxx.xxx
-ADR;TYPE=HOME:;;Xxx Xxxxxx Xx\xXxxxxxxxx;Xxxxxxxxxx\, Xxxx Xxxxxxx;;XX99 9X
+ADR;TYPE=HOME:;;Xxx Xxxxxx Xx\nXxxxxxxxx;Xxxxxxxxxx\, Xxxx Xxxxxxx;;XX99 9X
  X;;Xxxxxxxxx\, Xxx Xxxxxx Xx\, Xxxxxxxxxx\, Xxxx Xxxxxxx\, XX99 9XX
-NOTE:xx Xxxxxxxxx\x
+NOTE:xx Xxxxxxxxx\n
 CATEGORIES:xxXxxxxxxx
 END:VCARD
 BEGIN:VCARD
@@ -1421,7 +1421,7 @@ EMAIL;TYPE=INTERNET;TYPE=HOME:xxxx.xxxxxx@xxxxx.xxx
 TEL;TYPE=CELL:999999999999
 TEL;TYPE=HOME:99999 999999
 ADR;TYPE=HOME:;;99 Xxxxxxx Xxx;Xxxxxxxxxxxx;;XX9 9XX;;99 Xxxxxxx Xxx\, Xxxx
- xxxxxxxx\, XX9 9XX\x
+ xxxxxxxx\, XX9 9XX\n
 CATEGORIES:xxXxxxxxxx
 END:VCARD
 BEGIN:VCARD
@@ -1559,7 +1559,7 @@ item1.X-ABLabel:
 item2.TEL:99999 999999
 item2.X-ABLabel:Xxxxxx 99999 999999
 ADR;TYPE=HOME:;Xxxxxxxxxxxx;99 Xxxxxx Xx;Xxxxxxxxxxxx;;XX9 9XX;XX;99 Xxxxxx
-  Xx\xXxxxxxxxxxxx\xXxxxxxxxxxxx\xXX9 9XX\xXX
+  Xx\nXxxxxxxxxxxx\nXxxxxxxxxxxx\nXX9 9XX\nXX
 item3.URL:xxxx\://xxx.xxxxxx.xxx/xxxxxxxx/999999999999999999999
 item3.X-ABLabel:XXXXXXX
 CATEGORIES:xxXxxxxxxx
@@ -1587,7 +1587,7 @@ N:Xxxxxxxxx;Xxx;;;
 item1.EMAIL;TYPE=INTERNET:xxxxxx_xxxxxxxxx@xxx.xxx
 item1.X-ABLabel:
 item2.ADR:;;9 Xxxx Xxxxxxxx\, Xxx Xxxxxx\, Xxxxxxx XX9 9 XX;;;;XX;9 Xxxx Xx
- xxxxxx\, Xxx Xxxxxx\, Xxxxxxx XX9 9 XX\xXX
+ xxxxxx\, Xxx Xxxxxx\, Xxxxxxx XX9 9 XX\nXX
 item2.X-ABLabel:
 NOTE:Xxxx xxxxx
 CATEGORIES:xxXxxxxxxx
@@ -1760,7 +1760,7 @@ item1.EMAIL;TYPE=INTERNET:xxxxxx@xxxx.xxx.xx
 item1.X-ABLabel:
 item2.EMAIL;TYPE=INTERNET:xxxxx.xxxxx@xxx.xx.xx
 item2.X-ABLabel:
-NOTE:99999 999999 \x\x xxxxxx 99999 999999.\x\xxxxx
+NOTE:99999 999999 \x\n xxxxxx 99999 999999.\n\nxxxx
 CATEGORIES:xxXxxxxxxx
 END:VCARD
 BEGIN:VCARD
@@ -1805,7 +1805,7 @@ FN:Xxxxx Xxxxx
 N:Xxxxx;Xxxxx;;;
 item1.EMAIL;TYPE=INTERNET:xxxxx_xxxxx@xxxxx.xxx
 item1.X-ABLabel:
-NOTE:Xxx Xxxxx Xxxxx\, \xXxxxxxx Xx.
+NOTE:Xxx Xxxxx Xxxxx\, \nXxxxxxx Xx.
 CATEGORIES:xxXxxxxxxx
 END:VCARD
 BEGIN:VCARD
@@ -1890,8 +1890,8 @@ N:Xxxxxx;Xxxx;;;
 EMAIL;TYPE=INTERNET:xxxxxxxxxx9999@xxxxx.xxx
 TEL;TYPE=CELL:99999 999999
 TEL;TYPE=MAIN:99999 999999
-item1.ADR:;;Xxxxxxxxx;Xxxxxxxxxxxx;;XX9 9XX;XX;Xxxxxxxxx\xXxxxxxxxxxxx\xXX9
-  9XX\xXX
+item1.ADR:;;Xxxxxxxxx;Xxxxxxxxxxxx;;XX9 9XX;XX;Xxxxxxxxx\nXxxxxxxxxxxx\nXX9
+  9XX\nXX
 item1.X-ABLabel:
 item2.URL:xxxx\://xxx.xxxxxx.xxx/xxxxxxxx/999999999999999999999
 item2.X-ABLabel:XXXXXXX
