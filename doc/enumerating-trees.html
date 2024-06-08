@@ -1,0 +1,1448 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2024-06-08 Sat 16:04 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Enumerating trees in a parse forest</title>
+<meta name="author" content="CMSMcQ" />
+<meta name="generator" content="Org Mode" />
+<style>
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Enumerating trees in a parse forest</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org0bb9c70">1. Overview / About this document</a></li>
+<li><a href="#orga87dd0d">2. The problem</a>
+<ul>
+<li><a href="#orgba58ab8">2.1. Example</a></li>
+<li><a href="#orgd670ea8">2.2. A naive approach</a></li>
+</ul>
+</li>
+<li><a href="#orge989eb1">3. Parse Forest Grammars</a></li>
+<li><a href="#orgfd060eb">4. Solution</a></li>
+<li><a href="#org19dc09e">5. Details</a>
+<ul>
+<li><a href="#org64cd466">5.1. The procedure <i>num</i></a></li>
+<li><a href="#org8b912d6">5.2. <i>num</i> is a function</a></li>
+<li><a href="#org7eed96b">5.3. Definition of tree similarity</a></li>
+<li><a href="#org573b898">5.4. <i>num</i> is an injection</a></li>
+<li><a href="#org7d4fbb4">5.5. The procedures <i>arb</i> and <i>tree-constructor</i></a></li>
+<li><a href="#orgb51607c">5.6. <i>arb</i> is a total function</a></li>
+<li><a href="#org575e2aa">5.7. In non-error cases, <i>arb</i> and <i>num</i> are inverses of each other</a></li>
+<li><a href="#orgbdc508e">5.8. There is a 1:1 mapping between trees in <i>F</i> and a subset of base-<i>r</i> numerals</a></li>
+</ul>
+</li>
+<li><a href="#org39fa832">6. Another example</a></li>
+<li><a href="#org15ad771">7. Identifying the numerals which actually denote trees (with Woods automaton)</a>
+<ul>
+<li><a href="#orgd7b7b45">7.1. Using LR(0) automaton to identify numerals denoting trees</a></li>
+</ul>
+</li>
+<li><a href="#org2974c39">8. Concluding remarks</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org0bb9c70" class="outline-2">
+<h2 id="org0bb9c70"><span class="section-number-2">1.</span> Overview / About this document</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+This working paper describes a method for enumerating the parse trees
+represented in a parse forest grammar; since for any grammar <i>G</i> and
+sentence <i>S</i> ∈ <i>L(G)</i> a parse forest grammar can be constructed, the
+method allows the parse trees of <i>S</i> to be enumerated, even if there
+are infinitely many of them.
+</p>
+
+<p>
+The problem presented itself to the author in connection with work on
+a processor for Invisible XML (<i>reference to be supplied</i>) and the
+description uses examples from that context for concreteness.  The
+author apologizes to any reader who would have preferred a more
+abstract treatment with fewer examples.
+</p>
+
+<p>
+We begin with a description of the problem and the practical
+requirements.  We then describe a simple running example: a sentence
+with an infinite number of parse trees and show a parse forest grammar
+describing that infinite set.  The solution is to associate each tree
+with a distinct numeral written in base-<i>r</i> notation, where <i>r</i>
+depends on the parse forest grammar; the solution is described first
+very briefly and then in more detail, with reference to the running
+example. We then describe a second example.  An addendum describes the
+construction of a finite state automaton which recognizes (or
+generates) the numerals which actually denote trees.
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga87dd0d" class="outline-2">
+<h2 id="orga87dd0d"><span class="section-number-2">2.</span> The problem</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Consider a program which accepts an arbitrary context-free grammar <i>G</i>
+and an input string <i>S</i>.  If <i>S</i> is in <i>L(G)</i>, the program is to
+return a parse tree for <i>S</i>; if <i>S</i> is not in <i>L(G)</i>, the program
+indicates a parse failure.  (I.e., consider an ixml processor.)
+</p>
+
+<p>
+Now imagine that in the case of ambiguous strings, the program is to
+provide a next-tree interface which allows one tree after another to
+be retrieved until the set is exhausted or the user stops asking for
+the next tree.  The requirements for this interface are that it should
+be:
+</p>
+
+<ul class="org-ul">
+<li><i>Effective</i>.  Each call to the interface should return a finite
+parse tree, until the set of finite parse trees is exhausted.</li>
+
+<li><p>
+<i>Duplicate-free</i>.  No tree should be returned twice.
+</p>
+
+<p>
+An exception to the no-duplicates rule may be made in practice if
+some rules in the grammar are written with duplicate right-hand
+sides.  For language-theoretical purposes, a rule has a set, not a
+sequence, of right-hand sides.
+</p></li>
+
+<li><i>Fair</i>.  Every tree in the set of parse trees should eventually be
+returned after a some finite number of calls to the next-tree
+interface.</li>
+</ul>
+
+<p>
+In this case it is probably worth pointing out that a consequence of
+the first requirement is that the tree enumerator should not fall into
+an infinite loop.
+</p>
+</div>
+
+<div id="outline-container-orgba58ab8" class="outline-3">
+<h3 id="orgba58ab8"><span class="section-number-3">2.1.</span> Example</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+As an example consider grammar <i>G</i>:
+</p>
+<div class="org-src-container">
+<pre class="src src-ixml">S = A | B.
+A = A | 'x'.
+B = B | 'x'.
+</pre>
+</div>
+
+<p>
+<i>L(G)</i> has one sentence ("<code>x</code>"), the set of parse trees for which is
+countably infinite.  The XML representations for some of its parse
+trees are:
+</p>
+<pre class="example" id="org3fd62a4">
+&lt;S&gt;&lt;A&gt;x&lt;/A&gt;&lt;/S&gt;
+&lt;S&gt;&lt;A&gt;&lt;A&gt;x&lt;/A&gt;&lt;/A&gt;&lt;/S&gt;
+&lt;S&gt;&lt;A&gt;&lt;A&gt;&lt;A&gt;x&lt;/A&gt;&lt;/A&gt;&lt;/A&gt;&lt;/S&gt;
+...
+&lt;S&gt;&lt;B&gt;x&lt;/B&gt;&lt;/S&gt;
+&lt;S&gt;&lt;B&gt;&lt;B&gt;x&lt;/B&gt;&lt;/B&gt;&lt;/S&gt;
+&lt;S&gt;&lt;B&gt;&lt;B&gt;&lt;B&gt;x&lt;/B&gt;&lt;/B&gt;&lt;/B&gt;&lt;/S&gt;
+...
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgd670ea8" class="outline-3">
+<h3 id="orgd670ea8"><span class="section-number-3">2.2.</span> A naive approach</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+One naive approach to generating the trees is to make the first tree
+by taking the first choice at each choice point, then make the second
+tree by changing the last one of those choices to take the second
+choice, and so on.  This approach will fall into an infinite loop
+without ever returning any trees because there is no finite tree in
+which every choice taken is the first option.  If the rules for <i>A</i>
+and <i>B</i> are rewritten to put the RHS in the other order, this naive
+approach will return trees, but will never return any tree containing
+a <i>B</i>, because it attempts first to list all the trees in which the
+<i>S</i> dominates an <i>A</i>, and there are infinitely many such trees.
+</p>
+
+<p>
+One way to think about the problem is that we are searching for paths in
+a search space containing loops. A breadth-first search with
+backtracking has no particular trouble solving the problem, but for
+programmers not working Prolog, figuring out the backtracking is at best
+error-prone.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge989eb1" class="outline-2">
+<h2 id="orge989eb1"><span class="section-number-2">3.</span> Parse Forest Grammars</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+In many cases &#x2013; including this problem &#x2013; it is convenient to
+summarize a set of parse trees in a parse-forest grammar.  Every point
+of ambiguity in the parse-forest grammar is represented by a
+non-terminal with more than one right-hand side.  We require that in a
+parse forest grammar, each right-hand side in a production rule
+consist of a sequence of literal strings and nonterminal symbols,
+without nested choices, options, or repetitions.
+</p>
+
+<p>
+For this case, the parse-forest grammar (call it <i>G′</i>) is isomorphic
+to <i>G</i>; in the general case, the two grammars are not isomorphic, and
+the difference is important.
+</p>
+<div class="org-src-container">
+<pre class="src src-ixml">S.0.1 = A.0.1 | B.0.1 .
+A.0.1 = A.0.1 | 'x'.
+B.0.1 = B.0.1 | 'x'.
+</pre>
+</div>
+
+<p>
+Every parse-forest grammar <i>G′</i> describes a forest <i>F</i> of parse trees
+for <i>S</i> when parsed against <i>G</i>.
+</p>
+
+<p>
+Without loss of generality, we assume that:
+</p>
+<ul class="org-ul">
+<li><i>S</i> ∈ <i>L(G)</i> and thus <i>F</i> contains at least one parse tree.</li>
+<li>No two right-hand sides in any production rule are the same sequence
+of symbols; and</li>
+<li>The right-hand sides of any production rule are given as a sequence,
+not a set.  (The ordering imposed is unimportant; the only requirement
+is that we can associate a number with each right-hand side.)</li>
+<li>All nonterminals in <i>V(G′)</i> are reachable and productive.</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgfd060eb" class="outline-2">
+<h2 id="orgfd060eb"><span class="section-number-2">4.</span> Solution</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+The short summary of the solution is: we associate each tree with a
+unique numeral which uniquely identifies the tree.  We can arrange the
+set of all relevant numerals in a list, and have the next-tree
+interface return trees in the order specified by the list.  Since each
+numeral appears only once in the list, there are no duplicates.  Since
+every tree is represented by a numeral in the list and lies a finite
+distance from the beginning of the list, every tree will eventually be
+returned after a finite number of calls to the next-tree interface.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org19dc09e" class="outline-2">
+<h2 id="org19dc09e"><span class="section-number-2">5.</span> Details</h2>
+<div class="outline-text-2" id="text-5">
+<p>
+Let a nonterminal in the PFG which has multiple RHS be an 'ambiguous
+non-terminal'.  In <i>G′</i>, all non-terminals are ambiguous.
+</p>
+
+<p>
+Let a node in a parse tree labeled with an ambiguous non-terminal be
+an 'ambiguous node'.  For the trees of <i>G′</i>, all non-leaf nodes are
+ambiguous.
+</p>
+
+<p>
+Let <i>r</i> be the largest number of RHS possessed by any ambiguous
+non-terminal.  In <i>G′</i>, <i>r</i> = 2.
+</p>
+</div>
+
+<div id="outline-container-org64cd466" class="outline-3">
+<h3 id="org64cd466"><span class="section-number-3">5.1.</span> The procedure <i>num</i></h3>
+<div class="outline-text-3" id="text-5-1">
+<p>
+For any parse tree <i>T</i> represented by <i>G′</i>, we can construct a numeral
+<i>m</i> written in base <i>r</i>, as follows:
+</p>
+
+<ul class="org-ul">
+<li><i>T</i> has a finite number of nodes, and thus a finite number of
+ambiguous nodes.</li>
+
+<li>The number of ambiguous nodes in <i>T</i> and the number of digits in
+<i>m</i> will be the same.  (N.B. '0' and '00' and '000' are three
+different numerals denoting three distinct trees.)</li>
+
+<li>The nodes are considered in the order given by a depth-first
+pre-order traversal of <i>T</i>.  (Any traversal should work;
+depth-first lends itself to a simple implementation.) The first
+ambiguous node found in that traveral corresponds to the first
+digit of <i>m</i>, the second to the second digit of <i>m</i>, and so on.</li>
+
+<li>Each digit in <i>m</i> describes one ambiguous node <i>N</i> in the tree: if
+the children of <i>N</i> are those in the first RHS of the nonterminal,
+the digit is '0'; if the are those of the second nonterminal, the
+digit is '1', and so on, up to <i>r</i>-1.</li>
+</ul>
+
+<p>
+Call the procedure just described <i>num</i>; it maps from trees in <i>F</i> to
+numerals written in base <i>r</i>.
+</p>
+
+<p>
+For the trees given earlier, we construct the following numerals:
+</p>
+
+<ul class="org-ul">
+<li>01</li>
+<li>001</li>
+<li>0001</li>
+<li>&#x2026;</li>
+<li>11</li>
+<li>101</li>
+<li>1001</li>
+<li>&#x2026;</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org8b912d6" class="outline-3">
+<h3 id="org8b912d6"><span class="section-number-3">5.2.</span> <i>num</i> is a function</h3>
+<div class="outline-text-3" id="text-5-2">
+<p>
+<b>THEOREM:</b> For any finite tree <i>T</i> in <i>F</i>, given a parse forest
+grammar <i>G′</i> describing <i>F</i>, it is the case that <i>num(T)</i> generates
+exactly one numeral <i>m</i>.  That is, <i>num</i> is a function defined for all
+trees in <i>F</i>.
+</p>
+
+<p>
+<i>Proof:</i> <i>T</i> is finite, so it contains a finite number of ambiguous
+nodes.  The depth-first traversal imposes a total order over those
+nodes and thus produces a finite sequence of ambiguous nodes.  Each
+ambiguous node <i>N</i> is labeled with an ambiguous nonterminal symbol <i>S</i>
+(by the definitions of those terms), and the children of <i>N</i> form a
+sequence corresponding to exactly one right-hand side of <i>G′</i>'s
+production rule for <i>S</i>.  (If the children of <i>N</i> did not correspond
+to at least one right-hand side for <i>S</i>, then <i>T</i> would not be in the
+set <i>F</i> of trees described by <i>G′</i>.  If they corresponded to more than
+one right-hand side, then the rule would have duplicate right-hand
+sides, contrary to our assumption.)
+</p>
+
+<p>
+Mapping each node in the sequence of ambiguous nodes in <i>T</i> to a
+digit, we obtain a finite sequence of base-<i>r</i> digits.  The
+concatenation of that sequence will be a single numeral.  Q.E.D.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7eed96b" class="outline-3">
+<h3 id="org7eed96b"><span class="section-number-3">5.3.</span> Definition of tree similarity</h3>
+<div class="outline-text-3" id="text-5-3">
+<p>
+At this point it will be helpful to define what it means for trees
+<i>t1</i> and <i>t2</i> to be 'the same' or 'different'.
+</p>
+
+<p>
+Let <i>R1</i> and <i>R2</i> be the root nodes of <i>t1</i> and <i>t2</i>, respectively.
+Let <i>ch1</i> be the sequence of children of <i>R1</i>, and <i>ch2</i> the sequence
+of children of <i>R2</i>.
+</p>
+
+<p>
+Trees <i>t1</i> and <i>t2</i> are similar (or 'the same') if:
+</p>
+
+<ol class="org-ol">
+<li><p>
+<i>R1</i> and <i>R2</i> have the same label.
+</p>
+
+<p>
+Note that in the parse trees of <i>F</i>, the labels will be either
+nonterminals or literal strings.
+</p></li>
+
+<li><i>R1</i> and <i>R2</i> have the same number of children.</li>
+
+<li>The sequences formed by the labels of <i>ch1</i> and <i>ch2</i> are
+identical.</li>
+
+<li>The subtrees rooted in the nodes of <i>ch1</i> are pairwise similar to
+the subtrees rooted in the corresponding nodes of <i>ch2</i>.</li>
+</ol>
+
+<p>
+Note that criterion 3 is a consequence of criterion 4 and thus
+strictly speaking redundant; similarly criterion 2 is a consequence
+of 3.  They are listed separately here solely for convenience.
+</p>
+
+<p>
+Two nodes whose subtrees satisfy criteria 1-3 but not criterion 4 may
+be said to be <i>locally similar</i>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org573b898" class="outline-3">
+<h3 id="org573b898"><span class="section-number-3">5.4.</span> <i>num</i> is an injection</h3>
+<div class="outline-text-3" id="text-5-4">
+<p>
+<b>THEOREM:</b> For any two trees <i>t1</i> and <i>t2</i> in <i>F</i>, <i>num(t1)</i> and
+<i>num(t2)</i> are different numerals.  That is, <i>num</i> is an injection.
+</p>
+
+<p>
+<i>Proof:</i> If <i>t1</i> and <i>t2</i> are two trees and not the same tree, then
+they are not similar.  There must be some nodes <i>N1</i> in <i>t1</i> and <i>N2</i>
+in <i>t2</i> such that
+</p>
+
+<ul class="org-ul">
+<li>every ancestors of <i>N1</i> and those of <i>N2</i> are pairwise locally
+similar, and</li>
+<li>the left siblings of the ancestors are pairwise locally similar to
+the left siblings of the corresponding ancestors of <i>N2</i>, but</li>
+<li><i>N1</i> and <i>N2</i> are not locally similar.</li>
+</ul>
+
+<p>
+<i>N1</i> and <i>N2</i> must be labeled with the same symbol <i>S</i>; otherwise
+their parents would not be locally similar.  <i>S</i> must be a
+nonterminal; otherwise, the subtrees rooted in <i>N1</i> and <i>N2</i> would be
+similar.  Both the children of <i>N1</i> and those of <i>N2</i> must match some
+right-hand side of the production rule for <i>S</i> in the parse forest
+grammar <i>G′</i>; otherwise <i>t1</i> and <i>t2</i> would not both be parse trees in
+<i>F</i>.  The right-hand side which matches the children of <i>N1</i> and the
+right-hand side matching the children of <i>N2</i> must be different, since
+<i>N1</i> and <i>N2</i> have the same label but are not locally similar.
+</p>
+
+<p>
+Since all nodes encountered before <i>N1</i> and <i>N2</i> in depth-first
+pre-order traversal of <i>t1</i> and <i>t2</i> are pairwise similar, every digit
+generated by <i>num</i> for every ambiguous node to the left of or above
+<i>N1</i> and <i>N2</i> must be the same for <i>t1</i> and <i>t2</i>.  That is, <i>num(t1)</i>
+and <i>num(t2)</i> have a common prefix for the parts of <i>t1</i> and <i>t2</i> that
+precede <i>N1</i> and <i>N2</i> in a pre-order traversal.
+</p>
+
+<p>
+But the digit generated by <i>num</i> for <i>N1</i> and that generated for <i>N2</i>
+must be different.
+</p>
+
+<p>
+So <i>num(t1)</i> and <i>num(t2)</i> must differ in at least one digit. Q.E.D.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7d4fbb4" class="outline-3">
+<h3 id="org7d4fbb4"><span class="section-number-3">5.5.</span> The procedures <i>arb</i> and <i>tree-constructor</i></h3>
+<div class="outline-text-3" id="text-5-5">
+<p>
+Now let's go the other way.
+</p>
+
+<p>
+For any numeral <i>m</i> written in base <i>r</i>, we can in a finite number of
+steps either construct a parse tree <i>T</i> represented by the parse
+forest grammar <i>G′</i> or else confirm that <i>m</i> does not denote any tree
+in <i>F</i>, as follows.
+</p>
+
+<p>
+Let <i>S</i> ∈ <i>V(G′)</i> be the <i>current symbol</i>.
+</p>
+
+<p>
+Let <i>dd</i> be a sequence of base-<i>r</i> digits.
+</p>
+
+<p>
+Initially,
+</p>
+
+<ul class="org-ul">
+<li><i>S</i> is the start symbol of <i>G′</i>.</li>
+<li><i>dd</i> is a list of the digits of <i>m</i>.</li>
+</ul>
+
+<p>
+We now enter a recursive procedure which we will call
+<i>tree-constructor</i>, to build a tree whose root node is labeled <i>S</i> and
+return both that tree and some suffix of <i>dd</i>.
+</p>
+
+<p>
+<b>Procedure <i>tree-constructor</i>, with arguments <i>G</i>, <i>S</i>, and <i>dd</i></b>
+</p>
+
+<ol class="org-ol">
+<li><p>
+If <i>S</i> is a literal string, then make a one-node tree labeled with
+<i>S</i>, and return that tree together with <i>dd</i>.
+</p>
+
+<p>
+Otherwise, <i>S</i> is a nonterminal.  Continue to the next step.
+</p></li>
+
+<li><p>
+Initialize some variables.
+</p>
+
+<p>
+Let <i>i</i> be the integer value of the first digit of <i>dd</i>, if <i>dd</i> is
+non-empty, otherwise -1.
+</p>
+
+<p>
+Let <i>N</i> be a newly constructed node labeled <i>S</i>.
+</p>
+
+<p>
+Let <i>R</i> be the production rule for <i>S</i> in <i>G′</i>.
+</p>
+
+<p>
+Let <i>c</i> ('count') be the number of right-hand sides in <i>R</i>.
+</p>
+
+<p>
+With a little abuse of notation, we treat <i>R</i> as an array of
+right-hand sides with zero-based indexing.  So for 0 ≤ <i>j</i> &lt; <i>c</i>,
+<i>R[j]</i> denotes one of the right-hand sides in <i>R</i>.
+</p>
+
+<p>
+If <i>c</i> = 1, let <i>Q</i> be <i>R[0]</i> and let <i>dd′</i> be <i>dd</i>.
+</p>
+
+<p>
+Otherwise <i>c</i> &gt; 1.
+</p>
+
+<p>
+If 0 ≤ <i>i</i> &lt; <i>c</i>, then let <i>Q</i> be <i>R[i]</i> and let <i>dd′</i> be the tail
+of <i>dd</i>.
+</p>
+
+<p>
+If <i>i</i> ≥ <i>c</i>, then let <i>Q</i> be undefined and let <i>dd′</i> be <i>dd</i>.
+</p>
+
+<p>
+If <i>i</i> &lt; 0, then let <i>Q</i> be undefined and let <i>dd′</i> be <i>dd</i>.
+</p>
+
+<p>
+If <i>Q</i> is undefined, skip to step 4; otherwise continue with
+step 3.
+</p></li>
+
+<li><p>
+Construct a sequence of trees as the children of the current node.
+</p>
+
+<p>
+For each symbol <i>s</i> in <i>Q</i>, call the procedure <i>tree-constructor</i>
+with <i>G′</i>, <i>s</i>, and a sequence of digits.  For the first symbol,
+the sequence of digits is <i>dd′</i>; for later symbols, it is the
+suffix of <i>dd′</i> returned by the call to <i>tree-constructor</i> on the
+preceding symbol.
+</p>
+
+<p>
+Let <i>dd″</i> be the sequence of digits returned by the last call to
+<i>tree-constructor</i>.
+</p>
+
+<p>
+Let <i>ch</i> be the sequence of trees returned by this series of
+recursive calls to <i>tree-constructor</i>.
+</p>
+
+<p>
+Note that if <i>Q</i> is empty, then <i>ch</i> will also be empty.   
+</p></li>
+
+<li><p>
+Return the calculated values.
+</p>
+
+<p>
+If <i>Q</i> is undefined and <i>i</i> &lt; 0, then return a singleton tree whose
+sole node is labeled with the integer -1, together with <i>dd′</i>.
+(This occurs when <i>S</i> is an ambiguous nonterminal but there are no
+digits left to specify which right-hand side to select.  In that
+case the numeral <i>m</i> denotes no tree, but a longer numeral with <i>m</i>
+as a proper prefix does denote a tree.  The tree labeled -1 serves
+as signal for this case.)
+</p>
+
+<p>
+If <i>Q</i> is undefined and <i>i</i> ≥ <i>c</i>, then return a singleton tree
+whose sole node is labeled with the integer -2, together with
+<i>dd′</i>.  (This occurs when the index <i>i</i> is out of range and does
+not denote any right-hand side in <i>R</i>; in that case the numeral <i>m</i>
+denotes no tree in <i>F</i>, and neither does any numeral that has <i>m</i>
+as a prefix.  The tree labeled -2 serves as signal for this case.)   
+</p>
+
+<p>
+Singleton trees labeled with negative integers are <i>error trees</i>.
+</p>
+
+<p>
+If <i>Q</i> is empty, then return the singleton tree containing node
+<i>N</i>, together with <i>dd′</i>.
+</p>
+
+<p>
+If any member of <i>ch</i> is an error tree, then return the first such
+tree in <i>ch</i>, together with the sequence of digits returned with it
+by the recursive call to <i>tree-constructor</i>.
+</p>
+
+<p>
+Otherwise (<i>Q</i> is defined, non-empty, and consists only of
+non-error trees), return the tree whose root is <i>N</i> and in which
+the children of <i>N</i> are the root nodes of the trees in <i>ch</i>.
+</p></li>
+</ol>
+
+<p>
+<i>End of procedure tree-constructor.</i>
+</p>
+
+<p>
+For any call to <i>tree-constructor</i>, the difference between the
+sequence <i>dd</i> of digits passed to the procedure as an argument and the
+sequence <i>dd″</i> returned by the procedure may be referred to as the
+sequence of digits 'consumed by' the procedure.  These are the leading
+digits of <i>dd</i> which were used to select right-hand sides for
+ambiguous nonterminals in the construction of the tree or partial
+tree.
+</p>
+
+<p>
+Note that <i>tree-constructor</i> consumes one digit for each ambiguous
+nonterminal it encounters, until either the tree is complete or the
+digits are exhausted.
+</p>
+
+<p>
+<b>Procedure <i>arb</i>, with arguments <i>G′</i> and <i>m</i></b>
+</p>
+
+<p>
+For a given parse-forest grammar <i>G′</i> and a given base-<i>r</i> numeral <i>m</i>
+(where <i>r</i> is the highest number of right-hand sides possessed by any
+production rule in <i>G′</i>), we can define a procedure <i>arb</i> which takes
+<i>G′</i> and <i>m</i> as arguments and returns either a parse tree described by
+<i>G′</i> and denoted by <i>m</i> or one of three failure signals:
+out-of-digits, out-of-range, or excess-digits.
+</p>
+
+<ol class="org-ol">
+<li>Let <i>S</i> be the start symbol of <i>G′</i> and <i>dd</i> be the digits <i>m</i>.</li>
+
+<li><p>
+Call <i>tree-constructor</i> with arguments <i>G′</i>, <i>S</i>, and <i>dd</i>.  The
+procedure will return a tree and a sequence of digits; call them
+<i>T</i> and <i>dd″</i>.
+</p>
+
+<p>
+One of the following cases will apply:
+</p>
+
+<ul class="org-ul">
+<li><p>
+If <i>T</i> is an error tree whose root is labeled -1, then <i>m</i> does
+not denote any tree in <i>F</i>, but some numeral with <i>m</i> as a prefix
+does.
+</p>
+
+<p>
+Informally: we ran out of digits in <i>m</i>.
+</p>
+
+<p>
+In this case, return a signal for out-of-digits.
+</p></li>
+
+<li><p>
+If <i>T</i> is an error tree whose root is labeled -2, then <i>m</i> does
+not denote any tree in <i>F</i>, nor does any numeral of which <i>m</i> is
+a prefix.
+</p>
+
+<p>
+Informally: some digit in <i>m</i> was out of range.  (Perhaps <i>m</i> is
+a base-3 numeral, since some ambiguous nonterminal has three
+right-hand sides, but the some other ambiguous nonterminal has
+only two right-hand sides.  If a "2" is the first digit in <i>dd</i>
+when that other nonterminal must be expanded, then the digit will
+be out of range in this way.)
+</p>
+
+<p>
+In this case, return a signal for out-of-range.
+</p></li>
+
+<li><p>
+If <i>dd″</i> is non-empty, the <i>m</i> does not denote any tree in <i>F</i>,
+but some proper prefix of <i>m</i> does denote a tree.
+</p>
+
+<p>
+Informally: <i>m</i> has more digits than can be used.
+</p>
+
+<p>
+In this case, return a signal for excess-digits.
+</p></li>
+
+<li><p>
+Otherwise, <i>T</i> is the tree in <i>F</i> denoted by <i>m</i>.
+</p>
+
+<p>
+Return <i>T</i>.
+</p></li>
+</ul></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgb51607c" class="outline-3">
+<h3 id="orgb51607c"><span class="section-number-3">5.6.</span> <i>arb</i> is a total function</h3>
+<div class="outline-text-3" id="text-5-6">
+<p>
+<b>THEOREM:</b> For any parse forest grammar <i>G′</i> and any base-<i>r</i> numeral
+(or empty string) <i>m</i>, <i>arb(G′, m)</i> returns either a tree in <i>F</i> or
+one of the three signals.  That is, <i>arb</i> is a total function from
+base-<i>r</i> numerals to the union of the set {out-of-digits,
+out-of-range, excess-digits} and <i>F</i>.
+</p>
+
+<p>
+<i>Proof:</i> By induction on the length of <i>m</i>.
+</p>
+
+<p>
+<i>Base case:</i> If <i>m</i> is of length zero, then <i>arb(G′, m)</i> will return
+either a tree or the out-of-digits signal.
+</p>
+
+<p>
+Because <i>F</i> is non-empty, <i>G′</i> describes at least one parse tree.  If
+<i>F</i> contains only one parse tree, then that parse tree contains no
+ambiguous nodes, <i>G′</i> contains no ambiguous nonterminals, and no call
+to <i>tree-constructor</i> will consume any digits.
+</p>
+
+<p>
+And inversely, if <i>F</i> contains multiple parse trees, then <i>G′</i> will
+contain at least one ambiguous nonterminal and at least one digit will
+be consumed in the construction of any non-error tree by
+<i>tree-constructor</i>.
+</p>
+
+<p>
+Since <i>tree-constructor</i> consumes one digit for each ambiguous
+nonterminal encountered, when <i>arb</i> is called with an empty sequence
+of digits, all of the following are true:
+</p>
+
+<ul class="org-ul">
+<li>The procedure returns a non-error tree if and only if the tree it
+returns contains no ambiguous nodes and is the only tree in <i>F</i>, and
+<i>V(G′)</i> contains no ambiguous nonterminals.</li>
+
+<li>It returns an out-of-digits signal if and only if <i>V(G′)</i> contains
+at least one ambiguous nonterminal.</li>
+
+<li>It cannot return an out-of-range signal, because there are no
+out-of-range digits in <i>m</i>.</li>
+
+<li>It cannot return an excess-digits signal, because all digits in <i>dd</i>
+have been consumed.</li>
+</ul>
+
+<p>
+<i>Induction hypothesis:</i> Every base-<i>r</i> numeral of length <i>L</i> returns
+either a non-error tree or one of the signals out-of-digits,
+out-of-range, or excess-digits.
+</p>
+
+<p>
+<i>Induction step:</i> If the proposition is true for all numerals of
+length <i>L</i>, then it is also true for all numerals <i>m</i> of length
+<i>L</i> + 11.
+</p>
+
+<p>
+Let <i>d</i> be the last digit of <i>m</i>, and <i>m2</i> the prefix of <i>m</i> which
+contains all but the last digit of <i>m</i>.
+</p>
+
+<p>
+By hypothesis, one of the following cases holds:
+</p>
+
+<ul class="org-ul">
+<li><p>
+<i>arb(G′, m2)</i> returns a non-error tree.
+</p>
+
+<p>
+In this case, the call to <i>tree-constructor</i> will consume the digits
+of <i>m2</i> and return a singleton sequence containing <i>d</i>. The <i>arb</i>
+procedure will then return the excess-digits signal.
+</p></li>
+
+<li><p>
+<i>arb(G′, m2)</i> returns the out-of-digits signal.
+</p>
+
+<p>
+In this case, the call to <i>tree-constructor</i> will construct the same
+partial tree for <i>m</i> as for <i>m2</i>, and then reach the point where it
+ran out of digits and returned an error tree.  At that point, we
+need to choose among the right-hand sides of a production rule <i>R</i>
+for some nonterminal <i>N</i>, using digit <i>d</i>.  One of the following
+cases must apply:
+</p>
+
+<ul class="org-ul">
+<li>The integer value of digit <i>d</i> is greater than or equal to the
+number of right-hand sides in <i>R</i>.  In this case,
+<i>tree-constructor</i> will return a -2 tree, and <i>arb</i> will return
+an out-of-range signal.</li>
+
+<li><p>
+The integer value of digit <i>d</i> is less than the number of
+right-hand sides in <i>R</i>.  In this case, <i>tree-constructor</i> will
+select the appropriate right-hand side and continue.
+</p>
+
+<p>
+If no further ambiguous nonterminals are encountered,
+<i>tree-constructor</i> will consume no further digits and return a
+non-error tree denoted by <i>m</i>, together with an empty sequence
+of digits.  Procedure <i>arb</i> in turn will return the tree denoted
+by <i>m</i>.
+</p>
+
+<p>
+Otherwise, another ambiguous nonterminal is encountered, but the
+digits of <i>m</i> have been exhausted.  In this case,
+<i>tree-constructor</i> will return a -1 tree and <i>arb</i> will return
+an out-of-digits signal.
+</p></li>
+</ul></li>
+
+<li><p>
+<i>arb(G′, m2)</i> returns the out-of-range signal.
+</p>
+
+<p>
+In this case, the out-of-range digit is in the prefix <i>m2</i> and the
+additional presence of <i>d</i> at the end of <i>m</i> will have no effect on
+the out-of-range digits and so cannot make any difference.  So a
+call to <i>arb(G′, m)</i> will return the same signal.
+</p></li>
+
+<li><p>
+<i>arb(G′, m2)</i> returns the excess-digits signal.
+</p>
+
+<p>
+In this case, <i>tree-constructor</i> consumes fewer digits than are
+present in <i>m2</i>.  The additional presence of <i>d</i> at the end of <i>m</i>
+cannot make <i>tree-constructor</i> consume more digits.  So a call to
+<i>arb(G′, m)</i> will return the same signal.
+</p></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org575e2aa" class="outline-3">
+<h3 id="org575e2aa"><span class="section-number-3">5.7.</span> In non-error cases, <i>arb</i> and <i>num</i> are inverses of each other</h3>
+<div class="outline-text-3" id="text-5-7">
+<p>
+If I have defined them right, <i>num</i> and <i>arb</i> should be inverses of
+each other.
+</p>
+
+<p>
+<b>THEOREM:</b> For any base-<i>r</i> numeral <i>m</i>, if <i>arb(m)</i> is defined, then
+<i>m</i> = <i>num(arb(m))</i>. (To be proved.)
+</p>
+
+<p>
+<b>THEOREM:</b> For any tree <i>T</i> in <i>F</i>, <i>arb(num(T))</i> = <i>T</i>. (To be
+proved.)
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbdc508e" class="outline-3">
+<h3 id="orgbdc508e"><span class="section-number-3">5.8.</span> There is a 1:1 mapping between trees in <i>F</i> and a subset of base-<i>r</i> numerals</h3>
+<div class="outline-text-3" id="text-5-8">
+<p>
+<b>THEOREM:</b> the set of parse trees represented by <i>G′</i> has a one-to-one
+mapping to a subset of the set of numerals written in base <i>r</i>.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org39fa832" class="outline-2">
+<h2 id="org39fa832"><span class="section-number-2">6.</span> Another example</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+A second example may be helpful.  Let <i>G</i> be the following grammar
+(from a collection of ambiguous grammars constructed for testing
+grammar tools [/citation to be supplied/]):
+</p>
+<div class="org-src-container">
+<pre class="src src-ixml">S: A .
+A: 'a', B ; 'x' .
+B: 'b', A ; LDOE, A .
+LDOE: M; 'l' .
+M: 'm'; LDOE .
+</pre>
+</div>
+
+<p>
+Let <i>S</i> be "amalx".
+</p>
+
+<p>
+<i>G′</i> will be:
+</p>
+<div class="org-src-container">
+<pre class="src src-ixml">Goal·0·5 = S·0·5.
+S·0·5 = A·0·5.
+A·0·5 = "a", B·1·5.
+B·1·5 = LDOE·1·2, A·2·5.
+LDOE·1·2 = M·1·2.
+A·2·5 = "a", B·3·5.
+M·1·2 = "m";
+        LDOE·1·2.
+B·3·5 = LDOE·3·4, A·4·5.
+LDOE·3·4 = M·3·4;
+           "l".
+A·4·5 = "x".
+M·3·4 = LDOE·3·4.
+</pre>
+</div>
+
+<p>
+There are two ambiguous nonterminals in <i>G′</i>: <i>M·1·2</i> and <i>LDOE·3·4</i>.
+Each has two RHS, so <i>r</i> = 2.  (And as can be seen if you look
+carefully, they each form a loop in the parent/child relation, and the
+loops are separate and do not interact.)
+</p>
+
+<p>
+The first few numerals and their trees (this time in outline form) are:
+</p>
+
+<ul class="org-ul">
+<li>0 no tree</li>
+<li>1 no tree</li>
+<li>01 s(a(lit(a), b(ldoe(m(lit(m))), a(lit(a), b(ldoe(lit(l)), a(lit(x)))))))
+<ul class="org-ul">
+<li>S.0.5
+<ul class="org-ul">
+<li>A.0.5
+<ul class="org-ul">
+<li>"a"</li>
+<li>B.1.5
+<ul class="org-ul">
+<li>LDOE.1.2
+<ul class="org-ul">
+<li>M.1.2
+<ul class="org-ul">
+<li>"m"</li>
+</ul></li>
+</ul></li>
+<li>A.2.5
+<ul class="org-ul">
+<li>"a"</li>
+<li>B.3.5
+<ul class="org-ul">
+<li>LDOE.3.4
+<ul class="org-ul">
+<li>"l"</li>
+</ul></li>
+<li>A.4.5
+<ul class="org-ul">
+<li>"x"</li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul></li>
+<li>10 no tree</li>
+<li>11 no tree</li>
+<li>000 no tree</li>
+<li>001 s(a(lit(a), b(ldoe(m(lit(m))), a(lit(a), b(ldoe(m(ldoe(lit(l)))), a(lit(x)))))))</li>
+<li>010 no tree</li>
+<li>011 no tree</li>
+<li>100 no tree</li>
+<li>101 s(a(lit(a), b(ldoe(m(ldoe(m(lit(m))))), a(lit(a), b(ldoe(lit(l)), a(lit(x)))))))</li>
+<li>110 no tree</li>
+<li>111 no tree</li>
+<li>0000 no tree</li>
+<li><p>
+0001 s(a(lit(a), b(ldoe(m(lit(m))), a(lit(a), b(ldoe(m(ldoe(m(ldoe(&#x2026;))))), a(lit(x))))))) ;
+</p>
+
+<p>
+1001 s(a(lit(a), b(ldoe(m(ldoe(m(lit(m))))), a(lit(a), b(ldoe(m(ldoe(lit(l)))), a(lit(x))))))) 
+</p>
+
+<p>
+1101 s(a(lit(a), b(ldoe(m(ldoe(m(ldoe(m(lit(&#x2026;))))))), a(lit(a), b(ldoe(lit(l)), a(lit(x))))))) 
+&#x2026;
+</p></li>
+</ul>
+
+<p>
+Omitting numerals that don't map to trees now:
+</p>
+
+<ul class="org-ul">
+<li>00001</li>
+<li>10001</li>
+<li>11001</li>
+<li>11101</li>
+<li>000001</li>
+<li>100001</li>
+<li>110001</li>
+<li>111001</li>
+<li>111101</li>
+<li>0000001</li>
+<li>&#x2026;</li>
+</ul>
+
+<p>
+Careful inspection of a diagram showing the parent/child relation in
+the parse-forest grammar makes clear that the set of numerals that
+denote trees in this case is (1*0)(0*1).
+</p>
+</div>
+</div>
+
+<div id="outline-container-org15ad771" class="outline-2">
+<h2 id="org15ad771"><span class="section-number-2">7.</span> Identifying the numerals which actually denote trees (with Woods automaton)</h2>
+<div class="outline-text-2" id="text-7">
+<p>
+From the parent/child graph for a given parse forest grammar, we can
+derive a finite state automaton which defines the set of base-<i>r</i>
+numerals that describe trees.  So in principle it is always possible
+to define precisely the set of all base-<i>r</i> numerals that denote trees
+in <i>F</i>.
+</p>
+
+<p>
+We start by building the recursive transition network decribed by
+H. A.  Woods in "Transition Network Grammars for Natural Language
+Analysis", <i>CACM</i> 13.10 (Oct 1970): 591-606.
+</p>
+
+<ol class="org-ol">
+<li>Make a parse forest grammar <i>G′</i> for the parse forest.</li>
+<li>Make a Woods automaton for <i>G′</i>.</li>
+<li>Change all transitions to be epsilon transitions.</li>
+<li>At every transition from the start state for an ambiguous
+nonterminal to the first state in one of its RHS, make the
+transition a transition on the appropriate digit ('0', '1'¸
+&#x2026; string(r-1))</li>
+<li>Ignore the stack.</li>
+</ol>
+
+<p>
+The resulting FSA recognizes (or should, if I haven't botched
+something &#x2013; proof needed) the set of base-<i>r</i> numerals that denote
+trees.  It will probably have a <b>lot</b> of epsilon transitions, and will
+thus be too cluttered to read easily.  But it's just a conventional
+FSA with
+</p>
+
+<ul class="org-ul">
+<li>an alphabet consisting of the numerals from 0 to r-1,</li>
+
+<li>states consisting of the nonterminals (no, the symbols) of <i>G′</i>,</li>
+
+<li>a follow relation derived by unioning the parent-to-first-child,
+sibling-to-following-sibling, and last-child-to-parent relations
+in <i>G′</i>, and</li>
+
+<li>a rule that all transitions are empty except those from ambiguous
+parents to first children, and those are labeled with the digit
+for the RHS containing the first child.</li>
+</ul>
+
+<p>
+Since it's just a conventional FSA, it can be simplified in the usual
+way.
+</p>
+
+<p>
+After elimination of epsilon transitions and merger of equivalent
+states, the LDOE grammar ends up with this FSA.  Or, to be pedantic,
+this regular grammar. (The naming of nonterminals here is not completely
+systematic, but the fragments of <i>G′</i> nonterminals may help in reading the
+FSA.  The strings "q0" and "qf" are my personal conventions for the
+start- and end-states of the automaton for a particular nonterminal &#x2013;
+here S.0.5.)
+</p>
+<div class="org-src-container">
+<pre class="src src-ixml">S.0.5.q0 = "1", S.0.5.q0 . { merged with LDOE.1.2 }
+S.0.5.q0 = "0", LDOE.3.4 .
+LDOE.3.4 = "0", LDOE.3.4 .
+LDOE.3.4 = "1", S.0.5.qf .
+S.0.5.qf = {nil}. { final state }
+</pre>
+</div>
+
+<p>
+This is not quite the canonical form described in automata theory; they
+would omit state A.4.5 and just write
+</p>
+<div class="org-src-container">
+<pre class="src src-ixml">LDOE.3.4 = "1".
+</pre>
+</div>
+
+<p>
+I think it's clearer to have a named final state easily recognizable as
+such.  So I do.
+</p>
+</div>
+
+<div id="outline-container-orgd7b7b45" class="outline-3">
+<h3 id="orgd7b7b45"><span class="section-number-3">7.1.</span> Using LR(0) automaton to identify numerals denoting trees</h3>
+<div class="outline-text-3" id="text-7-1">
+<p>
+An alternative approach based on the LR(0) automaton may be easier for
+some readers to follow.  I take the construction described in Grune
+and Jacobs as a point of reference.
+</p>
+
+<p>
+The first step is to construct a non-deterministic automaton:
+</p>
+
+<ul class="org-ul">
+<li><p>
+Each (normal) state contains (or: is labeled with) one <i>item</i>: a
+grammar rule with a ● embedded in its right hand side.  If a rule
+has multiple right-hand sides, each RHS is treated as a separate
+rule.
+</p>
+
+<p>
+In the LDOE parse forest grammar, we thus have thirty states with
+labels like "B·1·5 = ● LDOE·1·2, A·2·5." and "M·1·2 = 'm' ●."
+</p></li>
+
+<li>From any state with a ● immediately preceding a symbol, a
+transitions labeled with that symbol goes to the state in which the
+● immediately follows that symbol.</li>
+
+<li>For each nonterminal <i>N</i> in the grammar a <i>station</i> is additionally
+constructed; it contains (is labeled with) "● <i>N</i>".</li>
+
+<li>From each normal state with a ● immediately preceding some
+nonterminal <i>N</i>, an epsilon transition goes from that state to the
+station for <i>N</i>.</li>
+
+<li><p>
+From every station for nonterminal <i>N</i>, epsilon transitions go from
+the station to the first state in each right-hand side for <i>N</i>.
+</p>
+
+<p>
+In the LDOE parse forest grammar, we thus have epsilon transitions
+from "● LDOE·3·4" to the states "LDOE·3·4 = ● M·3·4." and "LDOE·3·4
+= ● 'l'."
+</p></li>
+</ul>
+
+<p>
+The second step is to make three modifications to the automaton.  For
+each arc from state <i>S1</i> to state <i>S2</i> labeled with a nonterminal
+symbol <i>N</i>, the automaton already has epsilon transitions from <i>S1</i> to
+the station for <i>N</i>.
+</p>
+
+<ul class="org-ul">
+<li>Add epsilon transitions from each final state(s) of <i>N</i> to <i>S2</i>.</li>
+
+<li>Remove all arcs labeled with nonterminals.</li>
+
+<li>For each nonterminal in the parse forest grammar which has more than
+one right-hand side, label each arc with a number, starting with 0,
+1, 2, &#x2026;.</li>
+</ul>
+
+<p>
+The third step is to eliminate epsilon transitions in the usual way.
+</p>
+
+<p>
+In the LDOE example, this step produces the following automaton, in
+which the labeled choices are interleaved with the literal strings
+recognized in parsing the input.  It may be observed that the two
+cycles in the FSA consist only of choice labels uninterrupted by input
+literals; this will always be characteristic of infinite ambiguity.
+<img src="./images/ldoe-lr0-epsilon-free.dot.svg" alt="ldoe-lr0-epsilon-free.dot.svg" class="org-svg" />
+</p>
+
+<p>
+The automaton can be simplified by eliminating the transitions on
+literal strings as if they were epsilon transitions.
+</p>
+
+<p>
+Eliding the original grammar items, since they serve little purpose
+at this point, we get:
+<img src="./images/ldoe-lr0-choices-simplified.dot.svg" alt="ldoe-lr0-choices-simplified.dot.svg" class="org-svg" />
+</p>
+
+<p>
+It is evident that the numerals of trees in this parse forest will
+all match the regular expression "1*00*1".
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2974c39" class="outline-2">
+<h2 id="org2974c39"><span class="section-number-2">8.</span> Concluding remarks</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+The method described here is very simple, but sufficiently non-obvious
+that it seems worth while to describe it in writing.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 19 July 2023, revised 3 June 2024</p>
+<p class="author">Author: CMSMcQ</p>
+<p class="date">Created: 2024-06-08 Sat 16:04</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

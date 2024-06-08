@@ -1,0 +1,39 @@
+digraph ldoe_lr0 {
+// LR0 automaton for LDOE grammar and sentence 'amalx'.
+
+rankdir="TB";
+
+   G05_q0   [label="G·0·5: ● S·0·5.\nS·0·5: ● A·0·5.\nA·0·5: ● 'a', B·1·5."];
+   A05_lita [label="A·0·5: 'a' ●, B·1·5.\nB·1·5: ● LDOE·1·2, A·2·5.\nLDOE·1·2: ● M·1·2."];
+   
+   M12_q00  [label="M·1·2:  ● 'm'.\nLDOE·1·2: M·1·2 ● .\nB·1·5: LDOE·1·2 ● , A·2·5."];
+   M12_q01  [label="M·1·2:  ● LDOE·1·2.\nLDOE·1·2: ● M·1·2."];
+   M12_litm [label="M·1·2: 'm' ● .\nLDOE·1·2: M·1·2 ● .\nM·1·2: LDOE·1·2 ● .\nB·1·5: LDOE·1·2 ● , A·2·5.\nA·2·5: ● 'a', B·3·5."];
+
+   A25_lita [label="A·2·5: 'a' ● , B·3·5.\nB·3·5:  ● LDOE·3·4, A·4·5."];
+
+   LDOE34_q00 [label="LDOE·3·4: ● M·3·4.\nM·3·4:  ● LDOE·3·4."];
+   LDOE34_q01 [label="LDOE·3·4: ● 'l'."];
+   LDOE34_litl [label="LDOE·3·4: 'l' ● .\nB·3·5: LDOE·3·4 ● , A·4·5.\nM·3·4: LDOE·3·4 ● .\nLDOE·3·4: M·3·4 ● .\nA·4·5:  ● 'x'."];
+
+   A45_litx [label="A·4·5: 'x' ● .\nB·3·5: LDOE·3·4, A·4·5 ● .\nA·2·5: 'a', B·3·5 ● .\nB·1·5: LDOE·1·2, A·2·5 ● .\nA·0·5: 'a', B·1·5 ●.\nS·0·5: A·0·5 ●.\nG·0·5: S·0·5 ● ." peripheries=2];
+   
+
+   
+   G05_q0 -> A05_lita [label="a"];
+   A05_lita -> M12_q00 [label="0" fontcolor="red"];
+   A05_lita -> M12_q01 [label="1" fontcolor="red"];
+   M12_q01  -> M12_q00 [label="0" fontcolor="red"];
+   M12_q01  -> M12_q01 [label="1" fontcolor="red"];
+   M12_q00 -> M12_litm [label="m"];
+   M12_litm -> A25_lita [label="a"];
+
+   A25_lita -> LDOE34_q00 [label="0" fontcolor="red"];
+   A25_lita -> LDOE34_q01 [label="1" fontcolor="red"];
+   LDOE34_q00 -> LDOE34_q00 [label="0" fontcolor="red"];
+   LDOE34_q00 -> LDOE34_q01 [label="1" fontcolor="red"];
+   // LDOE34_q00 -> LDOE34_litl [label="1"];
+   LDOE34_q01 -> LDOE34_litl [label="l"];
+   LDOE34_litl -> A45_litx [label="x"];
+   
+}

@@ -1,0 +1,916 @@
+#+title: Enumerating trees in a parse forest
+#+author: CMSMcQ 
+#+date: 19 July 2023, revised 3 June 2024
+
+* Overview / About this document
+
+This working paper describes a method for enumerating the parse trees
+represented in a parse forest grammar; since for any grammar /G/ and
+sentence /S/ ∈ /L(G)/ a parse forest grammar can be constructed, the
+method allows the parse trees of /S/ to be enumerated, even if there
+are infinitely many of them.
+
+The problem presented itself to the author in connection with work on
+a processor for Invisible XML (/reference to be supplied/) and the
+description uses examples from that context for concreteness.  The
+author apologizes to any reader who would have preferred a more
+abstract treatment with fewer examples.
+
+We begin with a description of the problem and the practical
+requirements.  We then describe a simple running example: a sentence
+with an infinite number of parse trees and show a parse forest grammar
+describing that infinite set.  The solution is to associate each tree
+with a distinct numeral written in base-/r/ notation, where /r/
+depends on the parse forest grammar; the solution is described first
+very briefly and then in more detail, with reference to the running
+example. We then describe a second example.  An addendum describes the
+construction of a finite state automaton which recognizes (or
+generates) the numerals which actually denote trees.
+
+* The problem
+
+Consider a program which accepts an arbitrary context-free grammar /G/
+and an input string /S/.  If /S/ is in /L(G)/, the program is to
+return a parse tree for /S/; if /S/ is not in /L(G)/, the program
+indicates a parse failure.  (I.e., consider an ixml processor.)
+
+Now imagine that in the case of ambiguous strings, the program is to
+provide a next-tree interface which allows one tree after another to
+be retrieved until the set is exhausted or the user stops asking for
+the next tree.  The requirements for this interface are that it should
+be:
+
+  - /Effective/.  Each call to the interface should return a finite
+    parse tree, until the set of finite parse trees is exhausted.
+    
+  - /Duplicate-free/.  No tree should be returned twice.
+
+    An exception to the no-duplicates rule may be made in practice if
+    some rules in the grammar are written with duplicate right-hand
+    sides.  For language-theoretical purposes, a rule has a set, not a
+    sequence, of right-hand sides.
+
+  - /Fair/.  Every tree in the set of parse trees should eventually be
+    returned after a some finite number of calls to the next-tree
+    interface.
+
+In this case it is probably worth pointing out that a consequence of
+the first requirement is that the tree enumerator should not fall into
+an infinite loop.
+
+** Example
+
+As an example consider grammar /G/:
+#+begin_src ixml
+    S = A | B.
+    A = A | 'x'.
+    B = B | 'x'.
+#+end_src
+
+/L(G)/ has one sentence ("=x="), the set of parse trees for which is
+countably infinite.  The XML representations for some of its parse
+trees are:
+#+begin_example
+    <S><A>x</A></S>
+    <S><A><A>x</A></A></S>
+    <S><A><A><A>x</A></A></A></S>
+    ...
+    <S><B>x</B></S>
+    <S><B><B>x</B></B></S>
+    <S><B><B><B>x</B></B></B></S>
+    ...
+#+end_example
+
+** A naive approach
+One naive approach to generating the trees is to make the first tree
+by taking the first choice at each choice point, then make the second
+tree by changing the last one of those choices to take the second
+choice, and so on.  This approach will fall into an infinite loop
+without ever returning any trees because there is no finite tree in
+which every choice taken is the first option.  If the rules for /A/
+and /B/ are rewritten to put the RHS in the other order, this naive
+approach will return trees, but will never return any tree containing
+a /B/, because it attempts first to list all the trees in which the
+/S/ dominates an /A/, and there are infinitely many such trees.
+
+One way to think about the problem is that we are searching for paths in
+a search space containing loops. A breadth-first search with
+backtracking has no particular trouble solving the problem, but for
+programmers not working Prolog, figuring out the backtracking is at best
+error-prone.
+
+# (At least, both Norm and I have screwed up multiple times.)
+
+* Parse Forest Grammars
+
+In many cases -- including this problem -- it is convenient to
+summarize a set of parse trees in a parse-forest grammar.  Every point
+of ambiguity in the parse-forest grammar is represented by a
+non-terminal with more than one right-hand side.  We require that in a
+parse forest grammar, each right-hand side in a production rule
+consist of a sequence of literal strings and nonterminal symbols,
+without nested choices, options, or repetitions.
+
+For this case, the parse-forest grammar (call it /G′/) is isomorphic
+to /G/; in the general case, the two grammars are not isomorphic, and
+the difference is important.
+#+begin_src ixml
+    S.0.1 = A.0.1 | B.0.1 .
+    A.0.1 = A.0.1 | 'x'.
+    B.0.1 = B.0.1 | 'x'.
+#+end_src
+
+# Since /G′/ is isomorphic to G here, I am going to write /S/, A, and B, not
+# S.0.1, A.0.1, and B.0.1, purely for simplicity in typing.
+
+Every parse-forest grammar /G′/ describes a forest /F/ of parse trees
+for /S/ when parsed against /G/.
+
+Without loss of generality, we assume that:
+- /S/ ∈ /L(G)/ and thus /F/ contains at least one parse tree.
+- No two right-hand sides in any production rule are the same sequence
+  of symbols; and
+- The right-hand sides of any production rule are given as a sequence,
+  not a set.  (The ordering imposed is unimportant; the only requirement
+  is that we can associate a number with each right-hand side.)
+- All nonterminals in /V(G′)/ are reachable and productive.
+  
+* Solution
+
+The short summary of the solution is: we associate each tree with a
+unique numeral which uniquely identifies the tree.  We can arrange the
+set of all relevant numerals in a list, and have the next-tree
+interface return trees in the order specified by the list.  Since each
+numeral appears only once in the list, there are no duplicates.  Since
+every tree is represented by a numeral in the list and lies a finite
+distance from the beginning of the list, every tree will eventually be
+returned after a finite number of calls to the next-tree interface.
+
+* Details
+
+Let a nonterminal in the PFG which has multiple RHS be an 'ambiguous
+non-terminal'.  In /G′/, all non-terminals are ambiguous.
+
+Let a node in a parse tree labeled with an ambiguous non-terminal be
+an 'ambiguous node'.  For the trees of /G′/, all non-leaf nodes are
+ambiguous.
+
+Let /r/ be the largest number of RHS possessed by any ambiguous
+non-terminal.  In /G′/, /r/ = 2.
+
+** The procedure /num/
+
+For any parse tree /T/ represented by /G′/, we can construct a numeral
+/m/ written in base /r/, as follows:
+
+  - /T/ has a finite number of nodes, and thus a finite number of
+    ambiguous nodes.
+
+  - The number of ambiguous nodes in /T/ and the number of digits in
+    /m/ will be the same.  (N.B. '0' and '00' and '000' are three
+    different numerals denoting three distinct trees.)
+
+  - The nodes are considered in the order given by a depth-first
+    pre-order traversal of /T/.  (Any traversal should work;
+    depth-first lends itself to a simple implementation.) The first
+    ambiguous node found in that traveral corresponds to the first
+    digit of /m/, the second to the second digit of /m/, and so on.
+  
+  - Each digit in /m/ describes one ambiguous node /N/ in the tree: if
+    the children of /N/ are those in the first RHS of the nonterminal,
+    the digit is '0'; if the are those of the second nonterminal, the
+    digit is '1', and so on, up to /r/-1.
+
+Call the procedure just described /num/; it maps from trees in /F/ to
+numerals written in base /r/.
+
+For the trees given earlier, we construct the following numerals:
+
+- 01
+- 001
+- 0001
+- ...
+- 11
+- 101
+- 1001
+- ...
+
+** /num/ is a function
+
+*THEOREM:* For any finite tree /T/ in /F/, given a parse forest
+grammar /G′/ describing /F/, it is the case that /num(T)/ generates
+exactly one numeral /m/.  That is, /num/ is a function defined for all
+trees in /F/.
+
+/Proof:/ /T/ is finite, so it contains a finite number of ambiguous
+nodes.  The depth-first traversal imposes a total order over those
+nodes and thus produces a finite sequence of ambiguous nodes.  Each
+ambiguous node /N/ is labeled with an ambiguous nonterminal symbol /S/
+(by the definitions of those terms), and the children of /N/ form a
+sequence corresponding to exactly one right-hand side of /G′/'s
+production rule for /S/.  (If the children of /N/ did not correspond
+to at least one right-hand side for /S/, then /T/ would not be in the
+set /F/ of trees described by /G′/.  If they corresponded to more than
+one right-hand side, then the rule would have duplicate right-hand
+sides, contrary to our assumption.)
+
+Mapping each node in the sequence of ambiguous nodes in /T/ to a
+digit, we obtain a finite sequence of base-/r/ digits.  The
+concatenation of that sequence will be a single numeral.  Q.E.D.
+
+** Definition of tree similarity
+
+At this point it will be helpful to define what it means for trees
+/t1/ and /t2/ to be 'the same' or 'different'.
+
+Let /R1/ and /R2/ be the root nodes of /t1/ and /t2/, respectively.
+Let /ch1/ be the sequence of children of /R1/, and /ch2/ the sequence
+of children of /R2/.
+
+Trees /t1/ and /t2/ are similar (or 'the same') if:
+
+1. /R1/ and /R2/ have the same label.
+
+   Note that in the parse trees of /F/, the labels will be either
+   nonterminals or literal strings.
+  
+2. /R1/ and /R2/ have the same number of children.
+
+3. The sequences formed by the labels of /ch1/ and /ch2/ are
+   identical.
+  
+4. The subtrees rooted in the nodes of /ch1/ are pairwise similar to
+   the subtrees rooted in the corresponding nodes of /ch2/.
+
+Note that criterion 3 is a consequence of criterion 4 and thus
+strictly speaking redundant; similarly criterion 2 is a consequence
+of 3.  They are listed separately here solely for convenience.
+
+Two nodes whose subtrees satisfy criteria 1-3 but not criterion 4 may
+be said to be /locally similar/.
+
+** /num/ is an injection
+
+*THEOREM:* For any two trees /t1/ and /t2/ in /F/, /num(t1)/ and
+/num(t2)/ are different numerals.  That is, /num/ is an injection.
+
+/Proof:/ If /t1/ and /t2/ are two trees and not the same tree, then
+they are not similar.  There must be some nodes /N1/ in /t1/ and /N2/
+in /t2/ such that
+
+- every ancestors of /N1/ and those of /N2/ are pairwise locally
+  similar, and
+- the left siblings of the ancestors are pairwise locally similar to
+  the left siblings of the corresponding ancestors of /N2/, but
+- /N1/ and /N2/ are not locally similar.
+
+/N1/ and /N2/ must be labeled with the same symbol /S/; otherwise
+their parents would not be locally similar.  /S/ must be a
+nonterminal; otherwise, the subtrees rooted in /N1/ and /N2/ would be
+similar.  Both the children of /N1/ and those of /N2/ must match some
+right-hand side of the production rule for /S/ in the parse forest
+grammar /G′/; otherwise /t1/ and /t2/ would not both be parse trees in
+/F/.  The right-hand side which matches the children of /N1/ and the
+right-hand side matching the children of /N2/ must be different, since
+/N1/ and /N2/ have the same label but are not locally similar.
+
+Since all nodes encountered before /N1/ and /N2/ in depth-first
+pre-order traversal of /t1/ and /t2/ are pairwise similar, every digit
+generated by /num/ for every ambiguous node to the left of or above
+/N1/ and /N2/ must be the same for /t1/ and /t2/.  That is, /num(t1)/
+and /num(t2)/ have a common prefix for the parts of /t1/ and /t2/ that
+precede /N1/ and /N2/ in a pre-order traversal.
+
+But the digit generated by /num/ for /N1/ and that generated for /N2/
+must be different.
+
+So /num(t1)/ and /num(t2)/ must differ in at least one digit. Q.E.D.
+
+** The procedures /arb/ and /tree-constructor/
+
+Now let's go the other way.
+
+For any numeral /m/ written in base /r/, we can in a finite number of
+steps either construct a parse tree /T/ represented by the parse
+forest grammar /G′/ or else confirm that /m/ does not denote any tree
+in /F/, as follows.
+
+Let /S/ ∈ /V(G′)/ be the /current symbol/.
+
+Let /dd/ be a sequence of base-/r/ digits.
+
+Initially,
+
+- /S/ is the start symbol of /G′/.
+- /dd/ is a list of the digits of /m/.
+
+We now enter a recursive procedure which we will call
+/tree-constructor/, to build a tree whose root node is labeled /S/ and
+return both that tree and some suffix of /dd/.
+
+*Procedure /tree-constructor/, with arguments /G/, /S/, and /dd/*
+
+1. If /S/ is a literal string, then make a one-node tree labeled with
+   /S/, and return that tree together with /dd/.
+
+   Otherwise, /S/ is a nonterminal.  Continue to the next step.
+
+2. Initialize some variables.
+
+   Let /i/ be the integer value of the first digit of /dd/, if /dd/ is
+   non-empty, otherwise -1.
+            
+   Let /N/ be a newly constructed node labeled /S/.
+
+   Let /R/ be the production rule for /S/ in /G′/.
+    
+   Let /c/ ('count') be the number of right-hand sides in /R/.
+
+   With a little abuse of notation, we treat /R/ as an array of
+   right-hand sides with zero-based indexing.  So for 0 ≤ /j/ < /c/,
+   /R[j]/ denotes one of the right-hand sides in /R/.
+
+   If /c/ = 1, let /Q/ be /R[0]/ and let /dd′/ be /dd/.
+   
+   Otherwise /c/ > 1.
+
+   If 0 ≤ /i/ < /c/, then let /Q/ be /R[i]/ and let /dd′/ be the tail
+   of /dd/.
+   
+   If /i/ ≥ /c/, then let /Q/ be undefined and let /dd′/ be /dd/.
+
+   If /i/ < 0, then let /Q/ be undefined and let /dd′/ be /dd/.
+
+   If /Q/ is undefined, skip to step 4; otherwise continue with
+   step 3.
+   
+3. Construct a sequence of trees as the children of the current node.
+
+   For each symbol /s/ in /Q/, call the procedure /tree-constructor/
+   with /G′/, /s/, and a sequence of digits.  For the first symbol,
+   the sequence of digits is /dd′/; for later symbols, it is the
+   suffix of /dd′/ returned by the call to /tree-constructor/ on the
+   preceding symbol.
+
+   Let /dd″/ be the sequence of digits returned by the last call to
+   /tree-constructor/.
+   
+   Let /ch/ be the sequence of trees returned by this series of
+   recursive calls to /tree-constructor/.
+
+   Note that if /Q/ is empty, then /ch/ will also be empty.   
+
+4. Return the calculated values.
+   
+   If /Q/ is undefined and /i/ < 0, then return a singleton tree whose
+   sole node is labeled with the integer -1, together with /dd′/.
+   (This occurs when /S/ is an ambiguous nonterminal but there are no
+   digits left to specify which right-hand side to select.  In that
+   case the numeral /m/ denotes no tree, but a longer numeral with /m/
+   as a proper prefix does denote a tree.  The tree labeled -1 serves
+   as signal for this case.)
+
+   If /Q/ is undefined and /i/ ≥ /c/, then return a singleton tree
+   whose sole node is labeled with the integer -2, together with
+   /dd′/.  (This occurs when the index /i/ is out of range and does
+   not denote any right-hand side in /R/; in that case the numeral /m/
+   denotes no tree in /F/, and neither does any numeral that has /m/
+   as a prefix.  The tree labeled -2 serves as signal for this case.)   
+
+   Singleton trees labeled with negative integers are /error trees/.
+   
+   If /Q/ is empty, then return the singleton tree containing node
+   /N/, together with /dd′/.
+
+   If any member of /ch/ is an error tree, then return the first such
+   tree in /ch/, together with the sequence of digits returned with it
+   by the recursive call to /tree-constructor/.
+
+   Otherwise (/Q/ is defined, non-empty, and consists only of
+   non-error trees), return the tree whose root is /N/ and in which
+   the children of /N/ are the root nodes of the trees in /ch/.
+
+/End of procedure tree-constructor./
+
+For any call to /tree-constructor/, the difference between the
+sequence /dd/ of digits passed to the procedure as an argument and the
+sequence /dd″/ returned by the procedure may be referred to as the
+sequence of digits 'consumed by' the procedure.  These are the leading
+digits of /dd/ which were used to select right-hand sides for
+ambiguous nonterminals in the construction of the tree or partial
+tree.
+
+Note that /tree-constructor/ consumes one digit for each ambiguous
+nonterminal it encounters, until either the tree is complete or the
+digits are exhausted.
+
+*Procedure /arb/, with arguments /G′/ and /m/*
+
+For a given parse-forest grammar /G′/ and a given base-/r/ numeral /m/
+(where /r/ is the highest number of right-hand sides possessed by any
+production rule in /G′/), we can define a procedure /arb/ which takes
+/G′/ and /m/ as arguments and returns either a parse tree described by
+/G′/ and denoted by /m/ or one of three failure signals:
+out-of-digits, out-of-range, or excess-digits.
+
+1. Let /S/ be the start symbol of /G′/ and /dd/ be the digits /m/.
+
+2. Call /tree-constructor/ with arguments /G′/, /S/, and /dd/.  The
+   procedure will return a tree and a sequence of digits; call them
+   /T/ and /dd″/.
+
+   One of the following cases will apply:
+
+   - If /T/ is an error tree whose root is labeled -1, then /m/ does
+     not denote any tree in /F/, but some numeral with /m/ as a prefix
+     does.
+     
+     Informally: we ran out of digits in /m/.
+
+     In this case, return a signal for out-of-digits.
+
+   - If /T/ is an error tree whose root is labeled -2, then /m/ does
+     not denote any tree in /F/, nor does any numeral of which /m/ is
+     a prefix.
+
+     Informally: some digit in /m/ was out of range.  (Perhaps /m/ is
+     a base-3 numeral, since some ambiguous nonterminal has three
+     right-hand sides, but the some other ambiguous nonterminal has
+     only two right-hand sides.  If a "2" is the first digit in /dd/
+     when that other nonterminal must be expanded, then the digit will
+     be out of range in this way.)
+
+     In this case, return a signal for out-of-range.
+     
+   - If /dd″/ is non-empty, the /m/ does not denote any tree in /F/,
+     but some proper prefix of /m/ does denote a tree.
+
+     Informally: /m/ has more digits than can be used.
+
+     In this case, return a signal for excess-digits.
+     
+   - Otherwise, /T/ is the tree in /F/ denoted by /m/.
+
+     Return /T/.
+  
+#  2. If /R/ has more than one right-hand side, then select the
+#     right-hand side numbered /d1/ in a zero-based numbering.  (I.e.,
+#     convert /d1/ to a number /n/, skip the first /n/ right-hand sides
+#     in the sequence, and take the next one.
+# 
+#     If R has fewer than /n/ + 1 right-hand sides, then stop: /m/ does
+#     not denote a tree.
+# 
+#     If /R/ has one right-hand side, select that right-hand side.
+# 
+#  3. For each symbol /s/ token in the selected right-hand side,
+#     construct a node labeled with /s/; make the resulting sequence
+#     of nodes the children of
+#     
+#  2. If the working tree has any leaves which are ambiguous nodes, we
+#     select the leftmost such node, and continue with step 3.  If not,
+#     we jump to step 4.
+# 
+#     Note that the result will be that the sequence in which nodes are
+#     described by the digits of m will be the sequence in which they are
+#     encountered in a depth-first search of the final tree T.
+# 
+#     /(This is not quite right.  We need to handle *all* nodes depth-first.)/
+#     
+#  3. If there is a current digit, then we use the current digit to
+#     select which RHS to use in expanding the node: 0 for the first
+#     RHS, 1 for the second, and so on.  And then we advance the
+#     current-digit pointer to select the next digit in m, if any.
+# 
+#     Two special cases arise:
+# 
+#     If the current digit indicates a RHS which does not exist (say,
+#     the digit is '4' but the nonterminal in question does not have
+#     five RHS), then /m/ does not denote a tree.  (And furthermore, no
+#     numeral of which /m/ is a prefix denotes a tree.)  In this case we
+#     call /m/ an /unsatisfiable numeral/.
+# 
+#     If there is no current digit (i.e. we have reached the end of m
+#     without providing children for every ambiguous node in the working
+#     tree), then /m/ does not denote a tree.  But at least one numeral
+#     of which /m/ is a prefix does denote a tree; that may be useful
+#     for optimization.
+#     
+#     After this step, we jump to step 2.
+# 
+#  4. If the working tree contains no ambiguous nodes as leaves, then we
+#     inspect the current digit of /m/.
+# 
+#     If there is no current digit (i.e. we have used all the digits of
+#     m to guide the expansion of ambiguous nodes, and there are no
+#     digits left), then the working tree /T/ is a complete parse tree
+#     in the parse forest of /G′/, denoted by /m/.  (/Or: it would be,
+#     if we had built it right./)
+#     
+#     If there is a current digit (i.e. we have not used up all the
+#     digits of /m/), then /m/ does not denote a tree in /F/. (But some
+#     prefix of /m/, consisting of the digits that were used, does
+#     denote a tree in /F/.)
+
+# Note that at the conclusion of this process, the working tree /T/ will
+# contain some number of ambiguous nodes.  We will have one of the
+# following states of affairs:
+# 
+#   - Numeral /m/ is unsatisfiable.
+#     
+#   - The number of ambiguous nodes is equal to the number of digits
+#     in /m/.
+# 
+#     In this case, /T/ is a complete parse tree in /F/.
+#     
+#   - There are more ambiguous nodes than digits.
+# 
+#     In this case, /m/ is the prefix of at least one numeral denoting a
+#     tree in /F/ but does not itself denote a tree in /F/.
+#     
+#   - There are more digits than ambiguous nodes.
+# 
+#     In this case, some prefix of /m/ denotes a tree in /F/, but /m/
+#     does not.
+
+# Call the procedure just described /arb/; it maps from base-/r/
+# numerals to trees in /F/.
+
+** /arb/ is a total function
+
+*THEOREM:* For any parse forest grammar /G′/ and any base-/r/ numeral
+(or empty string) /m/, /arb(G′, m)/ returns either a tree in /F/ or
+one of the three signals.  That is, /arb/ is a total function from
+base-/r/ numerals to the union of the set {out-of-digits,
+out-of-range, excess-digits} and /F/.
+
+/Proof:/ By induction on the length of /m/.
+
+/Base case:/ If /m/ is of length zero, then /arb(G′, m)/ will return
+either a tree or the out-of-digits signal.
+
+Because /F/ is non-empty, /G′/ describes at least one parse tree.  If
+/F/ contains only one parse tree, then that parse tree contains no
+ambiguous nodes, /G′/ contains no ambiguous nonterminals, and no call
+to /tree-constructor/ will consume any digits.
+
+And inversely, if /F/ contains multiple parse trees, then /G′/ will
+contain at least one ambiguous nonterminal and at least one digit will
+be consumed in the construction of any non-error tree by
+/tree-constructor/.
+
+Since /tree-constructor/ consumes one digit for each ambiguous
+nonterminal encountered, when /arb/ is called with an empty sequence
+of digits, all of the following are true:
+
+- The procedure returns a non-error tree if and only if the tree it
+  returns contains no ambiguous nodes and is the only tree in /F/, and
+  /V(G′)/ contains no ambiguous nonterminals.
+  
+- It returns an out-of-digits signal if and only if /V(G′)/ contains
+  at least one ambiguous nonterminal.
+
+- It cannot return an out-of-range signal, because there are no
+  out-of-range digits in /m/.
+
+- It cannot return an excess-digits signal, because all digits in /dd/
+  have been consumed.
+  
+/Induction hypothesis:/ Every base-/r/ numeral of length /L/ returns
+either a non-error tree or one of the signals out-of-digits,
+out-of-range, or excess-digits.
+
+/Induction step:/ If the proposition is true for all numerals of
+length /L/, then it is also true for all numerals /m/ of length
+/L/ + 11.
+
+Let /d/ be the last digit of /m/, and /m2/ the prefix of /m/ which
+contains all but the last digit of /m/.
+
+By hypothesis, one of the following cases holds:
+
+- /arb(G′, m2)/ returns a non-error tree.
+
+  In this case, the call to /tree-constructor/ will consume the digits
+  of /m2/ and return a singleton sequence containing /d/. The /arb/
+  procedure will then return the excess-digits signal.
+  
+- /arb(G′, m2)/ returns the out-of-digits signal.
+
+  In this case, the call to /tree-constructor/ will construct the same
+  partial tree for /m/ as for /m2/, and then reach the point where it
+  ran out of digits and returned an error tree.  At that point, we
+  need to choose among the right-hand sides of a production rule /R/
+  for some nonterminal /N/, using digit /d/.  One of the following
+  cases must apply:
+
+    + The integer value of digit /d/ is greater than or equal to the
+      number of right-hand sides in /R/.  In this case,
+      /tree-constructor/ will return a -2 tree, and /arb/ will return
+      an out-of-range signal.
+      
+    + The integer value of digit /d/ is less than the number of
+      right-hand sides in /R/.  In this case, /tree-constructor/ will
+      select the appropriate right-hand side and continue.
+
+      If no further ambiguous nonterminals are encountered,
+      /tree-constructor/ will consume no further digits and return a
+      non-error tree denoted by /m/, together with an empty sequence
+      of digits.  Procedure /arb/ in turn will return the tree denoted
+      by /m/.
+
+      Otherwise, another ambiguous nonterminal is encountered, but the
+      digits of /m/ have been exhausted.  In this case,
+      /tree-constructor/ will return a -1 tree and /arb/ will return
+      an out-of-digits signal.
+  
+- /arb(G′, m2)/ returns the out-of-range signal.
+
+  In this case, the out-of-range digit is in the prefix /m2/ and the
+  additional presence of /d/ at the end of /m/ will have no effect on
+  the out-of-range digits and so cannot make any difference.  So a
+  call to /arb(G′, m)/ will return the same signal.
+  
+- /arb(G′, m2)/ returns the excess-digits signal.
+
+  In this case, /tree-constructor/ consumes fewer digits than are
+  present in /m2/.  The additional presence of /d/ at the end of /m/
+  cannot make /tree-constructor/ consume more digits.  So a call to
+  /arb(G′, m)/ will return the same signal.
+  
+** In non-error cases, /arb/ and /num/ are inverses of each other
+
+If I have defined them right, /num/ and /arb/ should be inverses of
+each other.
+
+*THEOREM:* For any base-/r/ numeral /m/, if /arb(m)/ is defined, then
+/m/ = /num(arb(m))/. (To be proved.)
+
+*THEOREM:* For any tree /T/ in /F/, /arb(num(T))/ = /T/. (To be
+proved.)
+
+** There is a 1:1 mapping between trees in /F/ and a subset of base-/r/ numerals
+
+*THEOREM:* the set of parse trees represented by /G′/ has a one-to-one
+mapping to a subset of the set of numerals written in base /r/.
+
+# * Addendum
+# 
+# Part of me thinks: well, all of that is completely obvious, who
+# would want to publish that as an algorithm?  And another part of me
+# thinks: look, you had trouble figuring this out.  Norm had trouble
+# figuring it out.  It can't be *that* obvious.  It began to seem
+# simple to me (and I began to have confidence that it wasn't going to
+# fall into any hidden traps) only when I thought of representing
+# trees as base-r numerals, and 'the current tree' in an
+# implementation of the next-tree interface as a position in the list
+# of base-r numerals.
+
+* Another example
+
+A second example may be helpful.  Let /G/ be the following grammar
+(from a collection of ambiguous grammars constructed for testing
+grammar tools [/citation to be supplied/]):
+#+begin_src ixml
+    S: A .
+    A: 'a', B ; 'x' .
+    B: 'b', A ; LDOE, A .
+    LDOE: M; 'l' .
+    M: 'm'; LDOE .
+#+end_src
+
+Let /S/ be "amalx".
+
+/G′/ will be:
+#+begin_src ixml
+  Goal·0·5 = S·0·5.
+  S·0·5 = A·0·5.
+  A·0·5 = "a", B·1·5.
+  B·1·5 = LDOE·1·2, A·2·5.
+  LDOE·1·2 = M·1·2.
+  A·2·5 = "a", B·3·5.
+  M·1·2 = "m";
+          LDOE·1·2.
+  B·3·5 = LDOE·3·4, A·4·5.
+  LDOE·3·4 = M·3·4;
+             "l".
+  A·4·5 = "x".
+  M·3·4 = LDOE·3·4.
+#+end_src
+
+There are two ambiguous nonterminals in /G′/: /M·1·2/ and /LDOE·3·4/.
+Each has two RHS, so /r/ = 2.  (And as can be seen if you look
+carefully, they each form a loop in the parent/child relation, and the
+loops are separate and do not interact.)
+
+The first few numerals and their trees (this time in outline form) are:
+
+- 0 no tree
+- 1 no tree
+- 01 s(a(lit(a), b(ldoe(m(lit(m))), a(lit(a), b(ldoe(lit(l)), a(lit(x)))))))
+  + S.0.5
+    + A.0.5
+      + "a"
+      + B.1.5
+        + LDOE.1.2
+          + M.1.2
+            + "m"
+        + A.2.5
+          + "a"
+          + B.3.5
+            + LDOE.3.4
+              + "l"
+            + A.4.5
+              + "x"
+- 10 no tree
+- 11 no tree
+- 000 no tree
+- 001 s(a(lit(a), b(ldoe(m(lit(m))), a(lit(a), b(ldoe(m(ldoe(lit(l)))), a(lit(x)))))))
+- 010 no tree
+- 011 no tree
+- 100 no tree
+- 101 s(a(lit(a), b(ldoe(m(ldoe(m(lit(m))))), a(lit(a), b(ldoe(lit(l)), a(lit(x))))))) 
+- 110 no tree
+- 111 no tree
+- 0000 no tree
+- 0001 s(a(lit(a), b(ldoe(m(lit(m))), a(lit(a), b(ldoe(m(ldoe(m(ldoe(...))))), a(lit(x))))))) ;
+
+  1001 s(a(lit(a), b(ldoe(m(ldoe(m(lit(m))))), a(lit(a), b(ldoe(m(ldoe(lit(l)))), a(lit(x))))))) 
+
+  1101 s(a(lit(a), b(ldoe(m(ldoe(m(ldoe(m(lit(...))))))), a(lit(a), b(ldoe(lit(l)), a(lit(x))))))) 
+  ...
+
+Omitting numerals that don't map to trees now:
+  
+- 00001
+- 10001
+- 11001
+- 11101
+- 000001
+- 100001
+- 110001
+- 111001
+- 111101
+- 0000001
+- ...
+
+Careful inspection of a diagram showing the parent/child relation in
+the parse-forest grammar makes clear that the set of numerals that
+denote trees in this case is (1*0)(0*1).
+
+* Identifying the numerals which actually denote trees (with Woods automaton)
+
+From the parent/child graph for a given parse forest grammar, we can
+derive a finite state automaton which defines the set of base-/r/
+numerals that describe trees.  So in principle it is always possible
+to define precisely the set of all base-/r/ numerals that denote trees
+in /F/.
+
+# To jog my own memory, if needed, I'll say here that I think a reliable
+# form of the automaton can be made by a construction similar to that
+# of what I call the stack-augmented regular grammar (it perhaps really
+# ought to be called a Woods automaton, because it's just a stack
+# automaton built following the hints in a 1970 paper by Woods (H A Woods,
+# "Transition Network Grammars for Natural Language Analysis", CACM 13.10
+# (Oct 1970): 591-606)).
+# 
+# Some of the details below will probably make no sense without an
+# explanation of the Woods automaton.  Sorry.
+
+We start by building the recursive transition network decribed by
+H. A.  Woods in "Transition Network Grammars for Natural Language
+Analysis", /CACM/ 13.10 (Oct 1970): 591-606.
+
+    1. Make a parse forest grammar /G′/ for the parse forest.
+    2. Make a Woods automaton for /G′/.
+    3. Change all transitions to be epsilon transitions.
+    4. At every transition from the start state for an ambiguous
+       nonterminal to the first state in one of its RHS, make the
+       transition a transition on the appropriate digit ('0', '1'¸
+       ... string(r-1))
+    5. Ignore the stack.
+
+# (Another construction is possible, I think, starting from the
+# parent/child graph of the parse-forest grammar /G′/, but it involves
+# appealing to the notion of 'next node' in a depth-first traversal of
+# a tree, while traversing something which is not a tree but directed
+# graph which is not guaranteed acyclic, so it has a certain
+# leap-of-faith quality to it.)
+
+The resulting FSA recognizes (or should, if I haven't botched
+something -- proof needed) the set of base-/r/ numerals that denote
+trees.  It will probably have a *lot* of epsilon transitions, and will
+thus be too cluttered to read easily.  But it's just a conventional
+FSA with
+
+    - an alphabet consisting of the numerals from 0 to r-1,
+    
+    - states consisting of the nonterminals (no, the symbols) of /G′/,
+
+    - a follow relation derived by unioning the parent-to-first-child,
+      sibling-to-following-sibling, and last-child-to-parent relations
+      in /G′/, and
+
+    - a rule that all transitions are empty except those from ambiguous
+      parents to first children, and those are labeled with the digit
+      for the RHS containing the first child.
+
+Since it's just a conventional FSA, it can be simplified in the usual
+way.
+
+After elimination of epsilon transitions and merger of equivalent
+states, the LDOE grammar ends up with this FSA.  Or, to be pedantic,
+this regular grammar. (The naming of nonterminals here is not completely
+systematic, but the fragments of /G′/ nonterminals may help in reading the
+FSA.  The strings "q0" and "qf" are my personal conventions for the
+start- and end-states of the automaton for a particular nonterminal --
+here S.0.5.)
+#+begin_src ixml
+    S.0.5.q0 = "1", S.0.5.q0 . { merged with LDOE.1.2 }
+    S.0.5.q0 = "0", LDOE.3.4 .
+    LDOE.3.4 = "0", LDOE.3.4 .
+    LDOE.3.4 = "1", S.0.5.qf .
+    S.0.5.qf = {nil}. { final state }
+#+end_src
+
+This is not quite the canonical form described in automata theory; they
+would omit state A.4.5 and just write
+#+begin_src ixml
+    LDOE.3.4 = "1".
+#+end_src
+
+I think it's clearer to have a named final state easily recognizable as
+such.  So I do.
+
+** Using LR(0) automaton to identify numerals denoting trees
+An alternative approach based on the LR(0) automaton may be easier for
+some readers to follow.  I take the construction described in Grune
+and Jacobs as a point of reference.
+
+The first step is to construct a non-deterministic automaton:
+
+- Each (normal) state contains (or: is labeled with) one /item/: a
+  grammar rule with a ● embedded in its right hand side.  If a rule
+  has multiple right-hand sides, each RHS is treated as a separate
+  rule.
+
+  In the LDOE parse forest grammar, we thus have thirty states with
+  labels like "B·1·5 = ● LDOE·1·2, A·2·5." and "M·1·2 = 'm' ●."
+
+- From any state with a ● immediately preceding a symbol, a
+  transitions labeled with that symbol goes to the state in which the
+  ● immediately follows that symbol.
+  
+- For each nonterminal /N/ in the grammar a /station/ is additionally
+  constructed; it contains (is labeled with) "● /N/".
+
+- From each normal state with a ● immediately preceding some
+  nonterminal /N/, an epsilon transition goes from that state to the
+  station for /N/.
+  
+- From every station for nonterminal /N/, epsilon transitions go from
+  the station to the first state in each right-hand side for /N/.
+
+  In the LDOE parse forest grammar, we thus have epsilon transitions
+  from "● LDOE·3·4" to the states "LDOE·3·4 = ● M·3·4." and "LDOE·3·4
+  = ● 'l'."
+
+The second step is to make three modifications to the automaton.  For
+each arc from state /S1/ to state /S2/ labeled with a nonterminal
+symbol /N/, the automaton already has epsilon transitions from /S1/ to
+the station for /N/.
+
+- Add epsilon transitions from each final state(s) of /N/ to /S2/.
+
+- Remove all arcs labeled with nonterminals.
+
+- For each nonterminal in the parse forest grammar which has more than
+  one right-hand side, label each arc with a number, starting with 0,
+  1, 2, ....
+
+The third step is to eliminate epsilon transitions in the usual way.
+
+In the LDOE example, this step produces the following automaton, in
+which the labeled choices are interleaved with the literal strings
+recognized in parsing the input.  It may be observed that the two
+cycles in the FSA consist only of choice labels uninterrupted by input
+literals; this will always be characteristic of infinite ambiguity.
+[[./images/ldoe-lr0-epsilon-free.dot.svg]]
+
+The automaton can be simplified by eliminating the transitions on
+literal strings as if they were epsilon transitions.
+# The items don't
+# serve much purpose any more but are retained to make the relationship
+# with the LR(0) automaton a little easier to trace.
+# [[./images/ldoe-lr0-choices-only.dot.svg]]
+Eliding the original grammar items, since they serve little purpose
+at this point, we get:
+[[./images/ldoe-lr0-choices-simplified.dot.svg]]
+
+It is evident that the numerals of trees in this parse forest will
+all match the regular expression "1*00*1".
+
+* Concluding remarks
+
+The method described here is very simple, but sufficiently non-obvious
+that it seems worth while to describe it in writing.

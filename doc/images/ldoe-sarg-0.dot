@@ -1,0 +1,157 @@
+digraph ldoe_sarg {
+// Woods-based stack automaton for LDOE grammar and sentence 'amalx'.
+
+rankdir="LR";
+
+ edge [color="black" style="dotted"];
+ subgraph G05 { rankdir="LR"; cluster=false;
+   G05_q0 [label="G.0.5/q0"];
+   G05_S05 [label="G.0.5/qS.0.5" peripheries=2];
+   /* sarg */ G05_q0 -> G05_S05;
+ }
+ subgraph S05 { rankdir="LR"; cluster=false;
+   S05_q0 [label="S.0.5/q0"];
+   S05_A05 [label="S.0.5/qA.0.5" peripheries=2];
+   /* sarg */ S05_q0 -> S05_A05;
+ }
+ subgraph A05 { rankdir="LR"; cluster=false;
+   A05_q0 [label="A.0.5/q0"];
+   A05_lita [label="A.0.5/q.lit.a"];
+   A05_B15 [label="A.0.5/qB.1.5" peripheries=2];
+   /* sarg */ A05_q0 -> A05_lita [label="a" color="invis" fontcolor="invis"];
+   /* sarg */ A05_lita -> A05_B15;
+   }
+ subgraph B15 { rankdir="LR"; cluster=false;
+   B15_q0 [label="B.1.5/q0"];
+   B15_LDOE12 [label="B.1.5/qLDOE.1.2"];
+   B15_A25 [label="B.1.5/qA.2.5" peripheries=2];
+   /* sarg */ B15_q0 -> B15_LDOE12 -> B15_A25;
+ }
+ subgraph LDOE12 { rankdir="LR"; cluster=false;
+   LDOE12_q0 [label="LDOE.1.2/q0"];
+   LDOE12_M12 [label="LDOE.1.2/qM.1.2" peripheries=2];
+   /* sarg */ LDOE12_q0 -> LDOE12_M12;
+ }
+ subgraph A25 { rankdir="LR"; cluster=false;
+   A25_q0 [label="A.2.5/q0"];
+   A25_lita [label="A.2.5/q_lit_a"];
+   A25_B35 [label="A.2.5/qB.3.5"];
+   /* sarg */ A25_q0 -> A25_lita [label="a" color="invis" fontcolor="invis"];
+   /* sarg */ A25_lita -> A25_B35;
+ }
+ subgraph M12 { rankdir="LR"; cluster=false;
+   M12_q0 [label="M.1.2/q0"];
+   M12_litm [label="M.1.2/q_lit_m" peripheries=2];
+   M12_LDOE12 [label="M.1.2/qLDOE12" peripheries=2];
+   /* sarg */ M12_q0 -> M12_litm [label="m" color="invis" fontcolor="invis"];
+   /* sarg */ M12_q0 -> M12_LDOE12;
+ }
+ subgraph B35 { rankdir="LR"; cluster=false;
+   B35_q0 [label="B.3.5/q0"];
+   B35_LDOE34 [label="B.3.5/qLDOE.3.4"];
+   B35_A45 [label="B.3.5/qA.4.5" peripheries=2];
+   /* sarg */ B35_q0 -> B35_LDOE34 -> B35_A45;
+ }
+ subgraph LDOE34 { rankdir="LR"; cluster=false;
+   LDOE34_q0 [label="LDOE.3.4/q0"];
+   LDOE34_M34 [label="LDOE.3.4/qM.3.4" peripheries=2];
+   LDOE34_litl [label="LDOE.3.4/q_lit_l" peripheries=2];
+   /* sarg */ LDOE34_q0 -> LDOE34_M34;
+   /* sarg */ LDOE34_q0 -> LDOE34_litl [label="l" color="invis" fontcolor="invis"];
+ }
+ subgraph A45 { rankdir="LR"; cluster=false;
+   A45_q0 [label="A.4.5/q0"];
+   A45_litx [label="A.4.5/q_lit_x" peripheries=2];
+   /* sarg */ A45_q0 -> A45_litx [label="x" color="invis" fontcolor="invis"];
+ }
+ subgraph M34 { rankdir="LR"; cluster=false;
+   M34_q0 [label="M.3.4/q0"];
+   M34_LDOE34 [label="M.3.4/qLDOE34"];
+   /* sarg */ M34_q0 -> M34_LDOE34;
+ }
+
+ subgraph { rank="same"; G05_q0; S05_q0; A05_q0; }
+ subgraph { rank="same";
+                         A05_lita;
+                         B15_q0; 
+                         LDOE12_q0;
+                         // M12_q0;
+          }
+ subgraph { rank="same";
+                         LDOE12_M12;
+                         M12_q0;
+                         M12_litm;
+          }
+ subgraph { rank="same";
+                         B15_LDOE12;
+                         A25_q0;
+                         A25_lita;
+          }
+ subgraph { rank="same";
+                         // A25_q0;
+                         A25_lita;
+                         B35_q0;
+                         LDOE34_q0;
+                         A45_q0;
+                         // M34_q0;
+                         }
+ subgraph { rank="same";
+                         A45_litx;
+                         B35_A45;
+                         A25_B35;
+                         A05_B15;
+                         // B15_A25;
+                         S05_A05;
+                         G05_S05;
+          }
+ subgraph { rank="same";
+                         A45_q0;
+                         B35_LDOE34;
+          }
+          
+ // The stack-augmented FSA
+ edge [color="red" style="solid"];
+ 
+ G05_q0 -> S05_q0 [label="Push G.0.5/qS.0.5"];
+ S05_A05 -> G05_S05 [label="Pop G.0.5/qS.0.5"];
+ 
+ S05_q0 -> A05_q0 [label="Push S.0.5/qA.0.5"];
+ A05_B15 -> S05_A05 [label="Pop S.0.5/qA.0.5"];
+
+ A05_q0 -> A05_lita [label="a"];
+ A05_lita -> B15_q0 [label="Push A.0.5/qB.1.5"];
+ B15_A25 -> A05_B15 [label="Pop A.0.5/qB.1.5"];
+ 
+ B15_q0 -> LDOE12_q0 [label="Push B.1.5/qLDOE.1.2"];
+ LDOE12_M12 -> B15_LDOE12 [label="Pop B.1.5/qLDOE.1.2"];
+ B15_LDOE12 -> A25_q0 [label="Push B.1.5/qA.2.5"];
+ A25_B35 -> B15_A25 [label="Pop B.1.5/qA.2.5"];
+ 
+ LDOE12_q0 -> M12_q0 [label="Push LDOE.1.2/qM.1.2"];
+ M12_litm -> LDOE12_M12 [label="Pop LDOE.1.2/qM.1.2"];
+ M12_LDOE12 -> LDOE12_M12 [label="Pop LDOE.1.2/qM.1.2"];
+
+ A25_q0 -> A25_lita [label="a"];
+ A25_lita -> B35_q0 [label="Push A.2.5/qB.3.5"];
+ B35_A45 -> A25_B35 [label="Pop A.2.5/qB.3.5"];
+
+ M12_q0 -> M12_litm [label="m"];
+ M12_q0 -> LDOE12_q0 [label="Push M.1.2/qLDOE.1.2"];
+ LDOE12_M12 -> M12_LDOE12 [label="Pop M.1.2/qLDOE.1.2"];
+
+ B35_q0 -> LDOE34_q0 [label="Push B.3.5/qLDOE.3.4"];
+ LDOE34_M34 -> B35_LDOE34 [label="Pop B.3.5/qLDOE.3.4"];
+ LDOE34_litl -> B35_LDOE34 [label="Pop B.3.5/qLDOE.3.4"];
+ B35_LDOE34 -> A45_q0 [label="Push B.3.5/qA.4.5"];
+ A45_litx -> B35_A45 [label="Pop B.3.5/qA.4.5"];
+
+ LDOE34_q0 -> M34_q0 [label="Push LDOE.3.4/qM.3.4"];
+ M34_LDOE34 -> LDOE34_M34 [label="Pop LDOE.3.4/qM.3.4"];
+ LDOE34_q0 -> LDOE34_litl [label="l"];
+
+ A45_q0 -> A45_litx [label="x"];
+
+ M34_q0 -> LDOE34_q0 [label="Push M.3.4/qLDOE.3.4"];
+ LDOE34_M34 -> M34_LDOE34 [label="Pop M.3.4/qLDOE.3.4"];
+ LDOE34_litl -> M34_LDOE34 [label="Pop M.3.4/qLDOE.3.4"];
+}

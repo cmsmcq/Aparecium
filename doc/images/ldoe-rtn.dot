@@ -1,0 +1,72 @@
+digraph ldoe_rtn {
+// Woods-based recursive transition network
+// for LDOE grammar and sentence 'amalx'.
+ rankdir="LR";
+ 
+ subgraph G05 { rankdir="LR";
+   G05_q0 [label="G.0.5/q0"];
+   G05_S05 [label="G.0.5/qS.0.5" peripheries=2];
+   G05_q0 -> G05_S05;
+ }
+ subgraph S05 { rankdir="LR";
+   S05_q0 [label="S.0.5/q0"];
+   S05_A05 [label="S.0.5/qA.0.5" peripheries=2];
+   S05_q0 -> S05_A05;
+ }
+ subgraph A05 { rankdir="LR";
+   A05_q0 [label="A.0.5/q0"];
+   A05_lita [label="A.0.5/q.lit.a"];
+   A05_B15 [label="A.0.5/qB.1.5" peripheries=2];
+   A05_q0 -> A05_lita [label="a"];
+   A05_lita -> A05_B15;
+   }
+ subgraph B15 { rankdir="LR";
+   B15_q0 [label="B.1.5/q0"];
+   B15_LDOE12 [label="B.1.5/qLDOE.1.2"];
+   B15_A25 [label="B.1.5/qA.2.5" peripheries=2];
+   B15_q0 -> B15_LDOE12 -> B15_A25;
+ }
+ subgraph LDOE12 { rankdir="LR";
+   LDOE12_q0 [label="LDOE.1.2/q0"];
+   LDOE12_M12 [label="LDOE.1.2/qM.1.2" peripheries=2];
+   LDOE12_q0 -> LDOE12_M12;
+ }
+ subgraph A25 { rankdir="LR";
+   A25_q0 [label="A.2.5/q0"];
+   A25_lita [label="A.2.5/q_lit_a"];
+   A25_qB35 [label="A.2.5/qB.3.5"];
+   A25_q0 -> A25_lita [label="a"];
+   A25_lita -> A25_qB35;
+ }
+ subgraph M12 { rankdir="LR";
+   M12_q0 [label="M.1.2/q0"];
+   M12_qlitm [label="M.1.2/q_lit_m" peripheries=2];
+   M12_qLDOE12 [label="M.1.2/qLDOE12" peripheries=2];
+   M12_q0 -> M12_qlitm [label="m"];
+   M12_q0 -> M12_qLDOE12;
+ }
+ subgraph B35 { rankdir="LR";
+   B35_q0 [label="B.3.5/q0"];
+   B35_LDOE34 [label="B.3.5/qLDOE.3.4"];
+   B35_A45 [label="B.3.5/qA.4.5" peripheries=2];
+   B35_q0 -> B35_LDOE34 -> B35_A45;
+ }
+ subgraph LDOE35 { rankdir="LR";
+   LDOE35_q0 [label="LDOE.3.5/q0"];
+   LDOE35_qM34 [label="LDOE.3.5/M.3.40" peripheries=2];
+   LDOE35_qlitl [label="LDOE.3.5/q_lit_l" peripheries=2];
+   LDOE35_q0 -> LDOE35_qM34;
+   LDOE35_q0 -> LDOE35_qlitl [label="l"];
+ }
+ subgraph A45 { rankdir="LR";
+   A45_q0 [label="A.4.5/q0"];
+   A45_qlitx [label="A.4.5/q_lit_x" peripheries=2];
+   A45_q0 -> A45_qlitx;
+ }
+ subgraph M34 { rankdir="LR";
+   M34_q0 [label="M.3.4/q0"];
+   M34_qLDOE34 [label="M.3.4/qLDOE34"];
+   M34_q0 -> M34_qLDOE34;
+ }
+ 
+}
