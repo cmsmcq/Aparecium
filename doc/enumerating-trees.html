@@ -3,11 +3,11 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2024-06-08 Sat 16:04 -->
+<!-- 2024-06-11 Tue 10:43 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Enumerating trees in a parse forest</title>
-<meta name="author" content="CMSMcQ" />
+<title>&lrm;</title>
+<meta name="author" content="Michael Sperberg-McQueen" />
 <meta name="generator" content="Org Mode" />
 <style>
   #content { max-width: 60em; margin: auto; }
@@ -196,45 +196,49 @@
 </head>
 <body>
 <div id="content" class="content">
-<h1 class="title">Enumerating trees in a parse forest</h1>
 <div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org0bb9c70">1. Overview / About this document</a></li>
-<li><a href="#orga87dd0d">2. The problem</a>
+<li><a href="#org68dcd31">1. Overview / About this document</a></li>
+<li><a href="#org8afe310">2. The problem</a>
 <ul>
-<li><a href="#orgba58ab8">2.1. Example</a></li>
-<li><a href="#orgd670ea8">2.2. A naive approach</a></li>
+<li><a href="#orgb584ddd">2.1. Example</a></li>
+<li><a href="#org62b6d2d">2.2. A naive approach</a></li>
 </ul>
 </li>
-<li><a href="#orge989eb1">3. Parse Forest Grammars</a></li>
-<li><a href="#orgfd060eb">4. Solution</a></li>
-<li><a href="#org19dc09e">5. Details</a>
+<li><a href="#org0bc4286">3. Parse Forest Grammars</a></li>
+<li><a href="#org77ed735">4. Solution</a></li>
+<li><a href="#org34f81f0">5. Details</a>
 <ul>
-<li><a href="#org64cd466">5.1. The procedure <i>num</i></a></li>
-<li><a href="#org8b912d6">5.2. <i>num</i> is a function</a></li>
-<li><a href="#org7eed96b">5.3. Definition of tree similarity</a></li>
-<li><a href="#org573b898">5.4. <i>num</i> is an injection</a></li>
-<li><a href="#org7d4fbb4">5.5. The procedures <i>arb</i> and <i>tree-constructor</i></a></li>
-<li><a href="#orgb51607c">5.6. <i>arb</i> is a total function</a></li>
-<li><a href="#org575e2aa">5.7. In non-error cases, <i>arb</i> and <i>num</i> are inverses of each other</a></li>
-<li><a href="#orgbdc508e">5.8. There is a 1:1 mapping between trees in <i>F</i> and a subset of base-<i>r</i> numerals</a></li>
+<li><a href="#orgd4357eb">5.1. The procedure <i>num</i></a></li>
+<li><a href="#org3aefa4d">5.2. <i>num</i> is a function</a></li>
+<li><a href="#orga304d11">5.3. Definition of tree similarity</a></li>
+<li><a href="#org1ddf123">5.4. <i>num</i> is an injection</a></li>
+<li><a href="#org47b0f10">5.5. The procedures <i>arb</i> and <i>tree-constructor</i></a></li>
+<li><a href="#org8720239">5.6. <i>arb</i> is a total function</a></li>
+<li><a href="#org142b66f">5.7. In non-error cases, <i>arb</i> and <i>num</i> are inverses of each other</a></li>
+<li><a href="#orga4e10ec">5.8. There is a 1:1 mapping between trees in <i>F</i> and a subset of base-<i>r</i> numerals</a></li>
 </ul>
 </li>
-<li><a href="#org39fa832">6. Another example</a></li>
-<li><a href="#org15ad771">7. Identifying the numerals which actually denote trees (with Woods automaton)</a>
+<li><a href="#org0e2d6b3">6. Another example</a></li>
+<li><a href="#orgf2aab5b">7. Identifying the numerals which actually denote trees</a>
 <ul>
-<li><a href="#orgd7b7b45">7.1. Using LR(0) automaton to identify numerals denoting trees</a></li>
+<li><a href="#org9100937">7.1. Algorithm</a></li>
+<li><a href="#org78a0583">7.2. Example:  grammar G1</a></li>
+<li><a href="#org87e68a1">7.3. Example:  G2 and G2′</a></li>
 </ul>
 </li>
-<li><a href="#org2974c39">8. Concluding remarks</a></li>
+<li><a href="#org908b87e">8. Concluding remarks</a></li>
 </ul>
 </div>
 </div>
+<p>
++title: Enumerating trees in a parse forest
+</p>
 
-<div id="outline-container-org0bb9c70" class="outline-2">
-<h2 id="org0bb9c70"><span class="section-number-2">1.</span> Overview / About this document</h2>
+<div id="outline-container-org68dcd31" class="outline-2">
+<h2 id="org68dcd31"><span class="section-number-2">1.</span> Overview / About this document</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 This working paper describes a method for enumerating the parse trees
@@ -264,11 +268,16 @@ example. We then describe a second example.  An addendum describes the
 construction of a finite state automaton which recognizes (or
 generates) the numerals which actually denote trees.
 </p>
+
+<p>
+This document could use some more work, but it may be complete enough
+to be helpful even in its current form.
+</p>
 </div>
 </div>
 
-<div id="outline-container-orga87dd0d" class="outline-2">
-<h2 id="orga87dd0d"><span class="section-number-2">2.</span> The problem</h2>
+<div id="outline-container-org8afe310" class="outline-2">
+<h2 id="org8afe310"><span class="section-number-2">2.</span> The problem</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Consider a program which accepts an arbitrary context-free grammar <i>G</i>
@@ -312,14 +321,15 @@ an infinite loop.
 </p>
 </div>
 
-<div id="outline-container-orgba58ab8" class="outline-3">
-<h3 id="orgba58ab8"><span class="section-number-3">2.1.</span> Example</h3>
+<div id="outline-container-orgb584ddd" class="outline-3">
+<h3 id="orgb584ddd"><span class="section-number-3">2.1.</span> Example</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
-As an example consider grammar <i>G</i>:
+As an example consider grammar <i>G1</i>:
 </p>
 <div class="org-src-container">
-<pre class="src src-ixml">S = A | B.
+<pre class="src src-ixml">{ G1 }
+S = A | B.
 A = A | 'x'.
 B = B | 'x'.
 </pre>
@@ -330,7 +340,7 @@ B = B | 'x'.
 countably infinite.  The XML representations for some of its parse
 trees are:
 </p>
-<pre class="example" id="org3fd62a4">
+<pre class="example" id="orgcc0e8e9">
 &lt;S&gt;&lt;A&gt;x&lt;/A&gt;&lt;/S&gt;
 &lt;S&gt;&lt;A&gt;&lt;A&gt;x&lt;/A&gt;&lt;/A&gt;&lt;/S&gt;
 &lt;S&gt;&lt;A&gt;&lt;A&gt;&lt;A&gt;x&lt;/A&gt;&lt;/A&gt;&lt;/A&gt;&lt;/S&gt;
@@ -343,8 +353,8 @@ trees are:
 </div>
 </div>
 
-<div id="outline-container-orgd670ea8" class="outline-3">
-<h3 id="orgd670ea8"><span class="section-number-3">2.2.</span> A naive approach</h3>
+<div id="outline-container-org62b6d2d" class="outline-3">
+<h3 id="org62b6d2d"><span class="section-number-3">2.2.</span> A naive approach</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 One naive approach to generating the trees is to make the first tree
@@ -370,8 +380,8 @@ error-prone.
 </div>
 </div>
 
-<div id="outline-container-orge989eb1" class="outline-2">
-<h2 id="orge989eb1"><span class="section-number-2">3.</span> Parse Forest Grammars</h2>
+<div id="outline-container-org0bc4286" class="outline-2">
+<h2 id="org0bc4286"><span class="section-number-2">3.</span> Parse Forest Grammars</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 In many cases &#x2013; including this problem &#x2013; it is convenient to
@@ -384,12 +394,13 @@ without nested choices, options, or repetitions.
 </p>
 
 <p>
-For this case, the parse-forest grammar (call it <i>G′</i>) is isomorphic
-to <i>G</i>; in the general case, the two grammars are not isomorphic, and
+For this case, the parse-forest grammar (call it <i>G1′</i>) is isomorphic
+to <i>G1</i>; in the general case, the two grammars are not isomorphic, and
 the difference is important.
 </p>
 <div class="org-src-container">
-<pre class="src src-ixml">S.0.1 = A.0.1 | B.0.1 .
+<pre class="src src-ixml">{ G1′ }
+S.0.1 = A.0.1 | B.0.1 .
 A.0.1 = A.0.1 | 'x'.
 B.0.1 = B.0.1 | 'x'.
 </pre>
@@ -415,8 +426,8 @@ is that we can associate a number with each right-hand side.)</li>
 </div>
 </div>
 
-<div id="outline-container-orgfd060eb" class="outline-2">
-<h2 id="orgfd060eb"><span class="section-number-2">4.</span> Solution</h2>
+<div id="outline-container-org77ed735" class="outline-2">
+<h2 id="org77ed735"><span class="section-number-2">4.</span> Solution</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 The short summary of the solution is: we associate each tree with a
@@ -431,8 +442,8 @@ returned after a finite number of calls to the next-tree interface.
 </div>
 </div>
 
-<div id="outline-container-org19dc09e" class="outline-2">
-<h2 id="org19dc09e"><span class="section-number-2">5.</span> Details</h2>
+<div id="outline-container-org34f81f0" class="outline-2">
+<h2 id="org34f81f0"><span class="section-number-2">5.</span> Details</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 Let a nonterminal in the PFG which has multiple RHS be an 'ambiguous
@@ -451,8 +462,8 @@ non-terminal.  In <i>G′</i>, <i>r</i> = 2.
 </p>
 </div>
 
-<div id="outline-container-org64cd466" class="outline-3">
-<h3 id="org64cd466"><span class="section-number-3">5.1.</span> The procedure <i>num</i></h3>
+<div id="outline-container-orgd4357eb" class="outline-3">
+<h3 id="orgd4357eb"><span class="section-number-3">5.1.</span> The procedure <i>num</i></h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
 For any parse tree <i>T</i> represented by <i>G′</i>, we can construct a numeral
@@ -498,11 +509,16 @@ For the trees given earlier, we construct the following numerals:
 <li>1001</li>
 <li>&#x2026;</li>
 </ul>
+
+<p>
+Note that not every base-<i>r</i> numeral is generated by a tree.  We call those
+numerals which do correspond to trees <i>useful numerals</i>.
+</p>
 </div>
 </div>
 
-<div id="outline-container-org8b912d6" class="outline-3">
-<h3 id="org8b912d6"><span class="section-number-3">5.2.</span> <i>num</i> is a function</h3>
+<div id="outline-container-org3aefa4d" class="outline-3">
+<h3 id="org3aefa4d"><span class="section-number-3">5.2.</span> <i>num</i> is a function</h3>
 <div class="outline-text-3" id="text-5-2">
 <p>
 <b>THEOREM:</b> For any finite tree <i>T</i> in <i>F</i>, given a parse forest
@@ -533,8 +549,8 @@ concatenation of that sequence will be a single numeral.  Q.E.D.
 </div>
 </div>
 
-<div id="outline-container-org7eed96b" class="outline-3">
-<h3 id="org7eed96b"><span class="section-number-3">5.3.</span> Definition of tree similarity</h3>
+<div id="outline-container-orga304d11" class="outline-3">
+<h3 id="orga304d11"><span class="section-number-3">5.3.</span> Definition of tree similarity</h3>
 <div class="outline-text-3" id="text-5-3">
 <p>
 At this point it will be helpful to define what it means for trees
@@ -583,8 +599,8 @@ be said to be <i>locally similar</i>.
 </div>
 </div>
 
-<div id="outline-container-org573b898" class="outline-3">
-<h3 id="org573b898"><span class="section-number-3">5.4.</span> <i>num</i> is an injection</h3>
+<div id="outline-container-org1ddf123" class="outline-3">
+<h3 id="org1ddf123"><span class="section-number-3">5.4.</span> <i>num</i> is an injection</h3>
 <div class="outline-text-3" id="text-5-4">
 <p>
 <b>THEOREM:</b> For any two trees <i>t1</i> and <i>t2</i> in <i>F</i>, <i>num(t1)</i> and
@@ -637,8 +653,8 @@ So <i>num(t1)</i> and <i>num(t2)</i> must differ in at least one digit. Q.E.D.
 </div>
 </div>
 
-<div id="outline-container-org7d4fbb4" class="outline-3">
-<h3 id="org7d4fbb4"><span class="section-number-3">5.5.</span> The procedures <i>arb</i> and <i>tree-constructor</i></h3>
+<div id="outline-container-org47b0f10" class="outline-3">
+<h3 id="org47b0f10"><span class="section-number-3">5.5.</span> The procedures <i>arb</i> and <i>tree-constructor</i></h3>
 <div class="outline-text-3" id="text-5-5">
 <p>
 Now let's go the other way.
@@ -917,8 +933,8 @@ Return <i>T</i>.
 </div>
 </div>
 
-<div id="outline-container-orgb51607c" class="outline-3">
-<h3 id="orgb51607c"><span class="section-number-3">5.6.</span> <i>arb</i> is a total function</h3>
+<div id="outline-container-org8720239" class="outline-3">
+<h3 id="org8720239"><span class="section-number-3">5.6.</span> <i>arb</i> is a total function</h3>
 <div class="outline-text-3" id="text-5-6">
 <p>
 <b>THEOREM:</b> For any parse forest grammar <i>G′</i> and any base-<i>r</i> numeral
@@ -1070,8 +1086,8 @@ cannot make <i>tree-constructor</i> consume more digits.  So a call to
 </div>
 </div>
 
-<div id="outline-container-org575e2aa" class="outline-3">
-<h3 id="org575e2aa"><span class="section-number-3">5.7.</span> In non-error cases, <i>arb</i> and <i>num</i> are inverses of each other</h3>
+<div id="outline-container-org142b66f" class="outline-3">
+<h3 id="org142b66f"><span class="section-number-3">5.7.</span> In non-error cases, <i>arb</i> and <i>num</i> are inverses of each other</h3>
 <div class="outline-text-3" id="text-5-7">
 <p>
 If I have defined them right, <i>num</i> and <i>arb</i> should be inverses of
@@ -1090,8 +1106,8 @@ proved.)
 </div>
 </div>
 
-<div id="outline-container-orgbdc508e" class="outline-3">
-<h3 id="orgbdc508e"><span class="section-number-3">5.8.</span> There is a 1:1 mapping between trees in <i>F</i> and a subset of base-<i>r</i> numerals</h3>
+<div id="outline-container-orga4e10ec" class="outline-3">
+<h3 id="orga4e10ec"><span class="section-number-3">5.8.</span> There is a 1:1 mapping between trees in <i>F</i> and a subset of base-<i>r</i> numerals</h3>
 <div class="outline-text-3" id="text-5-8">
 <p>
 <b>THEOREM:</b> the set of parse trees represented by <i>G′</i> has a one-to-one
@@ -1101,16 +1117,17 @@ mapping to a subset of the set of numerals written in base <i>r</i>.
 </div>
 </div>
 
-<div id="outline-container-org39fa832" class="outline-2">
-<h2 id="org39fa832"><span class="section-number-2">6.</span> Another example</h2>
+<div id="outline-container-org0e2d6b3" class="outline-2">
+<h2 id="org0e2d6b3"><span class="section-number-2">6.</span> Another example</h2>
 <div class="outline-text-2" id="text-6">
 <p>
-A second example may be helpful.  Let <i>G</i> be the following grammar
+A second example may be helpful.  Let <i>G2</i> be the following grammar
 (from a collection of ambiguous grammars constructed for testing
 grammar tools [/citation to be supplied/]):
 </p>
 <div class="org-src-container">
-<pre class="src src-ixml">S: A .
+<pre class="src src-ixml">{ G2 }
+S: A .
 A: 'a', B ; 'x' .
 B: 'b', A ; LDOE, A .
 LDOE: M; 'l' .
@@ -1123,10 +1140,11 @@ Let <i>S</i> be "amalx".
 </p>
 
 <p>
-<i>G′</i> will be:
+<i>G2′</i> will be:
 </p>
 <div class="org-src-container">
-<pre class="src src-ixml">Goal·0·5 = S·0·5.
+<pre class="src src-ixml">{ G2′ }
+Goal·0·5 = S·0·5.
 S·0·5 = A·0·5.
 A·0·5 = "a", B·1·5.
 B·1·5 = LDOE·1·2, A·2·5.
@@ -1242,194 +1260,204 @@ denote trees in this case is (1*0)(0*1).
 </div>
 </div>
 
-<div id="outline-container-org15ad771" class="outline-2">
-<h2 id="org15ad771"><span class="section-number-2">7.</span> Identifying the numerals which actually denote trees (with Woods automaton)</h2>
+<div id="outline-container-orgf2aab5b" class="outline-2">
+<h2 id="orgf2aab5b"><span class="section-number-2">7.</span> Identifying the numerals which actually denote trees</h2>
 <div class="outline-text-2" id="text-7">
 <p>
 From the parent/child graph for a given parse forest grammar, we can
-derive a finite state automaton which defines the set of base-<i>r</i>
-numerals that describe trees.  So in principle it is always possible
-to define precisely the set of all base-<i>r</i> numerals that denote trees
-in <i>F</i>.
-</p>
-
-<p>
-We start by building the recursive transition network decribed by
-H. A.  Woods in "Transition Network Grammars for Natural Language
-Analysis", <i>CACM</i> 13.10 (Oct 1970): 591-606.
-</p>
-
-<ol class="org-ol">
-<li>Make a parse forest grammar <i>G′</i> for the parse forest.</li>
-<li>Make a Woods automaton for <i>G′</i>.</li>
-<li>Change all transitions to be epsilon transitions.</li>
-<li>At every transition from the start state for an ambiguous
-nonterminal to the first state in one of its RHS, make the
-transition a transition on the appropriate digit ('0', '1'¸
-&#x2026; string(r-1))</li>
-<li>Ignore the stack.</li>
-</ol>
-
-<p>
-The resulting FSA recognizes (or should, if I haven't botched
-something &#x2013; proof needed) the set of base-<i>r</i> numerals that denote
-trees.  It will probably have a <b>lot</b> of epsilon transitions, and will
-thus be too cluttered to read easily.  But it's just a conventional
-FSA with
-</p>
-
-<ul class="org-ul">
-<li>an alphabet consisting of the numerals from 0 to r-1,</li>
-
-<li>states consisting of the nonterminals (no, the symbols) of <i>G′</i>,</li>
-
-<li>a follow relation derived by unioning the parent-to-first-child,
-sibling-to-following-sibling, and last-child-to-parent relations
-in <i>G′</i>, and</li>
-
-<li>a rule that all transitions are empty except those from ambiguous
-parents to first children, and those are labeled with the digit
-for the RHS containing the first child.</li>
-</ul>
-
-<p>
-Since it's just a conventional FSA, it can be simplified in the usual
-way.
-</p>
-
-<p>
-After elimination of epsilon transitions and merger of equivalent
-states, the LDOE grammar ends up with this FSA.  Or, to be pedantic,
-this regular grammar. (The naming of nonterminals here is not completely
-systematic, but the fragments of <i>G′</i> nonterminals may help in reading the
-FSA.  The strings "q0" and "qf" are my personal conventions for the
-start- and end-states of the automaton for a particular nonterminal &#x2013;
-here S.0.5.)
-</p>
-<div class="org-src-container">
-<pre class="src src-ixml">S.0.5.q0 = "1", S.0.5.q0 . { merged with LDOE.1.2 }
-S.0.5.q0 = "0", LDOE.3.4 .
-LDOE.3.4 = "0", LDOE.3.4 .
-LDOE.3.4 = "1", S.0.5.qf .
-S.0.5.qf = {nil}. { final state }
-</pre>
-</div>
-
-<p>
-This is not quite the canonical form described in automata theory; they
-would omit state A.4.5 and just write
-</p>
-<div class="org-src-container">
-<pre class="src src-ixml">LDOE.3.4 = "1".
-</pre>
-</div>
-
-<p>
-I think it's clearer to have a named final state easily recognizable as
-such.  So I do.
+derive a grammar or regular expression which defines the set of
+base-<i>r</i> numerals that describe trees.  So in principle it is always
+possible to define precisely the set of all base-<i>r</i> numerals that
+denote trees in <i>F</i>.  This may be done by building either the LR(0)
+automaton or the recursive transition network of the parse forest
+grammar, and then deriving a description of useful numerals from the
+automaton, but the method described below is a little more direct.
 </p>
 </div>
 
-<div id="outline-container-orgd7b7b45" class="outline-3">
-<h3 id="orgd7b7b45"><span class="section-number-3">7.1.</span> Using LR(0) automaton to identify numerals denoting trees</h3>
+<div id="outline-container-org9100937" class="outline-3">
+<h3 id="org9100937"><span class="section-number-3">7.1.</span> Algorithm</h3>
 <div class="outline-text-3" id="text-7-1">
 <p>
-An alternative approach based on the LR(0) automaton may be easier for
-some readers to follow.  I take the construction described in Grune
-and Jacobs as a point of reference.
+The algorithm is described in terms of work with a parse forest
+grammar; it may be possible to adapt it to other representations of a
+parse forest.
 </p>
 
 <p>
-The first step is to construct a non-deterministic automaton:
+A key operation in the algorithm is searching, in a given part of the
+parse forest grammar, for ambiguous nonterminals, and returning them
+in a given order.  Let us call this operation <i>fan</i> (find ambiguous
+nonterminals).  Given any sequence α of symbols in the vocabulary of
+the PFG, <i>fan</i> should return the sequence of ambiguous nonterminals
+reachable from α without passing through any other ambiguous
+nonterminal, in order.  If α is "A, B, C", then any ambiguous
+nonterminals reachable from A precede those reachable from B, and
+those reachable from C are at the end.
+</p>
+
+<p>
+The procedure <i>fan</i> may be intuitively clear to the reader already,
+but a more detailed description follows.  The procedure takes two
+arguments: the parse forest grammar <i>G</i> and a sequence α of symbols in
+<i>V(G)</i>, which is treated as a stack.
 </p>
 
 <ul class="org-ul">
-<li><p>
-Each (normal) state contains (or: is labeled with) one <i>item</i>: a
-grammar rule with a ● embedded in its right hand side.  If a rule
-has multiple right-hand sides, each RHS is treated as a separate
-rule.
-</p>
-
-<p>
-In the LDOE parse forest grammar, we thus have thirty states with
-labels like "B·1·5 = ● LDOE·1·2, A·2·5." and "M·1·2 = 'm' ●."
-</p></li>
-
-<li>From any state with a ● immediately preceding a symbol, a
-transitions labeled with that symbol goes to the state in which the
-● immediately follows that symbol.</li>
-
-<li>For each nonterminal <i>N</i> in the grammar a <i>station</i> is additionally
-constructed; it contains (is labeled with) "● <i>N</i>".</li>
-
-<li>From each normal state with a ● immediately preceding some
-nonterminal <i>N</i>, an epsilon transition goes from that state to the
-station for <i>N</i>.</li>
-
-<li><p>
-From every station for nonterminal <i>N</i>, epsilon transitions go from
-the station to the first state in each right-hand side for <i>N</i>.
-</p>
-
-<p>
-In the LDOE parse forest grammar, we thus have epsilon transitions
-from "● LDOE·3·4" to the states "LDOE·3·4 = ● M·3·4." and "LDOE·3·4
-= ● 'l'."
-</p></li>
+<li>If alpha is empty, return the empty sequence.</li>
+<li>Otherwise, let <i>S</i> be the first symbol in alpha.</li>
+<li>If <i>S</i> is a literal string, return <i>fan(G, tail(alpha))</i>.</li>
+<li>Otherwise, if <i>S</i> is an unambiguous nonterminal, then let beta be
+the right-hand side of <i>S</i> in <i>G</i>, let γ be the concatenation of
+beta and the tail of alpha, and return <i>fan(G, γ)</i>.</li>
+<li>Otherwise, if <i>S</i> is an ambiguous nonterminal, then return the
+sequence whose head is <i>S</i> and whose tail is <i>fan(G, tail(alpha))</i>.</li>
 </ul>
 
 <p>
-The second step is to make three modifications to the automaton.  For
-each arc from state <i>S1</i> to state <i>S2</i> labeled with a nonterminal
-symbol <i>N</i>, the automaton already has epsilon transitions from <i>S1</i> to
-the station for <i>N</i>.
+The grammar of useful numerals can be constructed as follows.  To
+reduce confusion, let us refer to the parse forest grammar as <i>G</i> and
+to the grammar of useful numerals as <i>U</i>.
 </p>
 
 <ul class="org-ul">
-<li>Add epsilon transitions from each final state(s) of <i>N</i> to <i>S2</i>.</li>
+<li>Let <i>S</i> be the start symbol of the parse forest grammar <i>G</i>, and
+<i>S′</i> be a newly constructed start symbol for the numeral grammar
+<i>U</i>.</li>
+<li>Let <i>A</i> be the result returned by <i>fan(G, (S))</i>.  (I am using (S) to
+denote the singleton sequence containins <i>S</i>.)</li>
+<li>In <i>U</i>, construct a production rule for <i>S′</i> whose right-hand side
+is <i>A</i>.</li>
+<li>For each ambiguous nonterminal <i>N</i> in <i>G</i> construct a production
+rule for <i>N</i> in <i>U</i> as follows.
+<ul class="org-ul">
+<li>The left hand side is (of course) <i>N</i>.</li>
+<li>For each right-hand side <i>R</i> of <i>N</i> in <i>G</i>, construct a right-hand
+side for <i>N</i> in <i>U</i>:
+<ul class="org-ul">
+<li>Let <i>d</i> be the digit associated with that right-hand side ('0',
+'1', etc.).</li>
+<li>Let the right-hand side in <i>U</i> be the concatenation of <i>d</i> with
+<i>fan(G, R)</i>.</li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
 
-<li>Remove all arcs labeled with nonterminals.</li>
+<div id="outline-container-org78a0583" class="outline-3">
+<h3 id="org78a0583"><span class="section-number-3">7.2.</span> Example:  grammar G1</h3>
+<div class="outline-text-3" id="text-7-2">
+<p>
+An example may be helpful.  For grammar <i>G1</i> given above, and its
+parse forest grammar <i>G1′</i>, all three non-terminals are ambiguous.
+</p>
 
-<li>For each nonterminal in the parse forest grammar which has more than
-one right-hand side, label each arc with a number, starting with 0,
-1, 2, &#x2026;.</li>
+<ul class="org-ul">
+<li><i>fan(G1′, (S.0.1))</i> returns the sequence (S.0.1).</li>
+<li>So the start symbol of <i>U</i> is defined with the rule "<code>Numeral = S.0.1.</code>"</li>
+<li>For the first RHS of S.0.1, <i>fan(G1′, (A.0.1))</i> = (A.0.1).</li>
+<li>For the second RHS of S.0.1, <i>fan(G1′, (B.0.1))</i> = (B.0.1).</li>
+<li>So the production rule for S.0.1 in <i>U</i> is "<code>S.0.1 = '0', A.0.1;
+  '1', B.0.1.</code>"</li>
+<li>For the first RHS of A.0.1, <i>fan(G1′, (A.0.1))</i> = (A.0.1).</li>
+<li>For the second RHS of A.0.1, <i>fan(G1′, ('x'))</i> = () &#x2013; i.e. the empty
+sequence.</li>
+<li>So the production rule for A.0.1 in <i>U</i> is "<code>A.0.1 = '0', A.0.1; '1'.</code>"</li>
+<li>For the first RHS of B.0.1, <i>fan(G1′, (B.0.1))</i> = (B.0.1).</li>
+<li>For the second RHS of B.0.1, <i>fan(G1′, ('x'))</i> = () &#x2013; i.e. the empty
+sequence.</li>
+<li>So the production rule for B.0.1 in <i>U</i> is "<code>B.0.1 = '0', B.0.1; '1'.</code>"</li>
 </ul>
 
 <p>
-The third step is to eliminate epsilon transitions in the usual way.
+The numerals grammar <i>U</i> as a whole is thus:
 </p>
+<div class="org-src-container">
+<pre class="src src-ixml">Numeral = S.0.1.
+S.0.1 = '0', A.0.1; '1', B.0.1.
+A.0.1 = '0', A.0.1; '1'.
+B.0.1 = '0', B.0.1; '1'.          
+</pre>
+</div>
 
 <p>
-In the LDOE example, this step produces the following automaton, in
-which the labeled choices are interleaved with the literal strings
-recognized in parsing the input.  It may be observed that the two
-cycles in the FSA consist only of choice labels uninterrupted by input
-literals; this will always be characteristic of infinite ambiguity.
-<img src="./images/ldoe-lr0-epsilon-free.dot.svg" alt="ldoe-lr0-epsilon-free.dot.svg" class="org-svg" />
+In this case, the grammar is regular in form and can easily be
+translated to a finite state automaton with states <i>S</i>, <i>A</i>, <i>B</i>, and
+<i>finis</i>.  It can also be simplified using grammar manipulations.
+Arden's Lemma allows us to rewrite the rules for A.0.1 and B.0.1 as
+</p>
+<div class="org-src-container">
+<pre class="src src-ixml">A.0.1 = '0'*, '1'.
+B.0.1 = '0'*, '1'.
+</pre>
+</div>
+<p>
+And then simple substitution, inlining the definitions of variables in
+place of references, reduces the grammar to single rule:
+</p>
+<div class="org-src-container">
+<pre class="src src-ixml">Numeral = '0', '0'*, '1'; '1', '0'*, '1'.
+</pre>
+</div>
+<p>
+Or in regular expression form, "0+1|10*1".
+</p>
+</div>
+</div>
+
+<div id="outline-container-org87e68a1" class="outline-3">
+<h3 id="org87e68a1"><span class="section-number-3">7.3.</span> Example:  G2 and G2′</h3>
+<div class="outline-text-3" id="text-7-3">
+<p>
+In the second example given above, there are two ambiguos nodes.
 </p>
 
-<p>
-The automaton can be simplified by eliminating the transitions on
-literal strings as if they were epsilon transitions.
-</p>
+<ul class="org-ul">
+<li>For the sequence (Goal·0·5), <i>fan</i> returns (M·1·2, LDOE·3·4).</li>
+<li>For the first RHS of M·1·2, i.e. ("m"), <i>fan</i> returns ().</li>
+<li>For the second RHS of M·1·2, i.e. (LDOE·1·2), <i>fan</i> returns (M·1·2).</li>
+<li>For the first RHS of LDOE·3·4, i.e. (M·3·4), <i>fan</i> returns (LDOE·3·4).</li>
+<li>For the second RHS of LDOE·3·4, i.e. ("l"), <i>fan</i> returns ().</li>
+</ul>
 
 <p>
-Eliding the original grammar items, since they serve little purpose
-at this point, we get:
-<img src="./images/ldoe-lr0-choices-simplified.dot.svg" alt="ldoe-lr0-choices-simplified.dot.svg" class="org-svg" />
+From these <i>fan</i> results, we construct the following grammar:
 </p>
-
+<div class="org-src-container">
+<pre class="src src-ixml">Numeral = M·1·2, LDOE·3·4.
+M·1·2 = "0" | "1", M·1·2.
+LDOE·3·4 = "0", LDOE·3·4 | "1".
+</pre>
+</div>
 <p>
-It is evident that the numerals of trees in this parse forest will
-all match the regular expression "1*00*1".
+In this grammar, <i>Numeral</i> is not in regular form (it has two
+nonterminals in its RHS), but simplifications can reduce it to a
+regular expression.  First we apply Arden's lemma to the rules for
+M·1·2 and LDOE·3·4:
+</p>
+<div class="org-src-container">
+<pre class="src src-ixml">M·1·2 = "1"*, "0".
+LDOE·3·4 = "0"*, "1".
+</pre>
+</div>
+<p>
+Substitution of those right-hand sides then reduces the rule for
+<i>Numeral</i> to:
+</p>
+<div class="org-src-container">
+<pre class="src src-ixml">Numeral = "1"*, "0", "0"*, "1".
+</pre>
+</div>
+<p>
+Or in more compact notation "1*00*1".
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org2974c39" class="outline-2">
-<h2 id="org2974c39"><span class="section-number-2">8.</span> Concluding remarks</h2>
+<div id="outline-container-org908b87e" class="outline-2">
+<h2 id="org908b87e"><span class="section-number-2">8.</span> Concluding remarks</h2>
 <div class="outline-text-2" id="text-8">
 <p>
 The method described here is very simple, but sufficiently non-obvious
@@ -1439,9 +1467,9 @@ that it seems worth while to describe it in writing.
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="date">Date: 19 July 2023, revised 3 June 2024</p>
-<p class="author">Author: CMSMcQ</p>
-<p class="date">Created: 2024-06-08 Sat 16:04</p>
+<p class="date">Date: 19 July 2023, revised 3-11 June 2024</p>
+<p class="author">Author: Michael Sperberg-McQueen</p>
+<p class="date">Created: 2024-06-11 Tue 10:43</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
