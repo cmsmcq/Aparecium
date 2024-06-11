@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2024-06-11 Tue 11:34 -->
+<!-- 2024-06-11 Tue 11:36 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Enumerating trees in a parse forest</title>
@@ -201,44 +201,47 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org5a89526">1. Overview / About this document</a></li>
-<li><a href="#org83bd3da">2. The problem</a>
+<li><a href="#org783bae0">1. Overview / About this document</a></li>
+<li><a href="#org41399f2">2. The problem</a>
 <ul>
-<li><a href="#orgf3493b0">2.1. Example</a></li>
-<li><a href="#org65cac05">2.2. A naive approach</a></li>
+<li><a href="#org023f69e">2.1. Example</a></li>
+<li><a href="#org9be6cab">2.2. A naive approach</a></li>
 </ul>
 </li>
-<li><a href="#org64fc411">3. Parse Forest Grammars</a></li>
-<li><a href="#orgc69e213">4. Solution</a></li>
-<li><a href="#org30c5172">5. Details</a>
+<li><a href="#org17eea62">3. Parse Forest Grammars</a></li>
+<li><a href="#org8a007f7">4. Solution</a></li>
+<li><a href="#orgbf98c8a">5. Details</a>
 <ul>
-<li><a href="#orgbbf2e85">5.1. The procedure <i>num</i></a></li>
-<li><a href="#org2e01048">5.2. <i>num</i> is a function</a></li>
-<li><a href="#orgecf4f09">5.3. Definition of tree similarity</a></li>
-<li><a href="#org4429fc4">5.4. <i>num</i> is an injection</a></li>
-<li><a href="#org7c45a83">5.5. The procedures <i>arb</i> and <i>tree-constructor</i></a></li>
-<li><a href="#orgd4f0b0e">5.6. <i>arb</i> is a total function</a></li>
-<li><a href="#org0804936">5.7. In non-error cases, <i>arb</i> and <i>num</i> are inverses of each other</a></li>
-<li><a href="#org96a632a">5.8. There is a 1:1 mapping between trees in <i>F</i> and a subset of base-<i>r</i> numerals</a></li>
+<li><a href="#org85d70c4">5.1. The procedure <i>num</i></a></li>
+<li><a href="#org454d282">5.2. <i>num</i> is a function</a></li>
+<li><a href="#org06377b4">5.3. Definition of tree similarity</a></li>
+<li><a href="#org6d21723">5.4. <i>num</i> is an injection</a></li>
+<li><a href="#org9f5673c">5.5. The procedures <i>arb</i> and <i>tree-constructor</i></a></li>
+<li><a href="#orgc515e30">5.6. <i>arb</i> is a total function</a></li>
+<li><a href="#orgd878f75">5.7. In non-error cases, <i>arb</i> and <i>num</i> are inverses of each other</a></li>
+<li><a href="#org0eee455">5.8. There is a 1:1 mapping between trees in <i>F</i> and a subset of base-<i>r</i> numerals</a></li>
 </ul>
 </li>
-<li><a href="#org9acb239">6. Another example</a></li>
-<li><a href="#org39f76d2">7. Identifying the numerals which actually denote trees</a>
+<li><a href="#org869ff4b">6. Another example</a></li>
+<li><a href="#org87bc034">7. Identifying the numerals which actually denote trees</a>
 <ul>
-<li><a href="#org66f85d3">7.1. Algorithm</a></li>
-<li><a href="#orge892108">7.2. The procedure <i>fan</i></a></li>
-<li><a href="#orgb98de6a">7.3. Constructing the grammar of useful numerals</a></li>
-<li><a href="#orgb8625e0">7.4. Example:  grammar G1</a></li>
-<li><a href="#orgb0315ca">7.5. Example:  G2 and G2′</a></li>
+<li><a href="#org565c536">7.1. Algorithm</a>
+<ul>
+<li><a href="#org1730e52">7.1.1. The procedure <i>fan</i></a></li>
+<li><a href="#orgb5fb162">7.1.2. Constructing the grammar of useful numerals</a></li>
 </ul>
 </li>
-<li><a href="#orgb5af05b">8. Concluding remarks</a></li>
+<li><a href="#org1df98f2">7.2. Example:  grammar G1</a></li>
+<li><a href="#orgad2e1a2">7.3. Example:  G2 and G2′</a></li>
+</ul>
+</li>
+<li><a href="#org6fd2a8f">8. Concluding remarks</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org5a89526" class="outline-2">
-<h2 id="org5a89526"><span class="section-number-2">1.</span> Overview / About this document</h2>
+<div id="outline-container-org783bae0" class="outline-2">
+<h2 id="org783bae0"><span class="section-number-2">1.</span> Overview / About this document</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 This working paper describes a method for enumerating the parse trees
@@ -276,8 +279,8 @@ to be helpful even in its current form.
 </div>
 </div>
 
-<div id="outline-container-org83bd3da" class="outline-2">
-<h2 id="org83bd3da"><span class="section-number-2">2.</span> The problem</h2>
+<div id="outline-container-org41399f2" class="outline-2">
+<h2 id="org41399f2"><span class="section-number-2">2.</span> The problem</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 Consider a program which accepts an arbitrary context-free grammar <i>G</i>
@@ -321,8 +324,8 @@ an infinite loop.
 </p>
 </div>
 
-<div id="outline-container-orgf3493b0" class="outline-3">
-<h3 id="orgf3493b0"><span class="section-number-3">2.1.</span> Example</h3>
+<div id="outline-container-org023f69e" class="outline-3">
+<h3 id="org023f69e"><span class="section-number-3">2.1.</span> Example</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 As an example consider grammar <i>G1</i>:
@@ -340,7 +343,7 @@ B = B | 'x'.
 countably infinite.  The XML representations for some of its parse
 trees are:
 </p>
-<pre class="example" id="orgbff49cd">
+<pre class="example" id="orgbb0d9b4">
 &lt;S&gt;&lt;A&gt;x&lt;/A&gt;&lt;/S&gt;
 &lt;S&gt;&lt;A&gt;&lt;A&gt;x&lt;/A&gt;&lt;/A&gt;&lt;/S&gt;
 &lt;S&gt;&lt;A&gt;&lt;A&gt;&lt;A&gt;x&lt;/A&gt;&lt;/A&gt;&lt;/A&gt;&lt;/S&gt;
@@ -353,8 +356,8 @@ trees are:
 </div>
 </div>
 
-<div id="outline-container-org65cac05" class="outline-3">
-<h3 id="org65cac05"><span class="section-number-3">2.2.</span> A naive approach</h3>
+<div id="outline-container-org9be6cab" class="outline-3">
+<h3 id="org9be6cab"><span class="section-number-3">2.2.</span> A naive approach</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 One naive approach to generating the trees is to make the first tree
@@ -380,8 +383,8 @@ best error-prone.
 </div>
 </div>
 
-<div id="outline-container-org64fc411" class="outline-2">
-<h2 id="org64fc411"><span class="section-number-2">3.</span> Parse Forest Grammars</h2>
+<div id="outline-container-org17eea62" class="outline-2">
+<h2 id="org17eea62"><span class="section-number-2">3.</span> Parse Forest Grammars</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 In many cases &#x2013; including this problem &#x2013; it is convenient to
@@ -427,8 +430,8 @@ right-hand side.)</li>
 </div>
 </div>
 
-<div id="outline-container-orgc69e213" class="outline-2">
-<h2 id="orgc69e213"><span class="section-number-2">4.</span> Solution</h2>
+<div id="outline-container-org8a007f7" class="outline-2">
+<h2 id="org8a007f7"><span class="section-number-2">4.</span> Solution</h2>
 <div class="outline-text-2" id="text-4">
 <p>
 The short summary of the solution is: we associate each tree with a
@@ -443,8 +446,8 @@ returned after a finite number of calls to the next-tree interface.
 </div>
 </div>
 
-<div id="outline-container-org30c5172" class="outline-2">
-<h2 id="org30c5172"><span class="section-number-2">5.</span> Details</h2>
+<div id="outline-container-orgbf98c8a" class="outline-2">
+<h2 id="orgbf98c8a"><span class="section-number-2">5.</span> Details</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 Let a nonterminal in the PFG which has multiple RHS be an <i>ambiguous
@@ -463,8 +466,8 @@ non-terminal.  In <i>G1′</i>, <i>r</i> = 2.
 </p>
 </div>
 
-<div id="outline-container-orgbbf2e85" class="outline-3">
-<h3 id="orgbbf2e85"><span class="section-number-3">5.1.</span> The procedure <i>num</i></h3>
+<div id="outline-container-org85d70c4" class="outline-3">
+<h3 id="org85d70c4"><span class="section-number-3">5.1.</span> The procedure <i>num</i></h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
 For any parse tree <i>T</i> represented by <i>G′</i>, we can construct a numeral
@@ -518,8 +521,8 @@ numerals which do correspond to trees <i>useful numerals</i>.
 </div>
 </div>
 
-<div id="outline-container-org2e01048" class="outline-3">
-<h3 id="org2e01048"><span class="section-number-3">5.2.</span> <i>num</i> is a function</h3>
+<div id="outline-container-org454d282" class="outline-3">
+<h3 id="org454d282"><span class="section-number-3">5.2.</span> <i>num</i> is a function</h3>
 <div class="outline-text-3" id="text-5-2">
 <p>
 <b>THEOREM:</b> For any finite tree <i>T</i> in <i>F</i>, given a parse forest
@@ -550,8 +553,8 @@ concatenation of that sequence will be a single numeral.  Q.E.D.
 </div>
 </div>
 
-<div id="outline-container-orgecf4f09" class="outline-3">
-<h3 id="orgecf4f09"><span class="section-number-3">5.3.</span> Definition of tree similarity</h3>
+<div id="outline-container-org06377b4" class="outline-3">
+<h3 id="org06377b4"><span class="section-number-3">5.3.</span> Definition of tree similarity</h3>
 <div class="outline-text-3" id="text-5-3">
 <p>
 At this point it will be helpful to define what it means for trees
@@ -600,8 +603,8 @@ be said to be <i>locally similar</i>.
 </div>
 </div>
 
-<div id="outline-container-org4429fc4" class="outline-3">
-<h3 id="org4429fc4"><span class="section-number-3">5.4.</span> <i>num</i> is an injection</h3>
+<div id="outline-container-org6d21723" class="outline-3">
+<h3 id="org6d21723"><span class="section-number-3">5.4.</span> <i>num</i> is an injection</h3>
 <div class="outline-text-3" id="text-5-4">
 <p>
 <b>THEOREM:</b> For any two trees <i>t1</i> and <i>t2</i> in <i>F</i>, <i>num(t1)</i> and
@@ -654,8 +657,8 @@ So <i>num(t1)</i> and <i>num(t2)</i> must differ in at least one digit. Q.E.D.
 </div>
 </div>
 
-<div id="outline-container-org7c45a83" class="outline-3">
-<h3 id="org7c45a83"><span class="section-number-3">5.5.</span> The procedures <i>arb</i> and <i>tree-constructor</i></h3>
+<div id="outline-container-org9f5673c" class="outline-3">
+<h3 id="org9f5673c"><span class="section-number-3">5.5.</span> The procedures <i>arb</i> and <i>tree-constructor</i></h3>
 <div class="outline-text-3" id="text-5-5">
 <p>
 Now let's go the other way.
@@ -934,8 +937,8 @@ Return <i>T</i>.
 </div>
 </div>
 
-<div id="outline-container-orgd4f0b0e" class="outline-3">
-<h3 id="orgd4f0b0e"><span class="section-number-3">5.6.</span> <i>arb</i> is a total function</h3>
+<div id="outline-container-orgc515e30" class="outline-3">
+<h3 id="orgc515e30"><span class="section-number-3">5.6.</span> <i>arb</i> is a total function</h3>
 <div class="outline-text-3" id="text-5-6">
 <p>
 <b>THEOREM:</b> For any parse forest grammar <i>G′</i> and any base-<i>r</i> numeral
@@ -1087,8 +1090,8 @@ cannot make <i>tree-constructor</i> consume more digits.  So a call to
 </div>
 </div>
 
-<div id="outline-container-org0804936" class="outline-3">
-<h3 id="org0804936"><span class="section-number-3">5.7.</span> In non-error cases, <i>arb</i> and <i>num</i> are inverses of each other</h3>
+<div id="outline-container-orgd878f75" class="outline-3">
+<h3 id="orgd878f75"><span class="section-number-3">5.7.</span> In non-error cases, <i>arb</i> and <i>num</i> are inverses of each other</h3>
 <div class="outline-text-3" id="text-5-7">
 <p>
 If I have defined them right, <i>num</i> and <i>arb</i> should be inverses of
@@ -1107,8 +1110,8 @@ proved.)
 </div>
 </div>
 
-<div id="outline-container-org96a632a" class="outline-3">
-<h3 id="org96a632a"><span class="section-number-3">5.8.</span> There is a 1:1 mapping between trees in <i>F</i> and a subset of base-<i>r</i> numerals</h3>
+<div id="outline-container-org0eee455" class="outline-3">
+<h3 id="org0eee455"><span class="section-number-3">5.8.</span> There is a 1:1 mapping between trees in <i>F</i> and a subset of base-<i>r</i> numerals</h3>
 <div class="outline-text-3" id="text-5-8">
 <p>
 <b>THEOREM:</b> the set of parse trees represented by <i>G′</i> has a one-to-one
@@ -1123,8 +1126,8 @@ preceding section.
 </div>
 </div>
 
-<div id="outline-container-org9acb239" class="outline-2">
-<h2 id="org9acb239"><span class="section-number-2">6.</span> Another example</h2>
+<div id="outline-container-org869ff4b" class="outline-2">
+<h2 id="org869ff4b"><span class="section-number-2">6.</span> Another example</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 A second example may be helpful.  Let <i>G2</i> be the following grammar
@@ -1227,8 +1230,8 @@ denote trees in this case is (1*0)(0*1).
 </div>
 </div>
 
-<div id="outline-container-org39f76d2" class="outline-2">
-<h2 id="org39f76d2"><span class="section-number-2">7.</span> Identifying the numerals which actually denote trees</h2>
+<div id="outline-container-org87bc034" class="outline-2">
+<h2 id="org87bc034"><span class="section-number-2">7.</span> Identifying the numerals which actually denote trees</h2>
 <div class="outline-text-2" id="text-7">
 <p>
 From the parent/child graph for a given parse forest grammar, we can
@@ -1241,8 +1244,8 @@ described below is a little more direct.
 </p>
 </div>
 
-<div id="outline-container-org66f85d3" class="outline-3">
-<h3 id="org66f85d3"><span class="section-number-3">7.1.</span> Algorithm</h3>
+<div id="outline-container-org565c536" class="outline-3">
+<h3 id="org565c536"><span class="section-number-3">7.1.</span> Algorithm</h3>
 <div class="outline-text-3" id="text-7-1">
 <p>
 The algorithm is described in terms of work with a parse forest
@@ -1250,11 +1253,10 @@ grammar; it may be possible to adapt it to other representations of a
 parse forest.
 </p>
 </div>
-</div>
 
-<div id="outline-container-orge892108" class="outline-3">
-<h3 id="orge892108"><span class="section-number-3">7.2.</span> The procedure <i>fan</i></h3>
-<div class="outline-text-3" id="text-7-2">
+<div id="outline-container-org1730e52" class="outline-4">
+<h4 id="org1730e52"><span class="section-number-4">7.1.1.</span> The procedure <i>fan</i></h4>
+<div class="outline-text-4" id="text-7-1-1">
 <p>
 A key operation in the algorithm is searching, in a given part of the
 parse forest grammar, for ambiguous nonterminals, and returning them
@@ -1287,9 +1289,9 @@ sequence whose head is <i>S</i> and whose tail is <i>fan(G′, tail(α))</i>.</l
 </div>
 </div>
 
-<div id="outline-container-orgb98de6a" class="outline-3">
-<h3 id="orgb98de6a"><span class="section-number-3">7.3.</span> Constructing the grammar of useful numerals</h3>
-<div class="outline-text-3" id="text-7-3">
+<div id="outline-container-orgb5fb162" class="outline-4">
+<h4 id="orgb5fb162"><span class="section-number-4">7.1.2.</span> Constructing the grammar of useful numerals</h4>
+<div class="outline-text-4" id="text-7-1-2">
 <p>
 The grammar of useful numerals can be constructed as follows.  To
 reduce confusion, let us refer to the parse forest grammar as <i>G′</i> and
@@ -1320,10 +1322,11 @@ side for <i>N</i> in <i>U</i>:
 </ul>
 </div>
 </div>
+</div>
 
-<div id="outline-container-orgb8625e0" class="outline-3">
-<h3 id="orgb8625e0"><span class="section-number-3">7.4.</span> Example:  grammar G1</h3>
-<div class="outline-text-3" id="text-7-4">
+<div id="outline-container-org1df98f2" class="outline-3">
+<h3 id="org1df98f2"><span class="section-number-3">7.2.</span> Example:  grammar G1</h3>
+<div class="outline-text-3" id="text-7-2">
 <p>
 An example may be helpful.  For grammar <i>G1</i> given above, and its
 parse forest grammar <i>G1′</i>, all three non-terminals are ambiguous.
@@ -1382,9 +1385,9 @@ Or in regular expression form, "0+1|10*1".
 </div>
 </div>
 
-<div id="outline-container-orgb0315ca" class="outline-3">
-<h3 id="orgb0315ca"><span class="section-number-3">7.5.</span> Example:  G2 and G2′</h3>
-<div class="outline-text-3" id="text-7-5">
+<div id="outline-container-orgad2e1a2" class="outline-3">
+<h3 id="orgad2e1a2"><span class="section-number-3">7.3.</span> Example:  G2 and G2′</h3>
+<div class="outline-text-3" id="text-7-3">
 <p>
 In the second example given above, there are two ambiguous nodes.
 </p>
@@ -1432,8 +1435,8 @@ Or in more compact notation "1*00*1".
 </div>
 </div>
 
-<div id="outline-container-orgb5af05b" class="outline-2">
-<h2 id="orgb5af05b"><span class="section-number-2">8.</span> Concluding remarks</h2>
+<div id="outline-container-org6fd2a8f" class="outline-2">
+<h2 id="org6fd2a8f"><span class="section-number-2">8.</span> Concluding remarks</h2>
 <div class="outline-text-2" id="text-8">
 <p>
 The method described here is very simple, but sufficiently non-obvious
@@ -1445,7 +1448,7 @@ that it seems worth while to describe it in writing.
 <div id="postamble" class="status">
 <p class="date">Date: 19 July 2023, revised 3-11 June 2024</p>
 <p class="author">Author: Michael Sperberg-McQueen</p>
-<p class="date">Created: 2024-06-11 Tue 11:34</p>
+<p class="date">Created: 2024-06-11 Tue 11:36</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

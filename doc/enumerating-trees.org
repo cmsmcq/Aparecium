@@ -775,7 +775,7 @@ The algorithm is described in terms of work with a parse forest
 grammar; it may be possible to adapt it to other representations of a
 parse forest.
 
-** The procedure /fan/
+*** The procedure /fan/
 A key operation in the algorithm is searching, in a given part of the
 parse forest grammar, for ambiguous nonterminals, and returning them
 in a given order.  Let us call this operation /fan/ (for 'find
@@ -800,7 +800,7 @@ arguments: the parse forest grammar /G′/ and a sequence α of symbols in
 - Otherwise, if /S/ is an ambiguous nonterminal, then return the
   sequence whose head is /S/ and whose tail is /fan(G′, tail(α))/.
 
-** Constructing the grammar of useful numerals
+*** Constructing the grammar of useful numerals
 
 The grammar of useful numerals can be constructed as follows.  To
 reduce confusion, let us refer to the parse forest grammar as /G′/ and
