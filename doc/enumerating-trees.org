@@ -1,4 +1,4 @@
-+title: Enumerating trees in a parse forest
+#+title: Enumerating trees in a parse forest
 #+author: Michael Sperberg-McQueen
 #+date: 19 July 2023, revised 3-11 June 2024
 
@@ -97,11 +97,11 @@ approach will return trees, but will never return any tree containing
 a /B/, because it attempts first to list all the trees in which the
 /S/ dominates an /A/, and there are infinitely many such trees.
 
-One way to think about the problem is that we are searching for paths in
-a search space containing loops. A breadth-first search with
+One way to think about the problem is that we are searching for paths
+in a search space containing loops. A breadth-first search with
 backtracking has no particular trouble solving the problem, but for
-programmers not working Prolog, figuring out the backtracking is at best
-error-prone.
+programmers not working in Prolog, figuring out the backtracking is at
+best error-prone.
 
 # (At least, both Norm and I have screwed up multiple times.)
 
@@ -136,8 +136,9 @@ Without loss of generality, we assume that:
 - No two right-hand sides in any production rule are the same sequence
   of symbols; and
 - The right-hand sides of any production rule are given as a sequence,
-  not a set.  (The ordering imposed is unimportant; the only requirement
-  is that we can associate a number with each right-hand side.)
+  not a set.  (The ordering imposed is unimportant; the only
+  requirement is that we be able to associate a number with each
+  right-hand side.)
 - All nonterminals in /V(G′)/ are reachable and productive.
   
 * Solution
@@ -153,15 +154,15 @@ returned after a finite number of calls to the next-tree interface.
 
 * Details
 
-Let a nonterminal in the PFG which has multiple RHS be an 'ambiguous
-non-terminal'.  In /G′/, all non-terminals are ambiguous.
+Let a nonterminal in the PFG which has multiple RHS be an /ambiguous
+non-terminal/.  In /G′/, all non-terminals are ambiguous.
 
 Let a node in a parse tree labeled with an ambiguous non-terminal be
-an 'ambiguous node'.  For the trees of /G′/, all non-leaf nodes are
+an /ambiguous node/.  For the trees of /G′/, all non-leaf nodes are
 ambiguous.
 
 Let /r/ be the largest number of RHS possessed by any ambiguous
-non-terminal.  In /G′/, /r/ = 2.
+non-terminal.  In /G1′/, /r/ = 2.
 
 ** The procedure /num/
 
@@ -178,7 +179,7 @@ For any parse tree /T/ represented by /G′/, we can construct a numeral
   - The nodes are considered in the order given by a depth-first
     pre-order traversal of /T/.  (Any traversal should work;
     depth-first lends itself to a simple implementation.) The first
-    ambiguous node found in that traveral corresponds to the first
+    ambiguous node found in that traversal corresponds to the first
     digit of /m/, the second to the second digit of /m/, and so on.
   
   - Each digit in /m/ describes one ambiguous node /N/ in the tree: if
@@ -662,6 +663,9 @@ proved.)
 *THEOREM:* the set of parse trees represented by /G′/ has a one-to-one
 mapping to a subset of the set of numerals written in base /r/.
 
+/Proof:/ Follows immediately from the two theorems given in the
+preceding section.
+
 # * Addendum
 # 
 # Part of me thinks: well, all of that is completely obvious, who
@@ -713,25 +717,13 @@ Each has two RHS, so /r/ = 2.  (And as can be seen if you look
 carefully, they each form a loop in the parent/child relation, and the
 loops are separate and do not interact.)
 
-The first few numerals and their trees (this time in outline form) are:
+The first few numerals and their trees (this time in Prolog structure
+form -- note that the top level of the Prolog interpreter has
+abbreviated some trees) are:
 
 - 0 no tree
 - 1 no tree
 - 01 s(a(lit(a), b(ldoe(m(lit(m))), a(lit(a), b(ldoe(lit(l)), a(lit(x)))))))
-  + S.0.5
-    + A.0.5
-      + "a"
-      + B.1.5
-        + LDOE.1.2
-          + M.1.2
-            + "m"
-        + A.2.5
-          + "a"
-          + B.3.5
-            + LDOE.3.4
-              + "l"
-            + A.4.5
-              + "x"
 - 10 no tree
 - 11 no tree
 - 000 no tree
@@ -744,13 +736,12 @@ The first few numerals and their trees (this time in outline form) are:
 - 111 no tree
 - 0000 no tree
 - 0001 s(a(lit(a), b(ldoe(m(lit(m))), a(lit(a), b(ldoe(m(ldoe(m(ldoe(...))))), a(lit(x))))))) ;
+- 1001 s(a(lit(a), b(ldoe(m(ldoe(m(lit(m))))), a(lit(a), b(ldoe(m(ldoe(lit(l)))), a(lit(x))))))) 
+- 1101 s(a(lit(a), b(ldoe(m(ldoe(m(ldoe(m(lit(...))))))), a(lit(a), b(ldoe(lit(l)), a(lit(x))))))) 
+- ...
 
-  1001 s(a(lit(a), b(ldoe(m(ldoe(m(lit(m))))), a(lit(a), b(ldoe(m(ldoe(lit(l)))), a(lit(x))))))) 
-
-  1101 s(a(lit(a), b(ldoe(m(ldoe(m(ldoe(m(lit(...))))))), a(lit(a), b(ldoe(lit(l)), a(lit(x))))))) 
-  ...
-
-Omitting numerals that don't map to trees now:
+As we continue the list, it becomes more and more convenient to omit
+numerals that don't map to trees.  
   
 - 00001
 - 10001
@@ -771,13 +762,12 @@ denote trees in this case is (1*0)(0*1).
 * Identifying the numerals which actually denote trees 
 
 From the parent/child graph for a given parse forest grammar, we can
-derive a grammar or regular expression which defines the set of
-base-/r/ numerals that describe trees.  So in principle it is always
-possible to define precisely the set of all base-/r/ numerals that
-denote trees in /F/.  This may be done by building either the LR(0)
-automaton or the recursive transition network of the parse forest
-grammar, and then deriving a description of useful numerals from the
-automaton, but the method described below is a little more direct.
+derive a grammar or regular expression which defines the set of useful
+base-/r/ numerals, i.e. those that describe trees in /F/.  This may be
+done by building either the LR(0) automaton or the recursive
+transition network of the parse forest grammar, and then deriving a
+description of useful numerals from the automaton, but the method
+described below is a little more direct.
 
 ** Algorithm
 
@@ -785,50 +775,53 @@ The algorithm is described in terms of work with a parse forest
 grammar; it may be possible to adapt it to other representations of a
 parse forest.
 
+** The procedure /fan/
 A key operation in the algorithm is searching, in a given part of the
 parse forest grammar, for ambiguous nonterminals, and returning them
-in a given order.  Let us call this operation /fan/ (find ambiguous
-nonterminals).  Given any sequence α of symbols in the vocabulary of
-the PFG, /fan/ should return the sequence of ambiguous nonterminals
-reachable from α without passing through any other ambiguous
-nonterminal, in order.  If α is "A, B, C", then any ambiguous
-nonterminals reachable from A precede those reachable from B, and
-those reachable from C are at the end.
+in a given order.  Let us call this operation /fan/ (for 'find
+ambiguous nonterminals').  Given any sequence α of symbols in the
+vocabulary of the PFG, /fan/ should return the sequence of ambiguous
+nonterminals reachable from α via the parent/child relation without
+passing through any other ambiguous nonterminal, in order.  If α is
+"A, B, C", then any ambiguous nonterminals reachable from A precede
+those reachable from B, and those reachable from C are at the end.
 
 The procedure /fan/ may be intuitively clear to the reader already,
 but a more detailed description follows.  The procedure takes two
-arguments: the parse forest grammar /G/ and a sequence α of symbols in
-/V(G)/, which is treated as a stack.
+arguments: the parse forest grammar /G′/ and a sequence α of symbols in
+/V(G′)/, which is treated as a stack.
 
-- If alpha is empty, return the empty sequence.
-- Otherwise, let /S/ be the first symbol in alpha.
-- If /S/ is a literal string, return /fan(G, tail(alpha))/.
-- Otherwise, if /S/ is an unambiguous nonterminal, then let beta be
-  the right-hand side of /S/ in /G/, let γ be the concatenation of
-  beta and the tail of alpha, and return /fan(G, γ)/.
+- If α is empty, return the empty sequence.
+- Otherwise, let /S/ be the first symbol in α.
+- If /S/ is a literal string, return /fan(G′, tail(α))/.
+- Otherwise, if /S/ is an unambiguous nonterminal, then let β be
+  the right-hand side of /S/ in /G′/, let γ be the concatenation of
+  β and the tail of α, and return /fan(G′, γ)/.
 - Otherwise, if /S/ is an ambiguous nonterminal, then return the
-  sequence whose head is /S/ and whose tail is /fan(G, tail(alpha))/.
+  sequence whose head is /S/ and whose tail is /fan(G′, tail(α))/.
+
+** Constructing the grammar of useful numerals
 
 The grammar of useful numerals can be constructed as follows.  To
-reduce confusion, let us refer to the parse forest grammar as /G/ and
+reduce confusion, let us refer to the parse forest grammar as /G′/ and
 to the grammar of useful numerals as /U/.
 
-- Let /S/ be the start symbol of the parse forest grammar /G/, and
+- Let /S/ be the start symbol of the parse forest grammar /G′/, and
   /S′/ be a newly constructed start symbol for the numeral grammar
   /U/.
-- Let /A/ be the result returned by /fan(G, (S))/.  (I am using (S) to
-  denote the singleton sequence containins /S/.)
+- Let /A/ be the result returned by /fan(G′, (S))/.  (I am using (S) to
+  denote the singleton sequence containing /S/.)
 - In /U/, construct a production rule for /S′/ whose right-hand side
   is /A/.
-- For each ambiguous nonterminal /N/ in /G/ construct a production
+- For each ambiguous nonterminal /N/ in /G′/ construct a production
   rule for /N/ in /U/ as follows.
   - The left hand side is (of course) /N/.
-  - For each right-hand side /R/ of /N/ in /G/, construct a right-hand
+  - For each right-hand side /R/ of /N/ in /G′/, construct a right-hand
     side for /N/ in /U/:
     - Let /d/ be the digit associated with that right-hand side ('0',
       '1', etc.).
     - Let the right-hand side in /U/ be the concatenation of /d/ with
-      /fan(G, R)/.
+      /fan(G′, R)/.
 
 ** Example:  grammar G1
 An example may be helpful.  For grammar /G1/ given above, and its
@@ -874,7 +867,7 @@ Or in regular expression form, "0+1|10*1".
 
 ** Example:  G2 and G2′
 
-In the second example given above, there are two ambiguos nodes.
+In the second example given above, there are two ambiguous nodes.
 
 - For the sequence (Goal·0·5), /fan/ returns (M·1·2, LDOE·3·4).
 - For the first RHS of M·1·2, i.e. ("m"), /fan/ returns ().
